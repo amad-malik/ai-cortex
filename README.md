@@ -36,11 +36,10 @@ curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8601/v2/health/ready  
 **Tested, with the same signed files, from the release's previous address on 13 Nov:** on one fresh, stock Rocky Linux 10.2 machine, with no Cortex
 and none of the container prerequisites on it, that line **in its previous-address form** installed Cortex with **no question asked**; a second run
 changed nothing; it came back
-by itself after a restart; and signing in, adding a second worker, creating a claim and returning a handoff, accepting it, writing a record and
+by itself after a restart; and signing in, adding a second worker, creating, claiming and returning a handoff, accepting it, writing a record and
 finding it by a word were all exercised.
 
-**From this address: not yet run.** The bytes are the same signed files, and one install from here is **planned**, after the check that its files
-can be fetched without a login; until its receipt exists, this page does not claim that anyone has installed from this address.
+**From this address: installed once, on 14 Nov** - status 0 on the screen, first try, 204 seconds, no question asked, and the installer downloaded from here is byte-identical to the signed one. A second run, a restart, the full check map and the first-hour walk-through were **not** part of it.
 
 **What was not part of that test — and every limit you will meet — is in the release text itself**, on the release page for `v0.2.1` at the public
 home named below. Read it
