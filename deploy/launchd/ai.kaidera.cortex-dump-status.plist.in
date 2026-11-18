@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Cortex backup freshness check: the macOS launch agent that stands in for deploy/systemd/cortex-dump-status.service and its timer.
+     It runs at load (so a stale dump is reported at login) and at minute 17 of every hour. The wrapper clears the alarm after a pass.
+     Rendered by scripts/launchd-backup (the four placeholder words are filled in there). A LaunchAgent runs only while the user is logged in. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.kaidera.cortex-dump-status</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>@CORTEX_HOME@/bin/launchd-run</string>
+    <string>--unit</string>
+    <string>cortex-dump-status.service</string>
+    <string>--home</string>
+    <string>@CORTEX_HOME@</string>
+    <string>--clear-on-success</string>
+    <string>--</string>
+    <string>@CORTEX_HOME@/bin/cortex-dump-status</string>
+    <string>--status-dir</string>
+    <string>@CORTEX_HOME@/dump-status</string>
+    <string>--out</string>
+    <string>@CORTEX_HOME@/dumps</string>
+    <string>--max-age-hours</string>
+    <string>26</string>
+    <string>--verify</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Minute</key>
+    <integer>17</integer>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>Nice</key>
+  <integer>10</integer>
+  <key>LowPriorityIO</key>
+  <true/>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>@PATH_VALUE@</string>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>@LOG_DIR@/cortex-dump-status.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>@LOG_DIR@/cortex-dump-status.err.log</string>
+</dict>
+</plist>

@@ -1,0 +1,1 @@
+cortex-config	f1_05_env_redaction	f1_05_env_from_process_child	run by f1_05_env_from_process_reads_only_the_named_keys_hermetic (its parent, green here) with --exact --ignored in a controlled environment; the #[ignore] attribute says so

@@ -1,0 +1,7 @@
+error[E0615]: attempted to take value of method `principal` on type `Ctx`
+ --> tests/ui/d4b_assign_principal_fail.rs:6:7
+  |
+6 |     c.principal.role = Role::ProjectLead;
+  |       ^^^^^^^^^ method, not a field
+  |
+  = help: methods are immutable and cannot be assigned to

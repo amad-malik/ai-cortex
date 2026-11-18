@@ -1,0 +1,161 @@
+# Cortex v2 skeleton (S5): the server and its Postgres, on names and ports that cannot touch the live v1 stack.
+# INTERIM(ponytail): a compose file is the 0.2.001 bridge; Quadlet units (P-2) replace it in 0.2.003.
+# Run it with deploy/install.sh. Checked by scripts/s5-check.sh; do not weaken a rule without kai's word.
+#
+# Borrowed from v1's docker-compose.cortex.yml (about 70 of its 676 lines): the pinned pgvector image, init: true,
+# shm_size, and the quiet 20 s health check (v1's 19 Oct incident), plus the server hardening lines.
+# Left out on purpose: every other v1 service, the published database port, and the postgres/postgres password.
+name: cv2-s5
+
+services:
+  db:
+    # INTERIM(ponytail): v1's running image, also what cortex-testkit uses; replaced by the P-1 cortex-postgres image in 0.2.003.
+    image: docker.io/pgvector/pgvector:0.8.2-pg18@sha256:42e7f6b4e1eceb02ff14e3e6bc6108bbe259abbe83879dc1845d0da1ddeb555d
+    container_name: cv2-s5-db
+    restart: unless-stopped
+    init: true
+    shm_size: 256m
+    mem_limit: 2g
+    cpus: 1.0
+    labels:
+      cortexv2: dev
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - effective_cache_size=1GB
+      - -c
+      - max_parallel_workers_per_gather=0
+    environment:
+      POSTGRES_DB: cortex
+      # Auth (vera, cox e0b0b76b): the unix socket is PEER (the OS user must match the database user: postgres in, nobody else) and every TCP rule,
+      # loopback included, is SCRAM. These flags act on a FRESH cluster only. An existing data volume keeps the rules it was created with: install.sh
+      # reads the EFFECTIVE rules and refuses a database that still trusts; it never deletes or recreates a volume (S5-PEER-AUTH-MAP.md).
+      POSTGRES_INITDB_ARGS: --auth-local=peer --auth-host=scram-sha-256 -E UTF8 --locale-provider=builtin --locale=C.UTF-8 --builtin-locale=C.UTF-8 --data-checksums
+      POSTGRES_PASSWORD_FILE: /run/secrets/cv2-s5-db-superuser
+    secrets:
+      - cv2-s5-db-superuser
+      - cv2-s5-owner-password
+      - cv2-s5-app-password
+    volumes:
+      # The pg18 image keeps its cluster under /var/lib/postgresql; mount the volume at the parent and set no PGDATA.
+      - cv2-s5-pg-data:/var/lib/postgresql
+      - ./initdb:/docker-entrypoint-initdb.d:ro,z
+    networks:
+      - cv2-s5-net
+    healthcheck:
+      # Quiet, TCP, 20 s timeout: v1's 19 Oct incident came from a short timeout orphaning pg_isready under PID 1.
+      test: ["CMD-SHELL", "pg_isready -q -U postgres -h 127.0.0.1 -d cortex >/dev/null 2>&1"]
+      interval: 15s
+      timeout: 20s
+      retries: 20
+      start_period: 10s
+
+  migrate:
+    # One-shot (cox N7): the only container of ours that mounts the OWNER password. It runs `cortex-server migrate` and exits; the
+    # server below waits for it to finish successfully. The long-running server mounts the app password only.
+    image: localhost/cv2-s5-server:dev
+    command: ["migrate"]
+    pull_policy: never   # our image is built here (install.sh builds it first); a pull would look for a registry
+    container_name: cv2-s5-migrate
+    restart: "no"
+    user: "10001:10001"
+    init: true
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    cpus: 1.0
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m,mode=1777
+    labels:
+      cortexv2: dev
+      cortexv2.role: oneshot   # the role, not compose's default restart, is what makes this the one container allowed the owner secret
+    environment:
+      HOME: /tmp
+    depends_on:
+      db:
+        condition: service_healthy
+    secrets:
+      - cv2-s5-owner-password
+    volumes:
+      - ${CORTEX_CONFIG:?set by install.sh}:/etc/cortex/cortex.toml:ro,z
+    networks:
+      - cv2-s5-net
+
+  server:
+    build:
+      context: ..
+      dockerfile: deploy/Containerfile
+    image: localhost/cv2-s5-server:dev
+    pull_policy: never
+    container_name: cv2-s5-server
+    restart: unless-stopped
+    user: "10001:10001"
+    init: true
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    cpus: 1.0
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=128m,mode=1777
+      - /run/cortex:rw,noexec,nosuid,size=16m,mode=0700,U
+    labels:
+      cortexv2: dev
+    environment:
+      HOME: /tmp
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      # Loopback only. v1 owns 8501, 5499, 5500 and 8765; proofs on this VM set CORTEX_PORT inside 57000-57999.
+      - "127.0.0.1:${CORTEX_PORT:-8601}:8601"
+    secrets:
+      - cv2-s5-app-password
+    volumes:
+      # Configuration is mounted, never baked into the image (S0 F-11). install.sh sets CORTEX_CONFIG.
+      - ${CORTEX_CONFIG:?set by install.sh}:/etc/cortex/cortex.toml:ro,z
+      - cv2-s5-state:/var/lib/cortex
+    networks:
+      - cv2-s5-net
+    healthcheck:
+      # No curl needed: bash's /dev/tcp asks GET /v2/health/ready (200 when ready, else 503 capability_unavailable).
+      test:
+        - CMD
+        - bash
+        - -c
+        - >-
+          exec 3<>/dev/tcp/127.0.0.1/8601 &&
+          printf 'GET /v2/health/ready HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3 &&
+          head -n 1 <&3 | grep -q ' 200 '
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+networks:
+  cv2-s5-net:
+    name: cv2-s5-net
+
+volumes:
+  cv2-s5-pg-data:
+    name: cv2-s5-pg-data
+  cv2-s5-state:
+    name: cv2-s5-state
+
+# Podman secrets, created by install.sh. They hold the three generated passwords; nothing here carries a value.
+secrets:
+  cv2-s5-db-superuser:
+    external: true
+  cv2-s5-owner-password:
+    external: true
+  cv2-s5-app-password:
+    external: true

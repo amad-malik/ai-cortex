@@ -1,0 +1,549 @@
+[
+ {
+  "id": "CM-01",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_05_an_added_or_removed_key_or_item_is_a_difference_and_list_order_matters"
+  ],
+  "what": "a list that is shorter or longer is not a difference",
+  "old": "            (x.len() != y.len()).then(|| format!(\"{path}[{}]\", x.len().min(y.len())))",
+  "new": "            None"
+ },
+ {
+  "id": "CM-02",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_06_the_image_comes_from_stack_env_and_quoting_is_part_of_the_value"
+  ],
+  "what": "quoted and plain scalars with the same text are equal",
+  "old": "        (Node::Scalar { .. }, Node::Scalar { .. }) => (a != b).then(|| path.to_string()),",
+  "new": "        (Node::Scalar { text: x, .. }, Node::Scalar { text: y, .. }) => (x != y).then(|| path.to_string()),"
+ },
+ {
+  "id": "CM-03",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_06b_labels_as_a_list_instead_of_a_mapping_is_a_difference_not_a_refusal"
+  ],
+  "what": "a list against a mapping is not a difference",
+  "old": "        _ => Some(path.to_string()),\n    }\n}",
+  "new": "        _ => None,\n    }\n}"
+ },
+ {
+  "id": "CM-04",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_05_an_added_or_removed_key_or_item_is_a_difference_and_list_order_matters"
+  ],
+  "what": "a key present on one side only is not a difference",
+  "old": "                    _ => return Some(here),",
+  "new": "                    _ => {}"
+ },
+ {
+  "id": "CM-05",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_06_the_image_comes_from_stack_env_and_quoting_is_part_of_the_value"
+  ],
+  "what": "a variable is not replaced by its value",
+  "old": "            Some(value) => out.push_str(value),",
+  "new": "            Some(_) => {}"
+ },
+ {
+  "id": "CM-06",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "a variable that is not in stack.env is accepted",
+  "old": "            None => return refuse(Refusal::UnknownVariable, path),",
+  "new": "            None => {}"
+ },
+ {
+  "id": "CM-07",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "a bare $ is kept as text",
+  "old": "        let Some(inner) = after.strip_prefix('{') else {\n            return refuse(Refusal::UnknownInterpolation, path);\n        };",
+  "new": "        let Some(inner) = after.strip_prefix('{') else {\n            out.push('$');\n            rest = after;\n            continue;\n        };"
+ },
+ {
+  "id": "CM-08",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "a default may hold another ${..}",
+  "old": "                && !tail[2..].contains(['$', '{']));",
+  "new": "                && true);"
+ },
+ {
+  "id": "CM-09",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "any ${NAME:x} form is accepted",
+  "old": "            || ((tail.starts_with(\":-\") || tail.starts_with(\":?\"))",
+  "new": "            || ((tail.starts_with(':'))"
+ },
+ {
+  "id": "CM-10",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "an anchor is accepted",
+  "old": "        '&' => return refuse(Refusal::Anchor, path),",
+  "new": "        '\\u{0}' => {}"
+ },
+ {
+  "id": "CM-11",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "an alias is accepted",
+  "old": "        '*' => return refuse(Refusal::Alias, path),",
+  "new": "        '\\u{0}' => {}"
+ },
+ {
+  "id": "CM-12",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "a tag is accepted",
+  "old": "        '!' => return refuse(Refusal::Tag, path),",
+  "new": "        '\\u{0}' => {}"
+ },
+ {
+  "id": "CM-13",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "a block scalar is accepted",
+  "old": "        '|' | '>' => return refuse(Refusal::BlockScalar, path),",
+  "new": "        '\\u{0}' => {}"
+ },
+ {
+  "id": "CM-14",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "a flow mapping is accepted",
+  "old": "        '{' => return refuse(Refusal::FlowMapping, path),",
+  "new": "        '\\u{0}' => {}"
+ },
+ {
+  "id": "CM-15",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "an escape in a quoted value is accepted",
+  "old": "            if inner.contains('\\\\') || (q == '\\'' && after.starts_with('\\'')) {",
+  "new": "            if false {"
+ },
+ {
+  "id": "CM-16",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "a comment after a plain value is accepted",
+  "old": "    if t.contains(\" #\") {",
+  "new": "    if false {"
+ },
+ {
+  "id": "CM-17",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "a mapping on a value line is accepted",
+  "old": "    if t.ends_with(':') || t.contains(\": \") {",
+  "new": "    if false {"
+ },
+ {
+  "id": "CM-18",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "a merge key is told from other bad keys by nothing",
+  "old": "    if text.starts_with(\"<<:\") || text == \"<<\" {",
+  "new": "    if false {"
+ },
+ {
+  "id": "CM-19",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "an empty key is accepted",
+  "old": "    if n == 0 || n > 64 || !(after == \":\" || after.starts_with(\": \")) {",
+  "new": "    if n > 64 || !(after == \":\" || after.starts_with(\": \")) {"
+ },
+ {
+  "id": "CM-20",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "a repeated key is accepted",
+  "old": "        if map.contains_key(key) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "CM-21",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "uneven indentation is accepted",
+  "old": "        Some(l) if l.indent > parent && l.indent != indent => refuse(Refusal::BadIndent, path),",
+  "new": "        Some(l) if false && l.indent > parent => refuse(Refusal::BadIndent, path),"
+ },
+ {
+  "id": "CM-22",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "a tab is accepted",
+  "old": "    if block.iter().any(|l| l.tab) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "CM-23",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_09_size_limits"
+  ],
+  "what": "a block or a line of any size is accepted",
+  "old": "    if block.len() > BLOCK_MAX_LINES || block.iter().any(|l| l.raw_len > LINE_MAX_BYTES) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "CM-24",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_09_size_limits"
+  ],
+  "what": "a file of any size is accepted",
+  "old": "    if text.len() > FILE_MAX_BYTES {",
+  "new": "    if false {"
+ },
+ {
+  "id": "CM-25",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_08_whole_file_refusals"
+  ],
+  "what": "extends is accepted",
+  "old": "        if body.starts_with(\"extends:\") {",
+  "new": "        if false {"
+ },
+ {
+  "id": "CM-26",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_08_whole_file_refusals"
+  ],
+  "what": "a second document is accepted",
+  "old": "        if raw.trim_end() == \"---\" || raw.trim_end() == \"...\" || raw.starts_with(\"--- \") {",
+  "new": "        if false {"
+ },
+ {
+  "id": "CM-27",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_08_whole_file_refusals"
+  ],
+  "what": "two db services are accepted",
+  "old": "    if found.next().is_some() {",
+  "new": "    if false {"
+ },
+ {
+  "id": "CM-28",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_07_every_refusal_class_is_refused_on_both_sides_with_a_path_and_no_value"
+  ],
+  "what": "the running file is reported as the candidate",
+  "old": "    let a = read_side(current.0, current.1, Side::Current)?;",
+  "new": "    let a = read_side(current.0, current.1, Side::Candidate)?;"
+ },
+ {
+  "id": "CM-29",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_10_a_change_to_a_volume_network_or_secret_the_db_service_names_is_a_difference"
+  ],
+  "what": "a named entry missing on one side is not a difference",
+  "old": "            _ => Some(path),",
+  "new": "            _ => None,"
+ },
+ {
+  "id": "CM-30",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_08_whole_file_refusals"
+  ],
+  "what": "include is told from other top-level keys by nothing",
+  "old": "            \"include\" if raw[key.len()..].starts_with(':') => {\n                return refuse(Refusal::Include, FILE_PATH);\n            }\n",
+  "new": ""
+ },
+ {
+  "id": "CM-31",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_10_a_change_to_a_volume_network_or_secret_the_db_service_names_is_a_difference"
+  ],
+  "what": "the top-level entries the db service names are never compared",
+  "old": "    let keys: BTreeSet<&(&'static str, String)> =\n",
+  "new": "    return Ok(());\n    #[allow(unreachable_code)]\n    let keys: BTreeSet<&(&'static str, String)> =\n"
+ },
+ {
+  "id": "CM-32",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_14_a_db_service_that_names_no_network_is_on_the_implicit_default_network_and_that_is_compared"
+  ],
+  "what": "the implicit default network is never looked at",
+  "old": "        && networks.is_empty()",
+  "new": "        && false"
+ },
+ {
+  "id": "CM-33",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_14_a_db_service_that_names_no_network_is_on_the_implicit_default_network_and_that_is_compared",
+   "cm_14b_when_the_db_service_names_its_networks_the_default_one_is_not_its_business"
+  ],
+  "what": "the default network is looked at only when the db service names networks",
+  "old": "        && networks.is_empty()",
+  "new": "        && !networks.is_empty()"
+ },
+ {
+  "id": "CM-34",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_14b_when_the_db_service_names_its_networks_the_default_one_is_not_its_business"
+  ],
+  "what": "the default network is compared whatever the db service names",
+  "old": "        && networks.is_empty()",
+  "new": "        && true"
+ },
+ {
+  "id": "CM-35",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_14_a_db_service_that_names_no_network_is_on_the_implicit_default_network_and_that_is_compared"
+  ],
+  "what": "the implicit network is looked up under another name",
+  "old": "        networks.insert(\"default\".to_string());",
+  "new": "        networks.insert(\"defaults\".to_string());"
+ },
+ {
+  "id": "CM-36",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_15_an_env_file_in_the_db_service_is_refused_on_both_sides_and_only_there"
+  ],
+  "what": "an env_file in the db service is accepted",
+  "old": "        && m.contains_key(\"env_file\")",
+  "new": "        && false"
+ },
+ {
+  "id": "CM-37",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_15_an_env_file_in_the_db_service_is_refused_on_both_sides_and_only_there"
+  ],
+  "what": "another key is taken for env_file",
+  "old": "        && m.contains_key(\"env_file\")",
+  "new": "        && m.contains_key(\"env_files\")"
+ },
+ {
+  "id": "CM-38",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_15_an_env_file_in_the_db_service_is_refused_on_both_sides_and_only_there"
+  ],
+  "what": "the refusal names another path",
+  "old": "(Refusal::EnvFile, \"services.db.env_file\".to_string())",
+  "new": "(Refusal::EnvFile, \"services.db\".to_string())"
+ },
+ {
+  "id": "CM-39",
+  "design": null,
+  "file": "src/compose.rs",
+  "tests": [
+   "group_compose"
+  ],
+  "fails": [
+   "cm_15_an_env_file_in_the_db_service_is_refused_on_both_sides_and_only_there"
+  ],
+  "what": "the refusal is of another class",
+  "old": "(Refusal::EnvFile, \"services.db.env_file\".to_string())",
+  "new": "(Refusal::Missing, \"services.db.env_file\".to_string())"
+ }
+]

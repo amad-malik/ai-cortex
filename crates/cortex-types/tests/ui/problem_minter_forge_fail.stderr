@@ -1,0 +1,5 @@
+error[E0451]: field `_sealed` of struct `ProblemCodeMinter` is private
+ --> tests/ui/problem_minter_forge_fail.rs:3:47
+  |
+3 |     let m = cortex_types::ProblemCodeMinter { _sealed: () };
+  |                                               ^^^^^^^ private field

@@ -1,0 +1,128 @@
+#!/usr/bin/python3
+"""Fake ssh for the gate runner's own tests. Never opens a network connection.
+The remote command is the LAST argument. Rules come from the JSON file named by FAKE_SCENARIO:
+{"rules": [{"match": "<regex>", "out": "text", "out_hex": "..", "err": "text", "rc": 0,
+            "sleep": seconds, "pidfile": "path", "early_out": "text written before any sleep", "orphan": seconds (a detached child keeps the pipes open), "ignore_term": true, "same_group_child": {"pid_to": path, "sleep": seconds}; pty step "flood_child": seconds}, ...]}  First matching rule wins; no rule = rc 127 and an UNMATCHED line."""
+import json, os, re, signal, sys, time
+
+argv = sys.argv[1:]
+log = os.environ.get("FAKE_LOG")
+tool = os.path.basename(sys.argv[0])
+cmd = argv[-1] if argv else ""
+if log:
+    with open(log, "a") as fh:
+        fh.write(json.dumps({"tool": tool, "argv": argv}) + "\n")
+if tool == "podman":
+    if argv[:2] == ["container", "exists"]:
+        sys.exit(0 if argv[2] in json.load(open(os.environ["FAKE_CONTAINERS"])) else 1)
+    if argv[:1] == ["inspect"]:
+        print("true localhost/rocky-systemd:10")
+        sys.exit(0)
+    if argv[:1] != ["exec"]:
+        sys.stderr.write("fake podman: unexpected arguments %r\n" % argv)
+        sys.exit(125)
+scenario = json.load(open(os.environ["FAKE_SCENARIO"]))
+for index, rule in enumerate(scenario["rules"]):
+    if re.search(rule["match"], cmd):
+        if rule.get("seq"):
+            counts_path = (log or "/dev/null") + ".counts"
+            counts = json.load(open(counts_path)) if os.path.exists(counts_path) else {}
+            n = counts.get(str(index), 0)
+            counts[str(index)] = n + 1
+            with open(counts_path, "w") as fh:
+                json.dump(counts, fh)
+            rule = dict(rule, **rule["seq"][min(n, len(rule["seq"]) - 1)])
+        break
+else:
+    if log:
+        with open(log, "a") as fh:
+            fh.write(json.dumps({"tool": tool, "UNMATCHED": cmd}) + "\n")
+    sys.stderr.write("fake-ssh: no rule for: %s\n" % cmd)
+    sys.exit(127)
+if rule.get("save_stdin"):
+    with open(rule["save_stdin"], "wb") as fh:
+        fh.write(sys.stdin.buffer.read())
+if rule.get("pty_steps"):
+    for step in rule["pty_steps"]:
+        if "print" in step:
+            sys.stdout.write(step["print"])
+            sys.stdout.flush()
+        if step.get("flood_child"):   # a descendant in the same session keeps writing to the terminal after this process has gone
+            if os.fork() == 0:
+                if step.get("flood_pid_to"):
+                    with open(step["flood_pid_to"], "w") as fh:
+                        fh.write(str(os.getpid()))
+                end = time.time() + float(step["flood_child"])
+                while time.time() < end:
+                    sys.stdout.write("inherited progress inherited progress inherited progress\r\n")
+                    sys.stdout.flush()
+                    time.sleep(0.002)
+                os._exit(0)
+        if step.get("flood"):
+            end = time.time() + float(step["flood"])
+            while time.time() < end:
+                sys.stdout.write("progress progress progress progress progress\r\n")
+                sys.stdout.flush()
+                time.sleep(0.002)
+        if step.get("sleep"):
+            pidfile = step.get("pidfile")
+            if pidfile:
+                with open(pidfile, "w") as fh:
+                    fh.write(str(os.getpid()))
+                def on_term(signum, frame):
+                    with open(pidfile + ".term", "w") as fh:
+                        fh.write("terminated")
+                    sys.exit(143)
+                signal.signal(signal.SIGTERM, on_term)
+            end = time.time() + float(step["sleep"])
+            while time.time() < end:
+                time.sleep(0.05)
+        if step.get("read"):
+            line = sys.stdin.readline()
+            if log:
+                with open(log, "a") as fh:
+                    fh.write(json.dumps({"tool": tool, "answer": line}) + "\n")
+            if line == "":
+                sys.stdout.write("eof on the terminal\n")
+                sys.stdout.flush()
+                sys.exit(int(step.get("eof_rc", 1)))
+    sys.exit(int(rule.get("rc", 0)))
+if rule.get("pid_to"):
+    with open(rule["pid_to"], "w") as fh:
+        fh.write(str(os.getpid()))
+if rule.get("early_out"):
+    sys.stdout.write(rule["early_out"])
+    sys.stdout.flush()
+if rule.get("orphan"):
+    if os.fork() == 0:
+        os.setsid()
+        time.sleep(float(rule["orphan"]))
+        os._exit(0)
+if rule.get("same_group_child"):   # a descendant in the SAME process group that ignores SIGTERM: {"pid_to": path, "sleep": seconds}
+    spec = rule["same_group_child"]
+    if os.fork() == 0:
+        signal.signal(signal.SIGTERM, signal.SIG_IGN)
+        with open(spec["pid_to"], "w") as fh:
+            fh.write(str(os.getpid()))
+        time.sleep(float(spec["sleep"]))
+        os._exit(0)
+if rule.get("ignore_term"):
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+if rule.get("sleep"):
+    pidfile = rule.get("pidfile")
+    if pidfile:
+        with open(pidfile, "w") as fh:
+            fh.write(str(os.getpid()))
+        def on_term(signum, frame):
+            with open(pidfile + ".term", "w") as fh:
+                fh.write("terminated")
+            sys.exit(143)
+        signal.signal(signal.SIGTERM, on_term)
+    end = time.time() + float(rule["sleep"])
+    while time.time() < end:
+        time.sleep(0.05)
+out = bytes.fromhex(rule["out_hex"]) if "out_hex" in rule else rule.get("out", "").encode()
+sys.stdout.buffer.write(out)
+sys.stdout.buffer.flush()
+sys.stderr.write(rule.get("err", ""))
+sys.exit(int(rule.get("rc", 0)))

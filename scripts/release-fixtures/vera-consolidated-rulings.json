@@ -1,0 +1,99 @@
+{
+ "what": "the two CONSOLIDATED rulings of vera (9 Nov) for audit (new hash) and records, one review file per entry with the two kinds of approval as separate sections: A = dynamic-SQL findings (SQL line, token column, statement hash), B = real Squawk findings (the REPORTED/JSON line); transcribed BY SCRIPT from the tables of the rulings; the `reason` strings of the dynamic findings are the ones already in the production list (the 8 Nov decision's)",
+ "audit": {
+  "ruling": {
+   "path": "/path/to/docs/Program/ReviewService/2026-11-09-audit-consolidated-29aba9ba-vera/RULING.md",
+   "sha256": "35ed7b581e129864b6b05e16141bcf821897ddcfa3494dd288b0a9c15feb602f",
+   "row": "29aba9ba-33f1-44b2-8aa5-d9f9a5bb61e3"
+  },
+  "migration_sha256": "8f3b85baf619f9eec5847d1904470fa99a91177e1a045b3570893cf671825775",
+  "dynamic_findings": [
+   {
+    "line": 57,
+    "column": 9,
+    "statement_sha256": "b2b7d2de29b99294c8273dcd511336fc86a52c3cd26432710306ce4ae4e84fac",
+    "reason": "Fixed REVOKE ALL TABLE audit.records target. Non-owner ACL grantee OID0 maps to PUBLIC; all other pg_roles names pass pg_catalog.quote_ident before %s. Privilege removal only; exact grants/readback retained."
+   },
+   {
+    "line": 64,
+    "column": 9,
+    "statement_sha256": "73ec3966ad46fc0c0348e691cfeaf10ab417749b2158ebd4a23dce454cd83259",
+    "reason": "Fixed REVOKE ALL FUNCTION audit.refuse_change() target. Same PUBLIC/prequoted catalogue-role boundary from that function ACL. Explicit NULL-ACL PUBLIC revoke and exact non-owner ACL readback retained."
+   },
+   {
+    "line": 71,
+    "column": 9,
+    "statement_sha256": "c5bae6f106b495cdb3c2b0a4f3b817714c8577fbd7968c17add94c0ad83d2c72",
+    "reason": "Fixed REVOKE ALL SCHEMA audit target. Same PUBLIC/prequoted catalogue-role boundary from that schema ACL. Restore/check exact declared schema/table rights, no function grant."
+   }
+  ],
+  "squawk": [
+   {
+    "rule": "require-lock-timeout",
+    "line": 8
+   },
+   {
+    "rule": "require-statement-timeout",
+    "line": 8
+   }
+  ]
+ },
+ "records": {
+  "ruling": {
+   "path": "/path/to/docs/Program/ReviewService/2026-11-09-records-consolidated-893b4137-vera/RULING.md",
+   "sha256": "adf16c4ec6854026603a9b6330b6ebb6d42da5afcb270e3adb67c8a072a6dd86",
+   "row": "893b4137-d853-4c85-bc89-5c19cad4e81e"
+  },
+  "migration_sha256": "69e0393a3ab48c4825dee5b133c03c6838468c417f57a40a6e99c6ba6c99f7b5",
+  "dynamic_findings": [
+   {
+    "line": 229,
+    "column": 9,
+    "statement_sha256": "45fdeb5ccdaf354f6cae47a4686fa7847145f842e4793f775c6a4bf1052ed106",
+    "reason": "Fixed REVOKE ALL TABLE template. r.rel separately quote_ident-renders catalogue schema/relation; filter limits tables/views to records. r.who is PUBLIC for0 or quote_ident-rendered pg_roles name."
+   },
+   {
+    "line": 238,
+    "column": 9,
+    "statement_sha256": "77fb7698b656839ce5d826270992d2e9a6b5842b61293dce8fcfe669b04eaa40",
+    "reason": "Fixed REVOKE ALL FUNCTION template. r.fn uses %I schema/function identifiers plus PostgreSQL pg_get_function_identity_arguments backend rendering, not raw argument/default/body text. r.who is PUBLIC or prequoted catalogue role; filter restricts records."
+   },
+   {
+    "line": 245,
+    "column": 9,
+    "statement_sha256": "49f40ddbe3918e228fbe0e9e4444e1f992ca27b70cd5b5f48740e663f10f749e",
+    "reason": "Fixed REVOKE ALL SCHEMA records target, with PUBLIC/prequoted catalogue grantee. Restrictive operation and exact restore/readback preserved."
+   },
+   {
+    "line": 290,
+    "column": 54,
+    "statement_sha256": "b1e6fa99a8a20914324816c50087541780eeb83902a76dcc2128c22187d285e8",
+    "reason": "Two single-quoted EXECUTE privilege labels in static allowed VALUES data, compared with ACL privilege_type; neither token invokes PL/pgSQL EXECUTE or supplies formatter SQL."
+   },
+   {
+    "line": 290,
+    "column": 114,
+    "statement_sha256": "b1e6fa99a8a20914324816c50087541780eeb83902a76dcc2128c22187d285e8",
+    "reason": "Two single-quoted EXECUTE privilege labels in static allowed VALUES data, compared with ACL privilege_type; neither token invokes PL/pgSQL EXECUTE or supplies formatter SQL."
+   }
+  ],
+  "squawk": [
+   {
+    "rule": "require-lock-timeout",
+    "line": 4
+   },
+   {
+    "rule": "require-statement-timeout",
+    "line": 4
+   },
+   {
+    "rule": "prefer-bigint-over-int",
+    "line": 55
+   },
+   {
+    "rule": "prefer-bigint-over-int",
+    "line": 148
+   }
+  ]
+ }
+}

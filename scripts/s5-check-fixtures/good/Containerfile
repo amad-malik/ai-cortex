@@ -1,0 +1,19 @@
+# Fixture: a GOOD S5 Containerfile. The real one is deploy/Containerfile.
+# No config and no secret is copied in: the server config is mounted at run time (S0 F-11).
+FROM quay.io/rockylinux/rockylinux@sha256:e372170ca8630f0f03e9b70fdd0bf4a3ce3426b0de7cdba615f06337389de176 AS build
+RUN dnf -y install gcc make && dnf clean all
+WORKDIR /src
+COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
+COPY crates ./crates
+COPY xtask ./xtask
+COPY deploy/server-features ./server-features
+ARG CORTEX_GIT_SHA=unknown
+ENV CORTEX_GIT_SHA=${CORTEX_GIT_SHA}
+RUN cargo build --release --locked -p cortex-server --features "$(cat server-features)"
+
+FROM quay.io/rockylinux/rockylinux@sha256:e372170ca8630f0f03e9b70fdd0bf4a3ce3426b0de7cdba615f06337389de176
+COPY --from=build /src/target/release/cortex-server /usr/local/bin/cortex-server
+USER 10001:10001
+EXPOSE 8601
+ENTRYPOINT ["/usr/local/bin/cortex-server"]
+CMD ["serve"]

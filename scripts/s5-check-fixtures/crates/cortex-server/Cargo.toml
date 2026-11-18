@@ -1,0 +1,17 @@
+[package]
+name = "cortex-server"
+version = "0.0.0"
+
+[features]
+# Test-only fault switch (contract r0.3 section 4). OFF by default and never in a release build.
+test-faults = []
+# The optional pieces this binary compiles in, one feature each (`assembly::compiled`: one `#[cfg(feature = "mod-x")]` line per piece).
+# audit, identity and tokens are core and always in (audit BEFORE identity in migration order). NOT default features: a test forbids any
+# `default` here, and the build recipe names the set.
+# A feature IMPLIES the pieces its piece needs (vera SERVE-NEXT-L1): search reads the records scope; boot uses the records and handoffs ports.
+mod-policy = ["dep:mod-policy"]
+mod-records = ["dep:mod-records"]
+mod-search = ["dep:mod-search", "mod-records"]
+mod-handoffs = ["dep:mod-handoffs"]
+mod-boot = ["dep:mod-boot", "mod-records", "mod-handoffs"]
+

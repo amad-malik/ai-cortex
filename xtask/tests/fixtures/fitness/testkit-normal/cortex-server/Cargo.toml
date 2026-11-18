@@ -1,0 +1,11 @@
+[package]
+name = "cortex-server"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+cortex-http = { path = "../cortex-http" }
+mod-identity = { path = "../mod-identity" }
+mod-tokens = { path = "../mod-tokens" }
+cortex-testkit = { path = "../cortex-testkit" }

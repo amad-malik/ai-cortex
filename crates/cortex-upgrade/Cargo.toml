@@ -1,0 +1,32 @@
+[package]
+name = "cortex-upgrade"
+description = "cortex upgrade: manifest rules, release choice, release layout and the upgrade state machine (piece 14)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[features]
+# Test-only switches (plain http for the fake transport). Never in a release build; xtask fitness should refuse it there.
+test-hooks = []
+
+[dependencies]
+cortex-types.workspace = true
+# SemVer 2.0 parsing and precedence (MIT OR Apache-2.0, dtolnay). New to the lock; goes in INTERIM-REGISTER.md at merge (D94).
+semver = "=1.0.28"
+# HTTP client for the release host (kai: rustls with the ring provider only, default features off; MIT OR Apache-2.0).
+ureq = { version = "=3.5.1", default-features = false, features = ["rustls"] }
+# gzip for the release archive, the pure-Rust backend only (MIT OR Apache-2.0).
+flate2 = { version = "=1.1.11", default-features = false, features = ["rust_backend"] }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+toml.workspace = true
+# the crate itself, with the test switches on, for its own integration tests
+cortex-upgrade = { path = ".", features = ["test-hooks"] }
+
+[lints]
+workspace = true

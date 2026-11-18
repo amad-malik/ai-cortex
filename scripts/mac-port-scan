@@ -1,0 +1,947 @@
+#!/usr/bin/env python3
+"""mac-port-scan: a REPORT of the constructs in shell files that are GNU-only, Linux-only or bash 4+, with the BSD or bash 3.2 replacement (M-1a TOOLING; bob).
+
+  python3 -I scripts/mac-port-scan [--format text|json] [--strict] [FILE ...]
+  python3 -I scripts/mac-port-scan --list-rules
+  python3 -I scripts/mac-port-scan --help
+
+LIMIT (kai, row efcb10fe), verbatim: catches the known 3.2 differences; NOT the real /bin/bash of a Mac, Apple's 3.2.57 with its own patches; proves nothing about what is not listed
+
+With no FILE it reads deploy/install.sh and deploy/db-roles.sh of this checkout. It only READS: it executes nothing, writes nothing, changes nothing. A REPORT: it exits 0 with
+findings; --strict exits 1 on an error-level finding; 2 is a refusal (usage, an unreadable file). Every rule below is held by a known-bad and a known-good line in
+scripts/mac-port-fixtures/rules.txt, and the rules and their replacements are the author's reading of documentation and of the BSD manuals: where it is not sure it says ASK-A-MAC.
+
+What a rule never sees: comments, here-document bodies and the text of quoted strings are blanked by a small lexer first (a `sed -i` in an error message is not a finding), but
+$(...), backticks, ${...} words and arithmetic expansions inside double quotes and unquoted here-documents ARE scanned. A command is found where a command is (after ; && || | ( { then do ... and behind the
+wrappers sudo env command xargs timeout nice nohup exec time and find -exec), not where it is only an argument. KNOWN LIMITS: a command named through a variable or an alias
+is not seen, nor is an eval or sh -c of a string built at run time; a rule that reads the text of a word cannot see a word built at run time. A fixed script handed to another shell as text (sh -c 'script', eval, trap 'handler' SIGNAL, three levels deep) IS scanned and reported on the line of the outer command.
+A line may be allowed with `# portable: ok <reason>` in a real comment (the Linux-only branch of an installer): it is listed as a NOTE with its reason. A marker without a reason is
+itself an error (MP-900) and allows nothing.
+Output (text): the REPORT line, then `file:line: severity rule message; use: replacement` per finding in file and line order, `NOTE file:line: rule allowed: reason`, then the summary line.
+"""
+import json
+import os
+import re
+import sys
+
+PROG = 'mac-port-scan'
+LIMIT = "catches the known 3.2 differences; NOT the real /bin/bash of a Mac, Apple's 3.2.57 with its own patches; proves nothing about what is not listed"
+REPORT_LINE = ("REPORT from documentation and the author's reading of the BSD manuals; it is not a proof that anything else is portable to macOS "
+               "(a command named through a variable is not seen; see --help)")
+
+# ---- the rule table: id, severity, title, replacement -------------------------------------------------------
+
+RULES = [
+    ('MP-001', 'error', 'sed -i without a suffix (GNU) and sed -i "" (BSD) do not agree', 'write to a temporary file and mv it over the original, or use -i.bak and delete the backup'),
+    ('MP-002', 'error', 'sed -r is GNU', 'sed -E'),
+    ('MP-003', 'error', 'GNU escapes \\+ \\? \\| in a basic sed expression', 'use sed -E with + ? |'),
+    ('MP-004', 'error', 'date -d / --date is GNU', 'BSD: date -j -f <format> <string>, or date -v<adjust>'),
+    ('MP-005', 'error', 'date +%N (nanoseconds) is GNU', 'date +%s, or python3 -c for sub-second time'),
+    ('MP-006', 'error', 'stat -c / --format is GNU', 'BSD: stat -f <format>'),
+    ('MP-007', 'info', 'readlink -f / -e / -m', '(cd "$(dirname "$p")" && pwd -P); macOS 12.3 and later have readlink -f (ASK-A-MAC)'),
+    ('MP-008', 'info', 'realpath', 'macOS 12.3 and later have it (ASK-A-MAC); before: (cd "$dir" && pwd -P)'),
+    ('MP-009', 'error', 'grep -P (PCRE) is GNU', 'grep -E, or perl or python3'),
+    ('MP-010', 'error', 'sha256sum / sha1sum / md5sum are GNU coreutils', 'shasum -a 256 / shasum -a 1 / md5 -q'),
+    ('MP-011', 'error', 'timeout is GNU coreutils', 'macOS has none: gtimeout from coreutils, or a watchdog (sleep in the background, then kill the exact pid)'),
+    ('MP-012', 'error', 'flock is util-linux', 'macOS has none: mkdir "$lock" as an atomic lock, or shlock'),
+    ('MP-013', 'error', 'mktemp without a template', 'mktemp -d "${TMPDIR:-/tmp}/name.XXXXXX"'),
+    ('MP-014', 'error', 'mktemp --tmpdir is GNU', 'mktemp "${TMPDIR:-/tmp}/name.XXXXXX"'),
+    ('MP-015', 'error', 'install -D is GNU', 'mkdir -p "$(dirname "$dst")" && install -m MODE "$src" "$dst"'),
+    ('MP-016', 'error', 'sort -V is GNU', 'sort on a fixed-width key, or python3'),
+    ('MP-017', 'error', 'head -n -N (all but the last N lines) is GNU', "sed '$d' for one line, or awk"),
+    ('MP-018', 'error', 'tac is GNU', 'tail -r'),
+    ('MP-019', 'error', 'nproc is GNU', 'sysctl -n hw.ncpu'),
+    ('MP-020', 'error', 'free is procps (Linux)', 'vm_stat, or sysctl hw.memsize'),
+    ('MP-021', 'error', 'base64 -w is GNU', "base64 | tr -d '\\n'"),
+    ('MP-022', 'error', 'find -printf / -regextype is GNU', 'find -print, or -exec stat -f ... {} +'),
+    ('MP-023', 'error', 'ps -C and the long options of ps are procps (Linux)', 'ps -ax -o pid=,comm= and filter the output'),
+    ('MP-024', 'error', 'df -B and the long options of df are GNU', 'df -k'),
+    ('MP-025', 'error', 'du -b and the long options of du are GNU', 'du -k, or wc -c'),
+    ('MP-026', 'error', 'tar --transform is GNU tar', 'bsdtar -s, or stage the files under the wanted names'),
+    ('MP-027', 'error', 'the long options of cp (--preserve ...) are GNU', 'cp -p, cp -R'),
+    ('MP-028', 'error', 'the long options of ls (--time-style ...) are GNU', 'ls -l, and format with stat -f'),
+    ('MP-029', 'error', 'getopt (the GNU enhanced one, with long options)', 'getopts (the builtin), or a while and case loop'),
+    ('MP-030', 'info', 'xargs -r', 'the macOS man page says -r is accepted and ignored (ASK-A-MAC); drop it and guard empty input with a test'),
+    ('MP-031', 'info', 'touch -d', 'touch -t YYYYMMDDhhmm; recent macOS touch has -d too (ASK-A-MAC)'),
+    ('MP-032', 'warn', 'echo -e: the echo of a Mac /bin/sh prints the -e', "printf '...\\n'"),
+    ('MP-034', 'error', '/proc does not exist on macOS', 'ps -p, lsof, sysctl'),
+    ('MP-035', 'error', 'systemd tools do not exist on macOS', 'launchctl (the launchd agents of M-1c)'),
+    ('MP-036', 'error', 'a Linux package manager', 'brew, or tell the user what to install'),
+    ('MP-037', 'error', 'a podman-only form (secret, compose, exists ...)', 'docker compose and a file secret: the Docker Desktop override of M-1b'),
+    ('MP-038', 'info', 'a call to the container runtime by name', 'call it through the runtime variable ($RT) so that Docker Desktop can be used'),
+    ('MP-040', 'error', '/etc/os-release and the other Linux release files', 'sw_vers -productVersion, or uname -s'),
+    ('MP-041', 'error', '/dev/shm does not exist on macOS', '${TMPDIR:-/tmp}'),
+    ('MP-042', 'error', '/run (for example /run/user/UID) does not exist on macOS', '${TMPDIR:-/tmp}, or a directory under $HOME/Library'),
+    ('MP-043', 'error', 'ss is iproute2 (Linux)', 'lsof -iTCP -sTCP:LISTEN -n -P, or netstat -an'),
+    ('MP-044', 'error', '/sys does not exist on macOS', 'ifconfig, sysctl, system_profiler'),
+    ('MP-050', 'error', 'declare / local / typeset -A (associative arrays) is bash 4', 'parallel indexed arrays, or key=value lines'),
+    ('MP-051', 'error', 'mapfile / readarray is bash 4', 'while IFS= read -r line; do ...; done < file'),
+    ('MP-052', 'error', 'case modification ${v,,} ${v^^} is bash 4', "tr '[:upper:]' '[:lower:]'"),
+    ('MP-053', 'error', 'the @ transforms ${v@Q} are bash 4.4 and 5', "printf '%q', or quote by hand"),
+    ('MP-054', 'error', '[[ -v var ]] and [ -v var ] are bash 4.2', '[ -n "${var+x}" ]'),
+    ('MP-055', 'error', '&>> is bash 4', '>> file 2>&1'),
+    ('MP-056', 'error', '|& is bash 4', '2>&1 |'),
+    ('MP-057', 'error', ';& and ;;& in case are bash 4', 'repeat the commands, or call a function'),
+    ('MP-058', 'error', 'coproc is bash 4', 'a named pipe (mkfifo), or a background job'),
+    ('MP-059', 'error', 'wait -n is bash 4.3', 'wait for a specific pid, or poll with kill -0'),
+    ('MP-060', 'error', 'read -t with a fraction is bash 4', 'read -t 1 (whole seconds)'),
+    ('MP-061', 'error', 'a negative array index ${a[-1]} is bash 4.3', '${a[${#a[@]}-1]}'),
+    ('MP-062', 'error', '$EPOCHSECONDS $EPOCHREALTIME $SRANDOM $BASHPID are bash 5', '$(date +%s), $$, $RANDOM'),
+    ('MP-063', 'error', 'local -n / declare -n / declare -g are bash 4', 'eval, or pass the name and use indirect expansion'),
+    ('MP-064', 'error', "printf '%(...)T' is bash 4.2", 'date +<format>'),
+    ('MP-065', 'error', 'shopt -s globstar and the other 4.x options', 'find, or nullglob (3.2 has it)'),
+    ('MP-066', 'error', 'a zero-padded or stepped brace range {01..10} is bash 4', 'seq -w, seq, or a while loop'),
+    ('MP-067', 'error', '** (globstar) in a pattern is bash 4', "find . -name '...'"),
+    ('MP-068', 'error', "$'...' with \\u escapes or non-ASCII text is bash 4.2", "printf with octal bytes ('\\303\\251')"),
+    ('MP-070', 'warn', 'an array expansion under set -u: an empty array is an unbound variable before bash 4.4', '${arr[@]+"${arr[@]}"}'),
+    ('MP-900', 'error', 'the allow marker has no reason', 'write: # portable: ok <reason>'),
+]
+INFO = {r[0]: r for r in RULES}
+
+
+# ---- the lexer: a code view with the text of strings and comments blanked, and the simple commands --------------
+
+class Word:
+    __slots__ = ('text', 'line', 'quoted', 'redir')
+
+    def __init__(self, text, line, quoted, redir):
+        self.text = text
+        self.line = line
+        self.quoted = quoted
+        self.redir = redir
+
+
+class Lexed:
+    def __init__(self, src):
+        self.src = src
+        self.code = list(src)
+        self.cmds = []          # list of (line, [Word])
+        self.comments = []      # (line, text)
+        self.ansi = []          # (line, body)
+        self.nl = [i for i, c in enumerate(src) if c == '\n']
+        self.pending = []       # here-documents waiting for the end of the line: (delimiter, quoted, strip tabs)
+        self.lex_range(0, len(src))
+
+    def line(self, i):
+        lo, hi = 0, len(self.nl)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if self.nl[mid] < i:
+                lo = mid + 1
+            else:
+                hi = mid
+        return lo + 1
+
+    def mask(self, a, b):
+        for k in range(a, min(b, len(self.code))):
+            if self.code[k] != '\n':
+                self.code[k] = ' '
+
+    # matching ----------------------------------------------------------------------------------------------
+    def skip_sq(self, i, j):
+        k = self.src.find("'", i + 1, j)
+        return j if k < 0 else k + 1
+
+    def skip_dq(self, i, j):
+        s = self.src
+        k = i + 1
+        while k < j:
+            c = s[k]
+            if c == '\\':
+                k += 2
+            elif c == '"':
+                return k + 1
+            elif c == '$' and k + 1 < j and s[k + 1] in '({':
+                k = self.close_group(k + 1, j)
+            elif c == '`':
+                k = self.close_tick(k, j)
+            else:
+                k += 1
+        return j
+
+    def close_tick(self, i, j):
+        s = self.src
+        k = i + 1
+        while k < j:
+            if s[k] == '\\':
+                k += 2
+            elif s[k] == '`':
+                return k + 1
+            else:
+                k += 1
+        return j
+
+    def close_group(self, i, j):
+        """s[i] is ( or {: the index just after its matching close, quote aware."""
+        s = self.src
+        op = s[i]
+        cl = ')' if op == '(' else '}'
+        depth = 0
+        k = i
+        while k < j:
+            c = s[k]
+            if c == '\\':
+                k += 2
+                continue
+            if c == "'":
+                k = self.skip_sq(k, j)
+                continue
+            if c == '"':
+                k = self.skip_dq(k, j)
+                continue
+            if c == '`':
+                k = self.close_tick(k, j)
+                continue
+            if c == op:
+                depth += 1
+            elif c == cl:
+                depth -= 1
+                if depth == 0:
+                    return k + 1
+            k += 1
+        return j
+
+    # the main scan -----------------------------------------------------------------------------------------
+    def lex_range(self, i, j):
+        s = self.src
+        words = []
+        cur = []
+        st = {'start': None, 'quoted': False, 'redir_next': False}
+
+        def end_word():
+            if cur or st['quoted']:
+                words.append(Word(''.join(cur), self.line(st['start']), st['quoted'], st['redir_next']))
+                st['redir_next'] = False
+            del cur[:]
+            st['start'] = None
+            st['quoted'] = False
+
+        def end_cmd():
+            end_word()
+            if words:
+                self.cmds.append((words[0].line, list(words)))
+                del words[:]
+            st['redir_next'] = False
+
+        def add(text, at, quoted=False):
+            if st['start'] is None:
+                st['start'] = at
+            cur.append(text)
+            if quoted:
+                st['quoted'] = True
+
+        while i < j:
+            c = s[i]
+            if c == '\n':
+                end_cmd()
+                i += 1
+                if self.pending:
+                    i = self.read_heredocs(i, j)
+                continue
+            if c in ' \t':
+                end_word()
+                i += 1
+                continue
+            if c == '\\':
+                if i + 1 < j and s[i + 1] == '\n':
+                    self.code[i] = ' '
+                    i += 2
+                    continue
+                if i + 1 < j:
+                    add(s[i + 1], i, True)
+                i += 2
+                continue
+            if c == "'":
+                k = self.skip_sq(i, j)
+                add(s[i + 1:k - 1] if k - 1 > i else '', i, True)
+                self.mask(i + 1, k - 1)
+                i = k
+                continue
+            if c == '"':
+                i = self.lex_dq(i, j, add)
+                continue
+            if c == '`':
+                k = self.close_tick(i, j)
+                add(s[i:k], i)
+                self.lex_range(i + 1, k - 1)
+                i = k
+                continue
+            if c == '$':
+                nxt = s[i + 1] if i + 1 < j else ''
+                if nxt == '(':
+                    if i + 2 < j and s[i + 2] == '(':
+                        k = self.close_group(i + 1, j)
+                        add(s[i:k], i)
+                        self.scan_exec(i + 3, k - 2, True)
+                    else:
+                        k = self.close_group(i + 1, j)
+                        add(s[i:k], i)
+                        self.lex_range(i + 2, k - 1)
+                    i = k
+                    continue
+                if nxt == '{':
+                    k = self.close_group(i + 1, j)
+                    add(s[i:k], i)
+                    self.lex_param(i, k, False)
+                    i = k
+                    continue
+                if nxt == "'":
+                    k = i + 2
+                    while k < j and s[k] != "'":
+                        k += 2 if s[k] == '\\' else 1
+                    body = s[i + 2:k]
+                    self.ansi.append((self.line(i), body))
+                    add(s[i:k + 1], i, True)
+                    self.mask(i + 2, k)
+                    i = min(k + 1, j)
+                    continue
+                add(c, i)
+                i += 1
+                if nxt and (nxt in '#?$!@*-' or nxt.isdigit()):
+                    add(nxt, i)
+                    i += 1
+                continue
+            if c == '#' and st['start'] is None:
+                k = s.find('\n', i, j)
+                k = j if k < 0 else k
+                self.comments.append((self.line(i), s[i + 1:k]))
+                self.mask(i, k)
+                i = k
+                continue
+            if c in ';&|()<>':
+                # operators and redirections
+                two = s[i:i + 3]
+                if c in '<>' and i + 1 < j and s[i + 1] == '(':
+                    end_word()
+                    k = self.close_group(i + 1, j)
+                    self.lex_range(i + 2, k - 1)
+                    i = k
+                    continue
+                if c in '<>' or (c == '&' and two[:2] in ('&>',)):
+                    # a redirection: an all-digit word before it is its file descriptor
+                    if cur and all(x.isdigit() for x in ''.join(cur)):
+                        del cur[:]
+                        st['start'] = None
+                    end_word()
+                    if two.startswith('<<<'):
+                        op = '<<<'
+                    elif two.startswith('<<'):
+                        op = '<<-' if s[i:i + 3] == '<<-' else '<<'
+                    elif two.startswith('&>>'):
+                        op = '&>>'
+                    elif two[:2] in ('>>', '>&', '<&', '<>', '>|', '&>'):
+                        op = two[:2]
+                    else:
+                        op = c
+                    words.append(Word(op, self.line(i), False, True))
+                    i += len(op)
+                    if op in ('<<', '<<-'):
+                        i = self.read_delim(i, j, op == '<<-')
+                    else:
+                        st['redir_next'] = True
+                    continue
+                end_cmd()
+                if c == ';':
+                    i += 3 if two == ';;&' else (2 if two[:2] in (';;', ';&') else 1)
+                elif c == '&':
+                    i += 2 if two[:2] == '&&' else 1
+                elif c == '|':
+                    i += 2 if two[:2] in ('||', '|&') else 1
+                elif c == '(':
+                    if two[:2] == '((':
+                        k = self.close_group(i, j)
+                        self.scan_exec(i + 2, k - 2, True)
+                        i = k
+                    else:
+                        i += 1
+                else:
+                    i += 1
+                continue
+            add(c, i)
+            i += 1
+        end_cmd()
+
+    def lex_param(self, i, j, in_dq):
+        """s[i:j] is a ${...} expansion: the command substitutions and backticks in its WORDS (${v:-$(cmd)}, ${v//$(cmd)/x}) are code. Single quotes make the
+        text literal unless the expansion is itself inside double quotes (or a here-document), where they are ordinary characters."""
+        self.scan_exec(i + 2, j - 1, in_dq)
+
+    def scan_exec(self, a, b, in_dq):
+        s = self.src
+        k = a
+        while k < b:
+            c = s[k]
+            if c == '\\':
+                k += 2
+            elif c == "'" and not in_dq:
+                k = self.skip_sq(k, b)
+            elif c == '"':
+                e = self.skip_dq(k, b)
+                self.scan_exec(k + 1, e - 1, True)
+                k = e
+            elif c == '$' and k + 1 < b and s[k + 1] == '(':
+                e = self.close_group(k + 1, b)
+                if not (k + 2 < b and s[k + 2] == '('):
+                    self.lex_range(k + 2, e - 1)
+                else:
+                    self.scan_exec(k + 3, e - 2, True)
+                k = e
+            elif c == '`':
+                e = self.close_tick(k, b)
+                self.lex_range(k + 1, e - 1)
+                k = e
+            else:
+                k += 1
+
+    def lex_dq(self, i, j, add):
+        s = self.src
+        k = i + 1
+        at = i
+        buf = []
+        while k < j:
+            c = s[k]
+            if c == '\\' and k + 1 < j:
+                buf.append(s[k + 1] if s[k + 1] in '$"\\`' else '\\' + s[k + 1])
+                self.mask(k, k + 2)
+                k += 2
+                continue
+            if c == '"':
+                add(''.join(buf), at, True)
+                return k + 1
+            if c == '$' and k + 1 < j and s[k + 1] == '(':
+                e = self.close_group(k + 1, j)
+                buf.append(s[k:e])
+                if not (k + 2 < j and s[k + 2] == '('):
+                    self.lex_range(k + 2, e - 1)
+                else:
+                    self.scan_exec(k + 3, e - 2, True)
+                k = e
+                continue
+            if c == '$' and k + 1 < j and s[k + 1] == '{':
+                e = self.close_group(k + 1, j)
+                buf.append(s[k:e])
+                self.lex_param(k, e, True)
+                k = e
+                continue
+            if c == '`':
+                e = self.close_tick(k, j)
+                buf.append(s[k:e])
+                self.lex_range(k + 1, e - 1)
+                k = e
+                continue
+            buf.append(c)
+            if c != '\n':
+                self.code[k] = ' '
+            k += 1
+        add(''.join(buf), at, True)
+        return j
+
+    def read_delim(self, i, j, strip):
+        s = self.src
+        while i < j and s[i] in ' \t':
+            i += 1
+        quoted = False
+        d = []
+        while i < j and s[i] not in ' \t\n;&|()<>':
+            c = s[i]
+            if c in '\'"':
+                quoted = True
+                k = s.find(c, i + 1, j)
+                k = j if k < 0 else k
+                d.append(s[i + 1:k])
+                i = k + 1
+                continue
+            if c == '\\':
+                quoted = True
+                i += 1
+                if i < j:
+                    d.append(s[i])
+                    i += 1
+                continue
+            d.append(c)
+            i += 1
+        self.pending.append((''.join(d), quoted, strip))
+        return i
+
+    def read_heredocs(self, i, j):
+        s = self.src
+        for delim, quoted, strip in self.pending:
+            body_start = i
+            while i < j:
+                e = s.find('\n', i, j)
+                e = j if e < 0 else e
+                text = s[i:e]
+                if (text.lstrip('\t') if strip else text) == delim:
+                    self.mask(body_start, e)
+                    i = e + 1 if e < j else j
+                    break
+                i = e + 1
+            else:
+                self.mask(body_start, j)
+                i = j
+                continue
+            if not quoted:
+                self.rescan_body(body_start, i)
+        self.pending = []
+        return i
+
+    def rescan_body(self, a, b):
+        """An unquoted here-document: $(...), backticks and ${...} in the body are code."""
+        s = self.src
+        k = a
+        while k < b:
+            c = s[k]
+            if c == '\\':
+                k += 2
+            elif c == '$' and k + 1 < b and s[k + 1] in '({':
+                e = self.close_group(k + 1, b)
+                for x in range(k, e):
+                    self.code[x] = s[x]
+                if s[k + 1] == '(' and not (k + 2 < b and s[k + 2] == '('):
+                    self.lex_range(k + 2, e - 1)
+                elif s[k + 1] == '(':
+                    self.scan_exec(k + 3, e - 2, True)
+                elif s[k + 1] == '{':
+                    self.lex_param(k, e, True)
+                k = e
+            elif c == '`':
+                e = self.close_tick(k, b)
+                for x in range(k, e):
+                    self.code[x] = s[x]
+                self.lex_range(k + 1, e - 1)
+                k = e
+            else:
+                k += 1
+
+
+# ---- command analysis ---------------------------------------------------------------------------------------
+
+RESERVED = {'!', '{', 'if', 'then', 'else', 'elif', 'do', 'while', 'until'}
+ASSIGN = re.compile(r'^[A-Za-z_][A-Za-z0-9_]*(\[[^\]]*\])?\+?=')
+SUDO_ARG = {'-u', '-g', '-h', '-p', '-C', '-r', '-t', '-U', '-D', '-R', '-T'}
+XARGS_ARG = {'-a', '-d', '-E', '-I', '-L', '-n', '-P', '-s', '-R', '-S'}
+
+
+def unwrap(name, args):
+    """The command run by a wrapper, as a list of words, or []."""
+    t = [w.text for w in args]
+    k = 0
+    if name in ('command',):
+        if any(re.fullmatch(r'-[a-zA-Z]*[vV][a-zA-Z]*', x) for x in t[:3]):
+            return []
+        while k < len(t) and t[k].startswith('-'):
+            k += 1
+    elif name in ('sudo', 'doas'):
+        while k < len(t) and t[k].startswith('-'):
+            k += 2 if t[k] in SUDO_ARG else 1
+    elif name == 'env':
+        while k < len(t) and (t[k].startswith('-') or ASSIGN.match(t[k])):
+            k += 2 if t[k] in ('-u', '-C', '-S') else 1
+    elif name == 'xargs':
+        while k < len(t) and t[k].startswith('-'):
+            k += 2 if t[k] in XARGS_ARG else 1
+    elif name == 'timeout':
+        while k < len(t) and t[k].startswith('-'):
+            k += 2 if t[k] in ('-s', '-k') else 1
+        k += 1
+    elif name == 'nice':
+        while k < len(t) and t[k].startswith('-'):
+            k += 2 if t[k] == '-n' else 1
+    elif name in ('nohup', 'exec', 'time', 'stdbuf', 'setsid'):
+        while k < len(t) and t[k].startswith('-'):
+            k += 1
+    else:
+        return []
+    return args[k:]
+
+
+def effective(words):
+    """(name, [arg Word], line) for the command of a simple command and the commands it runs through wrappers and find -exec."""
+    out = []
+    ws = []
+    skip = False
+    for w in words:
+        if w.redir:
+            continue
+        ws.append(w)
+    k = 0
+    while k < len(ws) and (ws[k].text in RESERVED and not ws[k].quoted or (ASSIGN.match(ws[k].text) and not ws[k].quoted)):
+        k += 1
+    ws = ws[k:]
+    seen = 0
+    while ws and seen < 8:
+        seen += 1
+        name = ws[0].text
+        if '/' in name:
+            name = os.path.basename(name)
+        args = ws[1:]
+        out.append((name, args, ws[0].line))
+        if name == 'find':
+            t = [w.text for w in args]
+            for idx, x in enumerate(t):
+                if x in ('-exec', '-execdir', '-ok', '-okdir'):
+                    sub = []
+                    for y in args[idx + 1:]:
+                        if y.text in (';', '+'):
+                            break
+                        sub.append(y)
+                    out.extend(effective(sub))
+        nxt = unwrap(name, args)
+        if not nxt:
+            break
+        ws = nxt
+        k = 0
+        while k < len(ws) and ASSIGN.match(ws[k].text):
+            k += 1
+        ws = ws[k:]
+    return out
+
+
+def texts(args):
+    return [a.text for a in args]
+
+
+def opt_cluster(t, letters):
+    """True when a short-option cluster (a dash, letters, then one of the letters; a value may follow: -Dm0644) contains one of the letters."""
+    return bool(re.match(r'-[A-Za-z]*[' + letters + r']', t))
+
+
+def r_sed(name, args):
+    if name != 'sed':
+        return []
+    t = texts(args)
+    hits = []
+    opts = []
+    for x in t:
+        if x == '--':
+            break
+        opts.append(x)
+    inplace = any(x.startswith('--in-place') or re.fullmatch(r'-[A-Za-z]*i', x) for x in opts)
+    ere = any(x == '--regexp-extended' or re.fullmatch(r'-[A-Za-z]*r[A-Za-z]*', x) for x in opts)
+    ext = any(re.fullmatch(r'-[A-Za-z]*E[A-Za-z]*', x) for x in opts)
+    if inplace:
+        hits.append('MP-001')
+    if ere:
+        hits.append('MP-002')
+    if not ere and not ext:
+        scripts = []
+        k = 0
+        while k < len(t):
+            if t[k] in ('-e',) and k + 1 < len(t):
+                scripts.append(t[k + 1])
+                k += 2
+                continue
+            if not t[k].startswith('-'):
+                scripts.append(t[k])
+                break
+            k += 1
+        if any(re.search(r'\\[+?|]', x) for x in scripts):
+            hits.append('MP-003')
+    return hits
+
+
+def r_date(name, args):
+    if name != 'date':
+        return []
+    t = texts(args)
+    hits = []
+    if any(x.startswith('--date') or opt_cluster(x, 'd') for x in t):
+        hits.append('MP-004')
+    if any(re.search(r'%[0-9]*N', x) for x in t):
+        hits.append('MP-005')
+    return hits
+
+
+def r_simple(name, args):
+    t = texts(args)
+    hits = []
+    long_opt = any(x.startswith('--') and x != '--' for x in t)
+    if name == 'stat' and any(opt_cluster(x, 'c') or x.startswith('--format') or x.startswith('--printf') or x == '--terse' for x in t):
+        hits.append('MP-006')
+    if name == 'readlink' and any(opt_cluster(x, 'fem') or x.startswith('--canonicalize') for x in t):
+        hits.append('MP-007')
+    if name == 'realpath':
+        hits.append('MP-008')
+    if name in ('grep', 'egrep', 'fgrep') and any(opt_cluster(x, 'P') or x == '--perl-regexp' for x in t):
+        hits.append('MP-009')
+    if name in ('sha256sum', 'sha1sum', 'md5sum', 'sha512sum', 'sha384sum', 'sha224sum', 'b2sum'):
+        hits.append('MP-010')
+    if name == 'timeout':
+        hits.append('MP-011')
+    if name == 'flock':
+        hits.append('MP-012')
+    if name == 'mktemp':
+        if any(x.startswith('--tmpdir') for x in t):
+            hits.append('MP-014')
+        plain = []
+        k = 0
+        while k < len(t):
+            if t[k] == '-p':
+                k += 2
+                continue
+            if not t[k].startswith('-'):
+                plain.append(t[k])
+            k += 1
+        if not plain:
+            hits.append('MP-013')
+    if name == 'install' and any(opt_cluster(x, 'D') for x in t):
+        hits.append('MP-015')
+    if name == 'sort' and (any(opt_cluster(x, 'V') for x in t) or '--version-sort' in t):
+        hits.append('MP-016')
+    if name == 'head':
+        for k, x in enumerate(t):
+            if (x == '-n' and k + 1 < len(t) and re.fullmatch(r'-\d+', t[k + 1])) or re.fullmatch(r'-n-\d+', x):
+                hits.append('MP-017')
+    if name == 'tac':
+        hits.append('MP-018')
+    if name == 'nproc':
+        hits.append('MP-019')
+    if name == 'free':
+        hits.append('MP-020')
+    if name == 'base64' and any(opt_cluster(x, 'w') or x.startswith('--wrap') for x in t):
+        hits.append('MP-021')
+    if name == 'find' and any(x in ('-printf', '-regextype') for x in t):
+        hits.append('MP-022')
+    if name == 'ps' and (long_opt or '-C' in t):
+        hits.append('MP-023')
+    if name == 'df' and (long_opt or any(opt_cluster(x, 'B') for x in t)):
+        hits.append('MP-024')
+    if name == 'du' and (long_opt or any(opt_cluster(x, 'b') for x in t)):
+        hits.append('MP-025')
+    if name == 'tar' and any(x.startswith('--transform') or x.startswith('--xform') for x in t):
+        hits.append('MP-026')
+    if name == 'cp' and long_opt:
+        hits.append('MP-027')
+    if name == 'ls' and long_opt:
+        hits.append('MP-028')
+    if name == 'getopt':
+        hits.append('MP-029')
+    if name == 'xargs' and ('-r' in t or '--no-run-if-empty' in t):
+        hits.append('MP-030')
+    if name == 'touch' and any(opt_cluster(x, 'd') or x.startswith('--date') for x in t):
+        hits.append('MP-031')
+    if name == 'echo' and any(re.fullmatch(r'-[neE]*e[neE]*', x) for x in t):
+        hits.append('MP-032')
+    if name in ('systemctl', 'loginctl', 'journalctl', 'systemd-run', 'systemd-analyze', 'timedatectl', 'hostnamectl', 'busctl'):
+        hits.append('MP-035')
+    if name in ('dnf', 'yum', 'apt', 'apt-get', 'rpm', 'dpkg', 'zypper', 'pacman', 'apk'):
+        hits.append('MP-036')
+    if name == 'podman':
+        plain = [x for x in t if not x.startswith('-')]
+        first = plain[0] if plain else ''
+        if first in ('secret', 'compose', 'pod', 'play', 'generate', 'kube', 'machine', 'system', 'unshare') or 'exists' in t:
+            hits.append('MP-037')
+        else:
+            hits.append('MP-038')
+    if name == 'ss':
+        hits.append('MP-043')
+    if name in ('declare', 'local', 'typeset', 'readonly'):
+        if any(opt_cluster(x, 'A') for x in t):
+            hits.append('MP-050')
+    if name in ('declare', 'local', 'typeset') and any(opt_cluster(x, 'ng') for x in t):
+        hits.append('MP-063')
+    if name in ('mapfile', 'readarray'):
+        hits.append('MP-051')
+    if name == 'coproc':
+        hits.append('MP-058')
+    if name == 'wait' and any(opt_cluster(x, 'n') for x in t):
+        hits.append('MP-059')
+    if name == 'read':
+        for k, x in enumerate(t):
+            if (x == '-t' and k + 1 < len(t) and re.fullmatch(r'\d*\.\d+', t[k + 1])) or re.fullmatch(r'-t\d*\.\d+', x):
+                hits.append('MP-060')
+    if name == 'printf':
+        if any(re.search(r'%\([^)]*\)T', x) for x in t):
+            hits.append('MP-064')
+    if name == 'shopt' and set(t) & {'globstar', 'autocd', 'dirspell', 'checkjobs', 'direxpand', 'lastpipe', 'localvar_inherit', 'assoc_expand_once', 'compat40', 'compat41', 'compat42', 'compat43', 'compat44'}:
+        hits.append('MP-065')
+    return hits
+
+
+PATH_RULES = [
+    (re.compile(r'^/proc(/|$)'), 'MP-034'),
+    (re.compile(r'^/etc/(os-release|lsb-release|redhat-release|debian_version|centos-release)$'), 'MP-040'),
+    (re.compile(r'^/dev/shm(/|$)'), 'MP-041'),
+    (re.compile(r'^/run(/|$)'), 'MP-042'),
+    (re.compile(r'^/sys(/|$)'), 'MP-044'),
+]
+
+CODE_RULES = [
+    ('MP-052', re.compile(r'\$\{!?\w+(\[[^\]]*\])?(,,?|\^\^?)')),
+    ('MP-053', re.compile(r'\$\{!?\w+(\[[^\]]*\])?@[A-Za-z]\}')),
+    ('MP-054', re.compile(r'\[\[?\s+(!\s+)?-v\s')),
+    ('MP-055', re.compile(r'&>>')),
+    ('MP-056', re.compile(r'\|&')),
+    ('MP-057', re.compile(r';;?&')),
+    ('MP-061', re.compile(r'\$\{!?\w+\[-\d+\]')),
+    ('MP-062', re.compile(r'\$\{?(EPOCHSECONDS|EPOCHREALTIME|SRANDOM|BASHPID)\b')),
+    ('MP-066', re.compile(r'\{(0\d+\.\.-?\d+|-?\d+\.\.0\d+)(\.\.\d+)?\}|\{-?\d+\.\.-?\d+\.\.\d+\}')),
+    ('MP-067', re.compile(r'\*\*/')),
+]
+ARRAY_Q = re.compile(r'(?<!\+)"\$\{\w+\[[@*]\]\}"')
+MARKER = re.compile(r'portable:\s*ok\b(.*)$')
+
+
+SHELLS = ('sh', 'bash', 'dash', 'zsh', 'ksh', 'ash')
+
+
+def nested_scripts(name, args):
+    """The scripts a command hands to another shell as TEXT: sh -c 'script' (and -lc, -ec), eval args, trap 'handler' SIGNAL. A string built at run time is not here."""
+    t = texts(args)
+    if name in SHELLS:
+        k = 0
+        while k < len(t):
+            x = t[k]
+            if x in ('-o', '+o', '-O', '+O'):
+                k += 2
+                continue
+            if re.fullmatch(r'-[A-Za-z]*c[A-Za-z]*', x):
+                return [t[k + 1]] if k + 1 < len(t) else []
+            if not x.startswith('-') and not x.startswith('+'):
+                return []
+            k += 1
+        return []
+    if name == 'eval':
+        return [' '.join(t)] if t else []
+    if name == 'trap':
+        plain = [x for x in t if not x.startswith('-')]
+        return [plain[0]] if len(plain) >= 2 else []
+    return []
+
+
+def scan_text(src, depth=0):
+    """(findings, allowed): findings are (line, rule), allowed are (line, rule, reason), both sorted and without duplicates."""
+    lx = Lexed(src)
+    found = set()
+    inner_allowed = []
+    nounset = None
+    for line, words in lx.cmds:
+        for name, args, nline in effective(words):
+            for rid in r_sed(name, args) + r_date(name, args) + r_simple(name, args):
+                found.add((nline, rid))
+            if depth < 3:
+                for text in nested_scripts(name, args):
+                    inner_found, inner_marks = scan_text(text, depth + 1)
+                    for _, rid in inner_found:
+                        if rid != 'MP-900':
+                            found.add((nline, rid))
+                    # a marker with a reason inside the string allows its finding, and is listed on the line of the outer command (never silently)
+                    inner_allowed += [(nline, rid, reason) for _, rid, reason in inner_marks]
+            if name == 'set':
+                t = texts(args)
+                if any(opt_cluster(x, 'u') for x in t) or any(t[k] == '-o' and k + 1 < len(t) and t[k + 1] == 'nounset' for k in range(len(t))):
+                    nounset = nline if nounset is None else min(nounset, nline)
+        for w in words:
+            for rx, rid in PATH_RULES:
+                if rx.match(w.text):
+                    found.add((w.line, rid))
+    code = ''.join(lx.code)
+    for n, text in enumerate(code.split('\n'), 1):
+        for rid, rx in CODE_RULES:
+            if rx.search(text):
+                found.add((n, rid))
+        if nounset is not None and n >= nounset and ARRAY_Q.search(text):
+            found.add((n, 'MP-070'))
+    for line, body in lx.ansi:
+        if re.search(r'\\[uU][0-9a-fA-F]', body) or any(ord(ch) > 127 for ch in body):
+            found.add((line, 'MP-068'))
+    marks = {}
+    for line, text in lx.comments:
+        m = MARKER.search(text)
+        if m:
+            reason = m.group(1).strip()
+            if reason:
+                marks[line] = reason
+            else:
+                found.add((line, 'MP-900'))
+    findings = []
+    allowed = []
+    for line, rid in sorted(found):
+        if line in marks:
+            allowed.append((line, rid, marks[line]))
+        else:
+            findings.append((line, rid))
+    return findings, sorted(set(allowed + inner_allowed))
+
+
+# ---- the command line ---------------------------------------------------------------------------------------
+
+def refuse(problem, fix):
+    sys.stderr.write('%s: problem: %s; fix: %s\n' % (PROG, problem, fix))
+    return 2
+
+
+def main(argv):
+    fmt = 'text'
+    strict = False
+    files = []
+    k = 0
+    while k < len(argv):
+        a = argv[k]
+        if a in ('-h', '--help'):
+            sys.stdout.write(__doc__)
+            return 0
+        if a == '--list-rules':
+            for rid, sev, title, repl in RULES:
+                sys.stdout.write('%s %s %s\n' % (rid, sev, title))
+            return 0
+        if a == '--strict':
+            strict = True
+        elif a == '--format':
+            k += 1
+            if k >= len(argv) or argv[k] not in ('text', 'json'):
+                return refuse('--format takes text or json', 'run: %s --format json FILE' % PROG)
+            fmt = argv[k]
+        elif a.startswith('-') and a != '-':
+            return refuse('an option this tool does not know: %s' % a, 'run: %s --help' % PROG)
+        else:
+            files.append(a)
+        k += 1
+    if not files:
+        here = os.path.dirname(os.path.realpath(__file__))
+        files = [os.path.join(here, '..', 'deploy', 'install.sh'), os.path.join(here, '..', 'deploy', 'db-roles.sh')]
+        files = [os.path.normpath(f) for f in files]
+    results = []
+    for f in files:
+        if os.path.isdir(f):
+            return refuse('%s is a directory' % f, 'give shell files')
+        try:
+            with open(f, 'r', encoding='utf-8', errors='replace') as fh:
+                src = fh.read()
+        except OSError as e:
+            return refuse('cannot read %s (%s)' % (f, e.strerror or e), 'give the path of a readable shell file')
+        results.append((f, scan_text(src)))
+    findings = []
+    allowed = []
+    for f, (fi, al) in results:
+        for line, rid in fi:
+            findings.append((f, line, rid))
+        for line, rid, reason in al:
+            allowed.append((f, line, rid, reason))
+    counts = {'error': 0, 'warn': 0, 'info': 0}
+    for f, line, rid in findings:
+        counts[INFO[rid][1]] += 1
+    summary = {'findings': len(findings), 'error': counts['error'], 'warn': counts['warn'], 'info': counts['info'], 'allowed': len(allowed), 'files': len(files)}
+    if fmt == 'json':
+        doc = {
+            'limit': LIMIT + ' | ' + REPORT_LINE,
+            'findings': [{'file': f, 'line': line, 'rule': rid, 'severity': INFO[rid][1], 'message': INFO[rid][2], 'replacement': INFO[rid][3]} for f, line, rid in findings],
+            'allowed': [{'file': f, 'line': line, 'rule': rid, 'reason': reason} for f, line, rid, reason in allowed],
+            'summary': summary,
+        }
+        sys.stdout.write(json.dumps(doc, indent=2) + '\n')
+    else:
+        out = ['%s: %s' % (PROG, REPORT_LINE)]
+        for f, line, rid in findings:
+            out.append('%s:%d: %s %s %s; use: %s' % (f, line, INFO[rid][1], rid, INFO[rid][2], INFO[rid][3]))
+        for f, line, rid, reason in allowed:
+            out.append('NOTE %s:%d: %s allowed: %s' % (f, line, rid, reason))
+        out.append('%s: %d finding(s) (%d error, %d warn, %d info), %d allowed, in %d file(s)' % (PROG, summary['findings'], counts['error'], counts['warn'], counts['info'], len(allowed), len(files)))
+        sys.stdout.write('\n'.join(out) + '\n')
+    if strict and counts['error']:
+        return 1
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))

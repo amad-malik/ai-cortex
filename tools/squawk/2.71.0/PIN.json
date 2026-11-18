@@ -1,0 +1,22 @@
+{
+  "tool": "squawk",
+  "version": "2.71.0",
+  "target": "x86_64-unknown-linux-musl",
+  "upstream": "sbdchd/squawk",
+  "source_commit": "a8cf181356a658b8b2b46b5afd18d1d8f2b18a10",
+  "release_published_at": "2026-10-29T13:53:59Z",
+  "asset_id": 688744731,
+  "asset_url": "https://github.com/sbdchd/squawk/releases/download/v2.71.0/squawk-linux-musl-x64",
+  "sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+  "bytes": 29340856,
+  "checksum_metadata_url": "https://api.github.com/repos/sbdchd/squawk/releases/assets/688744731",
+  "checksum_ui_url": "https://github.com/sbdchd/squawk/releases/expanded_assets/v2.71.0",
+  "license_expression": "Apache-2.0 OR MIT",
+  "license_choice_for_record": "MIT",
+  "scope": "Marv release builder and CI, local static lint only",
+  "binary_verification_status": "NOT_RUN: binary not fetched by Vera; two independent binary fetches required before execution",
+  "suggested_lane_relative_path": "tools/squawk/2.71.0/squawk-linux-musl-x64",
+  "suggested_repo_pin_record": "tools/squawk/2.71.0/PIN.json",
+  "gate": "Both fetched byte counts/hash must equal approved pin and upstream digest; mismatch stops, no repin",
+  "expires_on_change": "Different version, asset, hash, architecture or execution mode requires a new scope check"
+}

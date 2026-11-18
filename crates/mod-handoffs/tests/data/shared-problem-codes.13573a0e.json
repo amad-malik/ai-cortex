@@ -1,0 +1,17 @@
+{
+ "_comment": "The ONE source of the title and fix text of every problem code that more than one piece declares (cox, 6 Nov 2026 12:52:16 Z by date -u; WAVE1-RULINGS.md W1-34). Found by script over the S3 r2.6 twin (a31fa244): exactly two PIECE codes are shared (reason_required: handoffs, identity, records, tokens; target_retired: handoffs, identity, tokens); the other shared ones (invalid_request, not_found, target_not_allowed) are platform/chain codes minted once by the chain. The S3 twin gives a STATUS per code and no title or fix; S3 r2.7 will carry these two texts. A piece declares the code with EXACTLY these four fields; the registry (finn, W1-31) refuses a difference.",
+ "codes": [
+  {
+   "code": "reason_required",
+   "status": 422,
+   "title": "Reason required",
+   "fix": "Send the reason this operation requires, in the form its documentation gives."
+  },
+  {
+   "code": "target_retired",
+   "status": 409,
+   "title": "Worker retired",
+   "fix": "Use an active worker."
+  }
+ ]
+}

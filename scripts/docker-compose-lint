@@ -1,0 +1,822 @@
+#!/usr/bin/env python3
+"""docker-compose-lint: holds the Docker Desktop override of deploy/compose.yml to its shape, and holds the RESULT to the base's effective configuration (M-1b; bob@helix).
+
+  python3 -I scripts/docker-compose-lint --base <compose.yml> --override <compose.docker.yml> [--print-merged]
+      MERGE MODE. Merges the override over the base by the rules of docs.docker.com/reference/compose-file/merge/ (mappings merge, sequences append,
+      command / entrypoint / healthcheck.test are replaced, the unique resources of a service (ports, volumes, secrets, configs) are keyed by their
+      effective identity (ports: host ip, published, target, protocol; volumes: target; secrets and configs: target, which defaults to the source) and an
+      entry with the same identity MERGES as a mapping, !override replaces, !reset removes) and checks the result with every rule below.
+      --print-merged prints the merged model as JSON and checks nothing. Needs PyYAML.
+  python3 -I scripts/docker-compose-lint --rendered <config.json> --secrets-dir <abs dir> --server-image <ref>
+      RENDERED MODE. Checks the output of `docker compose config --format json` (on a Mac, the REAL one). Needs only the standard library.
+
+BOTH modes run the SAME rules on the same normalised model of each service (sizes in bytes, durations in seconds, short and long syntax of ports, volumes and
+secrets expanded, environment as a mapping): the EXPECT table below is the base's effective configuration, and a service must match it key by key; a key
+the base does not set (privileged, cap_add, devices, a changed command ...) is itself a finding. A Compose that renders an extra key this table does not know
+FAILS the lint: it fails closed.
+
+HONEST LIMIT: the merge in merge mode is THIS FILE's implementation of the documented rules, not Compose's own merge, and the rendered fixtures of the tests are
+the author's reading of the JSON shape, not a recording; the real Docker Desktop and the real macOS are NOT RUN until M-6.
+
+Rules: DCL-01 the override has only the allowed shape; DCL-02 the result differs from the base only where the override may change it, and the services are
+db, migrate and server; DCL-03 the secrets; DCL-04 images, no build, pull_policy never; DCL-05 migrate and server keep their hardening exactly; DCL-06 the
+database keeps its pin, its init and publishes no port; DCL-07 every published port is the base's and on loopback; DCL-08 each service has exactly the base's mounts,
+read-only where the base says so, and the secrets directory is mounted into nothing; DCL-09 each service gets exactly the base's secrets, mounted under their own
+names; DCL-10 names; DCL-11 health checks exactly; DCL-12 no key the base does not set, and the base's command, restart, labels, dependencies and networks; DCL-13 the
+environment exactly; DCL-14 memory, cpu and shared-memory limits exactly.
+Exit codes: 0 clean; 1 findings (one line each, then a FAILED line); 2 usage or an unreadable file.
+"""
+import json
+import os
+import re
+import sys
+
+PROG = 'docker-compose-lint'
+RULES = 14
+MiB = 1024 * 1024
+GiB = 1024 * MiB
+SERVICES = ('db', 'migrate', 'server')
+SECRET_FILES = {'cv2-s5-db-superuser': 'db-superuser', 'cv2-s5-owner-password': 'owner-password', 'cv2-s5-app-password': 'app-password'}
+DB_IMAGE = 'docker.io/pgvector/pgvector:0.8.2-pg18@sha256:42e7f6b4e1eceb02ff14e3e6bc6108bbe259abbe83879dc1845d0da1ddeb555d'
+DB_HC = ['CMD-SHELL', 'pg_isready -q -U postgres -h 127.0.0.1 -d cortex >/dev/null 2>&1']
+SERVER_HC = ['CMD', 'bash', '-c', "exec 3<>/dev/tcp/127.0.0.1/8601 && printf 'GET /v2/health/ready HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && head -n 1 <&3 | grep -q ' 200 '"]
+V1_NAMES = re.compile(r'\bcortex-(pg|api|embed-worker|graph-worker|pdf-worker|audio-worker|vision-worker)\b|\bspike-s0-|\bharness-appdb\b|\bplatform_agent_memory\b')
+IMAGE_EXPR = re.compile(r'\$\{CORTEX_SERVER_IMAGE:\?[^{}]*\}')
+# what the override may change in the result, as path prefixes
+ALLOWED = [('secrets', n) for n in SECRET_FILES] + [('services', 'migrate', 'image'), ('services', 'server', 'image'), ('services', 'server', 'build'), ('services', 'server', 'tmpfs')]
+PINNED_BASE_TMPFS = {
+    'migrate': ['/tmp:rw,noexec,nosuid,size=64m,mode=1777'],
+    'server': ['/tmp:rw,noexec,nosuid,size=128m,mode=1777', '/run/cortex:rw,noexec,nosuid,size=16m,mode=0700,U'],
+}
+UNIQUE_SEQ = ('ports', 'volumes', 'secrets', 'configs')
+REPLACE_KEYS = ('command', 'entrypoint')
+
+# The base's effective configuration, normalised (the base file deploy/compose.yml is compared to it in merge mode, so a change of the base shows up as a finding).
+_BASE_KEYS = ['container_name', 'restart', 'init', 'mem_limit', 'cpus', 'labels', 'environment', 'secrets', 'volumes', 'networks']
+_HARD_KEYS = ['image', 'pull_policy', 'user', 'read_only', 'cap_drop', 'security_opt', 'tmpfs', 'depends_on']
+SVC_KEYS = {
+    'db': set(_BASE_KEYS + ['image', 'shm_size', 'command', 'healthcheck']),
+    'migrate': set(_BASE_KEYS + _HARD_KEYS + ['command']),
+    'server': set(_BASE_KEYS + _HARD_KEYS + ['ports', 'healthcheck']),
+}
+HARDEN = {'user': '10001:10001', 'read_only': True, 'init': True, 'cap_drop': ['ALL'], 'security_opt': ['no-new-privileges:true']}
+EXPECT = {
+    'db': {
+        'container_name': 'cv2-s5-db', 'restart': 'unless-stopped', 'init': True, 'shm_size': 256 * MiB, 'mem_limit': 2 * GiB, 'cpus': 1.0,
+        'labels': {'cortexv2': 'dev'},
+        'command': ['postgres', '-c', 'shared_buffers=256MB', '-c', 'effective_cache_size=1GB', '-c', 'max_parallel_workers_per_gather=0'],
+        'environment': {
+            'POSTGRES_DB': 'cortex',
+            'POSTGRES_INITDB_ARGS': '--auth-local=peer --auth-host=scram-sha-256 -E UTF8 --locale-provider=builtin --locale=C.UTF-8 --builtin-locale=C.UTF-8 --data-checksums',
+            'POSTGRES_PASSWORD_FILE': '/run/secrets/cv2-s5-db-superuser',
+        },
+        'networks': ['cv2-s5-net'], 'depends_on': {},
+        'healthcheck': {'test': DB_HC, 'interval': 15.0, 'timeout': 20.0, 'retries': 20, 'start_period': 10.0},
+        'volumes': {'/var/lib/postgresql': ('volume', 'cv2-s5-pg-data', False), '/docker-entrypoint-initdb.d': ('bind', None, True)},
+        'secrets': ['cv2-s5-db-superuser', 'cv2-s5-owner-password', 'cv2-s5-app-password'],
+        'tmpfs': [],
+    },
+    'migrate': {
+        'container_name': 'cv2-s5-migrate', 'restart': 'no', 'mem_limit': 512 * MiB, 'cpus': 1.0,
+        'labels': {'cortexv2': 'dev', 'cortexv2.role': 'oneshot'}, 'command': ['migrate'], 'environment': {'HOME': '/tmp'},
+        'networks': ['cv2-s5-net'], 'depends_on': {'db': ('service_healthy', True, False)},
+        'tmpfs': ['/tmp:rw,noexec,nosuid,size=64m,mode=1777'],
+        'volumes': {'/etc/cortex/cortex.toml': ('bind', None, True)},
+        'secrets': ['cv2-s5-owner-password'], 'healthcheck': None,
+    },
+    'server': {
+        'container_name': 'cv2-s5-server', 'restart': 'unless-stopped', 'mem_limit': 1 * GiB, 'cpus': 1.0,
+        'labels': {'cortexv2': 'dev'}, 'command': None, 'environment': {'HOME': '/tmp'},
+        'networks': ['cv2-s5-net'], 'depends_on': {'db': ('service_healthy', True, False), 'migrate': ('service_completed_successfully', True, False)},
+        'tmpfs': ['/tmp:rw,noexec,nosuid,size=128m,mode=1777', '/run/cortex:rw,noexec,nosuid,size=16m,uid=10001,gid=10001,mode=0700'],
+        'volumes': {'/etc/cortex/cortex.toml': ('bind', None, True), '/var/lib/cortex-dumps': ('bind', None, True), '/var/lib/cortex': ('volume', 'cv2-s5-state', False)},
+        'secrets': ['cv2-s5-app-password'],
+        'healthcheck': {'test': SERVER_HC, 'interval': 15.0, 'timeout': 10.0, 'retries': 10, 'start_period': 20.0},
+        'ports': [('127.0.0.1', 8601, 'tcp')],
+    },
+}
+
+
+class Override(object):
+    def __init__(self, value):
+        self.value = value
+
+
+class Reset(object):
+    pass
+
+
+def usage_die(msg=None):
+    if msg:
+        sys.stderr.write('%s: %s\n' % (PROG, msg))
+    sys.stderr.write('%s: usage: %s --base B --override O [--print-merged] | --rendered R --secrets-dir D --server-image I\n' % (PROG, PROG))
+    sys.exit(2)
+
+
+def read_die(msg):
+    sys.stderr.write('%s: %s\n' % (PROG, msg))
+    sys.exit(2)
+
+
+# ---- reading --------------------------------------------------------------------------------------------------
+
+def load_yaml(path):
+    try:
+        import yaml
+    except ImportError:
+        read_die('merge mode needs PyYAML (rendered mode needs only the standard library)')
+
+    class Loader(yaml.SafeLoader):
+        pass
+
+    def over(loader, node):
+        if isinstance(node, yaml.MappingNode):
+            return Override(loader.construct_mapping(node, deep=True))
+        if isinstance(node, yaml.SequenceNode):
+            return Override(loader.construct_sequence(node, deep=True))
+        return Override(loader.construct_scalar(node))
+
+    def reset(loader, node):
+        return Reset()
+
+    Loader.add_constructor('!override', over)
+    Loader.add_constructor('!reset', reset)
+    try:
+        with open(path) as f:
+            return yaml.load(f, Loader=Loader)
+    except (OSError, yaml.YAMLError) as e:
+        read_die('cannot read %s: %s' % (path, str(e).splitlines()[0] if str(e) else type(e).__name__))
+
+
+def load_json(path):
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (OSError, ValueError) as e:
+        read_die('cannot read %s as JSON: %s' % (path, str(e).splitlines()[0] if str(e) else type(e).__name__))
+
+
+# ---- notations: the short and long syntax of ports, volumes and secrets, sizes, durations --------------------
+
+def strip(v):
+    if isinstance(v, Override):
+        return strip(v.value)
+    if isinstance(v, dict):
+        return dict((k, strip(x)) for k, x in v.items() if not isinstance(x, Reset))
+    if isinstance(v, list):
+        return [strip(x) for x in v]
+    return v
+
+
+def split_colon(s):
+    parts, cur, depth = [], '', 0
+    i = 0
+    while i < len(s):
+        c = s[i]
+        if c == '$' and s[i + 1:i + 2] == '{':
+            depth += 1
+            cur += '${'
+            i += 2
+            continue
+        if c == '}' and depth:
+            depth -= 1
+        if c == ':' and not depth:
+            parts.append(cur)
+            cur = ''
+        else:
+            cur += c
+        i += 1
+    parts.append(cur)
+    return parts
+
+
+def as_int(x):
+    try:
+        return int(x)
+    except (TypeError, ValueError):
+        return x
+
+
+def port_long(p):
+    """A port in long form (host_ip, published, target, protocol), from either syntax."""
+    if isinstance(p, dict):
+        out = dict(p)
+        out.setdefault('protocol', 'tcp')
+        return out
+    s = str(p)
+    proto = 'tcp'
+    if '/' in s.rsplit(':', 1)[-1] and '${' not in s.rsplit(':', 1)[-1]:
+        s, proto = s.rsplit('/', 1)
+    parts = split_colon(s)
+    out = {}
+    if len(parts) == 1:
+        out['target'] = as_int(parts[0])
+    elif len(parts) == 2:
+        out['published'] = parts[0]
+        out['target'] = as_int(parts[1])
+    else:
+        out['host_ip'] = parts[0]
+        out['published'] = parts[1]
+        out['target'] = as_int(parts[2])
+        if len(parts) > 3:
+            out['unknown_parts'] = parts[3:]
+    out['protocol'] = proto
+    return out
+
+
+def volume_long(v):
+    """A volume in long form, from either syntax; only what the short form says is set."""
+    if isinstance(v, dict):
+        return dict(v)
+    parts = split_colon(str(v))
+    if len(parts) == 1:
+        return {'type': 'volume', 'target': parts[0]}
+    src, tgt = parts[0], parts[1]
+    flags = parts[2].split(',') if len(parts) > 2 else []
+    out = {'type': 'bind' if src[:1] in ('.', '/', '$', '~') else 'volume', 'source': src, 'target': tgt}
+    bind = {}
+    unknown = []
+    sel = []
+    prop = []
+    for f in flags:
+        if f == 'ro':
+            out['read_only'] = True
+        elif f == 'rw':
+            out['read_only'] = False
+        elif f in ('z', 'Z'):
+            sel.append(f)
+        elif f in ('shared', 'slave', 'private', 'rshared', 'rslave', 'rprivate'):
+            prop.append(f)
+        elif f == 'nocopy':
+            out['volume'] = {'nocopy': True}
+        elif f in ('cached', 'delegated', 'consistent'):
+            out['consistency'] = f
+        elif f != '':
+            unknown.append(f)
+    # the parser assigns each recognised flag in turn, so the LAST wins; two DIFFERENT ones are a conflict and a finding, whatever the order
+    if sel:
+        bind['selinux'] = sel[-1]
+        if len(set(sel)) > 1:
+            out['conflicting_selinux'] = sel
+    if prop:
+        bind['propagation'] = prop[-1]
+        if len(set(prop)) > 1:
+            out['conflicting_propagation'] = prop
+    if bind:
+        out['bind'] = bind
+    if unknown:
+        out['unknown_flags'] = unknown
+    if len(parts) > 3:
+        out['unknown_parts'] = parts[3:]
+    return out
+
+
+def secret_long(x):
+    return {'source': x} if isinstance(x, str) else dict(x)
+
+
+def long_form(kind, x):
+    return {'ports': port_long, 'volumes': volume_long, 'secrets': secret_long, 'configs': secret_long}[kind](x)
+
+
+def ukey(kind, x):
+    d = long_form(kind, x)
+    if kind in ('secrets', 'configs'):
+        return d.get('target') or d.get('source')
+    if kind == 'volumes':
+        return d.get('target')
+    return (d.get('host_ip'), str(d.get('published')) if d.get('published') is not None else None, as_int(d.get('target')), d.get('protocol', 'tcp'))
+
+
+def size_bytes(x):
+    if x is None or isinstance(x, bool):
+        return None
+    if isinstance(x, (int, float)):
+        return int(x)
+    m = re.match(r'^\s*(\d+(?:\.\d+)?)\s*([bkmg]?)b?\s*$', str(x), re.I)
+    if not m:
+        return ('?', str(x))
+    return int(float(m.group(1)) * {'': 1, 'b': 1, 'k': 1024, 'm': MiB, 'g': GiB}[m.group(2).lower()])
+
+
+def duration_s(x):
+    if x is None or isinstance(x, bool):
+        return None
+    if isinstance(x, (int, float)):
+        return x / 1e9 if x >= 1e6 else float(x)
+    s = str(x).replace(' ', '')
+    parts = re.findall(r'(\d+(?:\.\d+)?)(ns|us|ms|s|m|h)', s)
+    if not parts or ''.join(a + b for a, b in parts) != s:
+        return ('?', str(x))
+    mult = {'ns': 1e-9, 'us': 1e-6, 'ms': 1e-3, 's': 1.0, 'm': 60.0, 'h': 3600.0}
+    return sum(float(a) * mult[b] for a, b in parts)
+
+
+def kv_dict(x):
+    if x is None:
+        return {}
+    if isinstance(x, dict):
+        return dict((str(k), None if v is None else str(v)) for k, v in x.items())
+    out = {}
+    for item in x:
+        k, eq, v = str(item).partition('=')
+        out[k] = v if eq else None
+    return out
+
+
+# ---- the merge (the documented rules, implemented here) -------------------------------------------------------
+
+def merge(base, over, path=()):
+    if isinstance(over, Override):
+        return strip(over.value)
+    if isinstance(base, dict) and isinstance(over, dict):
+        out = dict(base)
+        for k, v in over.items():
+            if isinstance(v, Reset):
+                out.pop(k, None)
+            elif k in out:
+                out[k] = merge(out[k], v, path + (k,))
+            else:
+                out[k] = strip(v)
+        return out
+    if isinstance(base, list) and isinstance(over, list):
+        if path and path[-1] in REPLACE_KEYS and len(path) == 3 and path[0] == 'services':
+            return strip(over)
+        if path[-2:] == ('healthcheck', 'test'):
+            return strip(over)
+        if len(path) == 3 and path[0] == 'services' and path[2] in UNIQUE_SEQ:
+            return merge_unique(path[2], base, over)
+        return list(base) + strip(over)
+    if isinstance(over, Reset):
+        return None
+    return strip(over)
+
+
+def merge_unique(kind, base, over):
+    """The unique resources of a service: entries with the same identity MERGE (as mappings, in long form); identical entries stay as they were."""
+    out = [strip(x) for x in base]
+    index = {}
+    for n, x in enumerate(out):
+        index[ukey(kind, x)] = n
+    for item in over:
+        item = strip(item)
+        k = ukey(kind, item)
+        if k in index:
+            pos = index[k]
+            if out[pos] != item:
+                out[pos] = merge(long_form(kind, out[pos]), long_form(kind, item))
+        else:
+            index[k] = len(out)
+            out.append(item)
+    return out
+
+
+# ---- the rules ------------------------------------------------------------------------------------------------
+
+def check_override_shape(over):
+    """DCL-01: the override has only the shape the plan allows."""
+    f = []
+    if not isinstance(over, dict):
+        return [('DCL-01', 'override', 'the override is not a mapping')]
+    for k in over:
+        if k not in ('services', 'secrets'):
+            f.append(('DCL-01', 'override.%s' % k, 'only services and secrets may be overridden'))
+    svc = over.get('services') or {}
+    for name, body in svc.items():
+        allowed = {'migrate': ('image',), 'server': ('image', 'build', 'tmpfs')}.get(name)
+        if allowed is None:
+            f.append(('DCL-01', 'override.services.%s' % name, 'only migrate and server may appear (a new or restated service is not an override)'))
+            continue
+        for k in (body or {}):
+            if k not in allowed:
+                f.append(('DCL-01', 'override.services.%s.%s' % (name, k), 'only %s may be set here' % ' and '.join(allowed)))
+            elif name == 'server' and k == 'tmpfs' and (not isinstance(body[k], Override) or not isinstance(body[k].value, list)):
+                f.append(('DCL-01', 'override.services.server.tmpfs', 'must replace the whole list with !override'))
+    sec = over.get('secrets') or {}
+    for name, body in sec.items():
+        if name not in SECRET_FILES:
+            f.append(('DCL-01', 'override.secrets.%s' % name, 'not one of the three secrets of the base'))
+        elif not isinstance(body, Override):
+            f.append(('DCL-01', 'override.secrets.%s' % name, 'must be replaced whole with !override (a merge would keep the base attributes)'))
+        elif not isinstance(body.value, dict) or sorted(body.value) != ['file']:
+            f.append(('DCL-01', 'override.secrets.%s' % name, 'must be exactly one attribute, file'))
+    return f
+
+
+def diffs(a, b, path=()):
+    if isinstance(a, dict) and isinstance(b, dict):
+        out = []
+        for k in sorted(set(a) | set(b), key=str):
+            if k not in a or k not in b:
+                out.append(path + (k,))
+            else:
+                out.extend(diffs(a[k], b[k], path + (k,)))
+        return out
+    return [] if a == b else [path]
+
+
+def check_minimal(base, merged):
+    """DCL-02 (merge mode): the result differs from the base only where the override may change it."""
+    f = []
+    for p in diffs(base, merged):
+        if not any(p[:len(a)] == a for a in ALLOWED):
+            f.append(('DCL-02', '.'.join(str(x) for x in p), 'the override changes this, and it may not'))
+    return f
+
+
+def check_pinned_base(base):
+    """DCL-02: the replacement must not hide changes to the Linux tmpfs lists."""
+    f = []
+    services = base.get('services') if isinstance(base, dict) else None
+    services = services if isinstance(services, dict) else {}
+    for name, expected in PINNED_BASE_TMPFS.items():
+        service = services.get(name)
+        actual = service.get('tmpfs') if isinstance(service, dict) else None
+        if actual != expected:
+            f.append(('DCL-02', 'base.services.%s.tmpfs' % name, 'pinned base tmpfs changed; review the Linux base before adapting'))
+    return f
+
+
+def check_services(cfg):
+    """DCL-02: the stack has exactly the three services of the base."""
+    have = set((cfg.get('services') or {}).keys())
+    f = []
+    for s in SERVICES:
+        if s not in have:
+            f.append(('DCL-02', 'services.%s' % s, 'the service is missing'))
+    for s in sorted(have - set(SERVICES)):
+        f.append(('DCL-02', 'services.%s' % s, 'a service the base does not have'))
+    return f
+
+
+def check_secrets(cfg, mode, ctx):
+    """DCL-03: every rule about the three secrets is HERE and nowhere else (cox: one place, so a change to option (B) is a small edit)."""
+    f = []
+    sec = cfg.get('secrets') or {}
+    for name in SECRET_FILES:
+        if name not in sec:
+            f.append(('DCL-03', 'secrets.%s' % name, 'the secret is missing'))
+    for name in sorted(set(sec) - set(SECRET_FILES)):
+        f.append(('DCL-03', 'secrets.%s' % name, 'a secret the base does not have'))
+    for name, suffix in SECRET_FILES.items():
+        body = sec.get(name)
+        if body is None:
+            continue
+        if not isinstance(body, dict):
+            f.append(('DCL-03', 'secrets.%s' % name, 'is not a mapping'))
+            continue
+        for bad in ('external', 'environment', 'content'):
+            if bad in body:
+                f.append(('DCL-03', 'secrets.%s.%s' % (name, bad), 'a Mac secret is a file under CORTEX_SECRETS_DIR, not %s' % bad))
+        extra = sorted(set(body) - set(['file', 'name', 'external', 'environment', 'content']))
+        if extra:
+            f.append(('DCL-03', 'secrets.%s' % name, 'unexpected attributes %s' % extra))
+        path = body.get('file')
+        if not isinstance(path, str):
+            if not any(b in body for b in ('external', 'environment', 'content')):
+                f.append(('DCL-03', 'secrets.%s.file' % name, 'no file'))
+            continue
+        if mode == 'raw':
+            # the COMPLETE interpolation expression and the exact suffix: no further component, no ../
+            if not re.fullmatch(r'\$\{CORTEX_SECRETS_DIR:\?[^{}]*\}/' + re.escape(suffix), path):
+                f.append(('DCL-03', 'secrets.%s.file' % name, 'must be exactly ${CORTEX_SECRETS_DIR:?...}/%s, found %s' % (suffix, path)))
+        else:
+            want = ctx['secrets_dir'].rstrip('/') + '/' + suffix
+            if path != want:
+                f.append(('DCL-03', 'secrets.%s.file' % name, 'must be %s, found %s' % (want, path)))
+    for s, svc in sorted((cfg.get('services') or {}).items()):
+        for v in (svc.get('volumes') or []):
+            src = volume_long(v).get('source')
+            if src is None:
+                continue
+            if mode == 'raw':
+                bad = 'CORTEX_SECRETS_DIR' in src
+                above = False
+            else:
+                root = ctx['secrets_dir'].rstrip('/')
+                above = isinstance(src, str) and src.startswith('/') and (root + '/').startswith(src.rstrip('/') + '/')
+                bad = src == root or src.startswith(root + '/') or above
+            if bad:
+                f.append(('DCL-08', 'services.%s.volumes' % s, 'the secrets directory is mounted into a container%s: %s' % (' (a directory above it)' if above else '', src)))
+    return f
+
+
+def check_images(cfg, mode, ctx):
+    """DCL-04: the release image on migrate and server, no build, pull_policy never."""
+    f = []
+    for s in ('migrate', 'server'):
+        svc = (cfg.get('services') or {}).get(s)
+        if svc is None:
+            continue
+        img = svc.get('image')
+        if mode == 'raw':
+            ok = isinstance(img, str) and IMAGE_EXPR.fullmatch(img) is not None
+        else:
+            ok = img == ctx['server_image']
+        if not ok:
+            f.append(('DCL-04', 'services.%s.image' % s, 'must be exactly the release image expression, found %s' % img))
+        if 'build' in svc:
+            f.append(('DCL-04', 'services.%s.build' % s, 'a user\'s Mac does not build: the build block must be removed'))
+        if svc.get('pull_policy') != 'never':
+            f.append(('DCL-04', 'services.%s.pull_policy' % s, 'must stay never, found %s' % svc.get('pull_policy')))
+    return f
+
+
+def norm_ports(svc):
+    out = []
+    for p in (svc.get('ports') or []):
+        d = port_long(p)
+        row = (d.get('host_ip'), as_int(d.get('target')), d.get('protocol', 'tcp'))
+        out.append(row + (tuple(d['unknown_parts']),) if d.get('unknown_parts') else row)
+    return out
+
+
+def mount_extra(d):
+    """What a mount carries beyond type, source, target and read_only that the base does not: a propagation, a volume option, any other key."""
+    extra = [k for k in d if k not in ('type', 'source', 'target', 'read_only', 'bind', 'volume')]
+    b = d.get('bind') or {}
+    extra += ['bind.' + k for k in b if k not in ('create_host_path', 'selinux') and not (k == 'propagation' and b[k] == 'rprivate')]
+    if b.get('selinux') not in (None, 'z', 'Z'):
+        extra.append('bind.selinux=%s' % b.get('selinux'))
+    extra += ['volume.' + k for k in (d.get('volume') or {})]
+    return tuple(sorted(set(extra)))
+
+
+def norm_mounts(svc):
+    out = {}
+    dup = []
+    for v in (svc.get('volumes') or []):
+        d = volume_long(v)
+        t = d.get('target')
+        if t in out:
+            dup.append(t)
+        out[t] = (d.get('type'), d.get('source'), bool(d.get('read_only', False)), mount_extra(d))
+    return out, dup
+
+
+def norm_secret_use(svc):
+    """[(source, effective target, extra keys)] of the secrets a service uses."""
+    out = []
+    for x in (svc.get('secrets') or []):
+        d = secret_long(x)
+        extra = sorted(set(d) - set(['source', 'target']))
+        out.append((d.get('source'), d.get('target') or d.get('source'), extra))
+    return out
+
+
+def as_flag(x, default):
+    """A Compose boolean in either spelling; anything else is kept as it is so that it differs from the base."""
+    if x is None:
+        return default
+    if isinstance(x, bool):
+        return x
+    if isinstance(x, str) and x.strip().lower() in ('true', 'yes', '1'):
+        return True
+    if isinstance(x, str) and x.strip().lower() in ('false', 'no', '0'):
+        return False
+    return ('?', x)
+
+
+def norm_depends(svc):
+    """name -> (condition, required, restart, *unknown keys): the explicit defaults (required true, restart false) are the same as leaving them out."""
+    d = svc.get('depends_on')
+    if d is None:
+        return {}
+    if isinstance(d, dict):
+        out = {}
+        for k, v in d.items():
+            v = v if isinstance(v, dict) else {}
+            extra = tuple(sorted(set(v) - set(['condition', 'required', 'restart'])))
+            out[k] = (v.get('condition', 'service_started'), as_flag(v.get('required'), True), as_flag(v.get('restart'), False)) + extra
+        return out
+    return dict((k, ('service_started', True, False)) for k in d)
+
+
+def norm_networks(svc):
+    n = svc.get('networks')
+    if n is None:
+        return []
+    return sorted(n.keys()) if isinstance(n, dict) else sorted(n)
+
+
+def norm_health(svc):
+    h = svc.get('healthcheck')
+    if h is None:
+        return None
+    return dict(test=h.get('test'), interval=duration_s(h.get('interval')), timeout=duration_s(h.get('timeout')), retries=as_int(h.get('retries')),
+                start_period=duration_s(h.get('start_period')), _extra=sorted(set(h) - set(['test', 'interval', 'timeout', 'retries', 'start_period'])))
+
+
+def norm_command(svc):
+    c = svc.get('command')
+    if isinstance(c, str):
+        import shlex
+        return shlex.split(c)
+    return c
+
+
+def check_service(name, svc, mode, ctx):
+    """DCL-05 to DCL-14 for one service: the service must be the base's, key by key, on the normalised model."""
+    f = []
+    exp = EXPECT[name]
+    w = 'services.%s' % name
+    # DCL-12: no key the base does not set (privileged, cap_add, devices, network_mode, ...), then the identity keys
+    for k in sorted(set(svc) - SVC_KEYS[name]):
+        f.append(('DCL-12', '%s.%s' % (w, k), 'a key the base does not set for this service (an escape or additive field?)'))
+    if svc.get('restart') != exp['restart']:
+        f.append(('DCL-12', w + '.restart', 'must be %s, found %s' % (exp['restart'], svc.get('restart'))))
+    if kv_dict(svc.get('labels')) != exp['labels']:
+        f.append(('DCL-12', w + '.labels', 'must be %s, found %s' % (exp['labels'], kv_dict(svc.get('labels')))))
+    if norm_command(svc) != exp['command']:
+        f.append(('DCL-12', w + '.command', 'must be %s, found %s' % (exp['command'], norm_command(svc))))
+    if norm_depends(svc) != exp['depends_on']:
+        f.append(('DCL-12', w + '.depends_on', 'must be %s, found %s' % (exp['depends_on'], norm_depends(svc))))
+    if norm_networks(svc) != exp['networks']:
+        f.append(('DCL-12', w + '.networks', 'must be %s, found %s' % (exp['networks'], norm_networks(svc))))
+    attached = svc.get('networks')
+    if isinstance(attached, dict):
+        for nk, body in sorted(attached.items()):
+            if body:
+                f.append(('DCL-12', w + '.networks.%s' % nk, 'the attachment carries %s: the base attaches with no options (no alias, no fixed address, no priority)' % sorted(body)))
+    # DCL-10: the container name
+    cn = svc.get('container_name')
+    if cn != exp['container_name']:
+        f.append(('DCL-10', w + '.container_name', 'must be %s, found %s' % (exp['container_name'], cn)))
+    # DCL-13: the environment, exactly (a literal password is a key the base does not set)
+    if kv_dict(svc.get('environment')) != exp['environment']:
+        f.append(('DCL-13', w + '.environment', 'must be exactly the base\'s, found keys %s' % sorted(kv_dict(svc.get('environment')))))
+    # DCL-14: limits, normalised
+    for key, norm in (('mem_limit', size_bytes), ('cpus', lambda x: None if x is None else float(x))):
+        try:
+            got = norm(svc.get(key))
+        except (TypeError, ValueError):
+            got = ('?', svc.get(key))
+        if got != exp[key]:
+            f.append(('DCL-14', '%s.%s' % (w, key), 'must be %s, found %s' % (exp[key], svc.get(key))))
+    if name == 'db' and size_bytes(svc.get('shm_size')) != exp['shm_size']:
+        f.append(('DCL-14', w + '.shm_size', 'must be %s bytes, found %s' % (exp['shm_size'], svc.get('shm_size'))))
+    # DCL-11: the health check, exactly, and not disabled
+    h = norm_health(svc)
+    eh = exp['healthcheck']
+    if eh is None:
+        if h is not None:
+            f.append(('DCL-11', w + '.healthcheck', 'the base sets no health check here'))
+    elif h is None:
+        f.append(('DCL-11', w + '.healthcheck', 'the health check is gone'))
+    else:
+        for key in ('test', 'interval', 'timeout', 'retries', 'start_period'):
+            if h.get(key) != eh[key]:
+                f.append(('DCL-11', '%s.healthcheck.%s' % (w, key), 'is not the base\'s'))
+        if h['_extra']:
+            f.append(('DCL-11', w + '.healthcheck', 'unexpected keys %s (disable?)' % h['_extra']))
+    # DCL-08: the mounts, exactly
+    mounts, dup = norm_mounts(svc)
+    if dup:
+        f.append(('DCL-08', w + '.volumes', 'two mounts of one target %s' % dup))
+    for target, (typ, src, ro) in sorted(exp['volumes'].items()):
+        got = mounts.get(target)
+        if got is None:
+            f.append(('DCL-08', w + '.volumes', 'the mount of %s is gone' % target))
+            continue
+        if got[0] != typ or (src is not None and got[1] != src):
+            f.append(('DCL-08', w + '.volumes', '%s must be a %s%s, found %s' % (target, typ, (' named %s' % src) if src else '', got[:2])))
+        if got[2] != ro:
+            f.append(('DCL-08', w + '.volumes', '%s must be %s, found %s' % (target, 'read-only' if ro else 'writable', 'read-only' if got[2] else 'writable')))
+        if got[3]:
+            f.append(('DCL-08', w + '.volumes', 'the mount of %s carries options the base does not set: %s' % (target, list(got[3]))))
+    for target in sorted(set(mounts) - set(exp['volumes'])):
+        f.append(('DCL-08', w + '.volumes', 'a mount the base does not have: %s' % target))
+    # DCL-09: the secrets a service uses, exactly, under their own names
+    use = norm_secret_use(svc)
+    if sorted(str(u[0]) for u in use) != sorted(exp['secrets']):
+        f.append(('DCL-09', w + '.secrets', 'must be %s, found %s' % (sorted(exp['secrets']), sorted(str(u[0]) for u in use))))
+    for src, tgt, extra in use:
+        if tgt != src or extra:
+            f.append(('DCL-09', w + '.secrets', 'the secret %s must be mounted under its own name with no uid, gid or mode (target %s, extra %s)' % (src, tgt, extra)))
+    # DCL-07: the published ports, exactly, on loopback
+    ports = norm_ports(svc)
+    for row in ports:
+        if row[0] != '127.0.0.1':
+            f.append(('DCL-07', w + '.ports', 'must be bound to 127.0.0.1, found %s' % (row[0],)))
+    if sorted(ports, key=str) != sorted(exp.get('ports', []), key=str):
+        f.append(('DCL-07', w + '.ports', 'must be %s, found %s' % (exp.get('ports', []), ports)))
+    if name == 'db':
+        # DCL-06: the database
+        if svc.get('ports'):
+            f.append(('DCL-06', w + '.ports', 'the database publishes no port, found %s' % svc.get('ports')))
+        if svc.get('image') != DB_IMAGE:
+            f.append(('DCL-06', w + '.image', 'must be the digest-pinned image of the base, found %s' % svc.get('image')))
+        if svc.get('init') is not True:
+            f.append(('DCL-06', w + '.init', 'must be true, found %s' % svc.get('init')))
+        if not svc.get('shm_size'):
+            f.append(('DCL-06', w + '.shm_size', 'shm_size is gone'))
+    else:
+        # DCL-05: migrate and server keep their hardening exactly
+        for key in ('user', 'read_only', 'init'):
+            if svc.get(key) != HARDEN[key]:
+                f.append(('DCL-05', '%s.%s' % (w, key), 'must be %s, found %s' % (HARDEN[key], svc.get(key))))
+        for key in ('cap_drop', 'security_opt'):
+            if svc.get(key) != HARDEN[key]:
+                f.append(('DCL-05', '%s.%s' % (w, key), 'must be exactly %s, found %s' % (HARDEN[key], svc.get(key))))
+        tm = svc.get('tmpfs')
+        tm = [tm] if isinstance(tm, str) else tm
+        if tm != exp['tmpfs']:
+            f.append(('DCL-05', w + '.tmpfs', 'must be exactly %s, found %s' % (exp['tmpfs'], tm)))
+    return f
+
+
+def check_stack(cfg):
+    """DCL-08 and DCL-10 on the top level: the named volumes and the names of networks and volumes, and no v1 name anywhere."""
+    f = []
+    top = sorted(set(cfg) - set(['name', 'services', 'networks', 'volumes', 'secrets']))
+    if top:
+        f.append(('DCL-12', 'top level', 'a top-level key the base does not set: %s' % top))
+    names = sorted((cfg.get('volumes') or {}).keys())
+    if names != ['cv2-s5-pg-data', 'cv2-s5-state']:
+        f.append(('DCL-08', 'volumes', 'must be exactly cv2-s5-pg-data and cv2-s5-state, found %s' % names))
+    nets = sorted((cfg.get('networks') or {}).keys())
+    if nets != ['cv2-s5-net']:
+        f.append(('DCL-12', 'networks', 'must be exactly cv2-s5-net, found %s' % nets))
+    if cfg.get('name') != 'cv2-s5':
+        f.append(('DCL-10', 'name', 'the project name must be cv2-s5, found %s' % cfg.get('name')))
+    for kind, rule in (('networks', 'DCL-12'), ('volumes', 'DCL-08')):
+        for key, body in sorted((cfg.get(kind) or {}).items()):
+            body = body or {}
+            nm = body.get('name', key)
+            if nm != key:
+                f.append(('DCL-10', '%s.%s' % (kind, key), 'the resource name must be %s, found %s (the keys are exactly the base\'s, all cv2-s5-)' % (key, nm)))
+            extra = sorted(set(body) - set(['name']))
+            if extra:
+                f.append((rule, '%s.%s' % (kind, key), 'carries %s, a definition the base does not set (a driver, a bind device, a flag): the named resource is not what it seems' % extra))
+    m = V1_NAMES.search(json.dumps(cfg))
+    if m:
+        f.append(('DCL-10', 'config', 'names the live v1 stack: %s' % m.group(0)))
+    return f
+
+
+def run_rules(cfg, mode, ctx):
+    f = []
+    f += check_services(cfg)
+    f += check_secrets(cfg, mode, ctx)
+    f += check_images(cfg, mode, ctx)
+    for name in SERVICES:
+        svc = (cfg.get('services') or {}).get(name)
+        if svc is not None:
+            f += check_service(name, svc, mode, ctx)
+    f += check_stack(cfg)
+    return f
+
+
+def finish(findings, mode):
+    if not findings:
+        sys.stdout.write('%s: OK (%d rules, %s mode)\n' % (PROG, RULES, mode))
+        sys.exit(0)
+    for rule, where, msg in findings:
+        sys.stdout.write('%s %s: %s\n' % (rule, where, msg))
+    sys.stdout.write('%s: FAILED (%d findings)\n' % (PROG, len(findings)))
+    sys.exit(1)
+
+
+def main(argv):
+    opts = {}
+    flags = set()
+    i = 0
+    while i < len(argv):
+        a = argv[i]
+        if a == '--print-merged':
+            flags.add(a)
+            i += 1
+        elif a in ('--base', '--override', '--rendered', '--secrets-dir', '--server-image'):
+            if i + 1 >= len(argv):
+                usage_die('%s needs a value' % a)
+            opts[a] = argv[i + 1]
+            i += 2
+        else:
+            usage_die('unknown argument')
+    if '--rendered' in opts:
+        if '--secrets-dir' not in opts or '--server-image' not in opts:
+            usage_die('rendered mode needs --secrets-dir and --server-image')
+        if not opts['--secrets-dir'].startswith('/'):
+            usage_die('--secrets-dir must be an absolute path')
+        if not opts['--server-image']:
+            usage_die('--server-image is empty')
+        cfg = load_json(opts['--rendered'])
+        if not isinstance(cfg, dict):
+            read_die('%s is not a JSON object' % opts['--rendered'])
+        finish(run_rules(cfg, 'rendered', {'secrets_dir': opts['--secrets-dir'], 'server_image': opts['--server-image']}), 'rendered')
+    if '--base' in opts and '--override' in opts:
+        base_raw = load_yaml(opts['--base'])
+        over_raw = load_yaml(opts['--override'])
+        if not isinstance(base_raw, dict) or not isinstance(over_raw, dict):
+            read_die('base and override must both be YAML mappings')
+        merged = merge(base_raw, over_raw)
+        if '--print-merged' in flags:
+            sys.stdout.write(json.dumps(merged) + '\n')
+            sys.exit(0)
+        findings = check_override_shape(over_raw) + check_pinned_base(base_raw) + check_minimal(strip(base_raw), merged) + run_rules(merged, 'raw', {})
+        finish(findings, 'merge')
+    usage_die()
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])

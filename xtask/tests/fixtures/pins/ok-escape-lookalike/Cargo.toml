@@ -1,0 +1,3 @@
+[dependencies]
+"serde\t_ignored" = "9"
+"serde_ignored\u0020" = "9"

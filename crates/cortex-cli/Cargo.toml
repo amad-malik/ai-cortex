@@ -1,0 +1,31 @@
+[package]
+name = "cortex-cli"
+description = "The cortex command line: the command registry, the global flags, --version and doctor (Wave 1 piece 10, the skeleton)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "cortex_cli"
+path = "src/lib.rs"
+
+[[bin]]
+name = "cortex"
+path = "src/main.rs"
+
+[dependencies]
+cortex-client = { path = "../cortex-client" }
+# W1-80: `cortex upgrade` links the upgrade engine (and so its TLS stack); cortex-types for the engine's system clock (ONLY groups/upgrade.rs names either).
+cortex-types.workspace = true
+cortex-upgrade = { path = "../cortex-upgrade" }
+serde_json.workspace = true
+thiserror.workspace = true
+# W1-43 Q-4: clap =4.6.7, derive OFF (no clap_derive in the lock), no colour feature (the help never carries an ESC byte). Exact pin.
+clap = { version = "=4.6.7", default-features = false, features = ["std", "help", "usage", "error-context", "suggestions"] }
+
+[dev-dependencies]
+# The tests reuse cortex-client's std-only fake server (crates/cortex-client/tests/support): no axum, no tokio.
+
+[lints]
+workspace = true

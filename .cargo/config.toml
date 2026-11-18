@@ -1,0 +1,26 @@
+# Cortex v2 build rules while S0 runs (START PLAN §8.2, amendment 1; kai's rows b22aced6 and ff332b9f).
+# Copy to <repo>/.cargo/config.toml in every cv2 repository from its first commit.
+# - NO shared target directory (A-31): each checkout or worktree builds into its own target/. A shared one let
+#   'cargo run' in one copy execute another copy's binary (finn's F-1a GREEN, stale xtask; reproduced in a two-copies test);
+# - at most 2 jobs;
+# - every rustc invocation and every test or run binary goes through cv2-admit (VM admission at nice 19), so editor
+#   tools such as rust-analyzer are admitted too. After S0's VM release, cv2-admit is a pass-through.
+# - the wrapper is scripts/cv2-admit-shim (S5; cox's answer 4): it runs build-host-1's cv2-admit when that file exists and
+#   runs the command unchanged otherwise, so a build on another machine, in CI or in an image does not fail on a missing path.
+# - DISK (kai 16:52Z, row d926d2c4; cox 6 Nov): /home filled at about 60 GB per hour, 302 GB in the per-lane target/ folders. Debug
+#   information and incremental caches are most of a target folder: both are OFF. The cost is poorer backtraces in tests (a panic still
+#   prints its file and line). After merging this into a lane, delete that lane's own target/ by its exact path once, so the old
+#   artifacts do not stay beside the new ones.
+[build]
+jobs = 2
+rustc-wrapper = "scripts/cv2-admit-shim"
+incremental = false
+
+[profile.dev]
+debug = 0
+
+[profile.test]
+debug = 0
+
+[target.x86_64-unknown-linux-gnu]
+runner = "scripts/cv2-admit-shim"

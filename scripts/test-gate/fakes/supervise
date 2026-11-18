@@ -1,0 +1,5 @@
+#!/bin/sh
+# FAKE crates/cortex-testkit/supervise.sh: records the call and runs the driver command.
+set -u
+{ printf 'supervise'; for a in "$@"; do printf ' [%s]' "$a"; done; echo; } >> "$TG_DIR/calls.log"
+exec "$@"

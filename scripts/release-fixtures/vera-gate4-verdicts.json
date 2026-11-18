@@ -1,0 +1,169 @@
+{
+ "what": "vera's 22 verdicts on the real Squawk findings of the five non-platform migrations at integration d350d6b (21 BASELINE for the exact first-release migration hashes, 1 FIX), transcribed BY SCRIPT from the table of her ruling (the migration name is the file's 0001_ name); `line` is squawk's REPORTED (JSON) line, one before the SQL line; audit's hash is the one the ruling names (the audit migration changes with finn's actor_uid fix)",
+ "ruling": {
+  "path": "/path/to/docs/Program/ReviewService/2026-11-09-squawk-gate4-d4b7aeb-vera/RULING.md",
+  "sha256": "4b73344788b02711206f7226d26b6b62a96cd936fb20709250359cd3c25a789b",
+  "row": "d4b7aeb6-93a3-4346-8f03-0b608b5914d6",
+  "relay_copy": "/path/to/docs/mvp/pieces/relay-vera-gate4-ruling-20261109/RULING.md",
+  "integration": "d350d6bd6c0c1af3bb4b4718d8b43f5b8cdbe4bd",
+  "timeout_scope": "the require-lock-timeout and require-statement-timeout verdicts hold ONLY for the first-install sequencing (the migrate service is one-shot and server depends on service_completed_successfully); not a live upgrade"
+ },
+ "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+ "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427",
+ "verdicts": [
+  {
+   "migration": "0001_audit",
+   "sha256": "10266dc510b78dd7bed352ac8f5ce4050c24c81a6c0150b5b404e509f0599aa8",
+   "rule": "require-lock-timeout",
+   "line": 8,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_audit",
+   "sha256": "10266dc510b78dd7bed352ac8f5ce4050c24c81a6c0150b5b404e509f0599aa8",
+   "rule": "require-statement-timeout",
+   "line": 8,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_audit",
+   "sha256": "10266dc510b78dd7bed352ac8f5ce4050c24c81a6c0150b5b404e509f0599aa8",
+   "rule": "prefer-bigint-over-int",
+   "line": 17,
+   "verdict": "FIX"
+  },
+  {
+   "migration": "0001_handoffs",
+   "sha256": "8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d",
+   "rule": "require-lock-timeout",
+   "line": 12,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_handoffs",
+   "sha256": "8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d",
+   "rule": "require-statement-timeout",
+   "line": 12,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_handoffs",
+   "sha256": "8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d",
+   "rule": "prefer-bigint-over-int",
+   "line": 30,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_handoffs",
+   "sha256": "8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d",
+   "rule": "prefer-bigint-over-int",
+   "line": 32,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_handoffs",
+   "sha256": "8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d",
+   "rule": "prefer-bigint-over-int",
+   "line": 45,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_handoffs",
+   "sha256": "8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d",
+   "rule": "prefer-bigint-over-int",
+   "line": 46,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_handoffs",
+   "sha256": "8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d",
+   "rule": "prefer-bigint-over-int",
+   "line": 91,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_handoffs",
+   "sha256": "8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d",
+   "rule": "prefer-bigint-over-int",
+   "line": 109,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_handoffs",
+   "sha256": "8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d",
+   "rule": "prefer-bigint-over-int",
+   "line": 122,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_handoffs",
+   "sha256": "8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d",
+   "rule": "prefer-bigint-over-int",
+   "line": 138,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_identity",
+   "sha256": "c08fab0dc0d048c62daa3e2c5b598802f31e54f46e6eb3f04c51e37056c29036",
+   "rule": "require-lock-timeout",
+   "line": 7,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_identity",
+   "sha256": "c08fab0dc0d048c62daa3e2c5b598802f31e54f46e6eb3f04c51e37056c29036",
+   "rule": "require-statement-timeout",
+   "line": 7,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_identity",
+   "sha256": "c08fab0dc0d048c62daa3e2c5b598802f31e54f46e6eb3f04c51e37056c29036",
+   "rule": "prefer-bigint-over-int",
+   "line": 25,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_records",
+   "sha256": "69e0393a3ab48c4825dee5b133c03c6838468c417f57a40a6e99c6ba6c99f7b5",
+   "rule": "require-lock-timeout",
+   "line": 4,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_records",
+   "sha256": "69e0393a3ab48c4825dee5b133c03c6838468c417f57a40a6e99c6ba6c99f7b5",
+   "rule": "require-statement-timeout",
+   "line": 4,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_records",
+   "sha256": "69e0393a3ab48c4825dee5b133c03c6838468c417f57a40a6e99c6ba6c99f7b5",
+   "rule": "prefer-bigint-over-int",
+   "line": 55,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_records",
+   "sha256": "69e0393a3ab48c4825dee5b133c03c6838468c417f57a40a6e99c6ba6c99f7b5",
+   "rule": "prefer-bigint-over-int",
+   "line": 148,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_tokens",
+   "sha256": "8357e64ae28a0e8f51568e0a0f686719838127687b479f71ce090a0ea1e82d68",
+   "rule": "require-lock-timeout",
+   "line": 6,
+   "verdict": "BASELINE"
+  },
+  {
+   "migration": "0001_tokens",
+   "sha256": "8357e64ae28a0e8f51568e0a0f686719838127687b479f71ce090a0ea1e82d68",
+   "rule": "require-statement-timeout",
+   "line": 6,
+   "verdict": "BASELINE"
+  }
+ ]
+}

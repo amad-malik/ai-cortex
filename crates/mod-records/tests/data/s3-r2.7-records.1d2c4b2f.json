@@ -1,0 +1,640 @@
+{
+ "_comment": "Extract of S3 r2.7 (JSON twin 1d2c4b2f..., pinned in mvp/wave1-pins-20261106-S3r27): the records operations and the schemas they use. Made by script (nemo, scratch/nemo/s3-extract.py, which reproduces the r2.6 extract byte for byte); edit nothing here.",
+ "operations": {
+  "records.invalidate": {
+   "max_body": 16384,
+   "method": "POST",
+   "path": "/v2/records/{id}/invalidate",
+   "scope": "records:lineage",
+   "target": "Lineage",
+   "x_errors": [
+    "404 not_found",
+    "409 lineage_state_conflict",
+    "403 target_not_allowed",
+    "422 reason_required"
+   ]
+  },
+  "records.log": {
+   "max_body": 9437184,
+   "method": "POST",
+   "path": "/v2/records",
+   "scope": "records:write",
+   "target": "None",
+   "x_errors": [
+    "422 type_reserved",
+    "422 source_required",
+    "422 source_not_allowed",
+    "422 locator_too_long",
+    "422 invalid_request",
+    "422 why_required",
+    "422 files_required",
+    "422 section_invalid",
+    "403 section_reserved",
+    "404 not_found"
+   ]
+  },
+  "records.section_current": {
+   "max_body": null,
+   "method": "GET",
+   "path": "/v2/sections/{name}",
+   "scope": "records:read",
+   "target": "None",
+   "x_errors": [
+    "404 not_found",
+    "422 section_invalid"
+   ]
+  },
+  "records.show": {
+   "max_body": null,
+   "method": "GET",
+   "path": "/v2/records/{id}",
+   "scope": "records:read",
+   "target": "None",
+   "x_errors": [
+    "404 not_found"
+   ]
+  },
+  "records.supersede": {
+   "max_body": 16384,
+   "method": "POST",
+   "path": "/v2/records/{id}/supersede",
+   "scope": "records:lineage",
+   "target": "Lineage",
+   "x_errors": [
+    "404 not_found",
+    "422 self_supersede",
+    "409 lineage_state_conflict",
+    "403 target_not_allowed",
+    "422 reason_required"
+   ]
+  }
+ },
+ "schemas": {
+  "Invalidate": {
+   "additionalProperties": false,
+   "properties": {
+    "reason": {
+     "description": "free text, 1-512 bytes, required for an invalidation AND an undo (422 reason_required)",
+     "maxLength": 512,
+     "type": "string",
+     "x-max-bytes": 512
+    },
+    "undo": {
+     "type": "boolean"
+    }
+   },
+   "required": [],
+   "type": "object",
+   "x-handler-required": {
+    "reason": "reason_required"
+   }
+  },
+  "Lineage": {
+   "additionalProperties": false,
+   "description": "the latest lineage change (records.state)",
+   "properties": {
+    "at": {
+     "format": "date-time",
+     "type": "string"
+    },
+    "by_id": {
+     "type": "string"
+    },
+    "by_kind": {
+     "type": "string"
+    },
+    "reason": {
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "reason",
+    "by_kind",
+    "by_id",
+    "at"
+   ],
+   "type": "object"
+  },
+  "LineageState": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "format": "uuid",
+     "type": "string"
+    },
+    "state": {
+     "enum": [
+      "active",
+      "superseded",
+      "invalidated"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "state"
+   ],
+   "type": "object"
+  },
+  "Record": {
+   "additionalProperties": false,
+   "properties": {
+    "author": {
+     "description": "worker uuid, <source>:<id> for a human, module id for the system (nemo 4)",
+     "type": "string"
+    },
+    "author_kind": {
+     "enum": [
+      "worker",
+      "service",
+      "human",
+      "system"
+     ],
+     "type": "string"
+    },
+    "body": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "created_at": {
+     "format": "date-time",
+     "type": "string"
+    },
+    "fields": {
+     "type": "object"
+    },
+    "handoff_id": {
+     "format": "uuid",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "id": {
+     "format": "uuid",
+     "type": "string"
+    },
+    "lineage": {
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/Lineage"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "provenance": {
+     "enum": [
+      "worker_written",
+      "kos_attested",
+      "host_attested",
+      "imported",
+      "system_written"
+     ],
+     "type": "string"
+    },
+    "reply_to": {
+     "format": "uuid",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "section": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "section_revision": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    },
+    "source": {
+     "oneOf": [
+      {
+       "$ref": "#/components/schemas/Source"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "state": {
+     "enum": [
+      "active",
+      "superseded",
+      "invalidated"
+     ],
+     "type": "string"
+    },
+    "summary": {
+     "type": "string"
+    },
+    "superseded_by": {
+     "format": "uuid",
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "type": {
+     "enum": [
+      "decision",
+      "lesson",
+      "note",
+      "status",
+      "question",
+      "blocker",
+      "knowledge",
+      "conversation",
+      "work-product",
+      "human-message",
+      "drill-canary",
+      "drill"
+     ],
+     "type": "string"
+    },
+    "valid_until": {
+     "format": "date-time",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "id",
+    "type",
+    "summary",
+    "state",
+    "created_at",
+    "author_kind",
+    "author",
+    "provenance"
+   ],
+   "type": "object"
+  },
+  "RecordCreate": {
+   "additionalProperties": false,
+   "allOf": [
+    {
+     "else": {
+      "not": {
+       "required": [
+        "source"
+       ]
+      },
+      "x-code": "source_not_allowed"
+     },
+     "if": {
+      "properties": {
+       "type": {
+        "const": "knowledge"
+       }
+      },
+      "required": [
+       "type"
+      ]
+     },
+     "then": {
+      "anyOf": [
+       {
+        "required": [
+         "source"
+        ]
+       },
+       {
+        "properties": {
+         "section": {
+          "pattern": "^(rules-project|rules-worker:[0-9a-f-]{36}|orientation)$"
+         }
+        },
+        "required": [
+         "section"
+        ]
+       }
+      ],
+      "x-code": "source_required"
+     }
+    },
+    {
+     "if": {
+      "properties": {
+       "section": {
+        "const": "orientation"
+       }
+      },
+      "required": [
+       "section"
+      ]
+     },
+     "then": {
+      "description": "ORIENTATION (S2 r9 section 3): type knowledge, written by the project lead only (403 section_reserved otherwise), source waived; body at most 3072 bytes; fields.reading_path[] REQUIRED with 5 to 10 entries, each at most 256 bytes (over 256: 422 locator_too_long; any other violation: 422 invalid_request), starting with / and with no control character",
+      "properties": {
+       "body": {
+        "maxLength": 3072
+       },
+       "fields": {
+        "properties": {
+         "reading_path": {
+          "items": {
+           "allOf": [
+            {
+             "maxLength": 256,
+             "x-code": "locator_too_long",
+             "x-max-bytes": 256
+            }
+           ],
+           "minLength": 1,
+           "pattern": "^/[^\\x00-\\x1f\\x7f]*$",
+           "type": "string"
+          },
+          "maxItems": 10,
+          "minItems": 5,
+          "type": "array"
+         }
+        },
+        "required": [
+         "reading_path"
+        ],
+        "type": "object"
+       },
+       "type": {
+        "const": "knowledge"
+       }
+      },
+      "required": [
+       "body",
+       "fields"
+      ]
+     }
+    },
+    {
+     "if": {
+      "required": [
+       "section"
+      ]
+     },
+     "then": {
+      "description": "a record in a reserved section is ONLY type knowledge (CHANGES section 22, S2 r9): anything else is 422 invalid_request at step 0, so a note in rules-project can never become a rule",
+      "properties": {
+       "type": {
+        "const": "knowledge"
+       }
+      },
+      "x-code": "invalid_request"
+     }
+    },
+    {
+     "if": {
+      "properties": {
+       "type": {
+        "const": "work-product"
+       }
+      },
+      "required": [
+       "type"
+      ]
+     },
+     "then": {
+      "description": "WORK-PRODUCT (cox W1-15, kai 09638b3f; KOS receipts): fields.files is a NON-EMPTY array of strings, each 1 to 1024 bytes (UTF-8), no control character and no NUL, no uniqueness rule, no item-count limit of its own (the 65536-byte fields limit bounds the whole). Absent or an EMPTY array: 422 files_required; not an array, a non-string, empty or control-character item: 422 invalid_request; an item over 1024 bytes: 422 locator_too_long (length first)",
+      "properties": {
+       "fields": {
+        "properties": {
+         "files": {
+          "allOf": [
+           {
+            "minItems": 1,
+            "x-code": "files_required"
+           }
+          ],
+          "items": {
+           "allOf": [
+            {
+             "maxLength": 1024,
+             "x-code": "locator_too_long",
+             "x-max-bytes": 1024
+            }
+           ],
+           "minLength": 1,
+           "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+           "type": "string"
+          },
+          "type": "array"
+         }
+        },
+        "required": [
+         "files"
+        ],
+        "type": "object"
+       }
+      },
+      "required": [
+       "fields"
+      ]
+     }
+    }
+   ],
+   "description": "Type rules: decision needs fields.why (why_required); knowledge needs source (source_required) except in the reserved sections; work-product needs fields.files (files_required). The owner of a knowledge record is its author in 0.2.001 (CONFIRMED by kai, 5c219116, on nemo 7): fields.owner is not required; the S2 pack keeps an OPTIONAL (nullable) owner column, so an explicit owner later is additive; a recorded deviation from S2 r9 s3.1/s3.6 beside D-13. affects, reply_to and handoff_id that name nothing in this project: 404 (R-5). CONDITIONAL (S2 records.records CHECKs; kai 25d694b1): source is REQUIRED for type knowledge, except in the reserved sections (rules-project, rules-worker:<id>, orientation), which waive it (422 source_required); source is FORBIDDEN for every other type (422 source_not_allowed), not silently ignored.",
+   "properties": {
+    "affects": {
+     "description": "at most 256 items and no duplicates (cox W1-19: every item is a platform.refs row of kind affects, keyed (from_id, to_id, kind)); a violation is 422 invalid_request at step 0, in this order: count, uuid format, uniqueness",
+     "items": {
+      "format": "uuid",
+      "type": "string"
+     },
+     "maxItems": 256,
+     "type": "array",
+     "uniqueItems": true
+    },
+    "body": {
+     "description": "262144 bytes (4194304 for conversation); over is 422 invalid_request (nemo 2)",
+     "type": "string",
+     "x-max-bytes": 262144
+    },
+    "fields": {
+     "description": "at most 65536 bytes as stored (nemo 3)",
+     "type": "object"
+    },
+    "handoff_id": {
+     "format": "uuid",
+     "type": "string"
+    },
+    "reply_to": {
+     "format": "uuid",
+     "type": "string"
+    },
+    "section": {
+     "description": "rules-project | rules-worker:<id> | orientation (reserved; written by the project lead only: CHANGES section 19); project-brief is deferred; anything else is 422 section_invalid",
+     "maxLength": 128,
+     "pattern": "^(rules-project|rules-worker:[0-9a-f-]{36}|orientation)$",
+     "type": "string",
+     "x-code": "section_invalid",
+     "x-max-bytes": 128
+    },
+    "source": {
+     "$ref": "#/components/schemas/Source"
+    },
+    "summary": {
+     "maxLength": 512,
+     "minLength": 1,
+     "type": "string",
+     "x-max-bytes": 512
+    },
+    "type": {
+     "description": "S2 3.1 types. human-message, drill-canary, drill AND conversation are RESERVED in 0.2.001: 422 type_reserved (nemo 1; conversation has no subtype in S3 yet: CHANGES section 19)",
+     "enum": [
+      "decision",
+      "lesson",
+      "note",
+      "status",
+      "question",
+      "blocker",
+      "knowledge",
+      "conversation",
+      "work-product",
+      "human-message",
+      "drill-canary",
+      "drill"
+     ],
+     "type": "string"
+    },
+    "valid_until": {
+     "description": "RFC 3339 date-time ONLY under the date-time rule (x-notes.datetime-rule): infinity, epoch, now, a date only, an offset outside -12:00..+14:00, a year before 1970 are 422 invalid_request.",
+     "format": "date-time",
+     "type": "string"
+    }
+   },
+   "required": [
+    "type",
+    "summary"
+   ],
+   "type": "object"
+  },
+  "RecordRef": {
+   "additionalProperties": false,
+   "properties": {
+    "created_at": {
+     "format": "date-time",
+     "type": "string"
+    },
+    "id": {
+     "format": "uuid",
+     "type": "string"
+    },
+    "section_revision": {
+     "type": [
+      "integer",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "id",
+    "created_at"
+   ],
+   "type": "object"
+  },
+  "SectionPointer": {
+   "additionalProperties": false,
+   "properties": {
+    "record_id": {
+     "format": "uuid",
+     "type": "string"
+    },
+    "revision": {
+     "type": "integer"
+    },
+    "section": {
+     "type": "string"
+    },
+    "sha256": {
+     "pattern": "^[0-9a-f]{64}$",
+     "type": "string"
+    },
+    "source_path": {
+     "description": "from the revision's fields.source_path, so a worker can check what it read (tate M5a)",
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   },
+   "required": [
+    "section",
+    "record_id",
+    "revision",
+    "sha256"
+   ],
+   "type": "object"
+  },
+  "Source": {
+   "additionalProperties": false,
+   "properties": {
+    "kind": {
+     "enum": [
+      "conversation",
+      "file",
+      "url",
+      "worker"
+     ],
+     "type": "string"
+    },
+    "ref": {
+     "maxLength": 2048,
+     "minLength": 1,
+     "type": "string",
+     "x-max-bytes": 2048
+    },
+    "span": {
+     "description": "reserved: written NULL in 0.2.001; validated from the mod-records span release; when present 1-512 bytes (nemo 9)",
+     "maxLength": 512,
+     "minLength": 1,
+     "type": [
+      "string",
+      "null"
+     ],
+     "x-max-bytes": 512
+    }
+   },
+   "required": [
+    "kind",
+    "ref"
+   ],
+   "type": "object"
+  },
+  "Supersede": {
+   "additionalProperties": false,
+   "properties": {
+    "by": {
+     "format": "uuid",
+     "type": "string"
+    },
+    "reason": {
+     "description": "free text, 1-512 bytes (records.state.reason); absent or empty is 422 reason_required",
+     "maxLength": 512,
+     "type": "string",
+     "x-max-bytes": 512
+    }
+   },
+   "required": [
+    "by"
+   ],
+   "type": "object",
+   "x-handler-required": {
+    "reason": "reason_required"
+   }
+  }
+ },
+ "version": "0.2.1-skeleton-draft.2.7"
+}

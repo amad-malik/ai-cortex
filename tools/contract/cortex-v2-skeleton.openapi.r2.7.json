@@ -1,0 +1,5795 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "Cortex v2 (v0.2.001 walking skeleton)",
+  "version": "0.2.1-skeleton-draft.2.7",
+  "description": "The daily loop of plan section 1: sign in and boot; hand off, claim, return, accept or rework; write and\nfind records, supersede and invalidate them; the roster; project isolation; health; dump and restore.\nEvery route belongs to exactly one piece (x-piece), declares exactly one scope (x-scope), and says whether it\nmutates (x-mutates). Every mutating route requires Idempotency-Key. Every error is application/problem+json.\nThe rules that hold for EVERY route are in x-rules (R-1 to R-20); read them before the routes.\n"
+ },
+ "servers": [
+  {
+   "url": "http://127.0.0.1:{port}",
+   "description": "worker listener (TCP, loopback); host-only admin routes are on the host socket",
+   "variables": {
+    "port": {
+     "default": "57100"
+    }
+   }
+  }
+ ],
+ "security": [
+  {
+   "workerToken": []
+  }
+ ],
+ "tags": [
+  {
+   "name": "health",
+   "description": "cortex-server (cox); open, no token"
+  },
+  {
+   "name": "identity",
+   "description": "mod-identity (sophi)"
+  },
+  {
+   "name": "tokens",
+   "description": "mod-tokens (finn; option A)"
+  },
+  {
+   "name": "policy",
+   "description": "mod-policy (sophi); no routes of its own: the scope table and the target rules"
+  },
+  {
+   "name": "audit",
+   "description": "mod-audit (marv)"
+  },
+  {
+   "name": "records",
+   "description": "mod-records (nemo)"
+  },
+  {
+   "name": "search",
+   "description": "mod-search (nix)"
+  },
+  {
+   "name": "handoffs",
+   "description": "mod-handoffs (bob)"
+  },
+  {
+   "name": "boot",
+   "description": "mod-boot (tate)"
+  },
+  {
+   "name": "admin",
+   "description": "host only (cox, cortex-server): see x-host-commands; never on the HTTP listener"
+  }
+ ],
+ "paths": {
+  "/v2/health": {
+   "get": {
+    "operationId": "server.health",
+    "tags": [
+     "health"
+    ],
+    "summary": "Server state: version, readiness, pieces, last good dump, backup state. Open by design (see Health)",
+    "x-piece": "health",
+    "x-scope": "none",
+    "x-class": "open",
+    "x-mutates": false,
+    "x-cli": "cortex doctor",
+    "x-v1": "GET /health",
+    "x-errors": [],
+    "responses": {
+     "200": {
+      "description": "Server state: version, readiness, pieces, last good dump, backup state",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Health"
+        }
+       }
+      }
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": []
+   }
+  },
+  "/v2/health/live": {
+   "get": {
+    "operationId": "server.live",
+    "tags": [
+     "health"
+    ],
+    "summary": "Liveness: 200 while the process runs",
+    "x-piece": "health",
+    "x-scope": "none",
+    "x-class": "open",
+    "x-mutates": false,
+    "x-cli": "-",
+    "x-v1": "GET /health/live",
+    "x-errors": [],
+    "responses": {
+     "200": {
+      "description": "Liveness: 200 while the process runs",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Ok"
+        }
+       }
+      }
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": []
+   }
+  },
+  "/v2/health/ready": {
+   "get": {
+    "operationId": "server.ready",
+    "tags": [
+     "health"
+    ],
+    "summary": "Readiness: 200 only when the database is reachable, migrations are current and every enabled piece is ready, else 503 capability_unavailable",
+    "x-piece": "health",
+    "x-scope": "none",
+    "x-class": "open",
+    "x-mutates": false,
+    "x-cli": "-",
+    "x-v1": "-",
+    "x-errors": [
+     "503 capability_unavailable"
+    ],
+    "responses": {
+     "200": {
+      "description": "Readiness: 200 only when the database is reachable, migrations are current and every enabled piece is ready, else 503 capability_unavailable",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Ok"
+        }
+       }
+      }
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     },
+     "503": {
+      "description": "503 capability_unavailable: not ready",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cache-Control": {
+        "$ref": "#/components/headers/Cache-Control"
+       }
+      },
+      "content": {
+       "application/problem+json": {
+        "schema": {
+         "$ref": "#/components/schemas/Problem"
+        }
+       }
+      }
+     }
+    },
+    "x-target": "None",
+    "security": []
+   }
+  },
+  "/v2/projects/{id}": {
+   "get": {
+    "operationId": "identity.project_get",
+    "tags": [
+     "identity"
+    ],
+    "summary": "One project: the token's own; any other id is 404",
+    "x-piece": "identity",
+    "x-scope": "roster:read",
+    "x-class": "work",
+    "x-mutates": false,
+    "x-cli": "cortex projects",
+    "x-v1": "GET /projects/{key}",
+    "x-errors": [
+     "404 not_found"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "One project: the token's own; any other id is 404",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Project"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/teams": {
+   "get": {
+    "operationId": "identity.teams_list",
+    "tags": [
+     "identity"
+    ],
+    "summary": "Teams of the token's project",
+    "x-piece": "identity",
+    "x-scope": "roster:read",
+    "x-class": "work",
+    "x-mutates": false,
+    "x-cli": "cortex roster",
+    "x-v1": "-",
+    "x-errors": [],
+    "x-order": "name, then id",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 200,
+       "default": 50
+      }
+     },
+     {
+      "name": "after",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string"
+      },
+      "description": "the next value of the previous page (R-8)"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Teams of the token's project",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TeamPage"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   },
+   "post": {
+    "operationId": "identity.team_create",
+    "tags": [
+     "identity"
+    ],
+    "summary": "Create a team (project lead)",
+    "x-piece": "identity",
+    "x-scope": "team:create",
+    "x-class": "admin",
+    "x-mutates": true,
+    "x-cli": "cortex team add <name>",
+    "x-v1": "-",
+    "x-errors": [
+     "422 name_invalid",
+     "409 name_taken"
+    ],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TeamCreate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Create a team (project lead)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Id"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/workers": {
+   "get": {
+    "operationId": "identity.workers_list",
+    "tags": [
+     "identity"
+    ],
+    "summary": "THE ROSTER: active workers of the token's project. Retired workers are not listed in 0.2.001 (Q-2; include_retired cut, sophi A7)",
+    "x-piece": "identity",
+    "x-scope": "roster:read",
+    "x-class": "work",
+    "x-mutates": false,
+    "x-cli": "cortex roster",
+    "x-v1": "GET /roster",
+    "x-errors": [],
+    "x-order": "name, then id",
+    "parameters": [
+     {
+      "name": "name",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "pattern": "^[A-Za-z][A-Za-z0-9-]{0,31}$",
+       "maxLength": 32,
+       "x-max-bytes": 32,
+       "x-label": "name"
+      },
+      "description": "compared by name_key; a value outside the name grammar (33 characters, a space, a leading digit, a trailing newline) is 422 invalid_request, not an empty page (sophi Q-11, R-4, R-18)"
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 200,
+       "default": 50
+      }
+     },
+     {
+      "name": "after",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string"
+      },
+      "description": "the next value of the previous page (R-8)"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "THE ROSTER: active workers of the token's project",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WorkerPage"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   },
+   "post": {
+    "operationId": "identity.worker_create",
+    "tags": [
+     "identity"
+    ],
+    "summary": "Add a worker (project lead). kind worker only in 0.2.001; a team that is not this project's is 404",
+    "x-piece": "identity",
+    "x-scope": "worker:create",
+    "x-class": "admin",
+    "x-mutates": true,
+    "x-cli": "cortex worker add <name> --role R --mode M",
+    "x-v1": "POST /agents",
+    "x-errors": [
+     "422 name_invalid",
+     "409 name_taken",
+     "422 job_roles_invalid",
+     "404 not_found"
+    ],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/WorkerCreate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Add a worker (project lead)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Id"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/workers/{id}/retire": {
+   "post": {
+    "operationId": "identity.worker_retire",
+    "tags": [
+     "identity"
+    ],
+    "summary": "Retire a worker (one-way): its tokens then answer 401 worker_retired. The reason is stored in identity.workers.retired_reason (sophi F-9; nemo, S2 revision 5). Project lead (not self), or a team lead for its own team (not self); S1 5.3",
+    "x-piece": "identity",
+    "x-scope": "worker:retire",
+    "x-class": "admin",
+    "x-mutates": true,
+    "x-cli": "cortex worker retire <id> --reason <text>",
+    "x-v1": "POST /admin/agents/remove",
+    "x-errors": [
+     "404 not_found",
+     "409 lead_permanent",
+     "409 target_retired",
+     "403 target_not_allowed",
+     "422 reason_required"
+    ],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     },
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Reason"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Retire a worker (one-way): its tokens then answer 401 worker_retired",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Ok"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "RetireTarget",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/workers/{id}/team": {
+   "put": {
+    "operationId": "identity.team_assign",
+    "tags": [
+     "identity"
+    ],
+    "summary": "Move, promote or demote a worker within teams (one team lead per team). Repeating the same (team, role) with job_roles absent or equal to the stored array, element for element, is 200 with no change and no audit row; the same (team, role) with a DIFFERENT job_roles list replaces the array (perm_gen does not rise) and leaves ONE audit record worker.team_assigned with job_roles_changed true (CHANGES section 24)",
+    "x-piece": "identity",
+    "x-scope": "team:assign",
+    "x-class": "admin",
+    "x-mutates": true,
+    "x-cli": "cortex worker move|promote|demote",
+    "x-v1": "-",
+    "x-errors": [
+     "404 not_found",
+     "409 target_retired",
+     "409 team_lead_taken",
+     "403 target_not_allowed",
+     "422 job_roles_invalid"
+    ],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     },
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TeamAssign"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Move, promote or demote a worker within teams (one team lead per team)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Ok"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "NotProjectLead",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/whoami": {
+   "get": {
+    "operationId": "tokens.whoami",
+    "tags": [
+     "tokens"
+    ],
+    "summary": "Who the token is: installation, project, worker, kind, role, team, job_roles, token id and expiry",
+    "x-piece": "tokens",
+    "x-scope": "self:read",
+    "x-class": "self",
+    "x-mutates": false,
+    "x-cli": "cortex whoami",
+    "x-v1": "-",
+    "x-errors": [],
+    "responses": {
+     "200": {
+      "description": "Who the token is: installation, project, worker, kind, role, team, job_roles, token id and expiry",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Whoami"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/self/token/revoke": {
+   "post": {
+    "operationId": "tokens.revoke_self",
+    "tags": [
+     "tokens"
+    ],
+    "summary": "Revoke the presented token. A retry with the same key after a success is 401 token_revoked (authentication runs before a replay, R-11); the revoke happened once (finn 5)",
+    "x-piece": "tokens",
+    "x-scope": "self:revoke",
+    "x-class": "self",
+    "x-mutates": true,
+    "x-cli": "cortex token revoke-self",
+    "x-v1": "-",
+    "x-errors": [],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Revoke the presented token",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Ok"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/workers/{id}/tokens": {
+   "post": {
+    "operationId": "tokens.issue",
+    "tags": [
+     "tokens"
+    ],
+    "summary": "Issue (or reissue) a worker's token. Issuing SUPERSEDES the worker's other active tokens (card, S1 4.3): in 0.2.001 they then answer 401 token_revoked and read state superseded. The SECRET is in this response ONCE and is never stored or replayed: a retry with the same key is 409 already_issued naming the token id only. Cortex-Token-Expires is the CALLER's token; the body's expires_at is the new token's (finn 2, 7)",
+    "x-piece": "tokens",
+    "x-scope": "token:issue",
+    "x-class": "admin",
+    "x-mutates": true,
+    "x-cli": "cortex token issue|reissue --worker <id>",
+    "x-v1": "cortex-auth-credential (script)",
+    "x-errors": [
+     "404 not_found",
+     "409 already_issued",
+     "409 target_retired",
+     "403 target_not_allowed"
+    ],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     },
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "responses": {
+     "201": {
+      "description": "Issue (or reissue) a worker's token",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/IssuedToken"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "TokenTarget",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/tokens": {
+   "get": {
+    "operationId": "tokens.list",
+    "tags": [
+     "tokens"
+    ],
+    "summary": "Token metadata (never a digest or a secret)",
+    "x-piece": "tokens",
+    "x-scope": "token:list",
+    "x-class": "admin",
+    "x-mutates": false,
+    "x-cli": "cortex token list",
+    "x-v1": "-",
+    "x-errors": [],
+    "x-order": "issued_at, then token_id",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 200,
+       "default": 50
+      }
+     },
+     {
+      "name": "after",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string"
+      },
+      "description": "the next value of the previous page (R-8)"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Token metadata (never a digest or a secret)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TokenPage"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "x-target-note": "a list, not one target: rule None, and the SQL filters a team lead's rows to its own team (sophi Q-8; finn)",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/tokens/{id}": {
+   "get": {
+    "operationId": "tokens.inspect",
+    "tags": [
+     "tokens"
+    ],
+    "summary": "One token's metadata",
+    "x-piece": "tokens",
+    "x-scope": "token:list",
+    "x-class": "admin",
+    "x-mutates": false,
+    "x-cli": "cortex token inspect <id>",
+    "x-v1": "-",
+    "x-errors": [
+     "404 not_found",
+     "403 target_not_allowed"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "One token's metadata",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TokenMeta"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "TokenTarget",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/tokens/{id}/revoke": {
+   "post": {
+    "operationId": "tokens.revoke",
+    "tags": [
+     "tokens"
+    ],
+    "summary": "Revoke a token, with a reason CODE. A token that is not active answers 200 with no change and no second audit row (R-14, finn 4)",
+    "x-piece": "tokens",
+    "x-scope": "token:revoke",
+    "x-class": "admin",
+    "x-mutates": true,
+    "x-cli": "cortex token revoke <id> --reason <code>",
+    "x-v1": "-",
+    "x-errors": [
+     "404 not_found",
+     "403 target_not_allowed",
+     "422 reason_required"
+    ],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     },
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TokenRevoke"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Revoke a token, with a reason CODE",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Ok"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "TokenTarget",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/audit": {
+   "get": {
+    "operationId": "audit.list",
+    "tags": [
+     "audit"
+    ],
+    "summary": "The token's project's audit records, project lead only (audit:read). PLAIN LOG in 0.2.001: no chain id, no seq, no hash, so NO completeness or tamper evidence; that arrives with the mod-audit hash chain release, and with it cortex audit verify (marv)",
+    "x-piece": "audit",
+    "x-scope": "audit:read",
+    "x-class": "admin",
+    "x-mutates": false,
+    "x-cli": "cortex audit list",
+    "x-v1": "GET /identity/audit",
+    "x-errors": [],
+    "x-order": "(at, id) ascending",
+    "parameters": [
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 200,
+       "default": 50
+      }
+     },
+     {
+      "name": "after",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string"
+      },
+      "description": "the next value of the previous page (R-8)"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "The token's project's audit records, project lead only (audit:read)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AuditPage"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/records": {
+   "post": {
+    "operationId": "records.log",
+    "tags": [
+     "records"
+    ],
+    "summary": "Write a record (S2 3.1 types; see RecordCreate). Writing a reserved section is a target rule: rules-project, the project lead; rules-worker:<id>, that worker or the project lead; orientation, the project lead (audited as section.write_reserved)",
+    "x-piece": "records",
+    "x-scope": "records:write",
+    "x-class": "work",
+    "x-mutates": true,
+    "x-cli": "cortex log <type> ... | cortex rules set",
+    "x-v1": "POST /work-products, POST /rules/ingest",
+    "x-errors": [
+     "422 type_reserved",
+     "422 source_required",
+     "422 source_not_allowed",
+     "422 locator_too_long",
+     "422 invalid_request",
+     "422 why_required",
+     "422 files_required",
+     "422 section_invalid",
+     "403 section_reserved",
+     "404 not_found"
+    ],
+    "x-max-body": 9437184,
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RecordCreate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Write a record (S2 3",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RecordRef"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "x-target-note": "reserved sections are the handler's own check (403 section_reserved): the rules sections for their owners, orientation for the project lead",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/records/{id}": {
+   "get": {
+    "operationId": "records.show",
+    "tags": [
+     "records"
+    ],
+    "summary": "One record with its state and lineage (always returned, even when superseded or invalidated)",
+    "x-piece": "records",
+    "x-scope": "records:read",
+    "x-class": "work",
+    "x-mutates": false,
+    "x-cli": "cortex record show <id>",
+    "x-v1": "GET /work-products/{id}",
+    "x-errors": [
+     "404 not_found"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "One record with its state and lineage (always returned, even when superseded or invalidated)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Record"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/records/{id}/supersede": {
+   "post": {
+    "operationId": "records.supersede",
+    "tags": [
+     "records"
+    ],
+    "summary": "Supersede a record by another (target rule: the author, the author's team lead or the project lead; a non-worker author: the project lead only). The path record or by naming nothing in this project: 404. The replacement `by` must be ACTIVE (not superseded, not invalidated): otherwise 409 lineage_state_conflict, checked in the same atomic statement as the state change, which also makes a cycle impossible; a record that is a SECTION REVISION cannot be superseded at all (409 lineage_state_conflict: a section changes by writing a new revision and is withdrawn by invalidation). Audited. Of concurrent supersedes of one record exactly one wins; the others are 409 lineage_state_conflict (CHANGES sections 20 and 26)",
+    "x-piece": "records",
+    "x-scope": "records:lineage",
+    "x-class": "work",
+    "x-mutates": true,
+    "x-cli": "cortex record supersede <id> --by <id> --reason <text>",
+    "x-v1": "POST /invalidate/{id} (superseded_by)",
+    "x-errors": [
+     "404 not_found",
+     "422 self_supersede",
+     "409 lineage_state_conflict",
+     "403 target_not_allowed",
+     "422 reason_required"
+    ],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     },
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Supersede"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Supersede a record by another (target rule: the author, the author's team lead or the project lead; a non-worker author: the project lead only)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LineageState"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "Lineage",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/records/{id}/invalidate": {
+   "post": {
+    "operationId": "records.invalidate",
+    "tags": [
+     "records"
+    ],
+    "summary": "Invalidate a record, or undo an invalidation. A reason is required for both. Undo is allowed only for an invalidated record; for a section revision it is 409 lineage_state_conflict if a higher revision exists in any state (CHANGES section 20). Invalidating a record that is already SUPERSEDED is 409 lineage_state_conflict (it would change no visibility; the body of a record in any state is readable by id). Audited",
+    "x-piece": "records",
+    "x-scope": "records:lineage",
+    "x-class": "work",
+    "x-mutates": true,
+    "x-cli": "cortex record invalidate <id> --reason <text> [--undo]   (alias: cortex invalidate)",
+    "x-v1": "POST /invalidate/{id}",
+    "x-errors": [
+     "404 not_found",
+     "409 lineage_state_conflict",
+     "403 target_not_allowed",
+     "422 reason_required"
+    ],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     },
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Invalidate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Invalidate a record, or undo an invalidation",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/LineageState"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "Lineage",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/sections/{name}": {
+   "get": {
+    "operationId": "records.section_current",
+    "tags": [
+     "records"
+    ],
+    "summary": "The CURRENT revision of a reserved section (rules-project, rules-worker:<id>, orientation): a pointer; 404 when none, and 404 after the current revision is invalidated until a new revision is written (no fallback to the previous one: CHANGES section 20)",
+    "x-piece": "records",
+    "x-scope": "records:read",
+    "x-class": "work",
+    "x-mutates": false,
+    "x-cli": "cortex rules",
+    "x-v1": "GET /rules",
+    "x-errors": [
+     "404 not_found",
+     "422 section_invalid"
+    ],
+    "parameters": [
+     {
+      "name": "name",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "maxLength": 128,
+       "x-code": "section_invalid"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "The CURRENT revision of a reserved section (rules-project, rules-worker:<id>, orientation): a pointer; 404 when none, and 404 after the current revision is invalidated until a new revision is written (no fallback to the previous one: CHANGES section 20)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SectionPointer"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/search": {
+   "post": {
+    "operationId": "search.query",
+    "tags": [
+     "search"
+    ],
+    "summary": "Keyword search over the token's project (Postgres full text). Read-only POST: no Idempotency-Key. Superseded and invalidated records are left out unless include_history. 429 busy when search's own cap (2 at once) is full: refused at once, before any database statement (R-9 case b); 503 unavailable on a statement timeout or an unreadable records dependency (nix 1)",
+    "x-piece": "search",
+    "x-scope": "records:read",
+    "x-class": "work",
+    "x-mutates": false,
+    "x-cli": "cortex search <q> [--type T]... [--limit N] [--since T] [--until T] [--history]   (alias: cortex-search; the v1-only flags --room --hall --graph --no-rerank are accepted, NOT sent, and noted in one stderr line: nix 2)",
+    "x-v1": "GET /search",
+    "x-errors": [
+     "422 query_too_long",
+     "422 invalid_request",
+     "429 busy",
+     "503 unavailable"
+    ],
+    "x-order": "rank descending, then created_at descending, then id",
+    "x-max-body": 16384,
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SearchRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Keyword search over the token's project (Postgres full text)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SearchResult"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/handoffs": {
+   "post": {
+    "operationId": "handoffs.create",
+    "tags": [
+     "handoffs"
+    ],
+    "summary": "Create a handoff. ONE scope; the target rule decides by kind: a task needs the project lead (any addressee) or a team lead (a WORKER addressee in its own team; the team comes from Role in socket r5); a consult is open to any worker. The packet includes acceptance AND verify",
+    "x-piece": "handoffs",
+    "x-scope": "handoff:create",
+    "x-class": "work",
+    "x-mutates": true,
+    "x-cli": "cortex handoff create ...",
+    "x-v1": "POST /handoffs",
+    "x-errors": [
+     "422 packet_incomplete",
+     "422 unknown_addressee",
+     "404 not_found",
+     "409 target_retired",
+     "403 target_not_allowed"
+    ],
+    "x-max-body": 262144,
+    "parameters": [
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/HandoffCreate"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "Create a handoff",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HandoffRef"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "TaskAddressee",
+    "x-target-note": "declared TaskAddressee; a consult is open to any worker: the handler passes Target{consult: true} for kind consult (decoded from the TOP-LEVEL kind field, never Addressee.kind) and mod-policy answers true for a consult for any principal that passed the scope check; for kind task the real addressee Target is checked by table 3.2 (cox W1-9)",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   },
+   "get": {
+    "operationId": "handoffs.list",
+    "tags": [
+     "handoffs"
+    ],
+    "summary": "Handoffs of the token's project, filtered. mine=true gives: the ones I hold (claimed); the pending ones addressed to me or to a job role I hold; and the RETURNED ones I may review: all returned for the project lead, the ones it created for a creator, never one it returned itself unless it is the only possible reviewer (self-review); AND the ones I CREATED that SOMEONE ELSE cancelled, for 7 days after closed_at (state cancelled, with closed_by and close_reason; one I cancelled myself is not listed: kai 32f893de). state absent = every state (bob 6)",
+    "x-piece": "handoffs",
+    "x-scope": "handoff:read",
+    "x-class": "work",
+    "x-mutates": false,
+    "x-cli": "cortex handoff mine | cortex handoff list",
+    "x-v1": "GET /handoffs",
+    "x-errors": [],
+    "x-order": "priority descending, then created_at ascending, then id",
+    "parameters": [
+     {
+      "name": "mine",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "name": "state",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "enum": [
+        "pending",
+        "claimed",
+        "returned",
+        "accepted",
+        "cancelled",
+        "all"
+       ],
+       "default": "all"
+      }
+     },
+     {
+      "name": "holder",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      }
+     },
+     {
+      "name": "created_by",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 200,
+       "default": 50
+      }
+     },
+     {
+      "name": "after",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string"
+      },
+      "description": "the next value of the previous page (R-8)"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Handoffs of the token's project, filtered",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HandoffPage"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/handoffs/{id}": {
+   "get": {
+    "operationId": "handoffs.show",
+    "tags": [
+     "handoffs"
+    ],
+    "summary": "Every packet field exactly as created, INCLUDING acceptance and verify, plus state, holder, round, the latest RETURN (summary, risks, tests, evidence refs: bob 1) and the latest review (with self_review)",
+    "x-piece": "handoffs",
+    "x-scope": "handoff:read",
+    "x-class": "work",
+    "x-mutates": false,
+    "x-cli": "cortex handoff show <id>",
+    "x-v1": "GET /handoffs/{id}",
+    "x-errors": [
+     "404 not_found"
+    ],
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Every packet field exactly as created, INCLUDING acceptance and verify, plus state, holder, round, the latest RETURN (summary, risks, tests, evidence refs: bob 1) and the latest review (with self_review)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Handoff"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/handoffs/{id}/claim": {
+   "post": {
+    "operationId": "handoffs.claim",
+    "tags": [
+     "handoffs"
+    ],
+    "summary": "Claim a pending handoff (the addressee; one winner). Answers {id, state, round}; the client calls show for the packet (bob 9)",
+    "x-piece": "handoffs",
+    "x-scope": "handoff:claim",
+    "x-class": "work",
+    "x-mutates": true,
+    "x-cli": "cortex handoff claim <id>",
+    "x-v1": "POST /handoffs/{id}/claim",
+    "x-errors": [
+     "404 not_found",
+     "409 already_claimed",
+     "409 invalid_transition",
+     "403 target_not_allowed"
+    ],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     },
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Claim a pending handoff (the addressee; one winner)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HandoffState"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "SelfWorker",
+    "x-target-note": "a WORKER addressee; a job-role addressee is checked in the handler with IdentityApi::worker (the Principal has no job roles)",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/handoffs/{id}/release": {
+   "post": {
+    "operationId": "handoffs.release",
+    "tags": [
+     "handoffs"
+    ],
+    "summary": "Release a claimed handoff to pending: the holder (reason optional), or the project lead (reason required). A release also CLEARS the rework lock (rework_holder), so the original addressing applies again (bob Q-17)",
+    "x-piece": "handoffs",
+    "x-scope": "handoff:hold",
+    "x-class": "work",
+    "x-mutates": true,
+    "x-cli": "cortex handoff release <id> [--reason <text>]",
+    "x-v1": "POST /handoffs/{id}/release",
+    "x-errors": [
+     "404 not_found",
+     "409 not_holder",
+     "409 invalid_transition",
+     "422 reason_required"
+    ],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     },
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Release"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Release a claimed handoff to pending: the holder (reason optional), or the project lead (reason required)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HandoffState"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "x-target-note": "None: the holder is mutable STATE, so the holder and lead checks are the handler's own: 409 not_holder; the project lead may release with a reason (cox, on C17: else not_holder could never fire under R-16)",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/handoffs/{id}/return": {
+   "post": {
+    "operationId": "handoffs.return",
+    "tags": [
+     "handoffs"
+    ],
+    "summary": "Return with a report (the holder): summary, evidence (at least one), risks, tests",
+    "x-piece": "handoffs",
+    "x-scope": "handoff:hold",
+    "x-class": "work",
+    "x-mutates": true,
+    "x-cli": "cortex handoff return <id> ...",
+    "x-v1": "POST /handoffs/{id}/return",
+    "x-errors": [
+     "404 not_found",
+     "409 not_holder",
+     "409 invalid_transition",
+     "422 evidence_required",
+     "422 risks_required",
+     "422 evidence_hash_mismatch",
+     "422 evidence_source_invalid"
+    ],
+    "x-max-body": 2097152,
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     },
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/HandoffReturn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Return with a report (the holder): summary, evidence (at least one), risks, tests",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HandoffState"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "x-target-note": "None: the holder check is the handler's own (409 not_holder), as for release",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/handoffs/{id}/accept": {
+   "post": {
+    "operationId": "handoffs.accept",
+    "tags": [
+     "handoffs"
+    ],
+    "summary": "Accept a returned handoff. The reviewer is the creator or the project lead (else 403 target_not_allowed), never the author while someone else can review (403 self_review_forbidden). The target rule comes FIRST, so a plain-worker author gets target_not_allowed (bob; R-16); the creator who is also the project lead and the only possible reviewer may self-review, marked self_review=true",
+    "x-piece": "handoffs",
+    "x-scope": "handoff:review",
+    "x-class": "work",
+    "x-mutates": true,
+    "x-cli": "cortex handoff accept <id>   (v1 form kept as alias: cortex-handoff --return <id> --decision accept; D-3, client owner marv)",
+    "x-v1": "POST /handoffs/{id}/accept",
+    "x-errors": [
+     "404 not_found",
+     "409 invalid_transition",
+     "403 self_review_forbidden",
+     "403 target_not_allowed"
+    ],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     },
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReviewNotes"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Accept a returned handoff",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HandoffState"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "SelfOrProjectLead",
+    "x-target-note": "T.worker = the creator; \"never the author\" is the handler's own check (self_review_forbidden)",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/handoffs/{id}/rework": {
+   "post": {
+    "operationId": "handoffs.rework",
+    "tags": [
+     "handoffs"
+    ],
+    "summary": "Send a returned handoff back (notes required; same worker; round + 1). Reviewer rules as accept",
+    "x-piece": "handoffs",
+    "x-scope": "handoff:review",
+    "x-class": "work",
+    "x-mutates": true,
+    "x-cli": "cortex handoff rework <id> --notes <text>   (alias: cortex-handoff --return <id> --decision rework)",
+    "x-v1": "POST /handoffs/{id}/rework",
+    "x-errors": [
+     "404 not_found",
+     "409 invalid_transition",
+     "422 notes_required",
+     "403 self_review_forbidden",
+     "403 target_not_allowed"
+    ],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     },
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReviewNotesRequired"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Send a returned handoff back (notes required; same worker; round + 1)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HandoffState"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "SelfOrProjectLead",
+    "x-target-note": "T.worker = the creator; \"never the author\" is the handler's own check (self_review_forbidden)",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/handoffs/{id}/cancel": {
+   "post": {
+    "operationId": "handoffs.cancel",
+    "tags": [
+     "handoffs"
+    ],
+    "summary": "Cancel an open handoff (pending, claimed or returned): its creator, the project lead, or the team lead of the WORKER ADDRESSEE's team at cancel time (a job_role addressee has no team); reason required (kai 120d490d)",
+    "x-piece": "handoffs",
+    "x-scope": "handoff:manage",
+    "x-class": "work",
+    "x-mutates": true,
+    "x-cli": "cortex handoff cancel <id> --reason <text>",
+    "x-v1": "POST /handoffs/{id}/cancel",
+    "x-errors": [
+     "404 not_found",
+     "409 invalid_transition",
+     "422 reason_required",
+     "403 target_not_allowed"
+    ],
+    "x-max-body": 16384,
+    "parameters": [
+     {
+      "name": "id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "description": "malformed, unknown or another project's: 404 not_found (R-5)"
+     },
+     {
+      "$ref": "#/components/parameters/IdempotencyKey"
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Reason"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Cancel an open handoff (pending, claimed or returned): its creator, the project lead, or the team lead of the WORKER ADDRESSEE's team at cancel time (a job_role addressee has no team); reason required (kai 120d490d)",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       },
+       "Cortex-Idempotent-Replay": {
+        "$ref": "#/components/headers/Cortex-Idempotent-Replay"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HandoffState"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "404": {
+      "$ref": "#/components/responses/NotFound"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "428": {
+      "$ref": "#/components/responses/IdempotencyKeyRequired"
+     },
+     "413": {
+      "$ref": "#/components/responses/BodyTooLarge"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "Lineage",
+    "x-target-note": "Lineage with Target{worker: the creator, kind: worker, team: the worker addressee's team at cancel time (None for a job_role addressee), lead}: the creator, the team lead of that team, or the project lead (kai 120d490d; sophi keeps the name, Q-12; a team lead who is the addressee may cancel, Q-13)",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  },
+  "/v2/boot": {
+   "get": {
+    "operationId": "boot.get",
+    "tags": [
+     "boot"
+    ],
+    "summary": "The briefing: identity, orientation, the rules in force as POINTERS (section, revision, sha256, source path), claimed handoffs, pending handoffs addressed to me, with per-section budget accounting. A budget below what the floor needs (4096 bytes) is 422 boot_budget_too_small with needed and budget in detail (R-13)",
+    "x-piece": "boot",
+    "x-scope": "self:read",
+    "x-class": "self",
+    "x-mutates": false,
+    "x-cli": "cortex boot [--budget N] [--format md|json]",
+    "x-v1": "cortex-boot",
+    "x-errors": [
+     "422 boot_budget_too_small"
+    ],
+    "parameters": [
+     {
+      "name": "budget",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "maximum": 262144,
+       "default": 12288,
+       "description": "bytes; over 262144 is 422 invalid_request; below the floor is 422 boot_budget_too_small (no schema minimum: only boot can compute needed)"
+      }
+     },
+     {
+      "name": "format",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "enum": [
+        "md",
+        "json"
+       ],
+       "default": "md"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "The briefing: identity, orientation, the rules in force as POINTERS (section, revision, sha256, source path), claimed handoffs, pending handoffs addressed to me, with per-section budget accounting",
+      "headers": {
+       "Cortex-Request-Id": {
+        "$ref": "#/components/headers/Cortex-Request-Id"
+       },
+       "Cortex-Token-Expires": {
+        "$ref": "#/components/headers/Cortex-Token-Expires"
+       },
+       "Cortex-Token-Renew": {
+        "$ref": "#/components/headers/Cortex-Token-Renew"
+       }
+      },
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Boot"
+        }
+       },
+       "text/markdown; charset=utf-8": {
+        "schema": {
+         "type": "string"
+        }
+       }
+      }
+     },
+     "401": {
+      "$ref": "#/components/responses/Unauthenticated"
+     },
+     "403": {
+      "$ref": "#/components/responses/Forbidden"
+     },
+     "422": {
+      "$ref": "#/components/responses/Unprocessable"
+     },
+     "429": {
+      "$ref": "#/components/responses/Busy"
+     },
+     "503": {
+      "$ref": "#/components/responses/Unavailable"
+     },
+     "default": {
+      "$ref": "#/components/responses/Problem"
+     }
+    },
+    "x-target": "None",
+    "security": [
+     {
+      "workerToken": []
+     }
+    ]
+   }
+  }
+ },
+ "components": {
+  "securitySchemes": {
+   "workerToken": {
+    "type": "http",
+    "scheme": "bearer",
+    "description": "An AI Worker's own token. Only its digest is stored (mod-tokens); the raw token never appears in logs,\nrecords, errors or stored idempotent replays (vera's promise 3). Tokens are bound to one project.\n"
+   }
+  },
+  "parameters": {
+   "IdempotencyKey": {
+    "name": "Idempotency-Key",
+    "in": "header",
+    "required": true,
+    "description": "Required on every mutating route (x-mutates: true). 8 to 128 printable ASCII characters, 0x20 to 0x7E (S2:549; cortex-db idempotency.rs:56). The CLI and cortex-client generate a UUIDv7 per logical operation and reuse it on retry. Bound to (project, principal, METHOD + CONCRETE PATH with every path id, body hash: RFC 8785 canonical JSON). Same key, path and body: the stored status and body are replayed (after the target check, R-19) with Cortex-Idempotent-Replay: true and nothing happens twice. Same key with a different path id or body: 422 idempotency_key_reused. Missing: 428 idempotency_key_required. Two Idempotency-Key headers, or a value outside 8-128 or not printable ASCII: 400 invalid_request (chain step 9; mira M3). Replays are kept 24 hours. Authentication runs before a replay (R-11).\n",
+    "schema": {
+     "type": "string",
+     "minLength": 8,
+     "maxLength": 128,
+     "pattern": "^[\\x20-\\x7E]+$"
+    }
+   }
+  },
+  "headers": {
+   "Cortex-Request-Id": {
+    "description": "Every response, errors included: a new UUIDv7 per response. A client-sent Cortex-Request-Id is ignored (H-04).",
+    "schema": {
+     "type": "string",
+     "format": "uuid"
+    }
+   },
+   "Cortex-Token-Expires": {
+    "description": "Token-authenticated successes: when the PRESENTED token expires (RFC 3339). On tokens.issue this is the caller's token, not the new one.",
+    "schema": {
+     "type": "string",
+     "format": "date-time"
+    }
+   },
+   "Cortex-Token-Renew": {
+    "description": "Token-authenticated successes inside the presented token's renewal window; the value is \"due\".",
+    "schema": {
+     "type": "string",
+     "enum": [
+      "due"
+     ]
+    }
+   },
+   "Cortex-Idempotent-Replay": {
+    "description": "On a replayed success of a mutating route; the value is \"true\". Absent on a first answer.",
+    "schema": {
+     "type": "string",
+     "enum": [
+      "true"
+     ]
+    }
+   },
+   "Cache-Control": {
+    "description": "On every refusal: \"no-store\".",
+    "schema": {
+     "type": "string",
+     "enum": [
+      "no-store"
+     ]
+    }
+   },
+   "WWW-Authenticate": {
+    "description": "On every 401: \"Bearer\".",
+    "schema": {
+     "type": "string",
+     "enum": [
+      "Bearer"
+     ]
+    }
+   },
+   "Retry-After": {
+    "description": "On every 429: \"1\" (seconds).",
+    "schema": {
+     "type": "string",
+     "enum": [
+      "1"
+     ]
+    }
+   }
+  },
+  "schemas": {
+   "Problem": {
+    "type": "object",
+    "description": "application/problem+json (CONTRACTS r7 :420; cortex-http problem.rs at 0b13f10b). Never carries a raw token, a record body or another project's data. The codes are in x-error-codes; a code is minted once, and a duplicate or a collision with a platform code is refused at startup (CONTRACTS r7 :434). No extension members in 0.2.001 (R-13).\n",
+    "required": [
+     "type",
+     "title",
+     "status",
+     "fix",
+     "request_id"
+    ],
+    "properties": {
+     "type": {
+      "type": "string",
+      "description": "the bare problem code (cortex-types ProblemType), e.g. not_found"
+     },
+     "title": {
+      "type": "string"
+     },
+     "status": {
+      "type": "integer"
+     },
+     "detail": {
+      "type": "string",
+      "description": "dynamic text: may name the field the client sent and, for boot_budget_too_small, the needed and budget byte counts (R-13); never a body, a secret or another project's data"
+     },
+     "fix": {
+      "type": "string",
+      "description": "what the caller can do: fixed text per code (F1-24)"
+     },
+     "request_id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "scope": {
+      "type": "string",
+      "enum": [
+       "install",
+       "project"
+      ],
+      "description": "on a 503 admission refusal, which admission refused (CONTRACTS r7 :424, :426)"
+     }
+    }
+   },
+   "Ok": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "ok"
+    ],
+    "properties": {
+     "ok": {
+      "type": "boolean"
+     }
+    }
+   },
+   "Id": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid"
+     }
+    }
+   },
+   "Reason": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [],
+    "properties": {
+     "reason": {
+      "type": "string",
+      "maxLength": 512,
+      "x-max-bytes": 512,
+      "description": "free text, 1-512 bytes; absent or empty is 422 reason_required"
+     }
+    },
+    "x-handler-required": {
+     "reason": "reason_required"
+    }
+   },
+   "TokenRevoke": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [],
+    "properties": {
+     "reason": {
+      "type": "string",
+      "pattern": "^[a-z][a-z_]{0,31}$",
+      "maxLength": 32,
+      "x-max-bytes": 32,
+      "x-label": "revoke_code",
+      "not": {
+       "enum": [
+        "superseded",
+        "reissued",
+        "retired",
+        "replaced_unused"
+       ]
+      },
+      "description": "a reason CODE, e.g. lost, compromised, rotated (stored in tokens.revoke_reason, a code column: tokens.sql:24); absent is 422 reason_required. The four SYSTEM codes superseded, reissued, retired and replaced_unused are assigned by the server and cannot be sent: 422 invalid_request at step 0 (OQ-T4)"
+     }
+    },
+    "x-handler-required": {
+     "reason": "reason_required"
+    }
+   },
+   "Release": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [],
+    "properties": {
+     "reason": {
+      "type": "string",
+      "maxLength": 512,
+      "x-max-bytes": 512,
+      "description": "required when the project lead releases another worker's claim (422 reason_required); optional for the holder"
+     }
+    },
+    "x-handler-required": {
+     "reason": "reason_required (only when the project lead releases another worker's claim)"
+    }
+   },
+   "Health": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "state",
+     "version",
+     "ready",
+     "pieces",
+     "backup"
+    ],
+    "properties": {
+     "state": {
+      "type": "string"
+     },
+     "version": {
+      "type": "string",
+      "description": "SemVer machine version, e.g. 0.2.1"
+     },
+     "ready": {
+      "type": "boolean"
+     },
+     "pieces": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": false,
+       "required": [
+        "name",
+        "enabled",
+        "ready"
+       ],
+       "properties": {
+        "name": {
+         "type": "string"
+        },
+        "enabled": {
+         "type": "boolean"
+        },
+        "ready": {
+         "type": "boolean"
+        }
+       }
+      }
+     },
+     "last_good_dump_at": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "date-time"
+     },
+     "backup": {
+      "type": "string",
+      "enum": [
+       "ok",
+       "stale",
+       "none"
+      ],
+      "description": "stale = more than 26 h since the last good dump; none = never dumped (nix BK-08)"
+     }
+    },
+    "description": "Installation-level state only, no project data. OPEN BY DESIGN: the one explicit health exception of vera's boundaries; carrying the backup state here is intended (nix; for vera and mike to confirm in their pass)."
+   },
+   "Project": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "name"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "name": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9-]{0,31}$",
+      "maxLength": 32,
+      "x-max-bytes": 32,
+      "x-label": "name"
+     }
+    }
+   },
+   "Team": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "name"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "name": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9-]{0,31}$",
+      "maxLength": 32,
+      "x-max-bytes": 32,
+      "x-label": "name"
+     },
+     "lead": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "uuid"
+     }
+    }
+   },
+   "TeamPage": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "items",
+     "next"
+    ],
+    "properties": {
+     "items": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Team"
+      }
+     },
+     "next": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "cursor for after=; null on the last page"
+     }
+    },
+    "description": "One page (R-8). Order: name, then id"
+   },
+   "TeamCreate": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "name"
+    ],
+    "properties": {
+     "name": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9-]{0,31}$",
+      "maxLength": 32,
+      "x-max-bytes": 32,
+      "x-label": "name",
+      "x-code": "name_invalid"
+     }
+    }
+   },
+   "Worker": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "name",
+     "kind",
+     "state",
+     "role"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "name": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9-]{0,31}$",
+      "maxLength": 32,
+      "x-max-bytes": 32,
+      "x-label": "name"
+     },
+     "kind": {
+      "type": "string",
+      "enum": [
+       "worker",
+       "service"
+      ]
+     },
+     "state": {
+      "type": "string",
+      "enum": [
+       "active",
+       "retired"
+      ]
+     },
+     "team": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "uuid"
+     },
+     "role": {
+      "type": "string",
+      "enum": [
+       "project_lead",
+       "team_lead",
+       "member"
+      ]
+     },
+     "job_roles": {
+      "type": "array",
+      "items": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9-]{0,31}$",
+       "maxLength": 32,
+       "x-max-bytes": 32,
+       "x-label": "job_role"
+      },
+      "maxItems": 8,
+      "uniqueItems": true,
+      "x-code": "job_roles_invalid"
+     },
+     "mode": {
+      "type": "string",
+      "enum": [
+       "model",
+       "deterministic"
+      ]
+     }
+    }
+   },
+   "WorkerPage": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "items",
+     "next"
+    ],
+    "properties": {
+     "items": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Worker"
+      }
+     },
+     "next": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "cursor for after=; null on the last page"
+     }
+    },
+    "description": "One page (R-8). Order: name, then id; retired workers are never listed in 0.2.001 (Q-2)"
+   },
+   "WorkerCreate": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "name",
+     "kind"
+    ],
+    "properties": {
+     "name": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9-]{0,31}$",
+      "maxLength": 32,
+      "x-max-bytes": 32,
+      "x-label": "name",
+      "x-code": "name_invalid"
+     },
+     "kind": {
+      "type": "string",
+      "enum": [
+       "worker"
+      ],
+      "description": "service is refused in 0.2.001 (R-12, sophi ID-12)"
+     },
+     "job_roles": {
+      "type": "array",
+      "items": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9-]{0,31}$",
+       "maxLength": 32,
+       "x-max-bytes": 32,
+       "x-label": "job_role"
+      },
+      "maxItems": 8,
+      "uniqueItems": true,
+      "x-code": "job_roles_invalid"
+     },
+     "mode": {
+      "type": "string",
+      "enum": [
+       "model",
+       "deterministic"
+      ]
+     },
+     "team": {
+      "type": "string",
+      "format": "uuid"
+     }
+    }
+   },
+   "TeamAssign": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "team",
+     "role"
+    ],
+    "properties": {
+     "team": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "role": {
+      "type": "string",
+      "enum": [
+       "member",
+       "team_lead"
+      ]
+     },
+     "job_roles": {
+      "type": "array",
+      "items": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9-]{0,31}$",
+       "maxLength": 32,
+       "x-max-bytes": 32,
+       "x-label": "job_role"
+      },
+      "maxItems": 8,
+      "uniqueItems": true,
+      "x-code": "job_roles_invalid"
+     }
+    }
+   },
+   "Whoami": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "installation",
+     "project",
+     "worker",
+     "kind",
+     "role",
+     "token_id",
+     "expires_at"
+    ],
+    "properties": {
+     "installation": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "project": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "worker": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "name": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9-]{0,31}$",
+      "maxLength": 32,
+      "x-max-bytes": 32,
+      "x-label": "name"
+     },
+     "kind": {
+      "type": "string",
+      "enum": [
+       "worker",
+       "service"
+      ]
+     },
+     "role": {
+      "type": "string",
+      "enum": [
+       "project_lead",
+       "team_lead",
+       "member"
+      ]
+     },
+     "team": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "uuid"
+     },
+     "job_roles": {
+      "type": "array",
+      "items": {
+       "type": "string",
+       "pattern": "^[a-z][a-z0-9-]{0,31}$",
+       "maxLength": 32,
+       "x-max-bytes": 32,
+       "x-label": "job_role"
+      }
+     },
+     "token_id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "expires_at": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "renew_due": {
+      "type": "boolean"
+     }
+    }
+   },
+   "IssuedToken": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "token",
+     "token_id",
+     "expires_at"
+    ],
+    "properties": {
+     "token": {
+      "type": "string",
+      "pattern": "^ctx2_[0-9a-f]{32}[.][A-Za-z0-9_-]{43}$",
+      "description": "the SECRET, shown once; never logged, stored or replayed. The pattern lets clients and the leak scan recognise one (finn 3)."
+     },
+     "token_id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "the NEW token's expiry (Cortex-Token-Expires is the caller's)"
+     }
+    }
+   },
+   "TokenMeta": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "token_id",
+     "worker",
+     "issued_at",
+     "expires_at",
+     "state"
+    ],
+    "properties": {
+     "token_id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "worker": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "issued_at": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "expires_at": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "last_used_at": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "date-time"
+     },
+     "state": {
+      "type": "string",
+      "enum": [
+       "active",
+       "revoked",
+       "superseded",
+       "expired"
+      ],
+      "description": "superseded for the reasons superseded, reissued and replaced_unused; revoked for every other reason code (OQ-T4)"
+     },
+     "revoke_reason": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "a code"
+     }
+    },
+    "description": "Never a digest or a secret."
+   },
+   "TokenPage": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "items",
+     "next"
+    ],
+    "properties": {
+     "items": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/TokenMeta"
+      }
+     },
+     "next": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "cursor for after=; null on the last page"
+     }
+    },
+    "description": "One page (R-8). Order: issued_at, then token_id; a team lead sees its own team's workers' tokens only"
+   },
+   "AuditRecord": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "at",
+     "action",
+     "actor_kind",
+     "outcome"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUIDv7, time-ordered"
+     },
+     "at": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "action": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.:-]{0,63}$",
+      "maxLength": 64,
+      "x-max-bytes": 64,
+      "x-label": "audit_action"
+     },
+     "actor_kind": {
+      "type": "string",
+      "enum": [
+       "worker",
+       "service",
+       "human",
+       "system",
+       "host"
+      ]
+     },
+     "actor_id": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "worker or service id, <source>:<id> for a human, module id for system"
+     },
+     "target": {
+      "type": "object"
+     },
+     "outcome": {
+      "type": "string",
+      "enum": [
+       "allowed",
+       "denied"
+      ]
+     },
+     "request_id": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "uuid"
+     },
+     "details": {
+      "type": "object",
+      "description": "IDs, names, from/to state and reason CODES only; never a body, a secret or free text"
+     }
+    },
+    "description": "S2 audit.sql (459ca5c9) columns. PLAIN in 0.2.001: no chain id, no seq, no hash (marv)."
+   },
+   "AuditPage": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "items",
+     "next"
+    ],
+    "properties": {
+     "items": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/AuditRecord"
+      }
+     },
+     "next": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "cursor for after=; null on the last page"
+     }
+    },
+    "description": "One page (R-8). Order: (at, id) ascending"
+   },
+   "Source": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "kind",
+     "ref"
+    ],
+    "properties": {
+     "kind": {
+      "type": "string",
+      "enum": [
+       "conversation",
+       "file",
+       "url",
+       "worker"
+      ]
+     },
+     "ref": {
+      "type": "string",
+      "maxLength": 2048,
+      "x-max-bytes": 2048,
+      "minLength": 1
+     },
+     "span": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "minLength": 1,
+      "maxLength": 512,
+      "x-max-bytes": 512,
+      "description": "reserved: written NULL in 0.2.001; validated from the mod-records span release; when present 1-512 bytes (nemo 9)"
+     }
+    }
+   },
+   "RecordCreate": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "type",
+     "summary"
+    ],
+    "properties": {
+     "type": {
+      "type": "string",
+      "enum": [
+       "decision",
+       "lesson",
+       "note",
+       "status",
+       "question",
+       "blocker",
+       "knowledge",
+       "conversation",
+       "work-product",
+       "human-message",
+       "drill-canary",
+       "drill"
+      ],
+      "description": "S2 3.1 types. human-message, drill-canary, drill AND conversation are RESERVED in 0.2.001: 422 type_reserved (nemo 1; conversation has no subtype in S3 yet: CHANGES section 19)"
+     },
+     "summary": {
+      "type": "string",
+      "maxLength": 512,
+      "x-max-bytes": 512,
+      "minLength": 1
+     },
+     "body": {
+      "type": "string",
+      "x-max-bytes": 262144,
+      "description": "262144 bytes (4194304 for conversation); over is 422 invalid_request (nemo 2)"
+     },
+     "fields": {
+      "type": "object",
+      "description": "at most 65536 bytes as stored (nemo 3)"
+     },
+     "source": {
+      "$ref": "#/components/schemas/Source"
+     },
+     "affects": {
+      "type": "array",
+      "items": {
+       "type": "string",
+       "format": "uuid"
+      },
+      "maxItems": 256,
+      "uniqueItems": true,
+      "description": "at most 256 items and no duplicates (cox W1-19: every item is a platform.refs row of kind affects, keyed (from_id, to_id, kind)); a violation is 422 invalid_request at step 0, in this order: count, uuid format, uniqueness"
+     },
+     "reply_to": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "handoff_id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "section": {
+      "type": "string",
+      "maxLength": 128,
+      "x-max-bytes": 128,
+      "pattern": "^(rules-project|rules-worker:[0-9a-f-]{36}|orientation)$",
+      "x-code": "section_invalid",
+      "description": "rules-project | rules-worker:<id> | orientation (reserved; written by the project lead only: CHANGES section 19); project-brief is deferred; anything else is 422 section_invalid"
+     },
+     "valid_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 date-time ONLY under the date-time rule (x-notes.datetime-rule): infinity, epoch, now, a date only, an offset outside -12:00..+14:00, a year before 1970 are 422 invalid_request."
+     }
+    },
+    "description": "Type rules: decision needs fields.why (why_required); knowledge needs source (source_required) except in the reserved sections; work-product needs fields.files (files_required). The owner of a knowledge record is its author in 0.2.001 (CONFIRMED by kai, 5c219116, on nemo 7): fields.owner is not required; the S2 pack keeps an OPTIONAL (nullable) owner column, so an explicit owner later is additive; a recorded deviation from S2 r9 s3.1/s3.6 beside D-13. affects, reply_to and handoff_id that name nothing in this project: 404 (R-5). CONDITIONAL (S2 records.records CHECKs; kai 25d694b1): source is REQUIRED for type knowledge, except in the reserved sections (rules-project, rules-worker:<id>, orientation), which waive it (422 source_required); source is FORBIDDEN for every other type (422 source_not_allowed), not silently ignored.",
+    "allOf": [
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "knowledge"
+        }
+       },
+       "required": [
+        "type"
+       ]
+      },
+      "then": {
+       "x-code": "source_required",
+       "anyOf": [
+        {
+         "required": [
+          "source"
+         ]
+        },
+        {
+         "required": [
+          "section"
+         ],
+         "properties": {
+          "section": {
+           "pattern": "^(rules-project|rules-worker:[0-9a-f-]{36}|orientation)$"
+          }
+         }
+        }
+       ]
+      },
+      "else": {
+       "x-code": "source_not_allowed",
+       "not": {
+        "required": [
+         "source"
+        ]
+       }
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "section": {
+         "const": "orientation"
+        }
+       },
+       "required": [
+        "section"
+       ]
+      },
+      "then": {
+       "required": [
+        "body",
+        "fields"
+       ],
+       "properties": {
+        "type": {
+         "const": "knowledge"
+        },
+        "body": {
+         "maxLength": 3072
+        },
+        "fields": {
+         "type": "object",
+         "required": [
+          "reading_path"
+         ],
+         "properties": {
+          "reading_path": {
+           "type": "array",
+           "minItems": 5,
+           "maxItems": 10,
+           "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^/[^\\x00-\\x1f\\x7f]*$",
+            "allOf": [
+             {
+              "maxLength": 256,
+              "x-max-bytes": 256,
+              "x-code": "locator_too_long"
+             }
+            ]
+           }
+          }
+         }
+        }
+       },
+       "description": "ORIENTATION (S2 r9 section 3): type knowledge, written by the project lead only (403 section_reserved otherwise), source waived; body at most 3072 bytes; fields.reading_path[] REQUIRED with 5 to 10 entries, each at most 256 bytes (over 256: 422 locator_too_long; any other violation: 422 invalid_request), starting with / and with no control character"
+      }
+     },
+     {
+      "if": {
+       "required": [
+        "section"
+       ]
+      },
+      "then": {
+       "properties": {
+        "type": {
+         "const": "knowledge"
+        }
+       },
+       "x-code": "invalid_request",
+       "description": "a record in a reserved section is ONLY type knowledge (CHANGES section 22, S2 r9): anything else is 422 invalid_request at step 0, so a note in rules-project can never become a rule"
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "work-product"
+        }
+       },
+       "required": [
+        "type"
+       ]
+      },
+      "then": {
+       "required": [
+        "fields"
+       ],
+       "properties": {
+        "fields": {
+         "type": "object",
+         "required": [
+          "files"
+         ],
+         "properties": {
+          "files": {
+           "type": "array",
+           "allOf": [
+            {
+             "minItems": 1,
+             "x-code": "files_required"
+            }
+           ],
+           "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+            "allOf": [
+             {
+              "maxLength": 1024,
+              "x-max-bytes": 1024,
+              "x-code": "locator_too_long"
+             }
+            ]
+           }
+          }
+         }
+        }
+       },
+       "description": "WORK-PRODUCT (cox W1-15, kai 09638b3f; KOS receipts): fields.files is a NON-EMPTY array of strings, each 1 to 1024 bytes (UTF-8), no control character and no NUL, no uniqueness rule, no item-count limit of its own (the 65536-byte fields limit bounds the whole). Absent or an EMPTY array: 422 files_required; not an array, a non-string, empty or control-character item: 422 invalid_request; an item over 1024 bytes: 422 locator_too_long (length first)"
+      }
+     }
+    ]
+   },
+   "RecordRef": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "created_at"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "section_revision": {
+      "type": [
+       "integer",
+       "null"
+      ]
+     }
+    }
+   },
+   "Lineage": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "reason",
+     "by_kind",
+     "by_id",
+     "at"
+    ],
+    "properties": {
+     "reason": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "by_kind": {
+      "type": "string"
+     },
+     "by_id": {
+      "type": "string"
+     },
+     "at": {
+      "type": "string",
+      "format": "date-time"
+     }
+    },
+    "description": "the latest lineage change (records.state)"
+   },
+   "Record": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "type",
+     "summary",
+     "state",
+     "created_at",
+     "author_kind",
+     "author",
+     "provenance"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "type": {
+      "type": "string",
+      "enum": [
+       "decision",
+       "lesson",
+       "note",
+       "status",
+       "question",
+       "blocker",
+       "knowledge",
+       "conversation",
+       "work-product",
+       "human-message",
+       "drill-canary",
+       "drill"
+      ]
+     },
+     "summary": {
+      "type": "string"
+     },
+     "body": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "fields": {
+      "type": "object"
+     },
+     "source": {
+      "oneOf": [
+       {
+        "$ref": "#/components/schemas/Source"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "state": {
+      "type": "string",
+      "enum": [
+       "active",
+       "superseded",
+       "invalidated"
+      ]
+     },
+     "superseded_by": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "uuid"
+     },
+     "lineage": {
+      "oneOf": [
+       {
+        "$ref": "#/components/schemas/Lineage"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "author_kind": {
+      "type": "string",
+      "enum": [
+       "worker",
+       "service",
+       "human",
+       "system"
+      ]
+     },
+     "author": {
+      "type": "string",
+      "description": "worker uuid, <source>:<id> for a human, module id for the system (nemo 4)"
+     },
+     "provenance": {
+      "type": "string",
+      "enum": [
+       "worker_written",
+       "kos_attested",
+       "host_attested",
+       "imported",
+       "system_written"
+      ]
+     },
+     "reply_to": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "uuid"
+     },
+     "handoff_id": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "uuid"
+     },
+     "valid_until": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "date-time"
+     },
+     "section": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "section_revision": {
+      "type": [
+       "integer",
+       "null"
+      ]
+     }
+    }
+   },
+   "Supersede": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "by"
+    ],
+    "properties": {
+     "by": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "reason": {
+      "type": "string",
+      "maxLength": 512,
+      "x-max-bytes": 512,
+      "description": "free text, 1-512 bytes (records.state.reason); absent or empty is 422 reason_required"
+     }
+    },
+    "x-handler-required": {
+     "reason": "reason_required"
+    }
+   },
+   "Invalidate": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [],
+    "properties": {
+     "reason": {
+      "type": "string",
+      "maxLength": 512,
+      "x-max-bytes": 512,
+      "description": "free text, 1-512 bytes, required for an invalidation AND an undo (422 reason_required)"
+     },
+     "undo": {
+      "type": "boolean"
+     }
+    },
+    "x-handler-required": {
+     "reason": "reason_required"
+    }
+   },
+   "LineageState": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "state"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "state": {
+      "type": "string",
+      "enum": [
+       "active",
+       "superseded",
+       "invalidated"
+      ]
+     }
+    }
+   },
+   "SectionPointer": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "section",
+     "record_id",
+     "revision",
+     "sha256"
+    ],
+    "properties": {
+     "section": {
+      "type": "string"
+     },
+     "record_id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "revision": {
+      "type": "integer"
+     },
+     "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+     },
+     "source_path": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "from the revision's fields.source_path, so a worker can check what it read (tate M5a)"
+     }
+    }
+   },
+   "SearchRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "query"
+    ],
+    "properties": {
+     "query": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "x-code": "query_too_long",
+      "description": "1-1000 CHARACTERS (the one limit in characters, nix D-11); over 1000 is 422 query_too_long, empty is 422 invalid_request"
+     },
+     "mode": {
+      "type": "string",
+      "enum": [
+       "keyword"
+      ],
+      "default": "keyword"
+     },
+     "types": {
+      "type": "array",
+      "items": {
+       "type": "string",
+       "enum": [
+        "decision",
+        "lesson",
+        "note",
+        "status",
+        "question",
+        "blocker",
+        "knowledge",
+        "conversation",
+        "work-product",
+        "human-message",
+        "drill-canary",
+        "drill"
+       ]
+      },
+      "uniqueItems": true
+     },
+     "since": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "until": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 50,
+      "default": 10
+     },
+     "include_history": {
+      "type": "boolean"
+     }
+    },
+    "description": "The interval is [since, until): since inclusive, until exclusive; since after until is 422 invalid_request; since equal to until is an empty result (nix 3)."
+   },
+   "SearchHit": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "type",
+     "summary",
+     "rank",
+     "created_at",
+     "state",
+     "truncated"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "type": {
+      "type": "string"
+     },
+     "summary": {
+      "type": "string"
+     },
+     "rank": {
+      "type": "number"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "state": {
+      "type": "string"
+     },
+     "truncated": {
+      "type": "boolean",
+      "description": "the body was cut for indexing (tsv_truncated)"
+     }
+    }
+   },
+   "SearchResult": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "hits",
+     "mode"
+    ],
+    "properties": {
+     "hits": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/SearchHit"
+      }
+     },
+     "mode": {
+      "type": "string"
+     }
+    },
+    "description": "Order: rank descending, then created_at descending, then id."
+   },
+   "Addressee": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "kind",
+     "ref"
+    ],
+    "properties": {
+     "kind": {
+      "type": "string",
+      "enum": [
+       "worker",
+       "job_role"
+      ],
+      "description": "team and human are refused by decoding in 0.2.001 (422 invalid_request; bob 8)"
+     },
+     "ref": {
+      "type": "string",
+      "maxLength": 256,
+      "x-max-bytes": 256,
+      "minLength": 1,
+      "description": "worker: a worker of this project (else 404, R-5; retired: 409 target_retired); job_role: a label on the job-role grammar (R-15, R-18; outside it 422 invalid_request at step 0) that some active worker holds (else 422 unknown_addressee)"
+     }
+    }
+   },
+   "HandoffCreate": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "kind",
+     "to"
+    ],
+    "properties": {
+     "kind": {
+      "type": "string",
+      "enum": [
+       "task",
+       "consult"
+      ]
+     },
+     "to": {
+      "$ref": "#/components/schemas/Addressee"
+     },
+     "summary": {
+      "type": "string",
+      "maxLength": 2048,
+      "x-max-bytes": 2048
+     },
+     "next_action": {
+      "type": "string",
+      "maxLength": 8192,
+      "x-max-bytes": 8192
+     },
+     "acceptance": {
+      "type": "string",
+      "maxLength": 8192,
+      "x-max-bytes": 8192
+     },
+     "verify": {
+      "type": "string",
+      "maxLength": 8192,
+      "x-max-bytes": 8192
+     },
+     "context": {
+      "type": "string",
+      "maxLength": 8192,
+      "x-max-bytes": 8192
+     },
+     "files": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "blockers": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "decisions": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "priority": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 50,
+      "description": "larger is more urgent"
+     },
+     "due_at": {
+      "type": "string",
+      "format": "date-time"
+     }
+    },
+    "description": "No incarnation in any request body in 0.2.001. files + blockers + decisions together at most 65536 bytes (R-1).",
+    "x-handler-required": {
+     "summary": "packet_incomplete",
+     "next_action": "packet_incomplete",
+     "acceptance": "packet_incomplete"
+    },
+    "x-aggregate-max-bytes": {
+     "fields": [
+      "files",
+      "blockers",
+      "decisions"
+     ],
+     "max": 65536,
+     "source": "S2 handoffs.handoffs table CHECK on the three jsonb columns together; over it is 422 invalid_request. THE ARITHMETIC IS S2's (cox, bob 12:06Z): octet_length of the jsonb TEXT of each array, so [\"x\"] counts the element plus its quotes and brackets and a comma-space counts 2; S2 wins where the two disagree"
+    }
+   },
+   "HandoffRef": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "state"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "state": {
+      "type": "string"
+     }
+    }
+   },
+   "Review": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "decision",
+     "by",
+     "at",
+     "self_review"
+    ],
+    "properties": {
+     "decision": {
+      "type": "string",
+      "enum": [
+       "accept",
+       "rework"
+      ]
+     },
+     "by": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "at": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "notes": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "self_review": {
+      "type": "boolean",
+      "description": "true only when the author is also the creator and the project lead; show prints \"self-reviewed (no independent reviewer)\""
+     }
+    }
+   },
+   "EvidenceRef": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "kind",
+     "sha256",
+     "size"
+    ],
+    "properties": {
+     "kind": {
+      "type": "string",
+      "enum": [
+       "test",
+       "output",
+       "review",
+       "artifact",
+       "link"
+      ]
+     },
+     "ref": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+     },
+     "size": {
+      "type": "integer",
+      "minimum": 0
+     }
+    },
+    "description": "Evidence as stored: no inline bytes."
+   },
+   "ReturnReport": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "round",
+     "author",
+     "summary",
+     "risks",
+     "tests",
+     "evidence",
+     "at"
+    ],
+    "properties": {
+     "round": {
+      "type": "integer"
+     },
+     "author": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "summary": {
+      "type": "string"
+     },
+     "risks": {
+      "type": "string"
+     },
+     "tests": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "evidence": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/EvidenceRef"
+      }
+     },
+     "at": {
+      "type": "string",
+      "format": "date-time"
+     }
+    },
+    "description": "What the holder returned, so the reviewer is not blind (bob 1)."
+   },
+   "Handoff": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "kind",
+     "state",
+     "to",
+     "summary",
+     "next_action",
+     "acceptance",
+     "created_by",
+     "created_at",
+     "round",
+     "priority"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "kind": {
+      "type": "string",
+      "enum": [
+       "task",
+       "consult"
+      ]
+     },
+     "state": {
+      "type": "string",
+      "enum": [
+       "pending",
+       "claimed",
+       "returned",
+       "accepted",
+       "cancelled"
+      ]
+     },
+     "to": {
+      "$ref": "#/components/schemas/Addressee"
+     },
+     "summary": {
+      "type": "string"
+     },
+     "next_action": {
+      "type": "string"
+     },
+     "acceptance": {
+      "type": "string"
+     },
+     "verify": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "context": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "files": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "blockers": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "decisions": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "priority": {
+      "type": "integer"
+     },
+     "due_at": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "date-time"
+     },
+     "holder": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "uuid"
+     },
+     "created_by": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "round": {
+      "type": "integer"
+     },
+     "closed_at": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "date-time"
+     },
+     "close_reason": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "latest_return": {
+      "oneOf": [
+       {
+        "$ref": "#/components/schemas/ReturnReport"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "latest_review": {
+      "oneOf": [
+       {
+        "$ref": "#/components/schemas/Review"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "closed_by": {
+      "oneOf": [
+       {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+         "kind",
+         "id"
+        ],
+        "properties": {
+         "kind": {
+          "type": "string",
+          "enum": [
+           "worker",
+           "service",
+           "system",
+           "host"
+          ]
+         },
+         "id": {
+          "type": "string"
+         }
+        }
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "the actor of the transition that closed the handoff (the reviewer for accepted, the canceller for cancelled); null while open (kai 32f893de)"
+     }
+    }
+   },
+   "HandoffPage": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "items",
+     "next"
+    ],
+    "properties": {
+     "items": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Handoff"
+      }
+     },
+     "next": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "cursor for after=; null on the last page"
+     }
+    },
+    "description": "One page (R-8). Order: priority descending (larger first), then created_at ascending, then id (bob Q-8, HAND-25)"
+   },
+   "HandoffState": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "state",
+     "round"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "state": {
+      "type": "string"
+     },
+     "round": {
+      "type": "integer"
+     }
+    }
+   },
+   "Evidence": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "kind",
+     "sha256"
+    ],
+    "properties": {
+     "kind": {
+      "type": "string",
+      "enum": [
+       "test",
+       "output",
+       "review",
+       "artifact",
+       "link"
+      ]
+     },
+     "ref": {
+      "type": "string",
+      "maxLength": 2048,
+      "x-max-bytes": 2048,
+      "minLength": 1
+     },
+     "inline_b64": {
+      "type": "string",
+      "contentEncoding": "base64",
+      "description": "at most 1 MiB decoded per entry and per return (bob 3)"
+     },
+     "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "of the inline bytes when present; a mismatch is 422 evidence_hash_mismatch"
+     }
+    },
+    "oneOf": [
+     {
+      "required": [
+       "ref"
+      ]
+     },
+     {
+      "required": [
+       "inline_b64"
+      ]
+     }
+    ],
+    "x-code": "evidence_source_invalid",
+    "description": "Exactly ONE of ref or inline_b64 (S2 handoffs.evidence: ref IS NOT NULL OR inline IS NOT NULL; S3 is stricter: not both). Neither or both is 422 evidence_source_invalid (kai 7d122f81)."
+   },
+   "HandoffReturn": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "summary"
+    ],
+    "properties": {
+     "summary": {
+      "type": "string",
+      "maxLength": 32768,
+      "x-max-bytes": 32768,
+      "minLength": 1
+     },
+     "evidence": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/Evidence"
+      },
+      "maxItems": 64
+     },
+     "risks": {
+      "type": "string",
+      "maxLength": 8192,
+      "x-max-bytes": 8192,
+      "description": "the literal \"none\" is allowed"
+     },
+     "tests": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "description": "At most 64 evidence entries.",
+    "x-handler-required": {
+     "evidence": "evidence_required (at least one entry)",
+     "risks": "risks_required"
+    }
+   },
+   "ReviewNotes": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [],
+    "properties": {
+     "notes": {
+      "type": "string",
+      "maxLength": 8192,
+      "x-max-bytes": 8192
+     }
+    }
+   },
+   "ReviewNotesRequired": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [],
+    "properties": {
+     "notes": {
+      "type": "string",
+      "maxLength": 8192,
+      "x-max-bytes": 8192,
+      "description": "absent or empty is 422 notes_required"
+     }
+    },
+    "x-handler-required": {
+     "notes": "notes_required"
+    }
+   },
+   "Orientation": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "record_id",
+     "revision",
+     "author",
+     "created_at",
+     "body",
+     "cut",
+     "reading_path"
+    ],
+    "properties": {
+     "record_id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "revision": {
+      "type": "integer"
+     },
+     "author": {
+      "type": "string"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "body": {
+      "type": "string"
+     },
+     "cut": {
+      "type": "boolean",
+      "description": "the body was shortened to fit the budget (about body only)"
+     },
+     "reading_path": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 10,
+      "items": {
+       "type": "string",
+       "minLength": 1,
+       "maxLength": 256,
+       "x-max-bytes": 256,
+       "pattern": "^/[^\\x00-\\x1f\\x7f]*$"
+      },
+      "description": "the record's fields.reading_path, in order (cox W1-20, tate): 5 to 10 entries, each at most 256 bytes and starting with /. In JSON the WHOLE list is always present and no entry is shortened; the Markdown rendering follows S2 7.2 (at the floor, the first three entries and \"n more\", the count in sections[].omitted); the budget counts the rendered Markdown"
+     }
+    }
+   },
+   "BootHandoff": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "kind",
+     "state",
+     "priority",
+     "created_by",
+     "created_at",
+     "summary",
+     "summary_cut"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "kind": {
+      "type": "string"
+     },
+     "state": {
+      "type": "string"
+     },
+     "priority": {
+      "type": "integer"
+     },
+     "created_by": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time"
+     },
+     "summary": {
+      "type": "string"
+     },
+     "summary_cut": {
+      "type": "boolean"
+     }
+    },
+    "description": "A briefing line, not the packet: cortex handoff show <id> gives the packet (tate M5b)."
+   },
+   "BootSection": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "name",
+     "status",
+     "used",
+     "omitted"
+    ],
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "status": {
+      "type": "string",
+      "enum": [
+       "ok",
+       "none",
+       "capability_unavailable"
+      ]
+     },
+     "used": {
+      "type": "integer"
+     },
+     "omitted": {
+      "type": "integer"
+     }
+    }
+   },
+   "Boot": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "identity",
+     "orientation",
+     "rules",
+     "claimed",
+     "pending",
+     "budget",
+     "used",
+     "sections"
+    ],
+    "properties": {
+     "identity": {
+      "$ref": "#/components/schemas/Whoami"
+     },
+     "orientation": {
+      "oneOf": [
+       {
+        "$ref": "#/components/schemas/Orientation"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "null when never written or its current revision is invalidated (tate M1)"
+     },
+     "rules": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/SectionPointer"
+      }
+     },
+     "claimed": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/BootHandoff"
+      }
+     },
+     "pending": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/BootHandoff"
+      }
+     },
+     "budget": {
+      "type": "integer"
+     },
+     "used": {
+      "type": "integer"
+     },
+     "sections": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/BootSection"
+      }
+     }
+    },
+    "description": "Per-section accounting (tate M5c). Sections the server cannot fill say capability_unavailable."
+   }
+  },
+  "responses": {
+   "Unauthenticated": {
+    "description": "401 (0.2.001 set, S0 AuthError C5): token_missing (Missing); token_invalid (Malformed or Unknown, byte-identical for an unknown id and a wrong secret); token_expired (Expired); token_revoked (Revoked, INCLUDING a token superseded by a reissue: its TokenMeta.state reads superseded); worker_retired (Retired). A verifier that cannot answer (Unavailable) is 503 unavailable. token_superseded and generation_stale are DEFERRED (x-error-codes.deferred). (mira M2)",
+    "headers": {
+     "Cortex-Request-Id": {
+      "$ref": "#/components/headers/Cortex-Request-Id"
+     },
+     "Cache-Control": {
+      "$ref": "#/components/headers/Cache-Control"
+     },
+     "WWW-Authenticate": {
+      "$ref": "#/components/headers/WWW-Authenticate"
+     }
+    },
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/Problem"
+      }
+     }
+    }
+   },
+   "Forbidden": {
+    "description": "403 missing_scope (the principal lacks the route's scope, chain step 7) or the operation's own 403 codes in x-errors (target rules, in the handler). Never 403 for another project's resource (that is 404).",
+    "headers": {
+     "Cortex-Request-Id": {
+      "$ref": "#/components/headers/Cortex-Request-Id"
+     },
+     "Cache-Control": {
+      "$ref": "#/components/headers/Cache-Control"
+     },
+     "Cortex-Token-Expires": {
+      "$ref": "#/components/headers/Cortex-Token-Expires"
+     },
+     "Cortex-Token-Renew": {
+      "$ref": "#/components/headers/Cortex-Token-Renew"
+     }
+    },
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/Problem"
+      }
+     }
+    }
+   },
+   "NotFound": {
+    "description": "404 not_found: the resource named in the path or the body does not exist OR is in another project (row-level security makes it invisible; S1:239, :358), or the path id is malformed (R-5). One body for every case.",
+    "headers": {
+     "Cortex-Request-Id": {
+      "$ref": "#/components/headers/Cortex-Request-Id"
+     },
+     "Cache-Control": {
+      "$ref": "#/components/headers/Cache-Control"
+     },
+     "Cortex-Token-Expires": {
+      "$ref": "#/components/headers/Cortex-Token-Expires"
+     },
+     "Cortex-Token-Renew": {
+      "$ref": "#/components/headers/Cortex-Token-Renew"
+     }
+    },
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/Problem"
+      }
+     }
+    }
+   },
+   "BodyTooLarge": {
+    "description": "413 body_too_large, checked before parsing, against the operation's x-max-body (bytes).",
+    "headers": {
+     "Cortex-Request-Id": {
+      "$ref": "#/components/headers/Cortex-Request-Id"
+     },
+     "Cache-Control": {
+      "$ref": "#/components/headers/Cache-Control"
+     },
+     "Cortex-Token-Expires": {
+      "$ref": "#/components/headers/Cortex-Token-Expires"
+     },
+     "Cortex-Token-Renew": {
+      "$ref": "#/components/headers/Cortex-Token-Renew"
+     }
+    },
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/Problem"
+      }
+     }
+    }
+   },
+   "IdempotencyKeyRequired": {
+    "description": "428 idempotency_key_required",
+    "headers": {
+     "Cortex-Request-Id": {
+      "$ref": "#/components/headers/Cortex-Request-Id"
+     },
+     "Cache-Control": {
+      "$ref": "#/components/headers/Cache-Control"
+     },
+     "Cortex-Token-Expires": {
+      "$ref": "#/components/headers/Cortex-Token-Expires"
+     },
+     "Cortex-Token-Renew": {
+      "$ref": "#/components/headers/Cortex-Token-Renew"
+     }
+    },
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/Problem"
+      }
+     }
+    }
+   },
+   "Unprocessable": {
+    "description": "422: invalid_request (strict decoding R-3, query R-4, bytes R-1, NUL R-2), idempotency_key_reused on a mutating route, or the operation's own 422 codes in x-errors.",
+    "headers": {
+     "Cortex-Request-Id": {
+      "$ref": "#/components/headers/Cortex-Request-Id"
+     },
+     "Cache-Control": {
+      "$ref": "#/components/headers/Cache-Control"
+     },
+     "Cortex-Token-Expires": {
+      "$ref": "#/components/headers/Cortex-Token-Expires"
+     },
+     "Cortex-Token-Renew": {
+      "$ref": "#/components/headers/Cortex-Token-Renew"
+     }
+    },
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/Problem"
+      }
+     }
+    }
+   },
+   "Busy": {
+    "description": "429 busy, two cases. (a) A database lock conflict or deadlock (DbError::Busy at begin, in the handler or at commit): retry with the same Idempotency-Key (mira M1). (b) A route's own concurrency cap is full (search: 2 at once): refused at once, before any database statement, never queued; search takes no Idempotency-Key, so a plain retry (nix). The .001 global limiter queues and never refuses (INTERIM until the cortex-http limiter release) and is separate from a route's cap.",
+    "headers": {
+     "Cortex-Request-Id": {
+      "$ref": "#/components/headers/Cortex-Request-Id"
+     },
+     "Cache-Control": {
+      "$ref": "#/components/headers/Cache-Control"
+     },
+     "Retry-After": {
+      "$ref": "#/components/headers/Retry-After"
+     },
+     "Cortex-Token-Expires": {
+      "$ref": "#/components/headers/Cortex-Token-Expires"
+     },
+     "Cortex-Token-Renew": {
+      "$ref": "#/components/headers/Cortex-Token-Renew"
+     }
+    },
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/Problem"
+      }
+     }
+    }
+   },
+   "Unavailable": {
+    "description": "503 unavailable (minted by cortex-http): the database is down or timed out, or the token verifier cannot answer. maintenance and restore_in_progress are pass-through in .001 (no fence). A DISABLED piece's paths answer 404 not_found (S0 r3 s1.2), never 503; readiness reports 503 capability_unavailable only on GET /v2/health/ready.",
+    "headers": {
+     "Cortex-Request-Id": {
+      "$ref": "#/components/headers/Cortex-Request-Id"
+     },
+     "Cache-Control": {
+      "$ref": "#/components/headers/Cache-Control"
+     },
+     "Cortex-Token-Expires": {
+      "$ref": "#/components/headers/Cortex-Token-Expires"
+     },
+     "Cortex-Token-Renew": {
+      "$ref": "#/components/headers/Cortex-Token-Renew"
+     }
+    },
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/Problem"
+      }
+     }
+    }
+   },
+   "Problem": {
+    "description": "Any other refusal: 400, 405 and 415 invalid_request (R-3), 409 and 500 internal_error; see x-errors on the operation and x-error-codes.",
+    "headers": {
+     "Cortex-Request-Id": {
+      "$ref": "#/components/headers/Cortex-Request-Id"
+     },
+     "Cache-Control": {
+      "$ref": "#/components/headers/Cache-Control"
+     },
+     "Cortex-Token-Expires": {
+      "$ref": "#/components/headers/Cortex-Token-Expires"
+     },
+     "Cortex-Token-Renew": {
+      "$ref": "#/components/headers/Cortex-Token-Renew"
+     }
+    },
+    "content": {
+     "application/problem+json": {
+      "schema": {
+       "$ref": "#/components/schemas/Problem"
+      }
+     }
+    }
+   }
+  }
+ },
+ "x-rules": {
+  "R-1 bytes": "Every length limit is in UTF-8 BYTES. x-max-bytes on a string is the limit; maxLength carries the same number only as a looser bound on characters. The handler checks bytes BEFORE the database: over the limit is 422 invalid_request (or the field's own code), never a 500. (bob 3, nemo 3)",
+  "R-2 text": "A NUL character (U+0000) in any string is 422 invalid_request. Invalid UTF-8 or a lone surrogate escape is a JSON syntax error: 400 invalid_request. (bob 3; mira M3)",
+  "R-3 decoding": "Strict decoding (chain step 8, serde): bad JSON syntax is 400 invalid_request; a body that is valid JSON but not an OBJECT (an array, a string, a number, null) is 422 (all 15 request bodies are objects; W1-35 B); an unknown field, a missing schema-required field, a wrong type, a non-string value for an enum field (null, a number, true) or a value outside an enum is 422 invalid_request, never 400. BOUNDS (maxLength, x-max-bytes, minLength, maxItems, uniqueItems, pattern, minimum, maximum) are checked by the HANDLER: 422 with the property's x-code when it has one, else 422 invalid_request. A body that is not application/json is 415 invalid_request. A known path with the wrong method is 405 invalid_request with an Allow header. An unknown path is 404 not_found. (mira M3, M4, M7)",
+  "R-4 query": "Query parameters are strict too: an unknown query parameter, or a bad value (a limit outside its range, a bad cursor, a value outside an enum, a malformed id or date-time) is 422 invalid_request. A well-formed id in a FILTER that matches nothing gives an empty page, not 404. (sophi A6b, bob 6, tate M2) BUILT at 8a76e92 (socket delta 2, closed by vera r5): StrictQuery answers 422, and a DEFAULT-DENY marker means a route takes no query string unless it declares one. Until the serde_ignored decode lands (Wave 1, finn), every query struct MUST derive #[serde(deny_unknown_fields)] (vera r5).",
+  "R-5 ids": "An id in the PATH or the BODY that does not name a resource of the token's project (unknown, or another project's) is 404 not_found, with one body for both cases (S1:239, :358). A malformed id in the PATH is the same 404 (sophi A6a); a malformed id in the BODY fails decoding first (422 invalid_request). detail may name the field the client sent; it never says which case applied. Consequence: the r1 codes affects_unknown and lineage_target_unknown are retired (404 instead); unknown_addressee stays only for a job role that no active worker of the project holds. BUILT at 8a76e92 (socket delta 2, vera r5): path ids reach read AND write handlers through Ctx, and a malformed one is 404.",
+  "R-6 handler-required": "A field whose absence has its OWN minted code is not schema-required (else strict decoding would answer invalid_request first and the code could never fire). x-handler-required lists such fields; the handler refuses them absent, empty or whitespace-only with that code: reason_required, notes_required, evidence_required, risks_required, packet_incomplete. (sophi A5, nemo 1/6)",
+  "R-7 bodies": "A route that declares a request body needs a JSON object; the CLI and cortex-client always send one, {} when no field is set. (bob 5)",
+  "R-8 lists": "Every list answers {items, next}; limit default 50, maximum 200 (search has its own: 1-50, default 10); after = the next value of the previous page; keyset paging with no gaps or repeats; the order is the operation's x-order and is stable. A cursor is a POSITION, never authority: it cannot select rows outside the token's project (RLS). A cursor that does not decode, or was issued for another list, is 422 invalid_request. (sophi B2, bob 6, sam)",
+  "R-9 platform answers": "Every token route may also answer: 400/405/415/422 invalid_request (R-2, R-3, R-4); 401 (Unauthenticated); 403 missing_scope; 429 busy with Retry-After: 1, in two cases: (a) a database lock conflict or deadlock, at begin, in the handler or at commit: retry with the SAME Idempotency-Key; (b) a route's OWN concurrency cap is full (search: 2 at once): the handler refuses AT ONCE, before any database statement, and does not queue (v1 incident 912073e2: queueing under overload turned a slow query into an outage); search takes no Idempotency-Key, so a plain retry after Retry-After. cortex-http's INTERIM global cap queues and never refuses (until the cortex-http limiter release); it is separate from a route's own cap (nix); 500 internal_error; 503 unavailable (the database is down or timed out, or the token verifier cannot answer). 429 and 503 are declared on every token route; 400, 405 and 415 fall under default. The three health routes are OPEN: they ignore any Authorization header, valid, bad or absent, and answer as if none were sent (sam). (mira M1-M4, nix 1) BUILT at 8a76e92 (socket delta 2, vera r5): open routes sit outside the token check, inside the request-id and normaliser layers.",
+  "R-10 headers": "Every response: Cortex-Request-Id, a new UUIDv7 per response; a client-sent value is ignored (H-04). Every refusal: Cache-Control: no-store. Every 401: WWW-Authenticate: Bearer. Every 429: Retry-After: 1. A replayed success: Cortex-Idempotent-Replay: true. Every response to a token-authenticated request after authentication succeeded, SUCCESS OR REFUSAL (403 target, 404 malformed path id, 409, 422, 413, 428, 429 busy, a handler panic 500, a timeout 503; a read handler or a write handler alike): Cortex-Token-Expires (the PRESENTED token's expiry, never a newly issued token's) and, inside the renewal window, Cortex-Token-Renew: due. NEITHER is on a 401, nor on any refusal BEFORE authentication (a 429 or 503 before the token check), nor on the three open health routes. (mira M5, M6, W1-25; finn 7)",
+  "R-11 idempotency": "Only a committed success is recorded and replayed; no record for any refusal; a handler's own 4xx rolls back with the reservation (piece 11 s5). Authentication, scope AND the current target rule run BEFORE a replay (H-25, R-19), so a retry whose token is no longer valid, or whose caller no longer passes the target rule, is refused, never answered with the stored reply.",
+  "R-12 services": "No service principal exists in 0.2.001: worker_create accepts kind worker only (sophi ID-12) and nothing attests (kos-attest arrives with S5). The scope rows that name services take effect when services arrive. self:read and self:revoke are held by principals of kind worker only, so a service fixture is 403 missing_scope at step 7 (tate M6). More generally, a principal of kind service holds NO scope in 0.2.001, so every route's missing_scope negative can use a service fixture where no worker role lacks the scope (sam's deny actors).",
+  "R-13 problem": "Problem members are the built ones (cortex-http problem.rs at 0b13f10b): type, title, status, detail, fix, request_id, and scope on a scoped 503. No extension members in 0.2.001: numbers a code needs (boot_budget_too_small: needed and budget) are in detail. fix is fixed text per code.",
+  "R-14 non-active targets": "Revoking a token that is not active (revoked, superseded or expired) answers 200 {ok: true} with no state change and no second audit row (finn 4).",
+  "R-15 job roles": "A job_role addressee matches WorkerView.job_roles EXACTLY and case-sensitively, with no aliases and no folding (bob Q-9), on the job-role grammar of x-label-grammar (a lowercase letter, then up to 31 of a-z, 0-9 and hyphen: S1, S2 identity.workers). A job_role ref outside that grammar can match no one, so it is 422 invalid_request at step 0 (R-16), before any read.",
+  "R-16 refusal order": "When several refusals apply: the chain's own steps first (401, 403 missing_scope, 413, 400/422 decoding, the key-header errors 400 and 428). Then, in the handler, STEP 0: every check that needs NO database read answers 422 at once: bytes and bounds, patterns and the label grammar (R-18), NUL, uniqueness inside the body, conditional body rules (a source on a non-knowledge record), and the UNCONDITIONAL handler-required fields (sophi Q-10: no round trip, and nothing leaks, because a stateless 422 does not depend on any row). Inside step 0 the PER-FIELD checks (length, pattern, enum, range, NUL, a field own x-code) come BEFORE the CROSS-FIELD rules (oneOf and anyOf, the conditional source and orientation rules, the aggregate limit); the first refusal wins, in schema order within a group (cox, CHANGES section 17). Then the checks that need a read, in this order: 404 not_found (the path resource, then body references; R-5); 403 (the target rule FIRST, then self_review_forbidden, so a caller who is neither the creator nor the lead gets target_not_allowed even as the author: bob); THE IDEMPOTENCY LOOKUP (R-19: a stored success is replayed, a key used on another path or body is 422 idempotency_key_reused, otherwise proceed); 409 (invalid_transition before not_holder, then other conflicts); and last the 422s that need a read (unknown_addressee; release's reason_required when the caller is the lead and not the holder) (bob Q-12). So a retry of a COMMITTED operation by an authorized caller returns the stored success, never 409. TWO EXCEPTIONS: worker_retire answers 409 lead_permanent BEFORE 403, for any caller holding worker:retire, else that code could never fire (sophi Q-5); search checks its bounds (422) and THEN its own cap (429 busy, R-9 case b), both before its first database statement, so an invalid request takes no slot (nix MS-15b).",
+  "R-17 targets": "x-target on each operation names the mod-policy TargetRule variant its handler passes to ScopePolicy::target (sophi 3.2): None, SelfWorker, SelfOrProjectLead, NotProjectLead, RetireTarget, TokenTarget, Lineage, TaskAddressee. A rule that needs a Target field and finds None fails closed. BUILT at 3e69d030 (delta 3, closed by vera r6): S0 has the 8 variants; the truth table is mod-policy's (sophi).",
+  "R-19 replay": "A replay NEVER bypasses authorization (kai 2ddfafe0, security). (1) Authentication, scope AND the CURRENT target rule are evaluated before any stored reply is returned; if the target check fails the caller gets exactly the refusal a first call would get (403 target_not_allowed, or 404 not_found for another project's id) and NO stored body. (2) The key is bound to the project, the principal, the METHOD, the CONCRETE path with every path id, and the canonical body hash. The same key with a different path id or body is 422 idempotency_key_reused, evaluated AFTER the target check of the CURRENT request, so a caller without access learns nothing about the key. (3) Reading the target row for the check, before the lookup and in the same transaction, is allowed. (4) The lookup sits where R-16 puts it. (5) Defence in depth: a mutating route's success reply carries only id, ok, state, round, created_at and section_revision (tokens.issue is never stored; a retry is 409 already_issued), so a replay never reveals more than the first answer did. BUILT CODE: MET at e1ff0b6 (Wave 1 base; socket deltas 4 and 4b, vera ACCEPT): a write route takes an authorize closure and an execute closure; an Authorized proof comes only from Ctx::authorize and is bound to the chain's original authority; the chain's one idempotency wrapper looks up AFTER authorize. STATED LIMITS: a 405 comes from the method router outside every guard, so its refusal log line names no principal and the path (unmatched); only the standard methods are named in that line, any other method token logs (other).",
+  "R-20 generations": "The generation CHECK is ENFORCED in 0.2.001 (kai 69b235ad: a restore must not un-revoke a token). A token is stamped with the CURRENT install and project generations when it is issued; at verify the check is EQUALITY, and a stored generation different from the current one answers 401 token_revoked (S0 AuthError::Revoked; the distinct code generation_stale is deferred). A MISSING generation row means generation 0, at issue and at verify; a NULL is NEVER \"unknown, so pass\". The restore tooling (cortex-restore) raises the install generation in EVERY restore, with no flag and no skip (nix 87937d77). A PLAIN pg_restore does not raise it: that is DV-4, accepted as warning-only for 0.2.001, with the restore fence (0.2.011) as its closer.",
+  "R-18 labels": "Identifier-like strings (project, team and worker names; job roles; revoke codes; audit actions) take their grammar from ONE table, x-label-grammar, generated from S2's CHECKs and S1's grammar. S3 never accepts a label that S2 would refuse (mike 5fc9890a; kai's sweep, 6 Nov 02:5xZ). A label outside its grammar is 422 with the field's x-code (name_invalid, job_roles_invalid) or invalid_request, at step 0. PATTERN DIALECT (sophi F-11): patterns are ECMA-262, so ^ and $ anchor the WHOLE string and a trailing newline does NOT match; Postgres ~ and Rust regex agree. Python's re.search lets $ match before a final newline and would accept the name plus a newline: every Python checker uses re.fullmatch."
+ },
+ "x-label-grammar": {
+  "name": {
+   "pattern": "^[A-Za-z][A-Za-z0-9-]{0,31}$",
+   "maxLength": 32,
+   "source": "S2 identity.names: name_key ^[a-z][a-z0-9-]{0,31}$ and lower(label) = name_key (rev4); names_label_ascii ^[A-Za-z][A-Za-z0-9-]{0,31}$ (rev5 F-10); S1 3.3. Unique per project and kind by name_key (case-insensitive)"
+  },
+  "job_role": {
+   "pattern": "^[a-z][a-z0-9-]{0,31}$",
+   "maxLength": 32,
+   "source": "S2 identity.workers job_roles CHECK ^[a-z][a-z0-9-]{0,31}(,...)*$, at most 8 (rev4 and rev5); S1 label grammar"
+  },
+  "revoke_code": {
+   "pattern": "^[a-z][a-z_]{0,31}$",
+   "maxLength": 32,
+   "source": "S2 tokens.revoke_reason CHECK (tokens.sql:24)"
+  },
+  "audit_action": {
+   "pattern": "^[a-z][a-z0-9_.:-]{0,63}$",
+   "maxLength": 64,
+   "source": "S2 audit.records.action CHECK (audit.sql:19)"
+  }
+ },
+ "x-scopes": {
+  "self:read": [
+   "self",
+   "every principal of kind worker (R-12)"
+  ],
+  "self:revoke": [
+   "self",
+   "every principal of kind worker (R-12)"
+  ],
+  "roster:read": [
+   "work",
+   "project_lead, team_lead, member"
+  ],
+  "worker:create": [
+   "admin",
+   "project_lead"
+  ],
+  "worker:retire": [
+   "admin",
+   "project_lead (not self); team_lead for its own team (not self); S1 5.3 (sophi A1)"
+  ],
+  "team:create": [
+   "admin",
+   "project_lead"
+  ],
+  "team:assign": [
+   "admin",
+   "project_lead"
+  ],
+  "token:issue": [
+   "admin",
+   "project_lead; team_lead for its own team (not services)"
+  ],
+  "token:list": [
+   "admin",
+   "project_lead; team_lead own team"
+  ],
+  "token:revoke": [
+   "admin",
+   "project_lead; team_lead own team"
+  ],
+  "audit:read": [
+   "admin",
+   "project_lead only, own project"
+  ],
+  "records:read": [
+   "work",
+   "project_lead, team_lead, member"
+  ],
+  "records:write": [
+   "work",
+   "project_lead, team_lead, member"
+  ],
+  "records:lineage": [
+   "work",
+   "project_lead, team_lead, member (target rule: author, author's team lead, project lead)"
+  ],
+  "handoff:create": [
+   "work",
+   "every worker; target rule by kind: task = project_lead (any addressee) or team_lead (a worker addressee in its own team); consult = any worker"
+  ],
+  "handoff:read": [
+   "work",
+   "project_lead, team_lead, member"
+  ],
+  "handoff:claim": [
+   "work",
+   "the addressee (target rule)"
+  ],
+  "handoff:hold": [
+   "work",
+   "the holder; release also the project lead (with a reason)"
+  ],
+  "handoff:review": [
+   "work",
+   "the creator or the project lead, never the author (self-review only as the creator who is the project lead and the only possible reviewer)"
+  ],
+  "handoff:manage": [
+   "work",
+   "the creator, the project lead, or the team lead of the worker addressee's team (cancel)"
+  ]
+ },
+ "x-scopes-rule": "Frozen table (kai M-21): every route declares exactly one scope from this table; mod-policy REFUSES STARTUP on an unknown scope; a client-supplied scope string is never authority; services hold none of the admin scopes and not audit:read (and in 0.2.001 no scope at all, R-12). Target rules (the second column after the semicolons) are checked in the handler through mod-policy's ScopePolicy::target (sophi).",
+ "x-error-codes": {
+  "platform_and_chain": {
+   "token_missing": 401,
+   "token_invalid": 401,
+   "token_expired": 401,
+   "token_revoked": 401,
+   "worker_retired": 401,
+   "missing_scope": 403,
+   "target_not_allowed": 403,
+   "not_found": 404,
+   "restore_in_progress": 503,
+   "maintenance": 503,
+   "capability_unavailable": 503,
+   "idempotency_key_required": 428,
+   "idempotency_key_reused": 422,
+   "already_issued": 409,
+   "body_too_large": 413,
+   "invalid_request": [
+    400,
+    405,
+    415,
+    422
+   ],
+   "internal_error": 500,
+   "unavailable": 503,
+   "busy": 429,
+   "conflict": 409
+  },
+  "pieces": {
+   "already_claimed": 409,
+   "boot_budget_too_small": 422,
+   "evidence_hash_mismatch": 422,
+   "evidence_required": 422,
+   "evidence_source_invalid": 422,
+   "files_required": 422,
+   "invalid_transition": 409,
+   "job_roles_invalid": 422,
+   "lead_permanent": 409,
+   "lineage_state_conflict": 409,
+   "locator_too_long": 422,
+   "name_invalid": 422,
+   "name_taken": 409,
+   "not_holder": 409,
+   "notes_required": 422,
+   "packet_incomplete": 422,
+   "query_too_long": 422,
+   "reason_required": 422,
+   "risks_required": 422,
+   "section_invalid": 422,
+   "section_reserved": 403,
+   "self_review_forbidden": 403,
+   "self_supersede": 422,
+   "source_not_allowed": 422,
+   "source_required": 422,
+   "target_retired": 409,
+   "team_lead_taken": 409,
+   "type_reserved": 422,
+   "unknown_addressee": 422,
+   "why_required": 422
+  },
+  "deferred": {
+   "token_superseded": 401,
+   "generation_stale": 401,
+   "why": "S0 AuthError (C5) has no Superseded or Stale variant; adding them is an S0 change with a delta review (mira M2). In 0.2.001 a superseded token AND a stale generation both answer token_revoked; the generation CHECK is ENFORCED (kai 69b235ad: a restore must not un-revoke a token); only the distinct CODES are deferred."
+  },
+  "retired_in_r2": {
+   "affects_unknown": "404 not_found (R-5)",
+   "lineage_target_unknown": "404 not_found (R-5)",
+   "body_not_utf8": "cannot fire through JSON: invalid UTF-8 is a syntax error, 400 invalid_request (R-2)"
+  },
+  "rule": "type = the bare code; every refusal carries fix; a code is minted once; a duplicate or a collision with a platform code is refused at startup (CONTRACTS r7 :434). invalid_request is the one code with several statuses (400, 405, 415, 422: R-2, R-3, R-4). busy is 429 with Retry-After: 1 for a database lock conflict (0b13f10b) or a route's own full concurrency cap (R-9)."
+ },
+ "x-error-catalogue": {
+  "chain-order": "As frozen in finn's S0 r3 and mira's cortex-http signatures r2 (the C8 order; supersedes CONTRACTS r7 :422-433 here): 1 request id (a new UUIDv7; a client value is ignored); 2 install admission (503, a reserved no-op in .001); 3 authentication (401); 4 project admission (503, reserved no-op); 5 limiter (tower's INTERIM in-flight cap: it QUEUES and never refuses in .001); 6 max_body (413 body_too_large, before parsing); 7 SCOPE check only (403 missing_scope); 8 strict decode (400 invalid_request for bad syntax; 422 invalid_request for an unknown or missing field or a wrong type); 9 the key HEADER (400 for a bad key, 428 missing); 10 the handler's authorize phase: step-0 422, then 404 not_found for anything outside the token's project, then the target rules (403); 11 the idempotency lookup (replay, 422 reused, or proceed: R-19); 12 execute (409 state checks, the write). BUILT at e1ff0b67 (socket delta 4/4b): this is the built order; the idempotency lookup runs at step 11, AFTER the handler's authorize phase, and replay never bypasses authorization (R-19 MET). A database lock conflict at any step after begin is 429 busy. A refusal at any step rolls back the request's transaction. (mira M1, M3, M7)",
+  "cortex-http-codes": "minted by cortex-http (mira's Q3): internal_error 500; unavailable 503 (database down or timeout); busy 429 with Retry-After: 1 (a database lock conflict: retry the same key; a piece may also answer busy for its own full cap, R-9); conflict 409; invalid_request 400 / 405 (with Allow) / 415 / 422. Headers: R-10.",
+  "per-piece": "each operation's x-errors: \"status code\" pairs; every code resolves in x-error-codes"
+ },
+ "x-notes": {
+  "borrowed-code": "D94 (CTO): licensing is not a concern for now (internal use until the January commercial release). Any repository may be borrowed as INTERIM(ponytail); its licence is recorded in mvp/INTERIM-REGISTER.md; every non-permissive or unlicensed row is replaced or cleared before the commercial release. Security, validation and data-loss safety are not relaxed.",
+  "datetime-rule": "W1-39 (hale, piece 8 and piece 6): EVERY date-time input of a body, a query or a cursor is RFC 3339 YYYY-MM-DDTHH:MM:SS[.f{1,9}](Z|+HH:MM|-HH:MM) with upper-case T and Z, a real calendar date, year 1970 to 9999, hour 0-23, minute 0-59, second 0-59 (no leap second), offset minutes 0-59 and the offset within -12:00 .. +14:00; NUL or any other character is rejected. A reject is 422 invalid_request, never a database error, never 500. Shared vectors: mvp/api/rfc3339-vectors.json (14 accept, 48 reject). Not normalised to UTC.",
+  "max-body": "x-max-body is declared per operation (bytes) and is the chain's step-6 limit; an operation that declares none would get the default of 1 MiB, which counts as DRIFT for the Routes table (mira, item F). In this contract: 15 operations at 16384, 1 operations at 262144, 1 operations at 2097152, 1 operations at 9437184; operations with none: 15 (the open health routes and the plain reads). POST /v2/search is a READ with a body (x-mutates false, no Idempotency-Key) and lists 413 and 422; GET /v2/sections/{name} lists 422 for a section name that is not reserved; the open GET /v2/health/ready lists 503 capability_unavailable (mira F)."
+ },
+ "x-shared-codes": {
+  "rule": "W1-34: a problem code declared by more than one PIECE has exactly one status, title and fix; the registry refuses a difference (W1-31). Platform and chain codes (invalid_request, not_found, target_not_allowed, ...) are minted once by the chain and are not listed here.",
+  "source": "mvp/api/shared-problem-codes.json",
+  "sha256_prefix": "13573a0e91d6047a",
+  "codes": {
+   "reason_required": {
+    "status": 422,
+    "title": "Reason required",
+    "fix": "Send the reason this operation requires, in the form its documentation gives."
+   },
+   "target_retired": {
+    "status": 409,
+    "title": "Worker retired",
+    "fix": "Use an active worker."
+   }
+  }
+ },
+ "x-host-commands": {
+  "cortex-server bootstrap --project P --lead L --token-file PATH": "host only (podman exec), never HTTP. First run: project + lead + lead token; re-run: reissues the lead token (old one superseded) into a new 0600 file; a new project with its own lead is allowed; a different lead for an existing project is 409. Token never printed. (piece 11 contract s1)",
+  "cortex-server migrate": "one-shot; the only place the owner secret is mounted; forward-only; non-zero exit naming the failing migration.",
+  "cortex-server --version": "SemVer machine version and git sha; no database."
+ },
+ "x-deferred": {
+  "rule": "Deferred features are cited BY NAME. The planned release number lives only in RELEASE-LADDER (the single source), and machine versions are assigned at release time in merge order (kai cd15abd2). A number here would be a pointer that can go stale.",
+  "mod-tokens renewal": [
+   "tokens.renew: MUST ship before the first renewal window opens, about day 54 of a 90-day token: about 3 Jan 2027 for tokens first issued 10 Nov (finn 6; plan section 7)",
+   "401 token_superseded, with an AuthError Superseded variant (finn, an additive S0 change)"
+  ],
+  "mod-identity rename and name history": [
+   "identity renames (project, team, worker)"
+  ],
+  "mod-records history, explain, brief and span validation (placed right after the v1 import; kai cd15abd2)": [
+   "records.history",
+   "records.explain",
+   "records.brief",
+   "records.span (span validation)",
+   "the knowledge-owner revisit (kai 5c219116)"
+  ],
+  "the cortex-http limiter (replacing the INTERIM global cap)": [
+   "a real limiter in the chain"
+  ],
+  "mod-audit hash chain": [
+   "the audit hash chain (S1 s6) and cortex audit verify (marv)"
+  ],
+  "no ladder row yet": [
+   "the distinct 401 code generation_stale (the generation CHECK itself is enforced: a stale generation answers token_revoked)",
+   "handoff renew, suspend, resume, checkpoint, reassign, supersede, cancel-stale, context",
+   "team and human addressees",
+   "boot injection",
+   "host-socket admin routes",
+   "Problem extension members",
+   "conversation records (diary, checkpoint, session, chat) with their subtype",
+   "the project-brief reserved section",
+   "the denial log (S1 line 398; DV-3)"
+  ]
+ }
+}

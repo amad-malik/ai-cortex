@@ -1,0 +1,8 @@
+error[E0277]: `Env` is not an iterator
+ --> tests/ui/env_into_iter_fail.rs:4:17
+  |
+4 |     for pair in env {
+  |                 ^^^ `Env` is not an iterator
+  |
+  = help: the trait `Iterator` is not implemented for `Env`
+  = note: required for `Env` to implement `IntoIterator`

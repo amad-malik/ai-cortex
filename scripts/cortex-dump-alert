@@ -1,0 +1,106 @@
+#!/bin/sh
+# cortex-dump-alert: the alarm of the backup (piece 12; BK-04, BK-05; bob@helix)
+# INTERIM(ponytail): replaced in 0.2.003 by cortex backup on pgBackRest.
+#
+#   cortex-dump-alert --home <dir> [--status-dir <dir>]   raise: one journal line and the marker <dir>/ALARM (the state line is read from
+#                                                          the status directory, default <dir>/dump-status)
+#   cortex-dump-alert --home <dir> --clear    remove the marker, but only if the backup wrote it
+#
+# Started by OnFailure= of cortex-dump.service and cortex-dump-status.service (deploy/systemd). systemd hands over MONITOR_UNIT,
+# MONITOR_SERVICE_RESULT, MONITOR_EXIT_CODE and MONITOR_EXIT_STATUS of the failed unit; every value is validated against a fixed
+# grammar and only fixed words or digits are ever written out, so nothing from the environment (a password, a token) can reach the
+# journal or the marker. The marker is ONE line:
+#   {"source":"backup","utc":"<RFC 3339 UTC>","unit":"<unit>","status":"<digits or ?>","reason":"<fixed words>","state":"<the check's one line>"}
+# 0.2.001 (cox W1-42): the journal line, this marker, and `backup: stale` in GET /v2/health. WHO IS PAGED is cox's open question to
+# kai; this tool rings no one.
+#
+# Exit codes: 0 done; 1 the marker could not be written; 2 bad usage.
+set -eu
+umask 022
+LC_ALL=C
+export LC_ALL
+
+me=cortex-dump-alert
+
+die() {
+  printf '%s: %s\n' "$me" "$2" >&2
+  exit "$1"
+}
+
+home="" sdir="" clear=0
+while [ $# -gt 0 ]; do
+  case $1 in
+    --home) [ $# -ge 2 ] || die 2 "--home needs a value"; home=$2; shift 2 ;;
+    --status-dir) [ $# -ge 2 ] || die 2 "--status-dir needs a value"; sdir=$2; shift 2 ;;
+    --clear) clear=1; shift ;;
+    -h | --help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
+    *) die 2 "unknown argument (see --help)" ;;
+  esac
+done
+[ -n "$home" ] || die 2 "--home is required"
+case $home in
+  /*) ;;
+  *) die 2 "--home must be an absolute path" ;;
+esac
+home=${home%/}
+[ -d "$home" ] || die 2 "the home directory does not exist"
+marker=$home/ALARM
+
+if [ "$clear" -eq 1 ]; then
+  # a link, a missing file, a big file or another source's marker is left exactly as it is
+  if [ -L "$marker" ] || [ ! -f "$marker" ]; then exit 0; fi
+  size=$(wc -c < "$marker") || exit 0
+  if [ "$size" -gt 4096 ]; then exit 0; fi
+  if grep -q '"source":"backup"' "$marker"; then rm -f -- "$marker"; fi
+  exit 0
+fi
+
+# ---- raise ---------------------------------------------------------------------------------------------------------
+unit=${MONITOR_UNIT:-}
+printf '%s\n' "$unit" | grep -Eq '^[A-Za-z0-9@:_.-]{1,100}\.service$' || unit=unknown
+status=${MONITOR_EXIT_STATUS:-}
+printf '%s\n' "$status" | grep -Eq '^[0-9]{1,3}$' || status='?'
+result=${MONITOR_SERVICE_RESULT:-}
+printf '%s\n' "$result" | grep -Eq '^[a-z-]{1,24}$' || result=''
+
+case $result in
+  timeout) reason="timed out" ;;
+  signal | core-dump) reason="killed by a signal" ;;
+  *)
+    case $unit in
+      cortex-dump-status.service)
+        case $status in
+          1) reason="last good dump is stale or untrustworthy" ;;
+          *) reason="freshness check could not run" ;;
+        esac
+        ;;
+      *)
+        case $status in
+          1) reason="dump or check failed" ;;
+          2) reason="refused" ;;
+          3) reason="another dump was running" ;;
+          4) reason="timed out" ;;
+          *) reason="unit failed" ;;
+        esac
+        ;;
+    esac
+    ;;
+esac
+
+# the freshness check's own one line (fixed words and a number; it never repeats the file's contents)
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+[ -n "$sdir" ] || sdir=$home/dump-status # NOT `status`: that name already holds the exit status systemd handed over
+state=$("$here/cortex-dump-status" --status-dir "$sdir" 2> /dev/null | head -n 1) || state=""
+printf '%s\n' "$state" | grep -Eq '^[A-Za-z0-9 :.,()+-]{1,200}$' || state="state unavailable"
+
+utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+if [ -d "$marker" ] && [ ! -L "$marker" ]; then die 1 "the marker path is a directory"; fi
+tmp=$home/.ALARM.$$
+printf '{"source":"backup","utc":"%s","unit":"%s","status":"%s","reason":"%s","state":"%s"}\n' "$utc" "$unit" "$status" "$reason" "$state" > "$tmp" ||
+  { rm -f -- "$tmp"; die 1 "the marker could not be written"; }
+# a link in the marker's place (to a file OR to a directory: mv would move INTO a directory link) is removed as the link it is, never followed
+if [ -L "$marker" ]; then rm -f -- "$marker"; fi
+mv -f -- "$tmp" "$marker" || { rm -f -- "$tmp"; die 1 "the marker could not be put in place"; }
+
+printf '<3>%s: BACKUP ALARM unit=%s status=%s reason=%s; marker %s\n' "$me" "$unit" "$status" "$reason" "$marker" >&2
+exit 0

@@ -1,0 +1,142 @@
+{
+ "_comment": "Extract of S3 r2.7 (JSON twin 1d2c4b2f..., pinned in mvp/wave1-pins-20261106-S3r27): the search operation and the schemas it uses. Made by script (nemo, scratch/nemo/s3-extract-search.py, the records extractor with the operation prefix and schema names changed); edit nothing here.",
+ "operations": {
+  "search.query": {
+   "max_body": 16384,
+   "method": "POST",
+   "path": "/v2/search",
+   "scope": "records:read",
+   "target": "None",
+   "x_errors": [
+    "422 query_too_long",
+    "422 invalid_request",
+    "429 busy",
+    "503 unavailable"
+   ]
+  }
+ },
+ "schemas": {
+  "SearchHit": {
+   "additionalProperties": false,
+   "properties": {
+    "created_at": {
+     "format": "date-time",
+     "type": "string"
+    },
+    "id": {
+     "format": "uuid",
+     "type": "string"
+    },
+    "rank": {
+     "type": "number"
+    },
+    "state": {
+     "type": "string"
+    },
+    "summary": {
+     "type": "string"
+    },
+    "truncated": {
+     "description": "the body was cut for indexing (tsv_truncated)",
+     "type": "boolean"
+    },
+    "type": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "type",
+    "summary",
+    "rank",
+    "created_at",
+    "state",
+    "truncated"
+   ],
+   "type": "object"
+  },
+  "SearchRequest": {
+   "additionalProperties": false,
+   "description": "The interval is [since, until): since inclusive, until exclusive; since after until is 422 invalid_request; since equal to until is an empty result (nix 3).",
+   "properties": {
+    "include_history": {
+     "type": "boolean"
+    },
+    "limit": {
+     "default": 10,
+     "maximum": 50,
+     "minimum": 1,
+     "type": "integer"
+    },
+    "mode": {
+     "default": "keyword",
+     "enum": [
+      "keyword"
+     ],
+     "type": "string"
+    },
+    "query": {
+     "description": "1-1000 CHARACTERS (the one limit in characters, nix D-11); over 1000 is 422 query_too_long, empty is 422 invalid_request",
+     "maxLength": 1000,
+     "minLength": 1,
+     "type": "string",
+     "x-code": "query_too_long"
+    },
+    "since": {
+     "format": "date-time",
+     "type": "string"
+    },
+    "types": {
+     "items": {
+      "enum": [
+       "decision",
+       "lesson",
+       "note",
+       "status",
+       "question",
+       "blocker",
+       "knowledge",
+       "conversation",
+       "work-product",
+       "human-message",
+       "drill-canary",
+       "drill"
+      ],
+      "type": "string"
+     },
+     "type": "array",
+     "uniqueItems": true
+    },
+    "until": {
+     "format": "date-time",
+     "type": "string"
+    }
+   },
+   "required": [
+    "query"
+   ],
+   "type": "object"
+  },
+  "SearchResult": {
+   "additionalProperties": false,
+   "description": "Order: rank descending, then created_at descending, then id.",
+   "properties": {
+    "hits": {
+     "items": {
+      "$ref": "#/components/schemas/SearchHit"
+     },
+     "type": "array"
+    },
+    "mode": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "hits",
+    "mode"
+   ],
+   "type": "object"
+  }
+ },
+ "version": "0.2.1-skeleton-draft.2.7"
+}

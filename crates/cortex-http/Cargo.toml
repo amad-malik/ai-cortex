@@ -1,0 +1,37 @@
+[package]
+name = "cortex-http"
+description = "The request chain: request id, token check, body cap, scope check, strict decode, idempotency; problem+json (v0.2.001 piece 1)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+cortex-types.workspace = true
+cortex-db.workspace = true
+# The socket (S0, finn; workspace entry since 3bc43f3).
+cortex-module.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tokio.workspace = true
+# The web stack (ponytail card mvp/ponytail/cortex-http.md: MIT, licence files quoted; the SPEC's target stack).
+axum = { version = "=0.8.9", default-features = false, features = ["http1", "tokio", "json", "query", "matched-path"] }
+tower = { version = "=0.5.3", default-features = false, features = ["util", "limit"] }
+# H-19 (Wave 1): catch_unwind around a handler. Already in the lock (0.3.34); `std` adds no crate. NOT tower-http (W1-7).
+futures-util = { version = "0.3", default-features = false, features = ["std"] }
+bytes = "1"
+http-body-util = "0.1"
+
+[dev-dependencies]
+async-trait = "0.1"
+# tests/h_db.rs: the supervisor's Postgres (run only under crates/cortex-testkit/supervise.sh).
+cortex-testkit.workspace = true
+sqlx.workspace = true
+# tests/w0_plug.rs: finn's identity fixture piece (not mod-identity).
+plug-identity = { path = "../plug-identity" }
+cortex-types = { workspace = true, features = ["testkit"] }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+
+[lints]
+workspace = true

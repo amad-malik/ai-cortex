@@ -1,0 +1,4 @@
+# F1-01 fixture workspace (testkit-normal). Standalone; never a member of the repository workspace.
+[workspace]
+resolver = "3"
+members = ["cortex-types", "cortex-http", "cortex-server", "cortex-testkit", "mod-identity", "mod-tokens"]

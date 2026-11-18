@@ -1,0 +1,277 @@
+[
+ {
+  "id": "SM-01",
+  "what": "the mount policy is removed (no mount is judged)",
+  "old": "                problem = mount_problem(value, protected, unjudgeable)",
+  "new": "                problem = None",
+  "cells": [
+   "m361",
+   "m378",
+   "m392"
+  ]
+ },
+ {
+  "id": "SM-02",
+  "what": "the policy is widened to any mount type (the type is not judged)",
+  "old": "    if kv[\"type\"] != \"cache\":",
+  "new": "    if False:",
+  "cells": [
+   "m361",
+   "m378",
+   "m379",
+   "m380"
+  ]
+ },
+ {
+  "id": "SM-03",
+  "what": "the target overlap is ignored (a cache target over a COPY destination, the build directory, above or below is accepted)",
+  "old": "        if paths_overlap(comps, other) if how == \"either\" else other[:len(comps)] == comps:",
+  "new": "        if False:",
+  "cells": [
+   "m366",
+   "m367",
+   "m368",
+   "m369",
+   "m370",
+   "m371",
+   "m372",
+   "m373",
+   "m374",
+   "m375",
+   "m395"
+  ]
+ },
+ {
+  "id": "SM-04",
+  "what": "a mount with no type is accepted as a cache mount (the default type is not refused)",
+  "old": "    kv = dict(pairs)\n",
+  "new": "    kv = dict(pairs)\n    kv.setdefault(\"type\", \"cache\")\n",
+  "cells": [
+   "m364",
+   "m365"
+  ]
+ },
+ {
+  "id": "SM-05",
+  "what": "the seed keys from, source and src are accepted",
+  "old": "    seed = next((k for k in MOUNT_SEED_KEYS if k in kv), None)",
+  "new": "    seed = None",
+  "cells": [
+   "m381",
+   "m382",
+   "m383"
+  ]
+ },
+ {
+  "id": "SM-06",
+  "what": "a relative cache target is accepted",
+  "old": "    if not target.startswith(\"/\"):",
+  "new": "    if False:",
+  "cells": [
+   "m376"
+  ]
+ },
+ {
+  "id": "SM-07",
+  "what": "WORKDIR is not tracked (every relative COPY destination resolves against the root, so the build directory looks like the root and every valid cache mount is refused: the positive controls catch it)",
+  "old": "            workdir = resolve_in(workdir, words[0]) if len(words) == 1 else None",
+  "new": "            pass",
+  "cells": [
+   "p18",
+   "p20",
+   "p25"
+  ]
+ },
+ {
+  "id": "SM-08",
+  "what": "any RUN option other than --mount is accepted",
+  "old": "            elif name == \"network\" and value in RUN_NETWORK_VALUES:",
+  "new": "            elif name != \"mount\":",
+  "cells": [
+   "m390",
+   "m391"
+  ]
+ },
+ {
+  "id": "SM-09",
+  "what": "an unknown mount key is accepted",
+  "old": "    unknown = next((k for k in kv if k not in MOUNT_CACHE_KEYS), None)",
+  "new": "    unknown = None",
+  "cells": [
+   "m385"
+  ]
+ },
+ {
+  "id": "SM-10",
+  "what": "a variable in the cache target is accepted",
+  "old": "    comps = clean_path(target)\n",
+  "new": "    comps = clean_path(target.replace(\"$\", \"x\"))\n",
+  "cells": [
+   "m377"
+  ]
+ },
+ {
+  "id": "SM-11",
+  "what": "the default PATH directories are not protected",
+  "old": "                            [(clean_path(d), \"a default PATH directory\", \"either\") for d in PATH_DIRS]",
+  "new": "                            []",
+  "cells": [
+   "m374",
+   "m375"
+  ]
+ },
+ {
+  "id": "SM-12",
+  "what": "a duplicate mount key is accepted",
+  "old": "    dup = next((k for k in keys if keys.count(k) > 1), None)",
+  "new": "    dup = None",
+  "cells": [
+   "m386",
+   "m387"
+  ]
+ },
+ {
+  "id": "SM-13",
+  "what": "only the first --mount of a RUN is judged",
+  "old": "            if name == \"mount\":",
+  "new": "            if name == \"mount\" and not any(o[0] == \"mount\" for o in opts[:opts.index((name, value, tok))]):",
+  "cells": [
+   "m392"
+  ]
+ },
+ {
+  "id": "SM-14",
+  "what": "only the RUN that names cargo is judged (the others keep their options unjudged)",
+  "old": "        opts, _rest, errors = split_run_options(arg)\n        for e in errors:",
+  "new": "        opts, _rest, errors = split_run_options(arg) if \"cargo\" in arg else ([], arg, [])\n        for e in errors:",
+  "cells": [
+   "m393"
+  ]
+ },
+ {
+  "id": "SM-15",
+  "what": "an unjudgeable COPY or ADD destination (a variable) no longer refuses a mount (fail closed is lost)",
+  "old": "                elif any(d is None for d, _ in dests.get(stage, [])):",
+  "new": "                elif False:",
+  "cells": [
+   "m397"
+  ]
+ },
+ {
+  "id": "SM-16",
+  "what": "every cache mount is refused (the positive controls must catch an over-wide refusal)",
+  "old": "    if kv[\"type\"] != \"cache\":",
+  "new": "    if True:",
+  "cells": [
+   "p18",
+   "p20",
+   "p21",
+   "p22",
+   "p23"
+  ]
+ },
+ {
+  "id": "SM-17",
+  "what": "a quote in an option value is not refused as unreadable (the quoted mount spec and the quoted target are then judged)",
+  "old": "        if any(c in tok for c in \"\\\"'\") or not re.fullmatch(r\"[A-Za-z][A-Za-z0-9-]*\", name):",
+  "new": "        if not re.fullmatch(r\"[A-Za-z][A-Za-z0-9-]*\", name):",
+  "cells": [
+   "m399",
+   "m409"
+  ]
+ },
+ {
+  "id": "SM-18",
+  "what": "every mount is refused at the end of the policy (the allowlist accepts nothing: the positive controls catch an over-wide refusal)",
+  "old": "    return None\n\n\ndef check_run_options(ins):",
+  "new": "    return \"refused\"\n\n\ndef check_run_options(ins):",
+  "cells": [
+   "p18",
+   "p20",
+   "p21",
+   "p22",
+   "p23",
+   "p24",
+   "p25"
+  ]
+ },
+ {
+  "id": "SM-19",
+  "what": "the network value is widened to host (--network=host is accepted)",
+  "old": "RUN_NETWORK_VALUES = (\"none\", \"default\")",
+  "new": "RUN_NETWORK_VALUES = (\"none\", \"default\", \"host\")",
+  "cells": [
+   "m400"
+  ]
+ },
+ {
+  "id": "SM-20",
+  "what": "the security value is widened to insecure (--security=insecure is accepted)",
+  "old": "RUN_SECURITY_VALUES = (\"sandbox\",)",
+  "new": "RUN_SECURITY_VALUES = (\"sandbox\", \"insecure\")",
+  "cells": [
+   "m401"
+  ]
+ },
+ {
+  "id": "SM-21",
+  "what": "the stage context is ignored: a stage built FROM an earlier stage or from a variable is judged like one built FROM an external image (sam S523-SAM02)",
+  "old": "                if inherits.get(stage) is not None:",
+  "new": "                if False:",
+  "cells": [
+   "m402",
+   "m403",
+   "m404",
+   "m408"
+  ]
+ },
+ {
+  "id": "SM-22",
+  "what": "a mount before any explicit WORKDIR is judged (the missing WORKDIR is not a reason to refuse: sam S523-SAM02)",
+  "old": "                elif workdir is None:",
+  "new": "                elif False:",
+  "cells": [
+   "m394",
+   "m405",
+   "m406",
+   "m407"
+  ]
+ },
+ {
+  "id": "SM-23",
+  "what": "the earlier stage's name is compared case-sensitively (Docker's stage names are not)",
+  "old": "            elif image.lower() in aliases:",
+  "new": "            elif image in aliases:",
+  "cells": [
+   "m403"
+  ]
+ },
+ {
+  "id": "SM-24",
+  "what": "a FROM that is a variable is taken as an external image",
+  "old": "            elif any(c in image for c in \"$`\"):",
+  "new": "            elif False:",
+  "cells": [
+   "m404"
+  ]
+ },
+ {
+  "id": "SM-25",
+  "what": "the build directory is not protected (hue's survivor S21: in the real file the COPY destinations hide this, so only a stage whose copies are elsewhere isolates it)",
+  "old": "                protected = ([(workdir, \"the build directory (the WORKDIR in force)\", \"covers\")] if workdir is not None else []) + \\\n",
+  "new": "                protected = [] + \\\n",
+  "cells": [
+   "m410",
+   "m411"
+  ]
+ },
+ {
+  "id": "SM-26",
+  "what": "the build directory is protected both ways (a cache mount BELOW it is refused: a legitimate cache is lost)",
+  "old": "\"the build directory (the WORKDIR in force)\", \"covers\")",
+  "new": "\"the build directory (the WORKDIR in force)\", \"either\")",
+  "cells": [
+   "p28"
+  ]
+ }
+]

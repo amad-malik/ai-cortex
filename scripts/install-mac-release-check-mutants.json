@@ -1,0 +1,245 @@
+{
+ "target": "scripts/install-mac-release-check.sh",
+ "command": [
+  "sh",
+  "scripts/install-mac-release-check-test.sh",
+  "{copy}"
+ ],
+ "kill_marker": "RELEASE CHECK WRONG",
+ "mutants": [
+  {
+   "id": "RC-1",
+   "what": "the suite's exit status is not judged",
+   "old": "[ \"$rc\" -eq 0 ] || why=\"$why [the suite exited $rc, not 0]\"",
+   "new": "[ \"$rc\" -eq 0 ] || :"
+  },
+  {
+   "id": "RC-2",
+   "what": "a FAIL line is ignored",
+   "old": "if grep -q '^FAIL ' \"$out\"; then why=",
+   "new": "if false; then why="
+  },
+  {
+   "id": "RC-3",
+   "what": "a skip line is ignored",
+   "old": "if grep -q '^skip ' \"$out\"; then why=",
+   "new": "if false; then why="
+  },
+  {
+   "id": "RC-4",
+   "what": "a NOT_RUN line is ignored",
+   "old": "if grep -q '^NOT_RUN: ' \"$out\"; then why=",
+   "new": "if false; then why="
+  },
+  {
+   "id": "RC-5",
+   "what": "the required list is not judged",
+   "old": "[ -z \"$miss\" ] || why=",
+   "new": "[ -z \"$miss\" ] || :"
+  },
+  {
+   "id": "RC-6",
+   "what": "a required cell without an ok record of its own is not noticed",
+   "old": "  grep -qxF -- \"$rid\" \"$ok_ids\" || miss=\"$miss $rid\"",
+   "new": "  :"
+  },
+  {
+   "id": "RC-7",
+   "what": "the summary may say some cells were not run",
+   "old": "passed, 0 failed, 0 not run$/\\1/p",
+   "new": "passed, 0 failed, [0-9]* not run$/\\1/p"
+  },
+  {
+   "id": "RC-8",
+   "what": "the summary count is not reconciled with the ok records",
+   "old": "{ [ -z \"$n\" ] || [ \"$n\" = \"$nok\" ]; } ||",
+   "new": "{ true; } ||"
+  },
+  {
+   "id": "RC-9",
+   "what": "a missing summary passes",
+   "old": "{ [ \"$nsl\" = 1 ] && [ -n \"$n\" ] && [ \"$n\" -gt 0 ]; } ||",
+   "new": "{ true; } ||"
+  },
+  {
+   "id": "RC-10",
+   "what": "the suite is not told that the signed set is required",
+   "old": "INSTALL_MAC_REQUIRE_SET=1 INSTALL_MAC_REQUIRE_ALL=1",
+   "new": "INSTALL_MAC_REQUIRE_ALL=1"
+  },
+  {
+   "id": "RC-11",
+   "what": "the suite is not told that every cell must run",
+   "old": "INSTALL_MAC_REQUIRE_SET=1 INSTALL_MAC_REQUIRE_ALL=1",
+   "new": "INSTALL_MAC_REQUIRE_SET=1"
+  },
+  {
+   "id": "RC-12",
+   "what": "a caller's INSTALL_MAC_ONLY narrows the run",
+   "old": "env -u INSTALL_MAC_ONLY -u INSTALL_MAC_SH",
+   "new": "env -u INSTALL_MAC_SH"
+  },
+  {
+   "id": "RC-13",
+   "what": "a caller's INSTALL_MAC_SH replaces the installer",
+   "old": "-u INSTALL_MAC_ONLY -u INSTALL_MAC_SH -u INSTALL_MAC_INNER",
+   "new": "-u INSTALL_MAC_ONLY -u INSTALL_MAC_INNER"
+  },
+  {
+   "id": "RC-14",
+   "what": "a caller's INSTALL_MAC_INNER omits a cell",
+   "old": "-u INSTALL_MAC_SH -u INSTALL_MAC_INNER -u INSTALL_MAC_NO_SELFRUN",
+   "new": "-u INSTALL_MAC_SH -u INSTALL_MAC_NO_SELFRUN"
+  },
+  {
+   "id": "RC-15",
+   "what": "a caller's INSTALL_MAC_NO_SELFRUN omits a cell",
+   "old": "-u INSTALL_MAC_INNER -u INSTALL_MAC_NO_SELFRUN INSTALL_MAC_REQUIRE_SET=1",
+   "new": "-u INSTALL_MAC_INNER INSTALL_MAC_REQUIRE_SET=1"
+  },
+  {
+   "id": "RC-16",
+   "what": "a SET_DIR that is a link is accepted",
+   "old": "{ [ -d \"$set_dir\" ] && [ ! -L \"$set_dir\" ]; } ||",
+   "new": "{ [ -d \"$set_dir\" ]; } ||"
+  },
+  {
+   "id": "RC-17",
+   "what": "a key file of several lines is accepted",
+   "old": "{ [ \"$(wc -l < \"$key\" | tr -d ' ')\" = 1 ] && awk",
+   "new": "{ true && awk"
+  },
+  {
+   "id": "RC-18",
+   "what": "any key type is accepted",
+   "old": "$2 == \"ssh-ed25519\"",
+   "new": "$2 != \"\""
+  },
+  {
+   "id": "RC-19",
+   "what": "a version with a semicolon is accepted",
+   "old": "*[!0123456789.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-]*) fail",
+   "new": "*[!0123456789.ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-;]*) fail"
+  },
+  {
+   "id": "RC-20",
+   "what": "a failing check still prints PASS",
+   "old": "if [ -n \"$why\" ]; then",
+   "new": "if false; then"
+  },
+  {
+   "id": "RC-21",
+   "what": "a failing check exits 0",
+   "old": "cut -c1-300)\" 1",
+   "new": "cut -c1-300)\" 0"
+  },
+  {
+   "id": "RC-22",
+   "what": "a wrong argument count exits 1 not 2",
+   "old": "fail \"usage: install-mac-release-check.sh SET_DIR KEYFILE VERSION\" 2",
+   "new": "fail \"usage: install-mac-release-check.sh SET_DIR KEYFILE VERSION\" 1"
+  },
+  {
+   "id": "RC-23",
+   "what": "a missing suite is not refused up front",
+   "old": "[ -f \"$suite\" ] || fail \"no install-mac-test.sh beside this script ($here)\" 2",
+   "new": "[ -f \"$suite\" ] || :"
+  },
+  {
+   "id": "RC-24",
+   "what": "a required list that lists no cell is accepted",
+   "old": "grep -qE '^IT-M[0-9]' \"$required\" || fail \"install-mac-required-cells.txt lists no cell\" 2",
+   "new": "grep -qE '^IT-M[0-9]' \"$required\" || :"
+  },
+  {
+   "id": "RC-25",
+   "what": "the suite gets the LIVE set and key file, not the snapshot",
+   "old": "MAC_SET_DIR=\"$snap/set\" MAC_SET_KEYFILE=\"$snap/key.pub\"",
+   "new": "MAC_SET_DIR=\"$set_dir\" MAC_SET_KEYFILE=\"$key\""
+  },
+  {
+   "id": "RC-26",
+   "what": "the snapshot is not read-only",
+   "old": "chmod -R a-w \"$snap/set\" \"$snap/key.pub\"",
+   "new": ":"
+  },
+  {
+   "id": "RC-27",
+   "what": "a snapshot that changed during the run is not noticed",
+   "old": "cmp -s \"$snap/digests.before\" \"$snap/digests.after\" || why=",
+   "new": ": || why="
+  },
+  {
+   "id": "RC-28",
+   "what": "the receipt names the LIVE SHA256SUMS hash, not the exercised one",
+   "old": "\"$set_dir\" \"$ver\" \"$d_sums\" \"$d_sig\"",
+   "new": "\"$set_dir\" \"$ver\" \"$(sha_of \"$set_dir/SHA256SUMS\")\" \"$d_sig\""
+  },
+  {
+   "id": "RC-29",
+   "what": "a digest of the wrong length is accepted",
+   "old": "  [ \"${#sho}\" -eq 64 ] || return 1",
+   "new": "  :"
+  },
+  {
+   "id": "RC-30",
+   "what": "a digest that is not hex is accepted",
+   "old": "  case $sho in *[!0123456789abcdef]*) return 1 ;; esac",
+   "new": ":"
+  },
+  {
+   "id": "RC-31",
+   "what": "a failing hash command is masked",
+   "old": "sho=$(sha256sum \"$1\") || return 1; else",
+   "new": "sho=$(sha256sum \"$1\" || :); else"
+  },
+  {
+   "id": "RC-32",
+   "what": "a mention of 'ok   IT-M29 ' inside another line counts as a result record",
+   "old": "awk '/^ok   IT-M/ { print $2 }' \"$out\" > \"$ok_ids\"",
+   "new": "grep -o 'ok   IT-M[0-9A-Za-z.]*' \"$out\" | awk '{ print $2 }' > \"$ok_ids\""
+  },
+  {
+   "id": "RC-33",
+   "what": "a cell with two ok records is not noticed",
+   "old": "[ -z \"$dups\" ] || why=",
+   "new": ": || why="
+  },
+  {
+   "id": "RC-34",
+   "what": "an ok record for a cell outside the required list is not noticed",
+   "old": "[ -z \"$extra\" ] || why=",
+   "new": ": || why="
+  },
+  {
+   "id": "RC-35",
+   "what": "two summary lines are accepted",
+   "old": "{ [ \"$nsl\" = 1 ] && [ -n \"$n\" ]",
+   "new": "{ [ -n \"$n\" ]"
+  },
+  {
+   "id": "RC-36",
+   "what": "the snapshot hash covers only three files (an altered archive, image, manifest or meta passes)",
+   "old": "  for da_f in $set_files; do da_d=",
+   "new": "  for da_f in SHA256SUMS SHA256SUMS.sig install.sh; do da_d="
+  },
+  {
+   "id": "RC-37",
+   "what": "the key file is not part of the snapshot hash",
+   "old": "  da_d=$(sha_of \"$snap/key.pub\") || return 1\n  printf '%s key.pub\\n' \"$da_d\" >> \"$1\"",
+   "new": "  :"
+  },
+  {
+   "id": "RC-38",
+   "what": "the receipt names the SHA256SUMS hash where the archive's belongs",
+   "old": "\"$ver\" \"$d_tgz\" \"$ver\" \"$d_oci\"",
+   "new": "\"$ver\" \"$d_sums\" \"$ver\" \"$d_oci\""
+  },
+  {
+   "id": "RC-39",
+   "what": "the receipt names the manifest hash where the install.meta hash belongs",
+   "old": "\"$d_man\" \"$d_meta\"",
+   "new": "\"$d_man\" \"$d_man\""
+  }
+ ]
+}

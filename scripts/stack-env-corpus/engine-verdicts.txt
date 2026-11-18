@@ -1,0 +1,104 @@
+# stack.env corpus: what the ENGINE says about each file (cortex-upgrade parse_stack_env, read through the engine's own read: at most 8193 bytes, UTF-8).
+# engine: wave1/cortex-upgrade 4ae6c4de82831815a6f1895ea5a743d964787014 (git archive), crates/cortex-upgrade/src/stack_env.rs sha256 039758183a64627a3914ec571708e3a46ad0cec85bf48f590fedbad137aec263
+# produced by a throwaway test (tests/corpus_probe.rs, not committed) on that archive, 2026-11-07T19:03:26Z; scripts/mk-stack-env-corpus.py writes the files
+# IT-93 compares install.sh's read_stack_env with the first two columns; the text after # is the engine's own sentence, for people.
+# 8 Nov (hue), the last three lines: the engine's verdict from hale's engine-probe (/path/to/docs/mvp/reviews/S5-5W-hale-receipts/engine-probe: the UNCHANGED stack_env.rs, sha256 039758183a64627a3914ec571708e3a46ad0cec85bf48f590fedbad137aec263, read as layout.rs reads), for hale's P-1 (NUL) and the u64 boundary
+bad-cr-at-end-of-value.env REFUSE  # stack.env refused: line 1 has a value outside the allowed characters or length
+bad-crlf-file.env REFUSE  # stack.env refused: line 1 has a value outside the allowed characters or length
+bad-dup-db.env REFUSE  # stack.env refused: line 4 repeats a key
+bad-dup-server.env REFUSE  # stack.env refused: line 4 repeats a key
+bad-dup-version.env REFUSE  # stack.env refused: line 4 repeats a key
+bad-empty-file.env REFUSE  # stack.env refused: `CORTEX_VERSION` is missing
+bad-export-prefix.env REFUSE  # stack.env refused: line 1 names a key this file may not hold
+bad-extra-key.env REFUSE  # stack.env refused: line 4 names a key this file may not hold
+bad-image-colon-digest-hex-upper-mixed.env REFUSE  # stack.env refused: `CORTEX_DB_IMAGE` is not valid
+bad-image-digest-63.env REFUSE  # stack.env refused: `CORTEX_DB_IMAGE` is not valid
+bad-image-digest-65.env REFUSE  # stack.env refused: `CORTEX_DB_IMAGE` is not valid
+bad-image-digest-nonhex.env REFUSE  # stack.env refused: `CORTEX_DB_IMAGE` is not valid
+bad-image-digest-upper.env REFUSE  # stack.env refused: `CORTEX_SERVER_IMAGE` is not valid
+bad-image-double-digest.env REFUSE  # stack.env refused: `CORTEX_SERVER_IMAGE` is not valid
+bad-image-equals.env REFUSE  # stack.env refused: line 2 has a value outside the allowed characters or length
+bad-image-name-empty.env REFUSE  # stack.env refused: `CORTEX_SERVER_IMAGE` is not valid
+bad-image-name-second-at.env REFUSE  # stack.env refused: `CORTEX_SERVER_IMAGE` is not valid
+bad-image-no-digest.env REFUSE  # stack.env refused: `CORTEX_SERVER_IMAGE` is not valid
+bad-image-plus.env REFUSE  # stack.env refused: line 2 has a value outside the allowed characters or length
+bad-image-sha512.env REFUSE  # stack.env refused: `CORTEX_SERVER_IMAGE` is not valid
+bad-image-space.env REFUSE  # stack.env refused: line 2 has a value outside the allowed characters or length
+bad-image-tag.env REFUSE  # stack.env refused: `CORTEX_SERVER_IMAGE` is not valid
+bad-key-leading-space.env REFUSE  # stack.env refused: line 1 names a key this file may not hold
+bad-key-trailing-space.env REFUSE  # stack.env refused: line 1 names a key this file may not hold
+bad-line-no-equals.env REFUSE  # stack.env refused: line 4 is not `KEY=VALUE`, a comment or blank
+bad-line-words.env REFUSE  # stack.env refused: line 1 is not `KEY=VALUE`, a comment or blank
+bad-lowercase-key.env REFUSE  # stack.env refused: line 1 names a key this file may not hold
+bad-missing-db.env REFUSE  # stack.env refused: `CORTEX_DB_IMAGE` is missing
+bad-missing-server.env REFUSE  # stack.env refused: `CORTEX_SERVER_IMAGE` is missing
+bad-missing-version.env REFUSE  # stack.env refused: `CORTEX_VERSION` is missing
+bad-only-comments.env REFUSE  # stack.env refused: `CORTEX_VERSION` is missing
+bad-secret-key.env REFUSE  # stack.env refused: line 4 names a key this file may not hold
+bad-size-8193.env REFUSE  # stack.env refused: larger than 8192 bytes
+bad-value-301-bytes.env REFUSE  # stack.env refused: line 2 has a value outside the allowed characters or length
+bad-value-empty-version.env REFUSE  # stack.env refused: line 1 has a value outside the allowed characters or length
+bad-value-equals-inside.env REFUSE  # stack.env refused: line 1 has a value outside the allowed characters or length
+bad-value-leading-space.env REFUSE  # stack.env refused: line 1 has a value outside the allowed characters or length
+bad-value-quoted.env REFUSE  # stack.env refused: line 1 has a value outside the allowed characters or length
+bad-value-tab.env REFUSE  # stack.env refused: line 1 has a value outside the allowed characters or length
+bad-value-trailing-space.env REFUSE  # stack.env refused: line 1 has a value outside the allowed characters or length
+bad-version-00.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-01.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-02.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-03.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-04.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-05.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-06.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-07.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-08.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-09.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-10.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-11.env REFUSE  # stack.env refused: line 1 has a value outside the allowed characters or length
+bad-version-12.env REFUSE  # stack.env refused: line 1 has a value outside the allowed characters or length
+bad-version-13.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-14.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-15.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-16.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-17.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-18.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-19.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-20.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-21.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-22.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-23.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-24.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-25.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+bad-version-pre-zero-digits.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid
+good-any-order.env ACCEPT
+good-basic.env ACCEPT
+good-blank-ff-line.env ACCEPT
+good-blank-vt-line.env ACCEPT
+good-blank-ws-lines.env ACCEPT
+good-comment-after-ff.env ACCEPT
+good-comment-with-cr.env ACCEPT
+good-comments-blanks.env ACCEPT
+good-cr-only-line.env ACCEPT
+good-image-every-character.env ACCEPT
+good-image-hex-digits.env ACCEPT
+good-image-underscore.env ACCEPT
+good-indented-comment.env ACCEPT
+good-no-final-newline.env ACCEPT
+good-nonascii-comment.env ACCEPT
+good-registry-port.env ACCEPT
+good-size-8192.env ACCEPT
+good-value-300-bytes.env ACCEPT
+good-version-19-digits.env ACCEPT
+good-version-64-bytes.env ACCEPT
+good-version-all-digits.env ACCEPT
+good-version-core.env ACCEPT
+good-version-every-letter.env ACCEPT
+good-version-pre-alnum-leading-zero.env ACCEPT
+good-version-pre-dots.env ACCEPT
+good-version-pre-hyphen.env ACCEPT
+good-version-pre-numeric-digits.env ACCEPT
+good-version-pre-numeric.env ACCEPT
+good-version-zero.env ACCEPT
+bad-nul-line.env REFUSE  # stack.env refused: line 4 is not `KEY=VALUE`, a comment or blank
+bad-nul-in-value.env REFUSE  # stack.env refused: line 1 has a value outside the allowed characters or length
+bad-version-core-u64-overflow.env REFUSE  # stack.env refused: `CORTEX_VERSION` is not valid

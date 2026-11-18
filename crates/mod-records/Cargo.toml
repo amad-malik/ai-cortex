@@ -1,0 +1,26 @@
+[package]
+name = "mod-records"
+description = "Piece 6: typed, immutable, project-isolated records with lineage (supersede, invalidate, undo) and the reserved sections"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+async-trait.workspace = true
+axum = { workspace = true, features = ["json"] }
+cortex-db.workspace = true
+cortex-module.workspace = true
+cortex-types.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+cortex-testkit.workspace = true
+plug-identity = { path = "../plug-identity" }
+tokio.workspace = true
+
+[lints]
+workspace = true

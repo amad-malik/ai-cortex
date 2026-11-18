@@ -1,0 +1,33 @@
+[package]
+name = "mod-handoffs"
+description = "Cortex v0.2.001 piece 8: handoffs (create, show, list, claim, release, return, accept, rework, cancel)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+async-trait.workspace = true
+axum = { workspace = true, features = ["json"] }
+cortex-db.workspace = true
+cortex-module.workspace = true
+cortex-types.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+uuid.workspace = true
+# Inline evidence arrives as base64 (S3 Evidence.inline_b64); the crate is already in the lock through sqlx
+# (MIT or Apache-2.0, D94: recorded in the lane's receipt, not borrowed code).
+base64 = { version = "0.22", default-features = false, features = ["std"] }
+
+[dev-dependencies]
+cortex-testkit.workspace = true
+# The L3 tests mount the piece behind the real chain (the Wave 0 plug's pattern, w0_plug.rs).
+cortex-http = { path = "../cortex-http" }
+plug-identity = { path = "../plug-identity" }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+tower = { version = "=0.5.3", default-features = false, features = ["util"] }
+
+[lints]
+workspace = true

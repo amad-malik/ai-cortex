@@ -1,0 +1,8 @@
+# F1-02 fixture: a crate declaring BUSL-1.1. Standalone; never a member of the repository workspace.
+[package]
+name = "fixture-busl"
+version = "0.1.0"
+edition = "2024"
+license = "BUSL-1.1"
+
+[workspace]

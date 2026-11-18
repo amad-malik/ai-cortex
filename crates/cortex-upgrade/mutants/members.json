@@ -1,0 +1,3973 @@
+[
+ {
+  "id": "MB-01",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_02_the_home_alphabet_is_strict"
+  ],
+  "what": "a relative home is accepted",
+  "old": "    if !s.starts_with('/') {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-02",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_02_the_home_alphabet_is_strict"
+  ],
+  "what": "a dot is not in the home alphabet",
+  "old": "matches!(b, b'.' | b'_' | b'/' | b'-')",
+  "new": "matches!(b, b'_' | b'/' | b'-')"
+ },
+ {
+  "id": "MB-03",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_02_the_home_alphabet_is_strict"
+  ],
+  "what": "an underscore is not in the home alphabet",
+  "old": "matches!(b, b'.' | b'_' | b'/' | b'-')",
+  "new": "matches!(b, b'.' | b'/' | b'-')"
+ },
+ {
+  "id": "MB-04",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_02_the_home_alphabet_is_strict"
+  ],
+  "what": "a dash is not in the home alphabet",
+  "old": "matches!(b, b'.' | b'_' | b'/' | b'-')",
+  "new": "matches!(b, b'.' | b'_' | b'/')"
+ },
+ {
+  "id": "MB-05",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_02_the_home_alphabet_is_strict"
+  ],
+  "what": "any character is allowed in the home",
+  "old": "        .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'.' | b'_' | b'/' | b'-'))",
+  "new": "        .all(|_| true)"
+ },
+ {
+  "id": "MB-06",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_02_the_home_alphabet_is_strict"
+  ],
+  "what": "non-ASCII bytes are allowed in the home",
+  "old": "        .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'.' | b'_' | b'/' | b'-'))",
+  "new": "        .all(|b| b.is_ascii_alphanumeric() || b >= 0x80 || matches!(b, b'.' | b'_' | b'/' | b'-'))"
+ },
+ {
+  "id": "MB-07",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_02_the_home_alphabet_is_strict"
+  ],
+  "what": "an empty component is allowed in the home",
+  "old": "    if parts.iter().any(|p| p.is_empty()) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-08",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_02_the_home_alphabet_is_strict"
+  ],
+  "what": "a .. component is allowed in the home",
+  "old": "    if parts.contains(&\"..\") {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-09",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_03_the_unit_directory_must_be_a_real_private_directory_of_ours"
+  ],
+  "what": "a relative unit directory is accepted",
+  "old": "    if !dir.is_absolute() {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-10",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_03_the_unit_directory_must_be_a_real_private_directory_of_ours"
+  ],
+  "what": "a link to a directory is accepted as the unit directory",
+  "old": "fs::symlink_metadata(dir).map_err(|e| io(\"cannot look at the unit directory\"",
+  "new": "fs::metadata(dir).map_err(|e| io(\"cannot look at the unit directory\""
+ },
+ {
+  "id": "MB-11",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_03_the_unit_directory_must_be_a_real_private_directory_of_ours"
+  ],
+  "what": "a file is accepted as the unit directory",
+  "old": "    if !m.file_type().is_dir() {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-12",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_03_the_unit_directory_must_be_a_real_private_directory_of_ours"
+  ],
+  "what": "the owner of the unit directory is not checked",
+  "old": "    if m.uid() != me {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-13",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_03_the_unit_directory_must_be_a_real_private_directory_of_ours"
+  ],
+  "what": "an other-writable unit directory is accepted",
+  "old": "    if m.mode() & 0o022 != 0 {",
+  "new": "    if m.mode() & 0o020 != 0 {"
+ },
+ {
+  "id": "MB-14",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_03_the_unit_directory_must_be_a_real_private_directory_of_ours"
+  ],
+  "what": "a group-writable unit directory is accepted",
+  "old": "    if m.mode() & 0o022 != 0 {",
+  "new": "    if m.mode() & 0o002 != 0 {"
+ },
+ {
+  "id": "MB-15",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_01_render_fills_the_two_placeholders_and_refuses_any_other_token"
+  ],
+  "what": "@CORTEX_HOME@ is not filled",
+  "old": "                \"CORTEX_HOME\" => out.push_str(home),",
+  "new": "                \"CORTEX_HOME\" => out.push_str(\"\"),"
+ },
+ {
+  "id": "MB-16",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_01_render_fills_the_two_placeholders_and_refuses_any_other_token"
+  ],
+  "what": "@DB_CONTAINER@ is not filled",
+  "old": "                \"DB_CONTAINER\" => out.push_str(db),",
+  "new": "                \"DB_CONTAINER\" => out.push_str(\"\"),"
+ },
+ {
+  "id": "MB-17",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_01_render_fills_the_two_placeholders_and_refuses_any_other_token"
+  ],
+  "what": "the render does not check the home",
+  "old": "    check_home(Path::new(home))?;\n    if db.is_empty()",
+  "new": "    if db.is_empty()"
+ },
+ {
+  "id": "MB-18",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_01_render_fills_the_two_placeholders_and_refuses_any_other_token"
+  ],
+  "what": "the render accepts any database name",
+  "old": "    if db.is_empty()\n        || !db\n            .bytes()\n            .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')\n    {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-19",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_01_render_fills_the_two_placeholders_and_refuses_any_other_token"
+  ],
+  "what": "an unknown @token@ is copied instead of refused",
+  "old": "                other => {\n                    return refuse(format!(\n                        \"a unit template holds the token @{other}@, which is not a placeholder\"\n                    ));\n                }",
+  "new": "                other => {\n                    out.push_str(other);\n                }"
+ },
+ {
+  "id": "MB-1001",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 272: an emptiness check never holds",
+  "old": "    if text.is_empty()",
+  "new": "    if text.is_empty() && false"
+ },
+ {
+  "id": "MB-1002",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 273: an || becomes && (at column 8)",
+  "old": "        || !text.len().is_multiple_of(2)",
+  "new": "        && !text.len().is_multiple_of(2)"
+ },
+ {
+  "id": "MB-1003",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 274: an || becomes && (at column 8)",
+  "old": "        || !text.len().is_multiple_of(2)\n        || !text",
+  "new": "        || !text.len().is_multiple_of(2)\n        && !text"
+ },
+ {
+  "id": "MB-1004",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 276: an || becomes && (at column 40)",
+  "old": "            .bytes()\n            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))",
+  "new": "            .bytes()\n            .all(|b| b.is_ascii_digit() && (b'a'..=b'f').contains(&b))"
+ },
+ {
+  "id": "MB-1005",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 300: an equality is inverted (at column 16)",
+  "old": "        if word == \"absent\" {",
+  "new": "        if word != \"absent\" {"
+ },
+ {
+  "id": "MB-1006",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 300: a condition is always false",
+  "old": "        if word == \"absent\" {",
+  "new": "        if false {"
+ },
+ {
+  "id": "MB-1007",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 300: a condition is always true",
+  "old": "        if word == \"absent\" {",
+  "new": "        if true {"
+ },
+ {
+  "id": "MB-1008",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 307: an || becomes && (at column 48)",
+  "old": "                    .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))",
+  "new": "                    .all(|b| b.is_ascii_digit() && (b'a'..=b'f').contains(&b))"
+ },
+ {
+  "id": "MB-1009",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 309: an inequality is inverted (at column 25)",
+  "old": "            if sha.len() != 64",
+  "new": "            if sha.len() == 64"
+ },
+ {
+  "id": "MB-1010",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 310: an || becomes && (at column 16)",
+  "old": "                || !lower_hex(sha)",
+  "new": "                && !lower_hex(sha)"
+ },
+ {
+  "id": "MB-1011",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 311: an inequality is inverted (at column 30)",
+  "old": "                || mode.len() != 4",
+  "new": "                || mode.len() == 4"
+ },
+ {
+  "id": "MB-1012",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 311: an || becomes && (at column 16)",
+  "old": "                || mode.len() != 4",
+  "new": "                && mode.len() != 4"
+ },
+ {
+  "id": "MB-1013",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 312: an || becomes && (at column 16)",
+  "old": "                || !mode.bytes().all(|b| (b'0'..=b'7').contains(&b))",
+  "new": "                && !mode.bytes().all(|b| (b'0'..=b'7').contains(&b))"
+ },
+ {
+  "id": "MB-1014",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 322: a statement is deleted",
+  "old": "        unhex(target)?;",
+  "new": "        "
+ },
+ {
+  "id": "MB-1016",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 323: a condition is always true",
+  "old": "        if target.len() > 2 * 4096 {",
+  "new": "        if true {"
+ },
+ {
+  "id": "MB-1018",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 359: an equality is inverted (at column 29)",
+  "old": "            .position(|n| *n == name)",
+  "new": "            .position(|n| *n != name)"
+ },
+ {
+  "id": "MB-1019",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 368: an equality is inverted (at column 9)",
+  "old": "    if f == t {",
+  "new": "    if f != t {"
+ },
+ {
+  "id": "MB-1020",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused",
+   "mb_08_a_plan_that_cannot_be_trusted_writes_nothing"
+  ],
+  "what": "line 368: a condition is always false",
+  "old": "    if f == t {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1021",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 368: a condition is always true",
+  "old": "    if f == t {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1022",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused",
+   "mb_08_a_plan_that_cannot_be_trusted_writes_nothing"
+  ],
+  "what": "line 371: a condition is always false",
+  "old": "    if !valid_attempt_id(id) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1023",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 371: a condition is always true",
+  "old": "    if !valid_attempt_id(id) {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1024",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 371: a negation is dropped",
+  "old": "    if !valid_attempt_id(id) {",
+  "new": "    if valid_attempt_id(id) {"
+ },
+ {
+  "id": "MB-1025",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 401: a condition is always false",
+  "old": "    if text.len() > RECORD_MAX_BYTES {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1026",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 401: a condition is always true",
+  "old": "    if text.len() > RECORD_MAX_BYTES {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1028",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 404: an || becomes && (at column 29)",
+  "old": "    if !text.ends_with('\\n') || text.contains('\\r') {",
+  "new": "    if !text.ends_with('\\n') && text.contains('\\r') {"
+ },
+ {
+  "id": "MB-1029",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 404: a condition is always false",
+  "old": "    if !text.ends_with('\\n') || text.contains('\\r') {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1030",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 404: a condition is always true",
+  "old": "    if !text.ends_with('\\n') || text.contains('\\r') {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1031",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 404: a negation is dropped",
+  "old": "    if !text.ends_with('\\n') || text.contains('\\r') {",
+  "new": "    if text.ends_with('\\n') || text.contains('\\r') {"
+ },
+ {
+  "id": "MB-1032",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 408: an inequality is inverted (at column 21)",
+  "old": "    if lines.first() != Some(&RECORD_HEADER) {",
+  "new": "    if lines.first() == Some(&RECORD_HEADER) {"
+ },
+ {
+  "id": "MB-1033",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 408: a condition is always false",
+  "old": "    if lines.first() != Some(&RECORD_HEADER) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1034",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 408: a condition is always true",
+  "old": "    if lines.first() != Some(&RECORD_HEADER) {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1035",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 423: an inequality is inverted (at column 16)",
+  "old": "        if word != \"entry\" {",
+  "new": "        if word == \"entry\" {"
+ },
+ {
+  "id": "MB-1037",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 423: a condition is always true",
+  "old": "        if word != \"entry\" {",
+  "new": "        if true {"
+ },
+ {
+  "id": "MB-1038",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 434: a condition is always false",
+  "old": "        if last_index.is_some_and(|l| index <= l) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "MB-1039",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_04_the_record_has_one_exact_text_form_and_reads_back_to_the_same_record",
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 434: a condition is always true",
+  "old": "        if last_index.is_some_and(|l| index <= l) {",
+  "new": "        if true {"
+ },
+ {
+  "id": "MB-1043",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_06_a_plan_lists_every_changed_entry_with_what_it_was_and_changes_nothing_else",
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record"
+  ],
+  "what": "line 477: a condition is always true",
+  "old": "    if !m.file_type().is_file() || m.len() > RECORD_MAX_BYTES as u64 {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1044",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_06_a_plan_lists_every_changed_entry_with_what_it_was_and_changes_nothing_else",
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record"
+  ],
+  "what": "line 477: a negation is dropped",
+  "old": "    if !m.file_type().is_file() || m.len() > RECORD_MAX_BYTES as u64 {",
+  "new": "    if m.file_type().is_file() || m.len() > RECORD_MAX_BYTES as u64 {"
+ },
+ {
+  "id": "MB-1047",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_06_a_plan_lists_every_changed_entry_with_what_it_was_and_changes_nothing_else"
+  ],
+  "what": "line 560: the mode 0o600 is changed",
+  "old": "    write_durably(path, serialize(r).as_bytes(), 0o600)",
+  "new": "    write_durably(path, serialize(r).as_bytes(), 0o644)"
+ },
+ {
+  "id": "MB-1049",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_06_a_plan_lists_every_changed_entry_with_what_it_was_and_changes_nothing_else",
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record"
+  ],
+  "what": "line 565: a condition is always true",
+  "old": "    let m = fs::symlink_metadata(path).map_err(|e| io(what, path, &e))?;\n    if !m.file_type().is_file() {",
+  "new": "    let m = fs::symlink_metadata(path).map_err(|e| io(what, path, &e))?;\n    if true {"
+ },
+ {
+  "id": "MB-1050",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_06_a_plan_lists_every_changed_entry_with_what_it_was_and_changes_nothing_else",
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record"
+  ],
+  "what": "line 565: a negation is dropped",
+  "old": "    let m = fs::symlink_metadata(path).map_err(|e| io(what, path, &e))?;\n    if !m.file_type().is_file() {",
+  "new": "    let m = fs::symlink_metadata(path).map_err(|e| io(what, path, &e))?;\n    if m.file_type().is_file() {"
+ },
+ {
+  "id": "MB-1052",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_06_a_plan_lists_every_changed_entry_with_what_it_was_and_changes_nothing_else",
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record"
+  ],
+  "what": "line 568: a condition is always true",
+  "old": "    if m.len() > MEMBER_MAX_BYTES {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1058",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_13_a_backup_of_another_generation_is_never_taken_for_this_ones",
+   "mb_17_a_restore_puts_every_entry_back_keeps_the_record_and_removes_the_backups_last"
+  ],
+  "what": "line 610: an && becomes || (at column 87)",
+  "old": "        (Dest::File { sha256, mode }, Old::File { sha256: s, mode: m }) => sha256 == s && mode == m,",
+  "new": "        (Dest::File { sha256, mode }, Old::File { sha256: s, mode: m }) => sha256 == s || mode == m,"
+ },
+ {
+  "id": "MB-1060",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_08_a_plan_that_cannot_be_trusted_writes_nothing"
+  ],
+  "what": "line 652: a statement is deleted",
+  "old": ") -> Result<Record, MemberError> {\n    valid_pair(from, to, id)?;",
+  "new": ") -> Result<Record, MemberError> {\n    "
+ },
+ {
+  "id": "MB-1062",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_08_a_plan_that_cannot_be_trusted_writes_nothing"
+  ],
+  "what": "line 654: a statement is deleted",
+  "old": ") -> Result<Record, MemberError> {\n    valid_pair(from, to, id)?;\n    check_home(l.home)?;\n    check_unit_dir(l.unit_dir)?;",
+  "new": ") -> Result<Record, MemberError> {\n    valid_pair(from, to, id)?;\n    check_home(l.home)?;\n    "
+ },
+ {
+  "id": "MB-1063",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_06_a_plan_lists_every_changed_entry_with_what_it_was_and_changes_nothing_else",
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record"
+  ],
+  "what": "line 665: an equality is inverted (at column 26)",
+  "old": "                if sha256 == sha_hex(want) && mode == kind.mode() {",
+  "new": "                if sha256 != sha_hex(want) && mode == kind.mode() {"
+ },
+ {
+  "id": "MB-1064",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_06_a_plan_lists_every_changed_entry_with_what_it_was_and_changes_nothing_else",
+   "mb_09_a_plan_met_again_is_kept_replaced_when_stale_and_refused_when_it_is_not"
+  ],
+  "what": "line 665: an && becomes || (at column 43)",
+  "old": "                if sha256 == sha_hex(want) && mode == kind.mode() {",
+  "new": "                if sha256 == sha_hex(want) || mode == kind.mode() {"
+ },
+ {
+  "id": "MB-1065",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_06_a_plan_lists_every_changed_entry_with_what_it_was_and_changes_nothing_else",
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record"
+  ],
+  "what": "line 665: a condition is always false",
+  "old": "                if sha256 == sha_hex(want) && mode == kind.mode() {",
+  "new": "                if false {"
+ },
+ {
+  "id": "MB-1066",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_06_a_plan_lists_every_changed_entry_with_what_it_was_and_changes_nothing_else",
+   "mb_09_a_plan_met_again_is_kept_replaced_when_stale_and_refused_when_it_is_not"
+  ],
+  "what": "line 665: a condition is always true",
+  "old": "                if sha256 == sha_hex(want) && mode == kind.mode() {",
+  "new": "                if true {"
+ },
+ {
+  "id": "MB-1067",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_06_a_plan_lists_every_changed_entry_with_what_it_was_and_changes_nothing_else",
+   "mb_09_a_plan_met_again_is_kept_replaced_when_stale_and_refused_when_it_is_not"
+  ],
+  "what": "line 675: State::Planned becomes State::BackedUp",
+  "old": "            state: State::Planned,",
+  "new": "            state: State::BackedUp,"
+ },
+ {
+  "id": "MB-1070",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_09_a_plan_met_again_is_kept_replaced_when_stale_and_refused_when_it_is_not"
+  ],
+  "what": "line 680: an equality is inverted (at column 26)",
+  "old": "            if there.from == from && there.to == to {",
+  "new": "            if there.from != from && there.to == to {"
+ },
+ {
+  "id": "MB-1072",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_09_a_plan_met_again_is_kept_replaced_when_stale_and_refused_when_it_is_not"
+  ],
+  "what": "line 680: a condition is always false",
+  "old": "            if there.from == from && there.to == to {",
+  "new": "            if false {"
+ },
+ {
+  "id": "MB-1076",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_09_a_plan_met_again_is_kept_replaced_when_stale_and_refused_when_it_is_not"
+  ],
+  "what": "line 688: a negation is dropped",
+  "old": "        Some(there) if !all_in(&there, &[State::Planned, State::Restored]) => {",
+  "new": "        Some(there) if all_in(&there, &[State::Planned, State::Restored]) => {"
+ },
+ {
+  "id": "MB-1077",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_10_a_plan_leaves_members_last_alone_and_removes_the_leftover_of_a_promotion"
+  ],
+  "what": "line 697: a statement is deleted",
+  "old": "    remove_if_there(&l.home.join(LAST_NEW))?;",
+  "new": "    "
+ },
+ {
+  "id": "MB-1078",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_06_a_plan_lists_every_changed_entry_with_what_it_was_and_changes_nothing_else",
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record"
+  ],
+  "what": "line 704: a statement is deleted",
+  "old": "    persist(&update_path(l.home), &record)?;",
+  "new": "    "
+ },
+ {
+  "id": "MB-1080",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent",
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call"
+  ],
+  "what": "line 716: a condition is always true",
+  "old": "    let m = fs::symlink_metadata(backup).map_err(|e| format!(\"cannot be looked at ({e})\"))?;\n    if !m.file_type().is_file() {",
+  "new": "    let m = fs::symlink_metadata(backup).map_err(|e| format!(\"cannot be looked at ({e})\"))?;\n    if true {"
+ },
+ {
+  "id": "MB-1081",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent",
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call"
+  ],
+  "what": "line 716: a negation is dropped",
+  "old": "    let m = fs::symlink_metadata(backup).map_err(|e| format!(\"cannot be looked at ({e})\"))?;\n    if !m.file_type().is_file() {",
+  "new": "    let m = fs::symlink_metadata(backup).map_err(|e| format!(\"cannot be looked at ({e})\"))?;\n    if m.file_type().is_file() {"
+ },
+ {
+  "id": "MB-1082",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent",
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call"
+  ],
+  "what": "line 719: an inequality is inverted (at column 39)",
+  "old": "    if m.permissions().mode() & 0o7777 != mode {",
+  "new": "    if m.permissions().mode() & 0o7777 == mode {"
+ },
+ {
+  "id": "MB-1084",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent",
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call"
+  ],
+  "what": "line 719: a condition is always true",
+  "old": "    if m.permissions().mode() & 0o7777 != mode {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1085",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent",
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call"
+  ],
+  "what": "line 723: an inequality is inverted (at column 23)",
+  "old": "    if sha_hex(&bytes) != sha256 {",
+  "new": "    if sha_hex(&bytes) == sha256 {"
+ },
+ {
+  "id": "MB-1086",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_43_a_backup_with_the_recorded_mode_and_other_bytes_is_refused_by_its_hash_alone"
+  ],
+  "what": "line 723: a condition is always false",
+  "old": "    if sha_hex(&bytes) != sha256 {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1087",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent",
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call"
+  ],
+  "what": "line 723: a condition is always true",
+  "old": "    if sha_hex(&bytes) != sha256 {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1090",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent",
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call"
+  ],
+  "what": "line 766: a condition is always false",
+  "old": "    if backup_is(backup, sha256, mode).is_err() {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1092",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent",
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call"
+  ],
+  "what": "line 767: a statement is deleted",
+  "old": "        link_or_copy(dest, backup, mode)?;",
+  "new": "        "
+ },
+ {
+  "id": "MB-1095",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 805: an inequality is inverted (at column 14)",
+  "old": "    if rec.id != id || rec.from != from || rec.to != to {",
+  "new": "    if rec.id == id || rec.from != from || rec.to != to {"
+ },
+ {
+  "id": "MB-1098",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 805: a condition is always true",
+  "old": "    if rec.id != id || rec.from != from || rec.to != to {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1102",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_16_install_creates_the_bin_directory_when_the_home_has_none"
+  ],
+  "what": "line 834: an equality is inverted (at column 63)",
+  "old": "    if matches!(fs::symlink_metadata(&bin), Err(e) if e.kind() == std::io::ErrorKind::NotFound) {",
+  "new": "    if matches!(fs::symlink_metadata(&bin), Err(e) if e.kind() != std::io::ErrorKind::NotFound) {"
+ },
+ {
+  "id": "MB-1103",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_16_install_creates_the_bin_directory_when_the_home_has_none"
+  ],
+  "what": "line 834: a condition is always false",
+  "old": "    if matches!(fs::symlink_metadata(&bin), Err(e) if e.kind() == std::io::ErrorKind::NotFound) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1104",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 834: a condition is always true",
+  "old": "    if matches!(fs::symlink_metadata(&bin), Err(e) if e.kind() == std::io::ErrorKind::NotFound) {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1105",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_16_install_creates_the_bin_directory_when_the_home_has_none"
+  ],
+  "what": "line 836: the mode 0o755 is changed",
+  "old": "        fs::set_permissions(&bin, fs::Permissions::from_mode(0o755))",
+  "new": "        fs::set_permissions(&bin, fs::Permissions::from_mode(0o666))"
+ },
+ {
+  "id": "MB-1106",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 843: an equality is inverted (at column 33)",
+  "old": "            .find(|(k, n, _)| *k == e.kind && *n == e.name)",
+  "new": "            .find(|(k, n, _)| *k != e.kind && *n == e.name)"
+ },
+ {
+  "id": "MB-1107",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 843: an && becomes || (at column 43)",
+  "old": "            .find(|(k, n, _)| *k == e.kind && *n == e.name)",
+  "new": "            .find(|(k, n, _)| *k == e.kind || *n == e.name)"
+ },
+ {
+  "id": "MB-1108",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent",
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call"
+  ],
+  "what": "line 852: an equality is inverted (at column 83)",
+  "old": "        let is_new = |d: &Dest| matches!(d, Dest::File { sha256, mode } if *sha256 == sha_hex(want) && *mode == e.kind.mode());",
+  "new": "        let is_new = |d: &Dest| matches!(d, Dest::File { sha256, mode } if *sha256 != sha_hex(want) && *mode == e.kind.mode());"
+ },
+ {
+  "id": "MB-1109",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent",
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call"
+  ],
+  "what": "line 852: an && becomes || (at column 100)",
+  "old": "        let is_new = |d: &Dest| matches!(d, Dest::File { sha256, mode } if *sha256 == sha_hex(want) && *mode == e.kind.mode());",
+  "new": "        let is_new = |d: &Dest| matches!(d, Dest::File { sha256, mode } if *sha256 == sha_hex(want) || *mode == e.kind.mode());"
+ },
+ {
+  "id": "MB-1110",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 854: an equality is inverted (at column 17)",
+  "old": "        if state == State::Planned {",
+  "new": "        if state != State::Planned {"
+ },
+ {
+  "id": "MB-1111",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 854: a condition is always false",
+  "old": "        if state == State::Planned {",
+  "new": "        if false {"
+ },
+ {
+  "id": "MB-1112",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call",
+   "mb_15_an_install_refuses_a_destination_that_changed_after_the_plan"
+  ],
+  "what": "line 854: a condition is always true",
+  "old": "        if state == State::Planned {",
+  "new": "        if true {"
+ },
+ {
+  "id": "MB-1113",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 854: State::Planned becomes State::BackedUp",
+  "old": "        if state == State::Planned {",
+  "new": "        if state == State::BackedUp {"
+ },
+ {
+  "id": "MB-1115",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_14_a_link_an_absent_file_and_a_mode_are_put_back_as_they_were"
+  ],
+  "what": "line 862: a condition is always true",
+  "old": "                    let now = dest_now(&dest)?;\n                    if !is_old(&now, &e.old) {",
+  "new": "                    let now = dest_now(&dest)?;\n                    if true {"
+ },
+ {
+  "id": "MB-1116",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_14_a_link_an_absent_file_and_a_mode_are_put_back_as_they_were"
+  ],
+  "what": "line 862: a negation is dropped",
+  "old": "                    let now = dest_now(&dest)?;\n                    if !is_old(&now, &e.old) {",
+  "new": "                    let now = dest_now(&dest)?;\n                    if is_old(&now, &e.old) {"
+ },
+ {
+  "id": "MB-1117",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call"
+  ],
+  "what": "line 873: State::BackedUp becomes State::Replaced",
+  "old": "            rec.entries[i].state = State::BackedUp;",
+  "new": "            rec.entries[i].state = State::Replaced;"
+ },
+ {
+  "id": "MB-1118",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call"
+  ],
+  "what": "line 874: a statement is deleted",
+  "old": "            rec.entries[i].state = State::BackedUp;\n            persist(&path, &rec)?;",
+  "new": "            rec.entries[i].state = State::BackedUp;\n            "
+ },
+ {
+  "id": "MB-1119",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 876: State::BackedUp becomes State::Replaced",
+  "old": "            state = State::BackedUp;",
+  "new": "            state = State::Replaced;"
+ },
+ {
+  "id": "MB-1120",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 881: a condition is always false",
+  "old": "                if !is_new(&now) {",
+  "new": "                if false {"
+ },
+ {
+  "id": "MB-1121",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call"
+  ],
+  "what": "line 881: a condition is always true",
+  "old": "                if !is_new(&now) {",
+  "new": "                if true {"
+ },
+ {
+  "id": "MB-1122",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 881: a negation is dropped",
+  "old": "                if !is_new(&now) {",
+  "new": "                if is_new(&now) {"
+ },
+ {
+  "id": "MB-1124",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 883: a condition is always true",
+  "old": "                    // not replaced yet: the destination must be the old state, and the backup (when there is one) must be right\n                    if !is_old(&now, &e.old) {",
+  "new": "                    // not replaced yet: the destination must be the old state, and the backup (when there is one) must be right\n                    if true {"
+ },
+ {
+  "id": "MB-1125",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 883: a negation is dropped",
+  "old": "                    // not replaced yet: the destination must be the old state, and the backup (when there is one) must be right\n                    if !is_old(&now, &e.old) {",
+  "new": "                    // not replaced yet: the destination must be the old state, and the backup (when there is one) must be right\n                    if is_old(&now, &e.old) {"
+ },
+ {
+  "id": "MB-1126",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 903: a statement is deleted",
+  "old": "                    put_new(&dest, want, e.kind.mode())?;",
+  "new": "                    "
+ },
+ {
+  "id": "MB-1128",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 910: State::Replaced becomes State::Restored",
+  "old": "                rec.entries[i].state = State::Replaced;",
+  "new": "                rec.entries[i].state = State::Restored;"
+ },
+ {
+  "id": "MB-1129",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent"
+  ],
+  "what": "line 911: a statement is deleted",
+  "old": "                persist(&path, &rec)?;",
+  "new": "                "
+ },
+ {
+  "id": "MB-1130",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_15_an_install_refuses_a_destination_that_changed_after_the_plan"
+  ],
+  "what": "line 915: a condition is always false",
+  "old": "                if !is_new(&dest_now(&dest)?) {",
+  "new": "                if false {"
+ },
+ {
+  "id": "MB-1131",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call",
+   "mb_15_an_install_refuses_a_destination_that_changed_after_the_plan"
+  ],
+  "what": "line 915: a condition is always true",
+  "old": "                if !is_new(&dest_now(&dest)?) {",
+  "new": "                if true {"
+ },
+ {
+  "id": "MB-1132",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_12_a_run_lost_at_any_boundary_of_the_forward_protocol_is_continued_by_the_next_call",
+   "mb_15_an_install_refuses_a_destination_that_changed_after_the_plan"
+  ],
+  "what": "line 915: a negation is dropped",
+  "old": "                if !is_new(&dest_now(&dest)?) {",
+  "new": "                if is_new(&dest_now(&dest)?) {"
+ },
+ {
+  "id": "MB-1133",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_11_the_forward_protocol_changes_one_entry_at_a_time_and_never_leaves_a_destination_absent",
+   "mb_14_a_link_an_absent_file_and_a_mode_are_put_back_as_they_were"
+  ],
+  "what": "line 937: an equality is inverted (at column 52)",
+  "old": "            .map(|e| (e.kind, e.name.clone(), e.old == Old::Absent))",
+  "new": "            .map(|e| (e.kind, e.name.clone(), e.old != Old::Absent))"
+ },
+ {
+  "id": "MB-1134",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_23_the_inventory_of_an_unfinished_upgrade_is_found_by_from_to_and_id",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 943: an equality is inverted (at column 11)",
+  "old": "    a.from == b.from",
+  "new": "    a.from != b.from"
+ },
+ {
+  "id": "MB-1135",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_23_the_inventory_of_an_unfinished_upgrade_is_found_by_from_to_and_id",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 944: an equality is inverted (at column 16)",
+  "old": "        && a.to == b.to",
+  "new": "        && a.to != b.to"
+ },
+ {
+  "id": "MB-1136",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_23_the_inventory_of_an_unfinished_upgrade_is_found_by_from_to_and_id",
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent"
+  ],
+  "what": "line 944: an && becomes || (at column 8)",
+  "old": "        && a.to == b.to",
+  "new": "        || a.to == b.to"
+ },
+ {
+  "id": "MB-1137",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_23_the_inventory_of_an_unfinished_upgrade_is_found_by_from_to_and_id",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 945: an equality is inverted (at column 16)",
+  "old": "        && a.id == b.id",
+  "new": "        && a.id != b.id"
+ },
+ {
+  "id": "MB-1138",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_23_the_inventory_of_an_unfinished_upgrade_is_found_by_from_to_and_id",
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent"
+  ],
+  "what": "line 945: an && becomes || (at column 8)",
+  "old": "        && a.id == b.id",
+  "new": "        || a.id == b.id"
+ },
+ {
+  "id": "MB-1139",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_23_the_inventory_of_an_unfinished_upgrade_is_found_by_from_to_and_id",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 946: an equality is inverted (at column 27)",
+  "old": "        && a.entries.len() == b.entries.len()",
+  "new": "        && a.entries.len() != b.entries.len()"
+ },
+ {
+  "id": "MB-1140",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_23_the_inventory_of_an_unfinished_upgrade_is_found_by_from_to_and_id",
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent"
+  ],
+  "what": "line 946: an && becomes || (at column 8)",
+  "old": "        && a.entries.len() == b.entries.len()",
+  "new": "        || a.entries.len() == b.entries.len()"
+ },
+ {
+  "id": "MB-1141",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_23_the_inventory_of_an_unfinished_upgrade_is_found_by_from_to_and_id",
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent"
+  ],
+  "what": "line 947: an && becomes || (at column 8)",
+  "old": "        && a.entries.len() == b.entries.len()\n        && a.entries",
+  "new": "        && a.entries.len() == b.entries.len()\n        || a.entries"
+ },
+ {
+  "id": "MB-1142",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_23_the_inventory_of_an_unfinished_upgrade_is_found_by_from_to_and_id",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 950: an equality is inverted (at column 33)",
+  "old": "            .all(|(x, y)| x.kind == y.kind && x.name == y.name && x.old == y.old)",
+  "new": "            .all(|(x, y)| x.kind != y.kind && x.name == y.name && x.old == y.old)"
+ },
+ {
+  "id": "MB-1143",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_23_the_inventory_of_an_unfinished_upgrade_is_found_by_from_to_and_id",
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent"
+  ],
+  "what": "line 950: an && becomes || (at column 43)",
+  "old": "            .all(|(x, y)| x.kind == y.kind && x.name == y.name && x.old == y.old)",
+  "new": "            .all(|(x, y)| x.kind == y.kind || x.name == y.name && x.old == y.old)"
+ },
+ {
+  "id": "MB-1144",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_13_a_backup_of_another_generation_is_never_taken_for_this_ones",
+   "mb_14_a_link_an_absent_file_and_a_mode_are_put_back_as_they_were"
+  ],
+  "what": "line 967: an inequality is inverted (at column 67)",
+  "old": "                if (u.from.as_str(), u.to.as_str(), u.id.as_str()) != (from, to, id) {",
+  "new": "                if (u.from.as_str(), u.to.as_str(), u.id.as_str()) == (from, to, id) {"
+ },
+ {
+  "id": "MB-1145",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_42_a_live_record_of_another_attempt_or_pair_is_a_lost_inventory_even_with_no_members_last"
+  ],
+  "what": "line 967: a condition is always false",
+  "old": "                if (u.from.as_str(), u.to.as_str(), u.id.as_str()) != (from, to, id) {",
+  "new": "                if false {"
+ },
+ {
+  "id": "MB-1146",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_13_a_backup_of_another_generation_is_never_taken_for_this_ones",
+   "mb_14_a_link_an_absent_file_and_a_mode_are_put_back_as_they_were"
+  ],
+  "what": "line 967: a condition is always true",
+  "old": "                if (u.from.as_str(), u.to.as_str(), u.id.as_str()) != (from, to, id) {",
+  "new": "                if true {"
+ },
+ {
+  "id": "MB-1147",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_23_the_inventory_of_an_unfinished_upgrade_is_found_by_from_to_and_id"
+  ],
+  "what": "line 974: an equality is inverted (at column 28)",
+  "old": "                    && l.id == u.id",
+  "new": "                    && l.id != u.id"
+ },
+ {
+  "id": "MB-1156",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_18_a_restore_is_idempotent_and_a_second_one_changes_nothing"
+  ],
+  "what": "line 1037: a condition is always false",
+  "old": "    if is_old(&now, &e.old) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1157",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_13_a_backup_of_another_generation_is_never_taken_for_this_ones",
+   "mb_14_a_link_an_absent_file_and_a_mode_are_put_back_as_they_were"
+  ],
+  "what": "line 1037: a condition is always true",
+  "old": "    if is_old(&now, &e.old) {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1158",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_14_a_link_an_absent_file_and_a_mode_are_put_back_as_they_were"
+  ],
+  "what": "line 1043: a statement is deleted",
+  "old": "            remove_if_there(dest)?;",
+  "new": "            "
+ },
+ {
+  "id": "MB-1165",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_13_a_backup_of_another_generation_is_never_taken_for_this_ones",
+   "mb_14_a_link_an_absent_file_and_a_mode_are_put_back_as_they_were"
+  ],
+  "what": "line 1071: a condition is always true",
+  "old": "    if !is_old(&dest_now(dest)?, &e.old) {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1166",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_13_a_backup_of_another_generation_is_never_taken_for_this_ones",
+   "mb_14_a_link_an_absent_file_and_a_mode_are_put_back_as_they_were"
+  ],
+  "what": "line 1071: a negation is dropped",
+  "old": "    if !is_old(&dest_now(dest)?, &e.old) {",
+  "new": "    if is_old(&dest_now(dest)?, &e.old) {"
+ },
+ {
+  "id": "MB-1168",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_13_a_backup_of_another_generation_is_never_taken_for_this_ones",
+   "mb_14_a_link_an_absent_file_and_a_mode_are_put_back_as_they_were"
+  ],
+  "what": "line 1105: an equality is inverted (at column 19)",
+  "old": "        if e.state == State::Planned {",
+  "new": "        if e.state != State::Planned {"
+ },
+ {
+  "id": "MB-1170",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_13_a_backup_of_another_generation_is_never_taken_for_this_ones",
+   "mb_14_a_link_an_absent_file_and_a_mode_are_put_back_as_they_were"
+  ],
+  "what": "line 1105: a condition is always true",
+  "old": "        if e.state == State::Planned {",
+  "new": "        if true {"
+ },
+ {
+  "id": "MB-1172",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_19_a_planned_entry_is_only_verified_and_its_destination_is_never_touched"
+  ],
+  "what": "line 1107: a condition is always false",
+  "old": "            if !is_old(&dest_now(&dest)?, &e.old) {",
+  "new": "            if false {"
+ },
+ {
+  "id": "MB-1173",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_13_a_backup_of_another_generation_is_never_taken_for_this_ones",
+   "mb_19_a_planned_entry_is_only_verified_and_its_destination_is_never_touched"
+  ],
+  "what": "line 1107: a condition is always true",
+  "old": "            if !is_old(&dest_now(&dest)?, &e.old) {",
+  "new": "            if true {"
+ },
+ {
+  "id": "MB-1174",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_13_a_backup_of_another_generation_is_never_taken_for_this_ones",
+   "mb_19_a_planned_entry_is_only_verified_and_its_destination_is_never_touched"
+  ],
+  "what": "line 1107: a negation is dropped",
+  "old": "            if !is_old(&dest_now(&dest)?, &e.old) {",
+  "new": "            if is_old(&dest_now(&dest)?, &e.old) {"
+ },
+ {
+  "id": "MB-1175",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_13_a_backup_of_another_generation_is_never_taken_for_this_ones",
+   "mb_14_a_link_an_absent_file_and_a_mode_are_put_back_as_they_were"
+  ],
+  "what": "line 1117: a statement is deleted",
+  "old": "            restore_entry(&e, &dest, &backup_of(&dest, &id), &id, point)?;",
+  "new": "            "
+ },
+ {
+  "id": "MB-1176",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_17_a_restore_puts_every_entry_back_keeps_the_record_and_removes_the_backups_last"
+  ],
+  "what": "line 1119: State::Restored becomes State::Planned",
+  "old": "        rec.entries[i].state = State::Restored;",
+  "new": "        rec.entries[i].state = State::Planned;"
+ },
+ {
+  "id": "MB-1177",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_17_a_restore_puts_every_entry_back_keeps_the_record_and_removes_the_backups_last"
+  ],
+  "what": "line 1120: a statement is deleted",
+  "old": "        rec.entries[i].state = State::Restored;\n        persist(&path, &rec)?;",
+  "new": "        rec.entries[i].state = State::Restored;\n        "
+ },
+ {
+  "id": "MB-1178",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_14_a_link_an_absent_file_and_a_mode_are_put_back_as_they_were",
+   "mb_17_a_restore_puts_every_entry_back_keeps_the_record_and_removes_the_backups_last"
+  ],
+  "what": "line 1127: a statement is deleted",
+  "old": "        remove_if_there(&backup_of(&dest, &id))?;",
+  "new": "        "
+ },
+ {
+  "id": "MB-1181",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_13_a_backup_of_another_generation_is_never_taken_for_this_ones",
+   "mb_17_a_restore_puts_every_entry_back_keeps_the_record_and_removes_the_backups_last"
+  ],
+  "what": "line 1142: a statement is deleted",
+  "old": "    remove_if_there(&path)?;",
+  "new": "    "
+ },
+ {
+  "id": "MB-1182",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_44_forget_removes_the_live_record_and_a_members_last_of_the_same_attempt_and_nothing_else"
+  ],
+  "what": "line 1143: an equality is inverted (at column 18)",
+  "old": "    if inv.source == Source::Update",
+  "new": "    if inv.source != Source::Update"
+ },
+ {
+  "id": "MB-1184",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_44_forget_removes_the_live_record_and_a_members_last_of_the_same_attempt_and_nothing_else"
+  ],
+  "what": "line 1145: an equality is inverted (at column 16)",
+  "old": "        && l.id == inv.record.id",
+  "new": "        && l.id != inv.record.id"
+ },
+ {
+  "id": "MB-1186",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_44_forget_removes_the_live_record_and_a_members_last_of_the_same_attempt_and_nothing_else"
+  ],
+  "what": "line 1147: a statement is deleted",
+  "old": "        remove_if_there(&last_path(home))?;",
+  "new": "        "
+ },
+ {
+  "id": "MB-1189",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps"
+  ],
+  "what": "line 1173: an inequality is inverted (at column 70)",
+  "old": "    if (update.from.as_str(), update.to.as_str(), update.id.as_str()) != (from, to, id) {",
+  "new": "    if (update.from.as_str(), update.to.as_str(), update.id.as_str()) == (from, to, id) {"
+ },
+ {
+  "id": "MB-1191",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps"
+  ],
+  "what": "line 1173: a condition is always true",
+  "old": "    if (update.from.as_str(), update.to.as_str(), update.id.as_str()) != (from, to, id) {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1192",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent"
+  ],
+  "what": "line 1179: a condition is always false",
+  "old": "    if !all_in(&update, &[State::Replaced]) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1193",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps"
+  ],
+  "what": "line 1179: a condition is always true",
+  "old": "    if !all_in(&update, &[State::Replaced]) {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1194",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps"
+  ],
+  "what": "line 1179: a negation is dropped",
+  "old": "    if !all_in(&update, &[State::Replaced]) {",
+  "new": "    if all_in(&update, &[State::Replaced]) {"
+ },
+ {
+  "id": "MB-1195",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps"
+  ],
+  "what": "line 1179: State::Replaced becomes State::Restored",
+  "old": "    if !all_in(&update, &[State::Replaced]) {",
+  "new": "    if !all_in(&update, &[State::Restored]) {"
+ },
+ {
+  "id": "MB-1198",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 1192: an equality is inverted (at column 16)",
+  "old": "        && l.id == update.id",
+  "new": "        && l.id != update.id"
+ },
+ {
+  "id": "MB-1204",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps"
+  ],
+  "what": "line 1218: a statement is deleted",
+  "old": "    // S3: the live record goes\n    remove_if_there(&update_path(home))?;",
+  "new": "    // S3: the live record goes\n    "
+ },
+ {
+  "id": "MB-1210",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_28_the_sweep_removes_only_the_exact_backup_names_of_the_retired_attempts",
+   "mb_33_a_sweep_lost_in_the_middle_is_finished_by_the_next_one_and_keeps_what_it_keeps"
+  ],
+  "what": "line 1245: a statement is deleted",
+  "old": "                remove_if_there(&entry.path())?;",
+  "new": "                "
+ },
+ {
+  "id": "MB-1212",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_29_a_plan_of_an_attempt_that_never_switched_is_discarded_only_while_nothing_happened"
+  ],
+  "what": "line 1262: an inequality is inverted (at column 12)",
+  "old": "    if r.id != id {",
+  "new": "    if r.id == id {"
+ },
+ {
+  "id": "MB-1213",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_29_a_plan_of_an_attempt_that_never_switched_is_discarded_only_while_nothing_happened"
+  ],
+  "what": "line 1262: a condition is always false",
+  "old": "    if r.id != id {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1214",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_29_a_plan_of_an_attempt_that_never_switched_is_discarded_only_while_nothing_happened"
+  ],
+  "what": "line 1262: a condition is always true",
+  "old": "    if r.id != id {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1215",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_29_a_plan_of_an_attempt_that_never_switched_is_discarded_only_while_nothing_happened"
+  ],
+  "what": "line 1265: a condition is always false",
+  "old": "    if !all_in(&r, &[State::Planned]) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1216",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_29_a_plan_of_an_attempt_that_never_switched_is_discarded_only_while_nothing_happened"
+  ],
+  "what": "line 1265: a condition is always true",
+  "old": "    if !all_in(&r, &[State::Planned]) {",
+  "new": "    if true {"
+ },
+ {
+  "id": "MB-1217",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_29_a_plan_of_an_attempt_that_never_switched_is_discarded_only_while_nothing_happened"
+  ],
+  "what": "line 1265: a negation is dropped",
+  "old": "    if !all_in(&r, &[State::Planned]) {",
+  "new": "    if all_in(&r, &[State::Planned]) {"
+ },
+ {
+  "id": "MB-1218",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_29_a_plan_of_an_attempt_that_never_switched_is_discarded_only_while_nothing_happened"
+  ],
+  "what": "line 1265: State::Planned becomes State::BackedUp",
+  "old": "    if !all_in(&r, &[State::Planned]) {",
+  "new": "    if !all_in(&r, &[State::BackedUp]) {"
+ },
+ {
+  "id": "MB-1219",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_29_a_plan_of_an_attempt_that_never_switched_is_discarded_only_while_nothing_happened"
+  ],
+  "what": "line 1270: a statement is deleted",
+  "old": "    }\n    remove_if_there(&update_path(home))?;",
+  "new": "    }\n    "
+ },
+ {
+  "id": "MB-1221",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_31_the_lines_of_the_upgrade_record_name_each_entry_created_or_replaced"
+  ],
+  "what": "line 1284: an equality is inverted (at column 25)",
+  "old": "                if e.old == Old::Absent {",
+  "new": "                if e.old != Old::Absent {"
+ },
+ {
+  "id": "MB-1222",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_31_the_lines_of_the_upgrade_record_name_each_entry_created_or_replaced"
+  ],
+  "what": "line 1284: a condition is always false",
+  "old": "                if e.old == Old::Absent {",
+  "new": "                if false {"
+ },
+ {
+  "id": "MB-1223",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_31_the_lines_of_the_upgrade_record_name_each_entry_created_or_replaced"
+  ],
+  "what": "line 1284: a condition is always true",
+  "old": "                if e.old == Old::Absent {",
+  "new": "                if true {"
+ },
+ {
+  "id": "MB-1015",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 323: a condition is always false",
+  "old": "        if target.len() > 2 * 4096 {",
+  "new": "        if false {"
+ },
+ {
+  "id": "MB-1017",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 323: a comparison > becomes >=",
+  "old": "        if target.len() > 2 * 4096 {",
+  "new": "        if target.len() >= 2 * 4096 {"
+ },
+ {
+  "id": "MB-1027",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 401: a comparison > becomes >=",
+  "old": "    if text.len() > RECORD_MAX_BYTES {",
+  "new": "    if text.len() >= RECORD_MAX_BYTES {"
+ },
+ {
+  "id": "MB-1036",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 423: a condition is always false",
+  "old": "        if word != \"entry\" {",
+  "new": "        if false {"
+ },
+ {
+  "id": "MB-1040",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_05_a_record_that_is_not_exactly_ours_is_refused"
+  ],
+  "what": "line 434: a comparison <= becomes <",
+  "old": "        if last_index.is_some_and(|l| index <= l) {",
+  "new": "        if last_index.is_some_and(|l| index < l) {"
+ },
+ {
+  "id": "MB-1041",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_34_a_record_file_that_is_not_a_plain_file_of_a_record_size_is_refused"
+  ],
+  "what": "line 477: an || becomes && (at column 32)",
+  "old": "    if !m.file_type().is_file() || m.len() > RECORD_MAX_BYTES as u64 {",
+  "new": "    if !m.file_type().is_file() && m.len() > RECORD_MAX_BYTES as u64 {"
+ },
+ {
+  "id": "MB-1042",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_34_a_record_file_that_is_not_a_plain_file_of_a_record_size_is_refused"
+  ],
+  "what": "line 477: a condition is always false",
+  "old": "    if !m.file_type().is_file() || m.len() > RECORD_MAX_BYTES as u64 {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1045",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_34_a_record_file_that_is_not_a_plain_file_of_a_record_size_is_refused"
+  ],
+  "what": "line 477: a comparison > becomes >=",
+  "old": "    if !m.file_type().is_file() || m.len() > RECORD_MAX_BYTES as u64 {",
+  "new": "    if !m.file_type().is_file() || m.len() >= RECORD_MAX_BYTES as u64 {"
+ },
+ {
+  "id": "MB-1046",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_35_a_stale_temporary_and_a_wrong_backup_of_this_attempts_name_do_not_stop_the_install"
+  ],
+  "what": "line 542: a statement is deleted",
+  "old": "    remove_if_there(&tmp)?;",
+  "new": "    "
+ },
+ {
+  "id": "MB-1048",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_37_a_release_member_that_is_a_link_or_too_large_is_refused"
+  ],
+  "what": "line 565: a condition is always false",
+  "old": "    let m = fs::symlink_metadata(path).map_err(|e| io(what, path, &e))?;\n    if !m.file_type().is_file() {",
+  "new": "    let m = fs::symlink_metadata(path).map_err(|e| io(what, path, &e))?;\n    if false {"
+ },
+ {
+  "id": "MB-1051",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_37_a_release_member_that_is_a_link_or_too_large_is_refused"
+  ],
+  "what": "line 568: a condition is always false",
+  "old": "    if m.len() > MEMBER_MAX_BYTES {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1053",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_37_a_release_member_that_is_a_link_or_too_large_is_refused"
+  ],
+  "what": "line 568: a comparison > becomes >=",
+  "old": "    if m.len() > MEMBER_MAX_BYTES {",
+  "new": "    if m.len() >= MEMBER_MAX_BYTES {"
+ },
+ {
+  "id": "MB-1071",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_36_an_install_refuses_another_attempt_another_pair_a_bad_pair_a_bad_home_a_bad_unit_directory"
+  ],
+  "what": "line 680: an && becomes || (at column 34)",
+  "old": "            if there.from == from && there.to == to {",
+  "new": "            if there.from == from || there.to == to {"
+ },
+ {
+  "id": "MB-1073",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_36_an_install_refuses_another_attempt_another_pair_a_bad_pair_a_bad_home_a_bad_unit_directory"
+  ],
+  "what": "line 680: a condition is always true",
+  "old": "            if there.from == from && there.to == to {",
+  "new": "            if true {"
+ },
+ {
+  "id": "MB-1079",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_38_a_backup_that_is_not_a_regular_file_of_the_recorded_mode_is_not_one"
+  ],
+  "what": "line 716: a condition is always false",
+  "old": "    let m = fs::symlink_metadata(backup).map_err(|e| format!(\"cannot be looked at ({e})\"))?;\n    if !m.file_type().is_file() {",
+  "new": "    let m = fs::symlink_metadata(backup).map_err(|e| format!(\"cannot be looked at ({e})\"))?;\n    if false {"
+ },
+ {
+  "id": "MB-1083",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_38_a_backup_that_is_not_a_regular_file_of_the_recorded_mode_is_not_one"
+  ],
+  "what": "line 719: a condition is always false",
+  "old": "    if m.permissions().mode() & 0o7777 != mode {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1089",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_39_a_destination_that_changed_after_the_plan_is_refused_by_kind_by_mode_and_in_every_state"
+  ],
+  "what": "line 754: an && becomes || (at column 57)",
+  "old": "        Dest::File { sha256: s, mode: m } if s == sha256 && m == mode => {}",
+  "new": "        Dest::File { sha256: s, mode: m } if s == sha256 || m == mode => {}"
+ },
+ {
+  "id": "MB-1096",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_36_an_install_refuses_another_attempt_another_pair_a_bad_pair_a_bad_home_a_bad_unit_directory"
+  ],
+  "what": "line 805: an || becomes && (at column 20)",
+  "old": "    if rec.id != id || rec.from != from || rec.to != to {",
+  "new": "    if rec.id != id && rec.from != from || rec.to != to {"
+ },
+ {
+  "id": "MB-1097",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_36_an_install_refuses_another_attempt_another_pair_a_bad_pair_a_bad_home_a_bad_unit_directory"
+  ],
+  "what": "line 805: a condition is always false",
+  "old": "    if rec.id != id || rec.from != from || rec.to != to {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1099",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_36_an_install_refuses_another_attempt_another_pair_a_bad_pair_a_bad_home_a_bad_unit_directory"
+  ],
+  "what": "line 826: a statement is deleted",
+  "old": ") -> Result<Update, MemberError> {\n    valid_pair(from, to, id)?;",
+  "new": ") -> Result<Update, MemberError> {\n    "
+ },
+ {
+  "id": "MB-1101",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_36_an_install_refuses_another_attempt_another_pair_a_bad_pair_a_bad_home_a_bad_unit_directory"
+  ],
+  "what": "line 828: a statement is deleted",
+  "old": ") -> Result<Update, MemberError> {\n    valid_pair(from, to, id)?;\n    check_home(l.home)?;\n    check_unit_dir(l.unit_dir)?;",
+  "new": ") -> Result<Update, MemberError> {\n    valid_pair(from, to, id)?;\n    check_home(l.home)?;\n    "
+ },
+ {
+  "id": "MB-1114",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_39_a_destination_that_changed_after_the_plan_is_refused_by_kind_by_mode_and_in_every_state"
+  ],
+  "what": "line 862: a condition is always false",
+  "old": "                    let now = dest_now(&dest)?;\n                    if !is_old(&now, &e.old) {",
+  "new": "                    let now = dest_now(&dest)?;\n                    if false {"
+ },
+ {
+  "id": "MB-1123",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_39_a_destination_that_changed_after_the_plan_is_refused_by_kind_by_mode_and_in_every_state"
+  ],
+  "what": "line 883: a condition is always false",
+  "old": "                    // not replaced yet: the destination must be the old state, and the backup (when there is one) must be right\n                    if !is_old(&now, &e.old) {",
+  "new": "                    // not replaced yet: the destination must be the old state, and the backup (when there is one) must be right\n                    if false {"
+ },
+ {
+  "id": "MB-1153",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_24_the_inventory_of_a_finished_upgrade_is_members_last_bound_to_the_release_being_left"
+  ],
+  "what": "line 1004: State::Planned becomes State::BackedUp",
+  "old": "                && !all_in(&u, &[State::Planned, State::Restored])",
+  "new": "                && !all_in(&u, &[State::BackedUp, State::Restored])"
+ },
+ {
+  "id": "MB-1162",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_40_a_staging_file_of_a_lost_restore_does_not_stop_a_link_from_being_put_back"
+  ],
+  "what": "line 1064: a statement is deleted",
+  "old": "            remove_if_there(&staged)?;",
+  "new": "            "
+ },
+ {
+  "id": "MB-1167",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_41_a_restore_removes_the_new_file_a_lost_install_left_beside_a_destination"
+  ],
+  "what": "line 1104: a statement is deleted",
+  "old": "        remove_if_there(&sibling(&dest, \".new\"))?;",
+  "new": "        "
+ },
+ {
+  "id": "MB-1169",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_19_a_planned_entry_is_only_verified_and_its_destination_is_never_touched"
+  ],
+  "what": "line 1105: a condition is always false",
+  "old": "        if e.state == State::Planned {",
+  "new": "        if false {"
+ },
+ {
+  "id": "MB-1171",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_19_a_planned_entry_is_only_verified_and_its_destination_is_never_touched"
+  ],
+  "what": "line 1105: State::Planned becomes State::BackedUp",
+  "old": "        if e.state == State::Planned {",
+  "new": "        if e.state == State::BackedUp {"
+ },
+ {
+  "id": "MB-1179",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_19_a_planned_entry_is_only_verified_and_its_destination_is_never_touched"
+  ],
+  "what": "line 1128: a statement is deleted",
+  "old": "        remove_if_there(&sibling(&dest, &format!(\".restore-{id}\")))?;",
+  "new": "        "
+ },
+ {
+  "id": "MB-1190",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent"
+  ],
+  "what": "line 1173: a condition is always false",
+  "old": "    if (update.from.as_str(), update.to.as_str(), update.id.as_str()) != (from, to, id) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "MB-1196",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent"
+  ],
+  "what": "line 1183: an inequality is inverted (at column 32)",
+  "old": "            .filter(|e| e.state != State::Replaced)",
+  "new": "            .filter(|e| e.state == State::Replaced)"
+ },
+ {
+  "id": "MB-1197",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent"
+  ],
+  "what": "line 1183: State::Replaced becomes State::Restored",
+  "old": "            .filter(|e| e.state != State::Replaced)",
+  "new": "            .filter(|e| e.state != State::Restored)"
+ },
+ {
+  "id": "MB-1201",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps"
+  ],
+  "what": "line 1204: the mode 0o600 is changed",
+  "old": "        .mode(0o600)",
+  "new": "        .mode(0o644)"
+ },
+ {
+  "id": "MB-1187",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent"
+  ],
+  "what": "line 1162: a statement is deleted",
+  "old": ") -> Result<(), MemberError> {\n    valid_pair(from, to, id)?;",
+  "new": ") -> Result<(), MemberError> {\n    "
+ },
+ {
+  "id": "PM001",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_45_a_record_carries_its_retired_ids_in_one_exact_form_and_refuses_every_other"
+  ],
+  "what": "line 425: a condition is always false",
+  "old": "        if !valid_attempt_id(r) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "PM002",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 425: a condition is always true",
+  "old": "        if !valid_attempt_id(r) {",
+  "new": "        if true {"
+ },
+ {
+  "id": "PM003",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 425: a negation is dropped",
+  "old": "        if !valid_attempt_id(r) {",
+  "new": "        if valid_attempt_id(r) {"
+ },
+ {
+  "id": "PM004",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 428: an equality is inverted (at column 13)",
+  "old": "        if r == id {",
+  "new": "        if r != id {"
+ },
+ {
+  "id": "PM005",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_45_a_record_carries_its_retired_ids_in_one_exact_form_and_refuses_every_other"
+  ],
+  "what": "line 428: a condition is always false",
+  "old": "        if r == id {",
+  "new": "        if false {"
+ },
+ {
+  "id": "PM006",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 428: a condition is always true",
+  "old": "        if r == id {",
+  "new": "        if true {"
+ },
+ {
+  "id": "PM007",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_45_a_record_carries_its_retired_ids_in_one_exact_form_and_refuses_every_other",
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "line 431: an equality is inverted (at column 36)",
+  "old": "        if retired.iter().any(|x| x == r) {",
+  "new": "        if retired.iter().any(|x| x != r) {"
+ },
+ {
+  "id": "PM008",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_45_a_record_carries_its_retired_ids_in_one_exact_form_and_refuses_every_other"
+  ],
+  "what": "line 431: a condition is always false",
+  "old": "        if retired.iter().any(|x| x == r) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "PM009",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 431: a condition is always true",
+  "old": "        if retired.iter().any(|x| x == r) {",
+  "new": "        if true {"
+ },
+ {
+  "id": "PM010",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_45_a_record_carries_its_retired_ids_in_one_exact_form_and_refuses_every_other"
+  ],
+  "what": "line 434: a condition is always false",
+  "old": "        if retired.len() >= RETIRED_MAX {",
+  "new": "        if false {"
+ },
+ {
+  "id": "PM011",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 434: a condition is always true",
+  "old": "        if retired.len() >= RETIRED_MAX {",
+  "new": "        if true {"
+ },
+ {
+  "id": "PM012",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_45_a_record_carries_its_retired_ids_in_one_exact_form_and_refuses_every_other"
+  ],
+  "what": "line 434: a comparison >= becomes >",
+  "old": "        if retired.len() >= RETIRED_MAX {",
+  "new": "        if retired.len() > RETIRED_MAX {"
+ },
+ {
+  "id": "PM016",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record",
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "line 1229: a statement is deleted",
+  "old": "        remove_if_there(&update_path(home))?;",
+  "new": "        "
+ },
+ {
+  "id": "PM018",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "line 1237: an && becomes || (at column 32)",
+  "old": "        Some(l) if l.to == from && all_in(l, &[State::Replaced]) => {",
+  "new": "        Some(l) if l.to == from || all_in(l, &[State::Replaced]) => {"
+ },
+ {
+  "id": "PM021",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "line 1240: an inequality is inverted (at column 28)",
+  "old": "            v.retain(|x| *x != update.id);",
+  "new": "            v.retain(|x| *x == update.id);"
+ },
+ {
+  "id": "PM022",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "line 1241: a condition is always false",
+  "old": "            if v.len() > RETIRED_MAX {",
+  "new": "            if false {"
+ },
+ {
+  "id": "PM023",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 1241: a condition is always true",
+  "old": "            if v.len() > RETIRED_MAX {",
+  "new": "            if true {"
+ },
+ {
+  "id": "PM025",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps"
+  ],
+  "what": "line 1257: the mode 0o600 is changed",
+  "old": "        .mode(0o600)",
+  "new": "        .mode(0o644)"
+ },
+ {
+  "id": "PM026",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_47_members_last_is_trusted_only_when_present_readable_valid_complete_and_bound"
+  ],
+  "what": "line 1298: an inequality is inverted (at column 20)",
+  "old": "            if l.to != release {",
+  "new": "            if l.to == release {"
+ },
+ {
+  "id": "PM027",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_47_members_last_is_trusted_only_when_present_readable_valid_complete_and_bound"
+  ],
+  "what": "line 1298: a condition is always false",
+  "old": "            if l.to != release {",
+  "new": "            if false {"
+ },
+ {
+  "id": "PM028",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_47_members_last_is_trusted_only_when_present_readable_valid_complete_and_bound"
+  ],
+  "what": "line 1298: a condition is always true",
+  "old": "            if l.to != release {",
+  "new": "            if true {"
+ },
+ {
+  "id": "PM029",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_47_members_last_is_trusted_only_when_present_readable_valid_complete_and_bound"
+  ],
+  "what": "line 1304: a condition is always false",
+  "old": "            if !all_in(&l, &[State::Replaced]) {",
+  "new": "            if false {"
+ },
+ {
+  "id": "PM030",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_47_members_last_is_trusted_only_when_present_readable_valid_complete_and_bound"
+  ],
+  "what": "line 1304: a condition is always true",
+  "old": "            if !all_in(&l, &[State::Replaced]) {",
+  "new": "            if true {"
+ },
+ {
+  "id": "PM031",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_47_members_last_is_trusted_only_when_present_readable_valid_complete_and_bound"
+  ],
+  "what": "line 1304: a negation is dropped",
+  "old": "            if !all_in(&l, &[State::Replaced]) {",
+  "new": "            if all_in(&l, &[State::Replaced]) {"
+ },
+ {
+  "id": "PM032",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_47_members_last_is_trusted_only_when_present_readable_valid_complete_and_bound"
+  ],
+  "what": "line 1304: State::Replaced becomes State::Restored",
+  "old": "            if !all_in(&l, &[State::Replaced]) {",
+  "new": "            if !all_in(&l, &[State::Restored]) {"
+ },
+ {
+  "id": "PM033",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_49_the_recognised_backups_are_listed_by_their_exact_names_alone"
+  ],
+  "what": "line 1332: an && becomes || (at column 49)",
+  "old": "            if backup_id(&file, names).is_some() && entry.file_type().is_ok_and(|t| t.is_file()) {",
+  "new": "            if backup_id(&file, names).is_some() || entry.file_type().is_ok_and(|t| t.is_file()) {"
+ },
+ {
+  "id": "PM034",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_49_the_recognised_backups_are_listed_by_their_exact_names_alone"
+  ],
+  "what": "line 1332: a condition is always false",
+  "old": "            if backup_id(&file, names).is_some() && entry.file_type().is_ok_and(|t| t.is_file()) {",
+  "new": "            if false {"
+ },
+ {
+  "id": "PM035",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_49_the_recognised_backups_are_listed_by_their_exact_names_alone"
+  ],
+  "what": "line 1332: a condition is always true",
+  "old": "            if backup_id(&file, names).is_some() && entry.file_type().is_ok_and(|t| t.is_file()) {",
+  "new": "            if true {"
+ },
+ {
+  "id": "PM036",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_28_the_sweep_removes_only_the_exact_backup_names_of_the_retired_attempts",
+   "mb_33_a_sweep_lost_in_the_middle_is_finished_by_the_next_one_and_keeps_what_it_keeps"
+  ],
+  "what": "line 1360: an && becomes || (at column 56)",
+  "old": "                .is_some_and(|id| retired.contains(&id) && !protect.contains(&id));",
+  "new": "                .is_some_and(|id| retired.contains(&id) || !protect.contains(&id));"
+ },
+ {
+  "id": "PM037",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_28_the_sweep_removes_only_the_exact_backup_names_of_the_retired_attempts",
+   "mb_33_a_sweep_lost_in_the_middle_is_finished_by_the_next_one_and_keeps_what_it_keeps"
+  ],
+  "what": "line 1361: an && becomes || (at column 21)",
+  "old": "            if named && entry.file_type().is_ok_and(|t| t.is_file()) {",
+  "new": "            if named || entry.file_type().is_ok_and(|t| t.is_file()) {"
+ },
+ {
+  "id": "PM038",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_28_the_sweep_removes_only_the_exact_backup_names_of_the_retired_attempts",
+   "mb_33_a_sweep_lost_in_the_middle_is_finished_by_the_next_one_and_keeps_what_it_keeps"
+  ],
+  "what": "line 1361: a condition is always false",
+  "old": "            if named && entry.file_type().is_ok_and(|t| t.is_file()) {",
+  "new": "            if false {"
+ },
+ {
+  "id": "PM039",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_28_the_sweep_removes_only_the_exact_backup_names_of_the_retired_attempts",
+   "mb_33_a_sweep_lost_in_the_middle_is_finished_by_the_next_one_and_keeps_what_it_keeps"
+  ],
+  "what": "line 1361: a condition is always true",
+  "old": "            if named && entry.file_type().is_ok_and(|t| t.is_file()) {",
+  "new": "            if true {"
+ },
+ {
+  "id": "PM040",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members"
+  ],
+  "fails": [
+   "mb_28_the_sweep_removes_only_the_exact_backup_names_of_the_retired_attempts",
+   "mb_33_a_sweep_lost_in_the_middle_is_finished_by_the_next_one_and_keeps_what_it_keeps"
+  ],
+  "what": "line 1362: a statement is deleted",
+  "old": "                remove_if_there(&entry.path())?;",
+  "new": "                "
+ },
+ {
+  "id": "PH01",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else",
+   "prepare::rm_20_the_sweep_at_the_end_removes_only_what_the_new_members_last_retired_and_keeps_the_rest"
+  ],
+  "what": "a promotion does not retire the previous attempt's own id",
+  "old": "            v.push(l.id.clone());\n",
+  "new": ""
+ },
+ {
+  "id": "PH02",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "a previous record that is not bound to the release being left is still trusted at a promotion",
+  "old": "Some(l) if l.to == from && all_in(l, &[State::Replaced]) => {",
+  "new": "Some(l) if all_in(l, &[State::Replaced]) => {"
+ },
+ {
+  "id": "PH03",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "a previous record that is not complete is still trusted at a promotion",
+  "old": "Some(l) if l.to == from && all_in(l, &[State::Replaced]) => {",
+  "new": "Some(l) if l.to == from => {"
+ },
+ {
+  "id": "PH04",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "a promotion lost after S2 rewrites the record it published",
+  "old": "        point(\"promote:S3\");\n        return Ok(());\n    }\n    // W1-75",
+  "new": "        point(\"promote:S3\");\n    }\n    // W1-75"
+ },
+ {
+  "id": "PH05",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "the retired list is not capped",
+  "old": "            if v.len() > RETIRED_MAX {\n                v.drain(..v.len() - RETIRED_MAX);\n            }\n",
+  "new": ""
+ },
+ {
+  "id": "PH06",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "the new attempt's own id may stay in its retired list",
+  "old": "            v.retain(|x| *x != update.id);\n",
+  "new": ""
+ },
+ {
+  "id": "PH07",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_28_the_sweep_removes_only_the_exact_backup_names_of_the_retired_attempts",
+   "mb_48_the_sweep_removes_only_the_ids_a_trusted_record_retired_and_never_a_protected_one"
+  ],
+  "what": "the sweep ignores the protected ids",
+  "old": ".is_some_and(|id| retired.contains(&id) && !protect.contains(&id));",
+  "new": ".is_some_and(|id| retired.contains(&id));"
+ },
+ {
+  "id": "PH08",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_49_the_recognised_backups_are_listed_by_their_exact_names_alone"
+  ],
+  "what": "a backup name need not end in a valid attempt id",
+  "old": "            .filter(|id| valid_attempt_id(id))\n",
+  "new": ""
+ },
+ {
+  "id": "PH09",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_47_members_last_is_trusted_only_when_present_readable_valid_complete_and_bound"
+  ],
+  "what": "trusted_retired does not require a completed record",
+  "old": "            if !all_in(&l, &[State::Replaced]) {\n                return Trust::Untrusted(\n                    \"it is not a completed record",
+  "new": "            if false {\n                return Trust::Untrusted(\n                    \"it is not a completed record"
+ },
+ {
+  "id": "PH10",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_47_members_last_is_trusted_only_when_present_readable_valid_complete_and_bound"
+  ],
+  "what": "trusted_retired does not require the record to be bound to the release",
+  "old": "            if l.to != release {\n                return Trust::Untrusted(format!(\n                    \"it is the record of the upgrade to",
+  "new": "            if false {\n                return Trust::Untrusted(format!(\n                    \"it is the record of the upgrade to"
+ },
+ {
+  "id": "PH11",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_51_a_restore_with_a_home_the_units_cannot_carry_is_refused_before_it_writes"
+  ],
+  "what": "a restore does not check the home",
+  "old": "    check_home(home)?;\n    check_unit_dir(unit_dir)?;\n    let mut rec = inv.record.clone();",
+  "new": "    check_unit_dir(unit_dir)?;\n    let mut rec = inv.record.clone();"
+ },
+ {
+  "id": "PH12",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_50_a_restore_into_a_unit_directory_that_is_not_ours_to_write_changes_nothing",
+   "prepare::rm_33_a_rollback_into_a_unit_directory_that_is_not_ours_changes_nothing_exit_4"
+  ],
+  "what": "a restore does not check the unit directory",
+  "old": "    check_home(home)?;\n    check_unit_dir(unit_dir)?;\n    let mut rec = inv.record.clone();",
+  "new": "    check_home(home)?;\n    let mut rec = inv.record.clone();"
+ },
+ {
+  "id": "PH13",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_45_a_record_carries_its_retired_ids_in_one_exact_form_and_refuses_every_other",
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "a record is written without its retired lines",
+  "old": "    for id in &r.retired {\n        out.push_str(&format!(\"retired={id}\\n\"));\n    }\n",
+  "new": ""
+ },
+ {
+  "id": "PH14",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_45_a_record_carries_its_retired_ids_in_one_exact_form_and_refuses_every_other"
+  ],
+  "what": "a retired id may be the record's own",
+  "old": "        if r == id {\n            return bad(\"a record retires its own attempt\");\n        }\n",
+  "new": ""
+ },
+ {
+  "id": "P19001",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 1197: an equality is inverted (at column 67)",
+  "old": "                if (l.from.as_str(), l.to.as_str(), l.id.as_str()) == (from, to, id)",
+  "new": "                if (l.from.as_str(), l.to.as_str(), l.id.as_str()) != (from, to, id)"
+ },
+ {
+  "id": "P19002",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent",
+   "mb_55_with_the_live_record_gone_only_a_complete_published_record_of_this_attempt_counts_as_promoted"
+  ],
+  "what": "line 1198: an && becomes || (at column 20)",
+  "old": "                    && all_in(&l, &[State::Replaced]) =>",
+  "new": "                    || all_in(&l, &[State::Replaced]) =>"
+ },
+ {
+  "id": "P19003",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps"
+  ],
+  "what": "line 1210: an inequality is inverted (at column 70)",
+  "old": "    if (update.from.as_str(), update.to.as_str(), update.id.as_str()) != (from, to, id) {",
+  "new": "    if (update.from.as_str(), update.to.as_str(), update.id.as_str()) == (from, to, id) {"
+ },
+ {
+  "id": "P19004",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent",
+   "mb_53_a_promotion_that_refuses_changes_nothing_not_even_a_leftover_temporary"
+  ],
+  "what": "line 1210: a condition is always false",
+  "old": "    if (update.from.as_str(), update.to.as_str(), update.id.as_str()) != (from, to, id) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "P19005",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps"
+  ],
+  "what": "line 1210: a condition is always true",
+  "old": "    if (update.from.as_str(), update.to.as_str(), update.id.as_str()) != (from, to, id) {",
+  "new": "    if true {"
+ },
+ {
+  "id": "P19006",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent",
+   "mb_53_a_promotion_that_refuses_changes_nothing_not_even_a_leftover_temporary"
+  ],
+  "what": "line 1216: a condition is always false",
+  "old": "    if !all_in(&update, &[State::Replaced]) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "P19007",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps"
+  ],
+  "what": "line 1216: a condition is always true",
+  "old": "    if !all_in(&update, &[State::Replaced]) {",
+  "new": "    if true {"
+ },
+ {
+  "id": "P19008",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps"
+  ],
+  "what": "line 1216: a negation is dropped",
+  "old": "    if !all_in(&update, &[State::Replaced]) {",
+  "new": "    if all_in(&update, &[State::Replaced]) {"
+ },
+ {
+  "id": "P19009",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_07_a_plan_of_an_install_with_nothing_to_change_is_an_empty_record",
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps"
+  ],
+  "what": "line 1216: State::Replaced becomes State::Restored",
+  "old": "    if !all_in(&update, &[State::Replaced]) {",
+  "new": "    if !all_in(&update, &[State::Restored]) {"
+ },
+ {
+  "id": "P19010",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent"
+  ],
+  "what": "line 1220: an inequality is inverted (at column 32)",
+  "old": "            .filter(|e| e.state != State::Replaced)",
+  "new": "            .filter(|e| e.state == State::Replaced)"
+ },
+ {
+  "id": "P19011",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent"
+  ],
+  "what": "line 1220: State::Replaced becomes State::Restored",
+  "old": "            .filter(|e| e.state != State::Replaced)",
+  "new": "            .filter(|e| e.state != State::Restored)"
+ },
+ {
+  "id": "P19012",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_25_the_end_of_an_upgrade_promotes_the_record_in_three_durable_steps",
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record"
+  ],
+  "what": "line 1229: an equality is inverted (at column 16)",
+  "old": "        && l.id == update.id",
+  "new": "        && l.id != update.id"
+ },
+ {
+  "id": "P19014",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent",
+   "mb_52_a_same_attempt_members_last_that_is_not_complete_is_never_taken_for_the_published_record"
+  ],
+  "what": "line 1233: an || becomes && (at column 37)",
+  "old": "        if !same_content(l, &update) || !all_in(l, &[State::Replaced]) {",
+  "new": "        if !same_content(l, &update) && !all_in(l, &[State::Replaced]) {"
+ },
+ {
+  "id": "P19015",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent",
+   "mb_52_a_same_attempt_members_last_that_is_not_complete_is_never_taken_for_the_published_record"
+  ],
+  "what": "line 1233: a condition is always false",
+  "old": "        if !same_content(l, &update) || !all_in(l, &[State::Replaced]) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "P19016",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record",
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "line 1233: a condition is always true",
+  "old": "        if !same_content(l, &update) || !all_in(l, &[State::Replaced]) {",
+  "new": "        if true {"
+ },
+ {
+  "id": "P19017",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record",
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent"
+  ],
+  "what": "line 1233: a negation is dropped",
+  "old": "        if !same_content(l, &update) || !all_in(l, &[State::Replaced]) {",
+  "new": "        if same_content(l, &update) || !all_in(l, &[State::Replaced]) {"
+ },
+ {
+  "id": "P19018",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record",
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "line 1233: State::Replaced becomes State::Restored",
+  "old": "        if !same_content(l, &update) || !all_in(l, &[State::Replaced]) {",
+  "new": "        if !same_content(l, &update) || !all_in(l, &[State::Restored]) {"
+ },
+ {
+  "id": "P19019",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record",
+   "mb_46_a_promotion_retires_the_previous_trusted_attempt_and_names_nothing_else"
+  ],
+  "what": "line 1239: a statement is deleted",
+  "old": "        remove_if_there(&update_path(home))?;",
+  "new": "        "
+ },
+ {
+  "id": "PQ01",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_52_a_same_attempt_members_last_that_is_not_complete_is_never_taken_for_the_published_record",
+   "prepare::rm_34_a_same_attempt_members_last_with_a_planned_entry_stops_the_promotion_and_the_rollback_still_puts_the_files_back"
+  ],
+  "what": "the same-attempt resume does not require a complete members.last",
+  "old": "if !same_content(l, &update) || !all_in(l, &[State::Replaced]) {",
+  "new": "if !same_content(l, &update) {"
+ },
+ {
+  "id": "PQ02",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_27_a_promotion_refuses_what_is_not_finished_or_not_consistent",
+   "mb_54_a_genuine_resume_after_s2_keeps_the_published_record_and_a_different_record_of_the_same_attempt_is_refused"
+  ],
+  "what": "the same-attempt resume does not compare the entries (only completeness)",
+  "old": "if !same_content(l, &update) || !all_in(l, &[State::Replaced]) {",
+  "new": "if !all_in(l, &[State::Replaced]) {"
+ },
+ {
+  "id": "PQ03",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_55_with_the_live_record_gone_only_a_complete_published_record_of_this_attempt_counts_as_promoted"
+  ],
+  "what": "the absent-update branch accepts an incomplete same-attempt members.last",
+  "old": "                if (l.from.as_str(), l.to.as_str(), l.id.as_str()) == (from, to, id)\n                    && all_in(&l, &[State::Replaced]) =>",
+  "new": "                if (l.from.as_str(), l.to.as_str(), l.id.as_str()) == (from, to, id) =>"
+ },
+ {
+  "id": "PQ04",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_26_a_promotion_lost_at_any_step_is_finished_by_the_next_call_and_never_loses_the_older_record",
+   "prepare::rm_16_the_promotion_lost_at_any_of_its_steps_is_finished_by_a_resume"
+  ],
+  "what": "the leftover members.last.new is not removed before S1 (create_new then fails)",
+  "old": "    let new = home.join(LAST_NEW);\n    remove_if_there(&new)?;\n",
+  "new": "    let new = home.join(LAST_NEW);\n"
+ },
+ {
+  "id": "PQ05",
+  "design": null,
+  "file": "src/members.rs",
+  "tests": [
+   "group_members",
+   "group_engine"
+  ],
+  "fails": [
+   "mb_55_with_the_live_record_gone_only_a_complete_published_record_of_this_attempt_counts_as_promoted"
+  ],
+  "what": "the incomplete same-attempt members.last of an absent update says nothing (falls to the lost-inventory refusal)",
+  "old": "            Some(l) if (l.from.as_str(), l.to.as_str(), l.id.as_str()) == (from, to, id) => refuse(\n                \"members.update is absent and members.last is of this attempt but not complete",
+  "new": "            Some(l) if false => refuse(\n                \"members.update is absent and members.last is of this attempt but not complete"
+ }
+]

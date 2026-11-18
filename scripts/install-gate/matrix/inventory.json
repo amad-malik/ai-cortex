@@ -1,0 +1,672 @@
+{
+ "schema": 2,
+ "note": "Built with the ledger of INSTALL-G12-INPUT-INVENTORY-nix-r0.1.md from one source. Caller variables are given to the leaf shell at LAUNCH (its process environment) and OBSERVED; the include context is install.sh's real prefix. Synthetic values only; the canary is a builtin that prints CANARY. A finite matrix is never claimed as proof for every environment.",
+ "variables": [
+  {
+   "name": "HOME",
+   "phase": "caller",
+   "kind": "path",
+   "valid": [
+    "/home/gate"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "x;echo CANARY",
+    "*"
+   ],
+   "consumer": "default of --home, the unit directory, the private stage",
+   "note": "unset gives /nonexistent at install.sh 21"
+  },
+  {
+   "name": "CORTEX_INSTALL_WAIT",
+   "phase": "caller",
+   "kind": "numeric",
+   "valid": [
+    "180",
+    "30"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "`echo CANARY`",
+    "a[$(echo CANARY)]",
+    "x;echo CANARY",
+    "x\necho CANARY",
+    "*",
+    "-x",
+    "x y"
+   ],
+   "consumer": "install.sh wait_max, used in a [ -lt ] test only",
+   "note": "documented nowhere; finding F2 does not touch it"
+  },
+  {
+   "name": "CORTEX_INSTALL_POLL",
+   "phase": "caller",
+   "kind": "numeric",
+   "valid": [
+    "5",
+    "1"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "`echo CANARY`",
+    "a[$(echo CANARY)]",
+    "x;echo CANARY",
+    "x\necho CANARY",
+    "*",
+    "-x",
+    "x y"
+   ],
+   "consumer": "install.sh poll: sleep AND $((waited + poll))",
+   "note": "finding F2: arithmetic evaluates a[$(...)]; vera's witness variable"
+  },
+  {
+   "name": "CORTEX_SCRIPTS_DIR",
+   "phase": "caller",
+   "kind": "path",
+   "valid": [
+    "/home/gate/scripts"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "x;echo CANARY",
+    "*"
+   ],
+   "consumer": "where a CHECKOUT finds the backup scripts (ignored in release mode)",
+   "note": "tests and packaging"
+  },
+  {
+   "name": "CORTEX_LOG",
+   "phase": "caller",
+   "kind": "path",
+   "valid": [
+    "/home/gate/install.log"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "x;echo CANARY",
+    "*"
+   ],
+   "consumer": "a file every say and warn line is appended to",
+   "note": "assigned from the caller at install.sh 26"
+  },
+  {
+   "name": "CORTEX_MIN_FREE_GIB",
+   "phase": "caller",
+   "kind": "numeric",
+   "valid": [
+    "20"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "`echo CANARY`",
+    "a[$(echo CANARY)]",
+    "x;echo CANARY",
+    "x\necho CANARY",
+    "*",
+    "-x",
+    "x y"
+   ],
+   "consumer": "machine_look disk threshold",
+   "note": "prereq file"
+  },
+  {
+   "name": "PREREQ_ROOT",
+   "phase": "caller",
+   "kind": "path",
+   "valid": [
+    "/home/gate/fakeroot"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "x;echo CANARY",
+    "*"
+   ],
+   "consumer": "prefix of /etc, /sys, /proc, /dev/tty and the root stage",
+   "note": "a TEST HOOK read by shipped code (finding F4)"
+  },
+  {
+   "name": "CORTEX_DB_CONTAINER",
+   "phase": "caller",
+   "kind": "text",
+   "valid": [
+    "cv2-s5-db"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "x;echo CANARY",
+    "*"
+   ],
+   "consumer": "db-roles.sh, a HOST script run by install.sh: the caller's value passes through",
+   "note": "only a cv2-s5-* plain name is accepted there"
+  },
+  {
+   "name": "FETCH_BASE_URL",
+   "phase": "caller",
+   "kind": "url",
+   "valid": [
+    "https://example.invalid/release"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "x;echo CANARY",
+    "*"
+   ],
+   "consumer": "rel_fetch reads it from the environment when CORTEX_FROM is empty",
+   "note": "finding F1b: a caller-reachable download location, which interface r1 and W1-84 say the installer must not read from the environment"
+  },
+  {
+   "name": "CORTEX_YES",
+   "phase": "overwritten",
+   "kind": "text",
+   "valid": [
+    "1",
+    "0"
+   ],
+   "hostile": [],
+   "consumer": "OVERWRITTEN at install.sh 26 before the includes",
+   "note": "the cells prove the caller value is not consumed"
+  },
+  {
+   "name": "CORTEX_RELEASE",
+   "phase": "overwritten",
+   "kind": "text",
+   "valid": [
+    "0.2.1"
+   ],
+   "hostile": [],
+   "consumer": "OVERWRITTEN at install.sh 26",
+   "note": "the cells prove it"
+  },
+  {
+   "name": "CORTEX_BASE_URL",
+   "phase": "overwritten",
+   "kind": "url",
+   "valid": [
+    "https://example.invalid/release"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "x;echo CANARY",
+    "*"
+   ],
+   "consumer": "OVERWRITTEN at install.sh 26; set from --base-url only (interface r1, W1-84)",
+   "note": "the cells prove it"
+  },
+  {
+   "name": "CORTEX_FROM",
+   "phase": "overwritten",
+   "kind": "path",
+   "valid": [
+    "/home/gate/artefacts"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "x;echo CANARY",
+    "*"
+   ],
+   "consumer": "OVERWRITTEN at install.sh 26; set from --from",
+   "note": "the cells prove it"
+  },
+  {
+   "name": "CORTEX_CONFIG",
+   "phase": "overwritten_later",
+   "kind": "path",
+   "valid": [
+    "/home/gate/cortex-v2/cortex.toml"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "x;echo CANARY",
+    "*"
+   ],
+   "consumer": "the caller value is seen until install.sh 312, where the installer exports its own derived path; compose (359) reads the derived value",
+   "note": "caller-at-include cell only"
+  },
+  {
+   "name": "CORTEX_PORT",
+   "phase": "overwritten_later",
+   "kind": "numeric",
+   "valid": [
+    "8601"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "`echo CANARY`",
+    "a[$(echo CANARY)]",
+    "x;echo CANARY",
+    "x\necho CANARY",
+    "*",
+    "-x",
+    "x y"
+   ],
+   "consumer": "the caller value is seen until install.sh 313, where the installer exports the --port value; compose reads that",
+   "note": "caller-at-include cell only"
+  },
+  {
+   "name": "CORTEX_DUMP_STATUS",
+   "phase": "overwritten_later",
+   "kind": "path",
+   "valid": [
+    "/home/gate/cortex-v2/dump-status"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "x;echo CANARY",
+    "*"
+   ],
+   "consumer": "the caller value is seen until install.sh 325, where the installer exports the derived path; compose reads that",
+   "note": "caller-at-include cell only"
+  },
+  {
+   "name": "CORTEX_DUMPS",
+   "phase": "overwritten_later",
+   "kind": "path",
+   "valid": [
+    "/home/gate/cortex-v2/dumps"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "x;echo CANARY",
+    "*"
+   ],
+   "consumer": "UNSET by the installer at 326: no later consumer sees a caller value",
+   "note": "caller-at-include cell only"
+  },
+  {
+   "name": "CORTEX_GIT_SHA",
+   "phase": "overwritten_later",
+   "kind": "text",
+   "valid": [
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+   ],
+   "hostile": [],
+   "consumer": "the caller value is seen until install.sh 331, where the installer exports the derived value; compose reads that",
+   "note": "caller-at-include cell only"
+  },
+  {
+   "name": "CORTEX_VERSION",
+   "phase": "passthrough",
+   "kind": "text",
+   "valid": [
+    "0.2.1"
+   ],
+   "hostile": [],
+   "consumer": "in release mode exported from stack.env at 271 (the caller value is overwritten there); in a checkout a caller value passes to compose",
+   "note": "release mode overwrites, a checkout passes"
+  },
+  {
+   "name": "CORTEX_SERVER_IMAGE",
+   "phase": "passthrough",
+   "kind": "text",
+   "valid": [
+    "localhost/cortex-server@sha256:abababababababababababababababababababababababababababababababab"
+   ],
+   "hostile": [],
+   "consumer": "exported from stack.env in release mode (271)",
+   "note": ""
+  },
+  {
+   "name": "CORTEX_DB_IMAGE",
+   "phase": "passthrough",
+   "kind": "text",
+   "valid": [
+    "docker.io/pgvector/pgvector@sha256:abababababababababababababababababababababababababababababababab"
+   ],
+   "hostile": [],
+   "consumer": "exported from stack.env in release mode (271)",
+   "note": ""
+  },
+  {
+   "name": "PATH",
+   "phase": "shell",
+   "kind": "shell",
+   "valid": [
+    "/oracle/other:/oracle/path"
+   ],
+   "hostile": [
+    "$(echo CANARY)",
+    "x;echo CANARY"
+   ],
+   "consumer": "the shell; a real PATH is not tried in the oracle (nothing external can start there, by design)",
+   "note": "launch-phase"
+  },
+  {
+   "name": "LC_ALL",
+   "phase": "shell",
+   "kind": "shell",
+   "valid": [
+    "C",
+    "C.UTF-8"
+   ],
+   "hostile": [],
+   "consumer": "pinned per command in the prereq file",
+   "note": "launch-phase"
+  },
+  {
+   "name": "LANG",
+   "phase": "shell",
+   "kind": "shell",
+   "valid": [
+    "C",
+    "C.UTF-8"
+   ],
+   "hostile": [],
+   "consumer": "the shell's locale when LC_ALL is unset",
+   "note": "launch-phase; named in r0 section H and missing from r0's matrix"
+  },
+  {
+   "name": "SHELLOPTS",
+   "phase": "shell",
+   "kind": "shell",
+   "valid": [
+    "noglob"
+   ],
+   "hostile": [],
+   "consumer": "the shell imports it at start",
+   "note": "launch-phase; the observed effective value is in the raw receipt"
+  },
+  {
+   "name": "BASHOPTS",
+   "phase": "shell",
+   "kind": "shell",
+   "valid": [
+    "extglob"
+   ],
+   "hostile": [],
+   "consumer": "the shell imports it at start",
+   "note": "launch-phase; observed"
+  },
+  {
+   "name": "BASH_ENV",
+   "phase": "shell",
+   "kind": "shell",
+   "valid": [
+    "/dev/null"
+   ],
+   "hostile": [],
+   "consumer": "read by a non-interactive bash that is not in POSIX mode",
+   "note": "launch-phase; /dev/null and non-existent paths only"
+  },
+  {
+   "name": "ENV",
+   "phase": "shell",
+   "kind": "shell",
+   "valid": [
+    "/dev/null"
+   ],
+   "hostile": [],
+   "consumer": "read by an interactive POSIX shell",
+   "note": "launch-phase"
+  },
+  {
+   "name": "PS4",
+   "phase": "shell",
+   "kind": "shell",
+   "valid": [
+    "+ ",
+    "+ x"
+   ],
+   "hostile": [
+    "$(echo CANARY)"
+   ],
+   "consumer": "the xtrace prefix; a restricted bash does not take PS4 from its environment, so the leaf shows its DEFAULT prefix and the cell is UNTESTABLE (no hostile value was ever applied)",
+   "note": "launch-phase; observed: the default + prefix"
+  },
+  {
+   "name": "POSIXLY_CORRECT",
+   "phase": "shell",
+   "kind": "shell",
+   "valid": [
+    "1"
+   ],
+   "hostile": [],
+   "consumer": "the shell",
+   "note": "launch-phase"
+  },
+  {
+   "name": "CDPATH",
+   "phase": "shell",
+   "kind": "shell",
+   "valid": [
+    "/home/gate"
+   ],
+   "hostile": [
+    "$(echo CANARY)"
+   ],
+   "consumer": "the shell (install.sh 56 sets it empty for one cd)",
+   "note": "launch-phase"
+  },
+  {
+   "name": "GLOBIGNORE",
+   "phase": "shell",
+   "kind": "shell",
+   "valid": [
+    "*.x"
+   ],
+   "hostile": [
+    "*"
+   ],
+   "consumer": "the shell",
+   "note": "launch-phase"
+  }
+ ],
+ "excluded": [
+  {
+   "names": "IFS",
+   "phase": "in-shell",
+   "boundary": "bash does not import IFS from the environment",
+   "why": "the installer assigns and restores it locally (install.sh 217): not a caller input",
+   "owner": "none"
+  },
+  {
+   "names": "TMPDIR, XDG_CACHE_HOME",
+   "phase": "absent at the pins",
+   "boundary": "NO assignment or read of either name in the pinned bytes: zero matches in install.sh (ecb74677), the pinned prereq (4763c641) and fetch (27f0db41)",
+   "why": "r0.1 said the installer sets them in 11 places: that count came from marv's NEWER prereq (`deploy/install-prereq.sh` at his commit 4061169, sha256 prefix 509d9512, 2617 lines, NOT pinned here), where both names are set on command prefixes for a private stage; a child tool in the pinned bytes inherits whatever the caller exported. Re-derive on the final bytes",
+   "owner": "marv (newer bytes); add cells if the final prereq sets them"
+  },
+  {
+   "names": "project, lead, home_dir, port, start, reissue, EX_OK..EX_WORKER",
+   "phase": "pre-source",
+   "boundary": "assigned at install.sh 21 and 25, before the includes",
+   "why": "initialised by the installer; the prefix replay runs these lines",
+   "owner": "replayed in every cell"
+  },
+  {
+   "names": "check_only, release_given, base_given, from_given",
+   "phase": "pre-source",
+   "boundary": "assigned at install.sh 26 and 27",
+   "why": "initialised by the installer",
+   "owner": "replayed in every cell"
+  },
+  {
+   "names": "PREREQ_MISSING, PREREQ_FIXES, PREREQ_NEED_SUDO, PREREQ_COMPOSE",
+   "phase": "derived",
+   "boundary": "initialised by machine_look (prereq file, its first lines) and read by prereq_run",
+   "why": "shared state between two functions, not a caller input; evidence: the initialisation line",
+   "owner": "L2 only"
+  },
+  {
+   "names": "PREFLIGHT_ID, PREFLIGHT_WHY, STACK_WHY, sv, ss, sd, wait_max, poll",
+   "phase": "derived",
+   "boundary": "assigned inside install.sh functions or at install.sh 113 and 114",
+   "why": "derived (poll and wait_max from CORTEX_INSTALL_POLL and _WAIT, which ARE caller variables above)",
+   "owner": "L2 only"
+  },
+  {
+   "names": "CORTEX_STAGE_DIR",
+   "phase": "derived, not active",
+   "boundary": "interface r1: install.sh derives <home>/.stage-<release> and removes a stale real directory first",
+   "why": "NOT in the pinned bytes (zero matches in deploy at b27a969 and in the prereq and fetch files); nothing is invented",
+   "owner": "nemo (install.sh, W1-77) and marv; add cells when the line exists"
+  },
+  {
+   "names": "CORTEX_TRUST_KEY_FILE, CORTEX_TRUST_PRINCIPAL",
+   "phase": "reserved",
+   "boundary": "interface r1: RESERVED for marv's fetch_trust until D56; only it reads them",
+   "why": "zero matches at the pinned bytes",
+   "owner": "marv; add cells when D56 lands"
+  },
+  {
+   "names": "POSTGRES_DB, POSTGRES_INITDB_ARGS, POSTGRES_PASSWORD_FILE",
+   "phase": "container init",
+   "boundary": "compose.yml (integration 7d1c8d1) fixes them in the db service's environment block",
+   "why": "not reachable from the caller's environment: compose passes no host variable into them",
+   "owner": "hue's S5 checker (static); not a G12 cell"
+  },
+  {
+   "names": "POSTGRES_USER, POSTGRES_DB (initdb script)",
+   "phase": "container init",
+   "boundary": "read by initdb/00-cortex-roles.sh INSIDE the container with defaults postgres and cortex",
+   "why": "POSTGRES_USER is not set by compose (the image default applies)",
+   "owner": "hue; not a G12 cell"
+  },
+  {
+   "names": "XDG_RUNTIME_DIR, DOCKER_HOST, CONTAINERS_*, PODMAN_COMPOSE_PROVIDER, COMPOSE_*, proxy variables, DNF and curl variables",
+   "phase": "child tools",
+   "boundary": "read by podman, podman compose, systemctl, curl and dnf themselves",
+   "why": "not installer inputs; the oracle starts with its own fixed environment; the L2 fake-tool launch contract below is where they would be set",
+   "owner": "L2: NOT BUILT"
+  },
+  {
+   "names": "cortex-dump, cortex-dump-status, cortex-dump-alert, cortex-restore, restore-compare variables",
+   "phase": "scripts in bin/",
+   "boundary": "bob's scripts read their own variables",
+   "why": "outside the installer's inputs",
+   "owner": "bob"
+  }
+ ],
+ "interacting": [
+  {
+   "why": "POLL and WAIT together (install.sh 113 and 114)",
+   "set": {
+    "CORTEX_INSTALL_POLL": "1",
+    "CORTEX_INSTALL_WAIT": "30"
+   }
+  },
+  {
+   "why": "both base URL names: install.sh sets one from a flag and the fetch include reads the other from the environment",
+   "set": {
+    "CORTEX_BASE_URL": "https://example.invalid/release",
+    "FETCH_BASE_URL": "https://example.invalid/release"
+   }
+  },
+  {
+   "why": "only CORTEX_BASE_URL (overwritten by install.sh)",
+   "set": {
+    "CORTEX_BASE_URL": "https://example.invalid/release"
+   },
+   "unset": [
+    "FETCH_BASE_URL"
+   ]
+  },
+  {
+   "why": "only FETCH_BASE_URL (finding F1b)",
+   "set": {
+    "FETCH_BASE_URL": "https://example.invalid/release"
+   },
+   "unset": [
+    "CORTEX_BASE_URL"
+   ]
+  },
+  {
+   "why": "a local directory and a base URL together",
+   "set": {
+    "CORTEX_FROM": "/home/gate/artefacts",
+    "CORTEX_BASE_URL": "https://example.invalid/release"
+   }
+  },
+  {
+   "why": "the test root and the home together",
+   "set": {
+    "PREREQ_ROOT": "/home/gate/fakeroot",
+    "HOME": "/home/gate"
+   }
+  },
+  {
+   "why": "the test root empty and the home unset",
+   "set": {
+    "PREREQ_ROOT": ""
+   },
+   "unset": [
+    "HOME"
+   ]
+  },
+  {
+   "why": "the release variables together, as in release mode",
+   "set": {
+    "CORTEX_RELEASE": "0.2.1",
+    "CORTEX_VERSION": "0.2.1",
+    "CORTEX_SERVER_IMAGE": "localhost/cortex-server@sha256:abababababababababababababababababababababababababababababababab",
+    "CORTEX_DB_IMAGE": "docker.io/pgvector/pgvector@sha256:abababababababababababababababababababababababababababababababab"
+   }
+  },
+  {
+   "why": "xtrace from the environment with a hostile prefix",
+   "set": {
+    "SHELLOPTS": "xtrace",
+    "PS4": "$(echo CANARY)"
+   }
+  },
+  {
+   "why": "a checkout's scripts directory and the release variable",
+   "set": {
+    "CORTEX_SCRIPTS_DIR": "/home/gate/scripts",
+    "CORTEX_VERSION": "0.2.1"
+   }
+  },
+  {
+   "why": "a log file and a home",
+   "set": {
+    "CORTEX_LOG": "/home/gate/install.log",
+    "HOME": "/home/gate"
+   }
+  },
+  {
+   "why": "locale: LC_ALL and LANG together",
+   "set": {
+    "LC_ALL": "C.UTF-8",
+    "LANG": "C"
+   }
+  },
+  {
+   "why": "the answer in the environment (overwritten at install.sh 26) with a hostile PATH",
+   "set": {
+    "CORTEX_YES": "1",
+    "PATH": "x;echo CANARY"
+   }
+  }
+ ],
+ "argv": [
+  [],
+  [
+   "--check"
+  ],
+  [
+   "--help"
+  ],
+  [
+   "--project",
+   "gate",
+   "--lead",
+   "gate-lead"
+  ],
+  [
+   ""
+  ],
+  [
+   "a b\nc*"
+  ],
+  [
+   "--"
+  ],
+  [
+   "-"
+  ]
+ ],
+ "profiles": [
+  "clean",
+  "all_valid",
+  "all_hostile"
+ ]
+}

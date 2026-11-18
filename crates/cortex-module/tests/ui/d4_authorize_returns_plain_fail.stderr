@@ -1,0 +1,9 @@
+error[E0271]: expected `{async block@d4_authorize_returns_plain_fail.rs:19:41}` to be a future that resolves to `Result<Authorized<_>, Problem>`, but it resolves to `Result<(), _>`
+  --> tests/ui/d4_authorize_returns_plain_fail.rs:19:32
+   |
+19 |         |_tx, _ctx, _b: &Body| Box::pin(async move { Ok(()) }),
+   |                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Result<Authorized<_>, Problem>`, found `Result<(), _>`
+   |
+   = note: expected enum `Result<Authorized<_>, Problem>`
+              found enum `Result<(), _>`
+   = note: required for the cast from `Pin<Box<{async block@$DIR/tests/ui/d4_authorize_returns_plain_fail.rs:19:41: 19:51}>>` to `Pin<Box<dyn Future<Output = Result<Authorized<_>, Problem>> + Send>>`

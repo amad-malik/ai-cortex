@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metalink version="3.0" xmlns="http://www.metalinker.org/" type="dynamic" pubdate="Mon, 09 Nov 2026 11:56:05 GMT" generator="mirrormanager" xmlns:mm0="http://fedorahosted.org/mirrormanager">
+ <files>
+  <file name="repomd.xml">
+   <mm0:timestamp>1794183862</mm0:timestamp>
+   <size>4065</size>
+   <verification>
+    <hash type="md5">299c3fe0a4386e1a40270f71646956dc</hash>
+    <hash type="sha1">43fc865897e3bb38af92c4fc8c11738bdd7e53f6</hash>
+    <hash type="sha256">735295726c09e78c4bd113924ebe21a050c0c91d5d45988539fc520a35a05ae1</hash>
+    <hash type="sha512">14d8bb9e9657bda26eed5ac28d61bd7d66c25c02381218adbde2849e2bbb5ee3a43723390a8cf9406f4a845fbc3398a11caa29a0526a164b305d4902259b2733</hash>
+   </verification>
+   <mm0:alternates>
+    <mm0:alternate>
+      <mm0:timestamp>1794103121</mm0:timestamp>
+      <size>4065</size>
+      <verification>
+       <hash type="md5">44479c8fe0fc8e1e1c2873ebdc15e6cf</hash>
+       <hash type="sha1">12d80aebecb0a8b8a5b67944f0b54658959e5aa6</hash>
+       <hash type="sha256">3390af457f35116dcee77df73eaf1e98a74d409c7ff847ae7fcef257ea1f3ed3</hash>
+       <hash type="sha512">95b241ca5ef35896444324484cb72785cf331da556bcdac51270999ae1779b8186177c41bfdab681eae2fc7da9896232f65f36a14019b444c206d43c8e8a26ad</hash>
+      </verification>
+    </mm0:alternate>
+    <mm0:alternate>
+      <mm0:timestamp>1794015340</mm0:timestamp>
+      <size>4065</size>
+      <verification>
+       <hash type="md5">daa712abe6753a4efad46de60a8e7996</hash>
+       <hash type="sha1">07af14076254bc4d5be19c6eed15234f410463c0</hash>
+       <hash type="sha256">9c0113a1781b15506bfb4cbe91315c939fb2259eea05a974ae4641ce9fc90700</hash>
+       <hash type="sha512">a10e759da508b6713de5fbc0cd1dea7b2a5f14dd0ae161af750f3e8b3d84bbda1a81e74806026fdae67cf3420029e908736277c5ecddfa0745a6f328672ceeec</hash>
+      </verification>
+    </mm0:alternate>
+   </mm0:alternates>
+   <resources maxconnections="1">
+    <url protocol="http" type="http" location="US" preference="100">http://nullroute.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="100">https://nullroute.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="100">rsync://nullroute.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="99">http://cofractal-sea.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="99">rsync://cofractal-sea.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="99">https://cofractal-sea.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="98">https://nocix.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="98">rsync://nocix.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="98">http://nocix.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="97">https://ix-denver.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="97">http://ix-denver.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="97">rsync://ix-denver.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="96">https://us.mirrors.cicku.me/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="96">rsync://us.dyi.ng/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="95">https://mirrors.iu13.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="95">rsync://mirrors.iu13.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="95">http://mirrors.iu13.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="94">http://paducahix.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="94">rsync://paducahix.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="94">https://paducahix.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="93">https://mirror.tzulo.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="93">http://mirror.tzulo.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="93">rsync://mirror.tzulo.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="92">rsync://coresite-atl.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="92">https://coresite-atl.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="92">http://coresite-atl.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="91">https://cofractal-ewr.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="91">http://cofractal-ewr.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="91">rsync://cofractal-ewr.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="90">https://epel.mirror.shastacoe.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="90">http://epel.mirror.shastacoe.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="90">rsync://epel.mirror.shastacoe.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="89">http://ohioix.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="89">https://ohioix.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="89">rsync://ohioix.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="88">https://cfhcable.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="88">http://cfhcable.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="88">rsync://cfhcable.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="87">http://volico.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="87">https://volico.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="87">rsync://volico.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="86">https://irltoolkit.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="86">http://irltoolkit.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="86">rsync://irltoolkit.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="85">http://mirrors.sonic.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="85">https://mirrors.sonic.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="85">rsync://mirrors.sonic.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="84">http://mirror.grid.uchicago.edu/pub/linux/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="83">rsync://mirror.us.leaseweb.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="83">http://mirror.us.leaseweb.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="82">http://forksystems.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="82">rsync://forksystems.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="82">https://forksystems.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="81">http://epel.mirror.constant.com/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="81">https://epel.mirror.constant.com/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="80">http://mirror.sfo12.us.leaseweb.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="80">rsync://mirror.sfo12.us.leaseweb.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="79">https://mirror.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="79">http://mirror.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="79">rsync://mirror.fcix.net/fedora-buffet/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="78">http://mirror.nodesdirect.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="78">rsync://mirror.nodesdirect.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="77">https://southfront.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="77">rsync://southfront.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="77">http://southfront.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="76">rsync://mirror.cogentco.com/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="76">http://mirror.cogentco.com/pub/linux/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="75">rsync://mirror.cs.princeton.edu/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="75">https://mirror.cs.princeton.edu/pub/mirrors/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="74">https://ftp-chi.osuosl.org/pub/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="74">http://ftp-chi.osuosl.org/pub/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="74">rsync://ftp-chi.osuosl.org/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="73">http://mirrors.wcupa.edu/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="73">https://mirrors.wcupa.edu/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="72">https://mirror.mci-1.serverforge.org/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="72">http://mirror.mci-1.serverforge.org/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="72">rsync://archive.mci-1.serverforge.org/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="71">http://mirror.math.princeton.edu/pub/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="71">rsync://mirror.math.princeton.edu/pub/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="70">http://linux-mirrors.fnal.gov/linux/fedora/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="70">https://linux-mirrors.fnal.gov/linux/fedora/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="69">http://solidrock.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="69">rsync://solidrock.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="69">https://solidrock.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="68">https://mirror.fmt-2.serverforge.org/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="68">rsync://archive.fmt-2.serverforge.org/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="68">http://mirror.fmt-2.serverforge.org/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="67">http://mirror.its.umich.edu/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="67">rsync://mirror.its.umich.edu/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="67">https://mirror.its.umich.edu/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="66">http://fedora-mirror-atl.gigsouth.com/pub/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="66">https://fedora-mirror-atl.gigsouth.com/pub/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="66">rsync://fedora-mirror-atl.gigsouth.com/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="65">https://insect.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="65">http://insect.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="65">rsync://insect.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="64">rsync://ord.mirror.rackspace.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="64">http://ord.mirror.rackspace.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="64">https://ord.mirror.rackspace.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="63">https://atl.mirrors.knownhost.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="63">rsync://atl.mirrors.knownhost.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="62">http://nnenix.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="62">https://nnenix.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="62">rsync://nnenix.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="61">https://ftp-osl.osuosl.org/pub/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="61">http://ftp-osl.osuosl.org/pub/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="61">rsync://ftp-osl.osuosl.org/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="60">https://gigsouth.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="60">http://gigsouth.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="60">rsync://gigsouth.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="59">rsync://mirror.shomepower.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="59">https://mirror.shomepower.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="59">http://mirror.shomepower.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="58">rsync://ftp-nyc.osuosl.org/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="58">https://ftp-nyc.osuosl.org/pub/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="58">http://ftp-nyc.osuosl.org/pub/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="57">https://mirrors.mit.edu/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="57">http://mirrors.mit.edu/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="57">rsync://mirrors.mit.edu/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="56">http://abqix.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="56">https://abqix.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="56">rsync://abqix.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="55">https://iad.mirror.rackspace.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="55">rsync://iad.mirror.rackspace.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="55">http://iad.mirror.rackspace.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="54">http://ryamer.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="54">rsync://ryamer.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="54">https://ryamer.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="53">https://mirrors.lug.mtu.edu/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="53">http://mirrors.lug.mtu.edu/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="53">rsync://mirrors.lug.mtu.edu/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="52">http://lolhost.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="52">https://lolhost.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="52">rsync://lolhost.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="51">http://mirror.team-cymru.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="51">rsync://mirror.team-cymru.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="50">http://dfw.mirror.rackspace.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="50">https://dfw.mirror.rackspace.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="50">rsync://dfw.mirror.rackspace.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="49">https://veronanetworks.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="49">http://veronanetworks.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="49">rsync://veronanetworks.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="48">https://dl.fedoraproject.org/pub/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="47">https://d2lzkl7pfhq30w.cloudfront.net/pub/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="46">rsync://codingflyboy.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="46">http://codingflyboy.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="46">https://codingflyboy.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="US" preference="45">https://sjc.mirror.rackspace.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="US" preference="45">http://sjc.mirror.rackspace.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="US" preference="45">rsync://sjc.mirror.rackspace.com/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="CA" preference="44">http://yxeix.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="CA" preference="44">rsync://yxeix.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="CA" preference="44">https://yxeix.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="PR" preference="43">http://mirrors.upr.edu/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="PR" preference="43">rsync://mirrors.upr.edu/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="PR" preference="43">https://mirrors.upr.edu/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="CA" preference="42">https://mirror.cpsc.ucalgary.ca/mirror/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="CA" preference="42">http://mirror.cpsc.ucalgary.ca/mirror/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="CA" preference="42">rsync://mirror.cpsc.ucalgary.ca/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="CA" preference="41">rsync://ca.dyi.ng/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="CA" preference="41">https://ca.mirrors.cicku.me/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="CA" preference="40">rsync://lesnet.mm.fcix.net/fedora-epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="CA" preference="40">https://lesnet.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="CA" preference="40">http://lesnet.mm.fcix.net/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="http" type="http" location="CA" preference="39">http://mirror.dst.ca/fedora-linux/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="CA" preference="39">https://mirror.dst.ca/fedora-linux/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="CA" preference="39">rsync://mirror.dst.ca/fedora-buffet/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="https" type="https" location="CA" preference="38">https://epel.mirror.globo.tech/10.2/Everything/x86_64/repodata/repomd.xml</url>
+    <url protocol="rsync" type="rsync" location="CA" preference="38">rsync://epel.mirror.globo.tech/epel/10.2/Everything/x86_64/repodata/repomd.xml</url>
+   </resources>
+  </file>
+ </files>
+</metalink>

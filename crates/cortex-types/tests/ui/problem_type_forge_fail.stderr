@@ -1,0 +1,12 @@
+error[E0423]: cannot initialize a tuple struct which contains private fields
+ --> tests/ui/problem_type_forge_fail.rs:3:27
+  |
+3 |     let t = cortex_types::ProblemType("invented_code");
+  |                           ^^^^^^^^^^^
+  |
+  = note: a struct named `cortex_types::ProblemType` exists in another namespace
+note: constructor is not visible here due to private fields
+ --> src/problem.rs
+  |
+  | pub struct ProblemType(&'static str);
+  |                        ^^^^^^^^^^^^ private field

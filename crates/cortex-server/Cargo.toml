@@ -1,0 +1,64 @@
+[package]
+name = "cortex-server"
+description = "Cortex v0.2.001 piece 11: the server binary. Increments so far: the command line, the host bootstrap with its --require-existing refusal (W1-REISSUE), the fresh token file, the health document, the test-faults switch and the migrate decision"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[[bin]]
+name = "cortex-server"
+path = "src/main.rs"
+
+[features]
+# Test-only fault switch (contract r0.3 section 4). OFF by default and never in a release build.
+test-faults = []
+# The optional pieces this binary compiles in, one feature each (`assembly::compiled`: one `#[cfg(feature = "mod-x")]` line per piece).
+# audit, identity and tokens are core and always in (audit BEFORE identity in migration order). NOT default features: a test forbids any
+# `default` here, and the build recipe names the set.
+# A feature IMPLIES the pieces its piece needs (vera SERVE-NEXT-L1): search reads the records scope; boot uses the records and handoffs ports.
+mod-policy = ["dep:mod-policy"]
+mod-records = ["dep:mod-records"]
+mod-search = ["dep:mod-search", "mod-records"]
+mod-handoffs = ["dep:mod-handoffs"]
+mod-boot = ["dep:mod-boot", "mod-records", "mod-handoffs"]
+
+[dependencies]
+async-trait.workspace = true
+# `serve` (mira, Wave 1): the HTTP wiring. axum is only what the open health routes' handlers and the listener need.
+axum = { workspace = true, features = ["http1", "tokio"] }
+cortex-config.workspace = true
+cortex-db.workspace = true
+cortex-http = { path = "../cortex-http" }
+cortex-module.workspace = true
+cortex-types.workspace = true
+# core and always compiled in, FIRST in migration order: identity writes its audit rows through the audit sink (cox 20:07Z).
+mod-audit = { path = "../mod-audit" }
+mod-boot = { path = "../mod-boot", optional = true }
+mod-handoffs = { path = "../mod-handoffs", optional = true }
+# core and always compiled in: `bootstrap` (store.rs) calls it directly, so it is NOT a feature.
+mod-identity = { path = "../mod-identity" }
+mod-policy = { path = "../mod-policy", optional = true }
+mod-records = { path = "../mod-records", optional = true }
+mod-search = { path = "../mod-search", optional = true }
+# core (MANIFEST core: true) and always compiled in: the real Minter (src/minter.rs) calls issue_in_host_tx directly, so it is NOT a feature.
+mod-tokens = { path = "../mod-tokens" }
+# O_NOFOLLOW and O_NONBLOCK for the LAST_GOOD open (vera SERVER-I2-V1). Already in the lock (0.2.191, via tokio); only a dependency edge.
+libc = "0.2"
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+# The listener and the SIGTERM/SIGINT handlers of `serve`. The `signal` feature adds two packages to the lock (signal-hook-registry 1.4.8, errno 0.3.14;
+# both MIT OR Apache-2.0; no direct edge): ruled by cox (a), INTERIM-REGISTER rows 21 and 22.
+tokio = { workspace = true, features = ["net", "signal"] }
+# The transient read buffer of a secret file is zeroised on drop (vera SERVER-I3-V1, same class). Already a workspace dependency (cortex-types); only an edge.
+zeroize.workspace = true
+
+[dev-dependencies]
+cortex-testkit.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread", "macros", "io-util", "time"] }
+# tests/serve_*.rs drive the real router in-process.
+tower = { version = "=0.5.3", default-features = false, features = ["util"] }
+
+[lints]
+workspace = true

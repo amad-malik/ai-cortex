@@ -1,0 +1,402 @@
+{
+ "target": "scripts/test-gate/test_gate.py",
+ "command": [
+  "env",
+  "TEST_GATE_PY={copy}",
+  "sh",
+  "scripts/test-gate/test-gate-test.sh"
+ ],
+ "kill_marker": "TEST GATE CELLS FAILED",
+ "mutants": [
+  {
+   "id": "TG-M01",
+   "what": "a panic that merely CONTAINS the database text counts as the missing-database panic (TG-04)",
+   "old": "msgs.get(t) == NEEDS_DB",
+   "new": "NEEDS_DB in (msgs.get(t) or \"\")"
+  },
+  {
+   "id": "TG-M02",
+   "what": "the database text is read without its ': NotPresent' tail (TG-02)",
+   "old": "supervise.sh (L-9): NotPresent\"\nNOT_RUN_NESTED",
+   "new": "supervise.sh (L-9)\"\nNOT_RUN_NESTED"
+  },
+  {
+   "id": "TG-M03",
+   "what": "no failure is ever reported by the free driver (TG-03)",
+   "old": "if s == \"FAILED\"} - needs_db",
+   "new": "if s == \"FAILED\"} - set(ran)"
+  },
+  {
+   "id": "TG-M04",
+   "what": "an ignored test needs no declaration (TG-12)",
+   "old": "(\"ignored but not declared\", ignored_ran - set(declared))",
+   "new": "(\"ignored but not declared\", set())"
+  },
+  {
+   "id": "TG-M05",
+   "what": "a listed test with no result is accepted (TG-10)",
+   "old": "inv - green - needs_db - real_failed - ignored_ran - set(declared)),",
+   "new": "set()),"
+  },
+  {
+   "id": "TG-M06",
+   "what": "a test that ran but was never listed is accepted (TG-11)",
+   "old": "(\"ran but not in the inventory\", set(ran) - inv)",
+   "new": "(\"ran but not in the inventory\", set())"
+  },
+  {
+   "id": "TG-M07",
+   "what": "a declared ignore that no longer exists is accepted (TG-13)",
+   "old": "(\"declared but not in the inventory\", set(declared) - inv)",
+   "new": "(\"declared but not in the inventory\", set())"
+  },
+  {
+   "id": "TG-M08",
+   "what": "a trybuild child that is not ok is accepted (TG-14)",
+   "old": "{k[:3] for k in kids if k[3] != \"ok\"}",
+   "new": "set()"
+  },
+  {
+   "id": "TG-M09",
+   "what": "an empty inventory is accepted when only one of the two is empty (TG-39)",
+   "old": "if not m or not inv:",
+   "new": "if not m and not inv:"
+  },
+  {
+   "id": "TG-M10",
+   "what": "an empty inventory is accepted at all (TG-34)",
+   "old": "if not m or not inv:",
+   "new": "if False:"
+  },
+  {
+   "id": "TG-M11",
+   "what": "the database drivers still run after the free driver found problems (TG-03)",
+   "old": "    if problems:\n        say(\"test-db     not run: the free driver has problems\")",
+   "new": "    if False:\n        say(\"test-db     not run: the free driver has problems\")"
+  },
+  {
+   "id": "TG-M12",
+   "what": "a workspace with no database tests is treated as owing database runs (TG-19)",
+   "old": "    if not needs_db:\n",
+   "new": "    if False:\n"
+  },
+  {
+   "id": "TG-M13",
+   "what": "nested in an admission is not noticed (TG-20)",
+   "old": "nested = bool(os.environ.get(\"CV2_ADMITTED\"))",
+   "new": "nested = False"
+  },
+  {
+   "id": "TG-M14",
+   "what": "no podman is not noticed (TG-18)",
+   "old": "elif not cfg[\"podman\"] or not os.access(cfg[\"podman\"], os.X_OK):",
+   "new": "elif False:"
+  },
+  {
+   "id": "TG-M15",
+   "what": "a missing supervise.sh is not noticed (TG-35)",
+   "old": "elif not os.access(cfg[\"supervise\"], os.X_OK):",
+   "new": "elif False:"
+  },
+  {
+   "id": "TG-M16",
+   "what": "NOT_RUN exits 1 instead of 77 (TG-18)",
+   "old": "        return 77",
+   "new": "        return 1"
+  },
+  {
+   "id": "TG-M17",
+   "what": "the last line is not the exact NOT_RUN form (TG-18)",
+   "old": "say(f\"NOT_RUN: {reason}\")",
+   "new": "say(f\"NOT RUN: {reason}\")"
+  },
+  {
+   "id": "TG-M18",
+   "what": "the nested reason is not the exact text (TG-20)",
+   "old": "NOT_RUN_NESTED = \"nested in an admission: the database reservation cannot be taken\"",
+   "new": "NOT_RUN_NESTED = \"nested in an admission\""
+  },
+  {
+   "id": "TG-M19",
+   "what": "exit 75 is not a refusal (TG-22)",
+   "old": "REFUSED = (3, 75)",
+   "new": "REFUSED = (3,)"
+  },
+  {
+   "id": "TG-M20",
+   "what": "exit 3 is not a refusal (TG-22)",
+   "old": "REFUSED = (3, 75)",
+   "new": "REFUSED = (75,)"
+  },
+  {
+   "id": "TG-M21",
+   "what": "eleven tries instead of twelve (TG-23)",
+   "old": "TRIES = 12",
+   "new": "TRIES = 11"
+  },
+  {
+   "id": "TG-M22",
+   "what": "the free driver has no bound (TG-24)",
+   "old": "str(cfg[\"free_bound\"]), sys.executable",
+   "new": "\"0\", sys.executable"
+  },
+  {
+   "id": "TG-M23",
+   "what": "the bound's exit 124 is not read as the bound (TG-24)",
+   "old": "if rc in (124, 137):\n        return fail([f\"free driver exceeded",
+   "new": "if rc == 137:\n        return fail([f\"free driver exceeded"
+  },
+  {
+   "id": "TG-M24",
+   "what": "the database bound is 600 s, not 780 (TG-02)",
+   "old": "\"--kill-after=120\", str(cfg[\"db_bound\"])",
+   "new": "\"--kill-after=120\", \"600\""
+  },
+  {
+   "id": "TG-M25",
+   "what": "the database drivers do not ask for CV2_DB (TG-02)",
+   "old": "db_env = dict(env, CARGO_TERM_COLOR=\"never\", CV2_DB=\"1\", CV2_ADMIT_LOG=\"1\")",
+   "new": "db_env = dict(env, CARGO_TERM_COLOR=\"never\", CV2_ADMIT_LOG=\"1\")"
+  },
+  {
+   "id": "TG-M26",
+   "what": "a driver that exits non-zero is accepted when its lines say ok (TG-09)",
+   "old": "        if rc != 0:\n            problems.append(f\"driver for",
+   "new": "        if False:\n            problems.append(f\"driver for"
+  },
+  {
+   "id": "TG-M27",
+   "what": "a needs-database test is not required to be ok in its run (TG-05, TG-06)",
+   "old": "if res.get((norm(target), name)) == \"ok\":",
+   "new": "if True:"
+  },
+  {
+   "id": "TG-M28",
+   "what": "a failure of another test in a database run is accepted (TG-07)",
+   "old": "for k in bad if (pkg, k[0], k[1]) not in needs_db and not any(norm(t) == k[0] and n == k[1] for t, n in by_pkg[pkg])]",
+   "new": "for k in bad if False]"
+  },
+  {
+   "id": "TG-M29",
+   "what": "the packages run in reverse order (TG-02, TG-26)",
+   "old": "for pkg in sorted(by_pkg):",
+   "new": "for pkg in reversed(sorted(by_pkg)):"
+  },
+  {
+   "id": "TG-M30",
+   "what": "the gate goes on to the next package after a failure (TG-09)",
+   "old": "        if problems:\n            break",
+   "new": "        if False:\n            break"
+  },
+  {
+   "id": "TG-M31",
+   "what": "a hyphenated target name is not normalised (TG-36)",
+   "old": "return target.replace(\"-\", \"_\")",
+   "new": "return target"
+  },
+  {
+   "id": "TG-M32",
+   "what": "the binary's hash is not stripped from a database run (TG-27)",
+   "old": "r.group(1).rsplit(\"-\", 1)[0]",
+   "new": "r.group(1)"
+  },
+  {
+   "id": "TG-M33",
+   "what": "the guard is never consulted (TG-28)",
+   "old": "if cfg[\"guard\"]:",
+   "new": "if False:"
+  },
+  {
+   "id": "TG-M34",
+   "what": "a load of exactly 12 is not busy (TG-28)",
+   "old": "if load >= 12:",
+   "new": "if load > 12:"
+  },
+  {
+   "id": "TG-M35",
+   "what": "a slow API answer is not busy (TG-29)",
+   "old": "if took >= 0.05:",
+   "new": "if took >= 5:"
+  },
+  {
+   "id": "TG-M36",
+   "what": "a 401 answer counts as no answer (TG-37)",
+   "old": "        except urllib.error.HTTPError:\n            pass   # a 401 in a few ms proves the API answers\n",
+   "new": ""
+  },
+  {
+   "id": "TG-M37",
+   "what": "an API that does not answer is not busy (TG-37)",
+   "old": "return \"the live API does not answer\"",
+   "new": "return \"\""
+  },
+  {
+   "id": "TG-M38",
+   "what": "the guard gives up one pause late (TG-28)",
+   "old": "if pauses >= cfg[\"guard_max\"]:",
+   "new": "if pauses > cfg[\"guard_max\"]:"
+  },
+  {
+   "id": "TG-M39",
+   "what": "a test that cannot be attributed to a package is accepted (TG-38)",
+   "old": "unattributed = sorted(t for t in needs_db if t[0] in (\"?\", \"(doc)\"))",
+   "new": "unattributed = []"
+  },
+  {
+   "id": "TG-M40",
+   "what": "a doctest that needs a database is attributed to nothing and accepted (TG-38)",
+   "old": "(\"?\", \"(doc)\")",
+   "new": "(\"?\",)"
+  },
+  {
+   "id": "TG-M41",
+   "what": "the failure exit code is 0 (all failure cells)",
+   "old": "    say(f\"test: FAIL ({len(problems)} problem{'s' if len(problems) != 1 else ''})\")\n    return 1",
+   "new": "    say(f\"test: FAIL ({len(problems)} problem{'s' if len(problems) != 1 else ''})\")\n    return 0"
+  },
+  {
+   "id": "TG-M42",
+   "what": "the pass line reads differently (TG-01)",
+   "old": "say(f\"test: PASS (free driver only",
+   "new": "say(f\"test: OK (free driver only"
+  },
+  {
+   "id": "TG-M43",
+   "what": "the free run drops --no-fail-fast (TG-01)",
+   "old": "[cargo, \"test\", \"--workspace\", \"--no-fail-fast\"]",
+   "new": "[cargo, \"test\", \"--workspace\"]"
+  },
+  {
+   "id": "TG-M44",
+   "what": "the build drops the JSON messages (TG-01)",
+   "old": "\"--no-run\", \"--message-format=json\"]",
+   "new": "\"--no-run\"]"
+  },
+  {
+   "id": "TG-M45",
+   "what": "the listing adds --ignored (TG-01)",
+   "old": "\"--\", \"--list\"]",
+   "new": "\"--\", \"--list\", \"--ignored\"]"
+  },
+  {
+   "id": "TG-M47",
+   "what": "cargo's stderr (the Running lines) is thrown away in the run (TG-40)",
+   "old": "        ran = subprocess.run([cargo, \"test\", \"--workspace\", \"--no-fail-fast\"], env=env, stdout=out, stderr=subprocess.STDOUT, check=False)",
+   "new": "        ran = subprocess.run([cargo, \"test\", \"--workspace\", \"--no-fail-fast\"], env=env, stdout=out, stderr=subprocess.DEVNULL, check=False)"
+  },
+  {
+   "id": "TG-M48",
+   "what": "cargo's stderr is thrown away in the listing (TG-40)",
+   "old": "[cargo, \"test\", \"--workspace\", \"--\", \"--list\"], env=env, stdout=out, stderr=subprocess.STDOUT",
+   "new": "[cargo, \"test\", \"--workspace\", \"--\", \"--list\"], env=env, stdout=out, stderr=subprocess.DEVNULL"
+  },
+  {
+   "id": "TG-M49",
+   "what": "a seam is honoured without the test hook (TG-32)",
+   "old": "hook = env.get(\"TEST_GATE_TEST\") == \"1\"",
+   "new": "hook = True"
+  },
+  {
+   "id": "TG-M50",
+   "what": "the free driver is not run through the admission program (TG-33)",
+   "old": "rc = admitted(cfg, child, env, os.path.join(work, \"free.log\"), \"the free driver\")",
+   "new": "rc = subprocess.run(child, env=env, check=False).returncode"
+  },
+  {
+   "id": "TG-M51",
+   "what": "the panic line is not looked for before the message is read (TG-02)",
+   "old": "if state == \"thread\" and PANIC.match(line):",
+   "new": "if state == \"thread\":"
+  },
+  {
+   "id": "TG-M52",
+   "what": "the needs-database list is not kept (TG-02)",
+   "old": "f.writelines(\"\\t\".join(t) + \"\\n\" for t in sorted(needs_db))",
+   "new": "f.writelines([])"
+  },
+  {
+   "id": "TG-M53",
+   "what": "a build failure is not told apart (TG-17)",
+   "old": "    if rc == 10:\n",
+   "new": "    if rc == 99:\n"
+  },
+  {
+   "id": "TG-M54",
+   "what": "the problem count in the FAIL line is wrong (TG-03)",
+   "old": "say(f\"test: FAIL ({len(problems)} problem",
+   "new": "say(f\"test: FAIL ({len(problems) + 1} problem"
+  },
+  {
+   "id": "TG-M46",
+   "what": "the free phase lets cargo colour its output (TG-16)",
+   "old": "env = dict(os.environ, CARGO_TERM_COLOR=\"never\")\n    cargo = cfg[\"cargo\"]",
+   "new": "env = dict(os.environ)\n    cargo = cfg[\"cargo\"]"
+  },
+  {
+   "id": "TG-M55",
+   "what": "the database drivers let cargo colour its output (TG-16)",
+   "old": "db_env = dict(env, CARGO_TERM_COLOR=\"never\", CV2_DB=\"1\", CV2_ADMIT_LOG=\"1\")",
+   "new": "db_env = dict(env, CV2_DB=\"1\", CV2_ADMIT_LOG=\"1\")"
+  },
+  {
+   "id": "TG-M56",
+   "what": "a test that FAILED is also reported as never run (TG-03: the problem count)",
+   "old": "inv - green - needs_db - real_failed - ignored_ran - set(declared)),",
+   "new": "inv - green - needs_db - ignored_ran - set(declared)),"
+  },
+  {
+   "id": "TG-M57",
+   "what": "an undeclared ignored test is also reported as never run (TG-12: the problem count)",
+   "old": "inv - green - needs_db - real_failed - ignored_ran - set(declared)),",
+   "new": "inv - green - needs_db - real_failed - set(declared)),"
+  },
+  {
+   "id": "TG-M58",
+   "what": "an exit status other than 0 or 101 is not a problem (TG-42)",
+   "old": "    else:\n        problems.append(f\"the free run exited {run_rc}",
+   "new": "    elif False:\n        problems.append(f\"the free run exited {run_rc}"
+  },
+  {
+   "id": "TG-M59",
+   "what": "status 101 with no printed failure is accepted (TG-43)",
+   "old": "        if not printed_failed:\n            problems.append(\"cargo exited 101",
+   "new": "        if False:\n            problems.append(\"cargo exited 101"
+  },
+  {
+   "id": "TG-M60",
+   "what": "status 0 with printed failures is accepted (TG-43)",
+   "old": "        if printed_failed:\n            problems.append(f\"cargo exited 0",
+   "new": "        if False:\n            problems.append(f\"cargo exited 0"
+  },
+  {
+   "id": "TG-M61",
+   "what": "the intended 101 is not recognised (TG-02, TG-44)",
+   "old": "    elif run_rc == 101:   # what cargo",
+   "new": "    elif run_rc == 102:   # what cargo"
+  },
+  {
+   "id": "TG-M62",
+   "what": "the exit status is recorded as 0 whatever it was (TG-42)",
+   "old": "f.write(f\"{ran.returncode}\\n\")",
+   "new": "f.write(\"0\\n\")"
+  },
+  {
+   "id": "TG-M63",
+   "what": "the 101 is not explained in the output (TG-44)",
+   "old": "say(f\"test-free   cargo exit status 101: explained by",
+   "new": "say(f\"test-free   cargo exit status 101: seen with"
+  },
+  {
+   "id": "TG-M64",
+   "what": "the 101 is 'explained' next to a real failure (TG-03)",
+   "old": "printed_failed == len(needs_db):",
+   "new": "printed_failed >= len(needs_db):"
+  },
+  {
+   "id": "TG-M65",
+   "what": "a clean status 0 is not said (TG-44)",
+   "old": "say(\"test-free   cargo exit status 0\")",
+   "new": "pass"
+  }
+ ]
+}

@@ -1,0 +1,16 @@
+# cortex-v2 secret scan rules (S5; S1 section 4.1). gitleaks is MIT; no scanner is installed on build-host-1 yet (LAYOUT section 6),
+# so scripts/ci.sh reports the secret scan as NOT_RUN until vera and kai name one. These rules are ready for it.
+title = "cortex-v2 secret scan"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "cortex-v2-worker-token"
+description = "A Cortex v2 worker token: ctx2_<token id: 32 lowercase hex>.<secret: 43 base64url characters>"
+regex = '''ctx2_[0-9a-f]{32}\.[A-Za-z0-9_-]{43}'''
+
+[[rules]]
+id = "cortex-v2-recovery-key"
+description = "A Cortex v2 recovery key prefix (ctxr_). The exact length is not fixed in S1, so the rule is deliberately broad."
+regex = '''ctxr_[A-Za-z0-9_-]{16,}'''

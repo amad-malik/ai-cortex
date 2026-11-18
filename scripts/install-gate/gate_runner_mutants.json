@@ -1,0 +1,2964 @@
+[
+ {
+  "id": "GRM-01",
+  "what": "refuses no protected name",
+  "old": "    if host in (\"localhost\", \"localhost.localdomain\") or host.endswith(\".localhost\") or first in LIVE_HOSTS:",
+  "new": "    if False:",
+  "fails": "FAIL GR-02a"
+ },
+ {
+  "id": "GRM-02",
+  "what": "does not compare the target name with this host's name",
+  "old": "    if host == name or first == name.split(\".\")[0]:",
+  "new": "    if False:",
+  "fails": "FAIL GR-02e"
+ },
+ {
+  "id": "GRM-03",
+  "what": "accepts an address of this host",
+  "old": "        if addr.is_loopback or addr in local:",
+  "new": "        if False:",
+  "fails": "FAIL GR-02b"
+ },
+ {
+  "id": "GRM-04",
+  "what": "accepts loopback addresses",
+  "old": "        if addr.is_loopback or addr in local:",
+  "new": "        if addr in local:",
+  "fails": "FAIL GR-02b"
+ },
+ {
+  "id": "GRM-05",
+  "what": "does not compare machine-ids",
+  "old": "    if remote_id == local_id:",
+  "new": "    if False:",
+  "fails": "FAIL GR-02c"
+ },
+ {
+  "id": "GRM-06",
+  "what": "accepts an unreadable remote machine-id",
+  "old": "    if r.rc != 0 or not re.fullmatch(r\"[0-9a-f]{32}\", remote_id):",
+  "new": "    if False:",
+  "fails": "FAIL GR-02f"
+ },
+ {
+  "id": "GRM-07",
+  "what": "does not compare hostnames",
+  "old": "    if remote_host.split(\".\")[0] == mine.split(\".\")[0] or remote_host.split(\".\")[0] in LIVE_HOSTS:",
+  "new": "    if False:",
+  "fails": "FAIL GR-02d"
+ },
+ {
+  "id": "GRM-08",
+  "what": "accepts an unreadable remote hostname",
+  "old": "    if h.rc != 0 or not remote_host:",
+  "new": "    if False:",
+  "fails": "FAIL GR-02f"
+ },
+ {
+  "id": "GRM-09",
+  "what": "accepts an unreadable local address list",
+  "old": "    if rc != 0 or not local:",
+  "new": "    if False:",
+  "fails": "FAIL GR-02g"
+ },
+ {
+  "id": "GRM-10",
+  "what": "a failed check hides the next",
+  "old": "            results[cid] = (verdict, note, list(receipts))\n",
+  "new": "            results[cid] = (verdict, note, list(receipts))\n            if verdict == \"FAIL\":\n                interrupted = True\n",
+  "fails": "FAIL GR-03"
+ },
+ {
+  "id": "GRM-11",
+  "what": "an exception counts as PASS",
+  "old": "results[cid] = (\"FAIL\", \"exception %s: %s (%s)\"",
+  "new": "results[cid] = (\"PASS\", \"exception %s: %s (%s)\"",
+  "fails": "FAIL GR-04"
+ },
+ {
+  "id": "GRM-12",
+  "what": "NOT RUN counts as PASS",
+  "old": "    if \"NOT RUN\" in verdicts or L2_STATUS != \"PRESENT\":",
+  "new": "    if False:",
+  "fails": "FAIL GR-01"
+ },
+ {
+  "id": "GRM-13",
+  "what": "an interrupt is not handled",
+  "old": "        signal.signal(sig, lambda signum, frame: (_ for _ in ()).throw(Interrupted()))",
+  "new": "        pass",
+  "fails": "FAIL GR-05"
+ },
+ {
+  "id": "GRM-14",
+  "what": "the ssh child survives an interrupt",
+  "old": "            self.stop(proc)\n            raise\n        finally:\n            if stdin_path:",
+  "new": "            raise\n        finally:\n            if stdin_path:",
+  "fails": "FAIL GR-05"
+ },
+ {
+  "id": "GRM-15",
+  "what": "the receipt is trimmed",
+  "old": "        self._put(base + \".out\", out)",
+  "new": "        self._put(base + \".out\", out.strip())",
+  "fails": "FAIL GR-07"
+ },
+ {
+  "id": "GRM-16",
+  "what": "the receipt is decoded and re-encoded",
+  "old": "        self._put(base + \".out\", out)",
+  "new": "        self._put(base + \".out\", out.decode(\"utf-8\", \"replace\").encode())",
+  "fails": "FAIL GR-07"
+ },
+ {
+  "id": "GRM-17",
+  "what": "SHA256SUMS omits run.json",
+  "old": "                if rel != \"SHA256SUMS\":",
+  "new": "                if rel not in (\"SHA256SUMS\", \"run.json\"):",
+  "fails": "FAIL GR-07"
+ },
+ {
+  "id": "GRM-18",
+  "what": "the environment is recorded",
+  "old": "\"project\": args.project, \"lead\": args.lead, \"port\": args.port}",
+  "new": "\"project\": args.project, \"lead\": args.lead, \"port\": args.port, \"env\": dict(os.environ)}",
+  "fails": "FAIL GR-08"
+ },
+ {
+  "id": "GRM-19",
+  "what": "accepts a container pattern",
+  "old": "CONTAINER_NAME = re.compile(r\"[a-z][a-z0-9_.-]{0,62}\")",
+  "new": "CONTAINER_NAME = re.compile(r\".*\")",
+  "fails": "FAIL GR-16"
+ },
+ {
+  "id": "GRM-20",
+  "what": "accepts a live container name",
+  "old": "    return bool(CONTAINER_NAME.fullmatch(name)) and not name.startswith(LIVE_CONTAINER_PREFIXES)",
+  "new": "    return bool(CONTAINER_NAME.fullmatch(name))",
+  "fails": "FAIL GR-16"
+ },
+ {
+  "id": "GRM-21",
+  "what": "sends a command that is not on the allow-list",
+  "old": "        if not command_allowed(cmd):\n            raise Refused(EX_USAGE, \"command not on the allow-list: %r\" % cmd)\n        base = self.rec.next_base(check, step)\n        t0 = now()\n        try:\n            rc, out, err = self.ssh.run(cmd, stdin_path=stdin_path)",
+  "new": "        if False:\n            raise Refused(EX_USAGE, \"command not on the allow-list: %r\" % cmd)\n        base = self.rec.next_base(check, step)\n        t0 = now()\n        try:\n            rc, out, err = self.ssh.run(cmd, stdin_path=stdin_path)",
+  "fails": "FAIL GR-17b"
+ },
+ {
+  "id": "GRM-22",
+  "what": "ssh may prompt",
+  "old": "\"-o\", \"BatchMode=yes\", ",
+  "new": "",
+  "fails": "FAIL GR-17"
+ },
+ {
+  "id": "GRM-23",
+  "what": "runs without python3 -I",
+  "old": "    if sys.flags.isolated != 1:",
+  "new": "    if False:",
+  "fails": "FAIL GR-18"
+ },
+ {
+  "id": "GRM-24",
+  "what": "accepts an existing evidence directory",
+  "old": "or os.path.exists(ev) or",
+  "new": "or",
+  "fails": "FAIL GR-19"
+ },
+ {
+  "id": "GRM-25",
+  "what": "accepts an evidence directory under /tmp",
+  "old": "ev.startswith((\"/tmp/\", \"/var/tmp/\")) or ",
+  "new": "",
+  "fails": "FAIL GR-19"
+ },
+ {
+  "id": "GRM-26",
+  "what": "evidence directory is world readable",
+  "old": "os.mkdir(path, 0o700)",
+  "new": "os.mkdir(path, 0o755)",
+  "fails": "FAIL GR-19"
+ },
+ {
+  "id": "GRM-27",
+  "what": "accepts a malformed image checksum",
+  "old": "    if not re.fullmatch(r\"[0-9a-f]{64}\", a.image_checksum):",
+  "new": "    if False:",
+  "fails": "FAIL GR-21"
+ },
+ {
+  "id": "GRM-28",
+  "what": "passes with podman present",
+  "old": "    if not partial and (podman.rc == 0 or podman.out.strip()):",
+  "new": "    if False:",
+  "fails": "FAIL GR-03"
+ },
+ {
+  "id": "GRM-29",
+  "what": "ready is not required",
+  "old": "    if h.rc != 0 or not ready:",
+  "new": "    if h.rc != 0:",
+  "fails": "FAIL GR-22"
+ },
+ {
+  "id": "GRM-30",
+  "what": "the migrate exit code is not read",
+  "old": "        if m.rc != 0 or parts[:1] != [b\"0\"]:",
+  "new": "        if m.rc != 0:",
+  "fails": "FAIL GR-22"
+ },
+ {
+  "id": "GRM-31",
+  "what": "hard-codes the migrate container name",
+  "old": "ctx.step(\"G3\", \"migrate\", \"g3_migrate\", container=name)",
+  "new": "ctx.step(\"G3\", \"migrate\", \"g3_migrate\", container=\"cv2-s5-migrate\")",
+  "fails": "FAIL GR-01"
+ },
+ {
+  "id": "GRM-32",
+  "what": "accepts an unsafe container name from the compose file",
+  "old": "    if name is None or not CONTAINER_NAME.fullmatch(name):",
+  "new": "    if name is None:",
+  "fails": "FAIL GR-22"
+ },
+ {
+  "id": "GRM-33",
+  "what": "reads the compose file even when it could not be read",
+  "old": "compose_container(c.out.decode(\"utf-8\", \"replace\"), \"migrate\") if c.rc == 0 else None",
+  "new": "compose_container(c.out.decode(\"utf-8\", \"replace\"), \"migrate\") if True else None",
+  "fails": "FAIL GR-22"
+ },
+ {
+  "id": "GRM-34",
+  "what": "two questions pass G9",
+  "old": "    if n > 1:",
+  "new": "    if n > 5:",
+  "fails": "FAIL GR-24"
+ },
+ {
+  "id": "GRM-35",
+  "what": "a password prompt is answered with text",
+  "old": "os.write(master, b\"\\x04\" if password else consent)",
+  "new": "os.write(master, consent)",
+  "fails": "FAIL GR-25"
+ },
+ {
+  "id": "GRM-36",
+  "what": "a password prompt is not recognised",
+  "old": "password = \"assword\" in m.group(0)",
+  "new": "password = False",
+  "fails": "FAIL GR-25"
+ },
+ {
+  "id": "GRM-37",
+  "what": "the upload is not verified",
+  "old": "    if sums.rc != 0 or wrong:",
+  "new": "    if False:",
+  "fails": "FAIL GR-28"
+ },
+ {
+  "id": "GRM-38",
+  "what": "the upload check compares names only",
+  "old": "wrong = sorted(n for n in names if remote.get(n) != local[n]) +",
+  "new": "wrong = sorted(n for n in names if n not in remote) +",
+  "fails": "FAIL GR-28"
+ },
+ {
+  "id": "GRM-39",
+  "what": "the install timeout is not enforced",
+  "old": "                if exited_at is None and tick > deadline:",
+  "new": "                if False:",
+  "fails": "FAIL GR-31"
+ },
+ {
+  "id": "GRM-40",
+  "what": "a timed-out child is left running",
+  "old": "                if exited_at is None and tick > deadline:\n                    timed_out = True\n                    self.stop(proc)\n                    break",
+  "new": "                if exited_at is None and tick > deadline:\n                    timed_out = True\n                    break",
+  "fails": "FAIL GR-31"
+ },
+ {
+  "id": "GRM-41",
+  "what": "the answers receipt is empty",
+  "old": "self.rec._put(base + \".answers\", (json.dumps(events, indent=1) + \"\\n\").encode())",
+  "new": "self.rec._put(base + \".answers\", b\"[]\\n\")",
+  "fails": "FAIL GR-23"
+ },
+ {
+  "id": "GRM-42",
+  "what": "the transcript loses its escape codes",
+  "old": "self.rec.receipt(base, cmd, rc, transcript, b\"\", t0, now())",
+  "new": "self.rec.receipt(base, cmd, rc, transcript.replace(b\"\\x1b\", b\"\"), b\"\", t0, now())",
+  "fails": "FAIL GR-30"
+ },
+ {
+  "id": "GRM-43",
+  "what": "a prompt inside ANSI codes is not found",
+  "old": "text = ANSI.sub(b\"\", bytes(transcript[scan_from:])).decode(\"utf-8\", \"replace\")",
+  "new": "text = bytes(transcript[scan_from:]).decode(\"utf-8\", \"replace\")",
+  "fails": "FAIL GR-30"
+ },
+ {
+  "id": "GRM-44",
+  "what": "an existing artefact directory is accepted",
+  "old": "    if mk.rc != 0:",
+  "new": "    if False:",
+  "fails": "FAIL GR-33"
+ },
+ {
+  "id": "GRM-45",
+  "what": "an unsafe artefact name is accepted",
+  "old": "    bad = [n for n in names if not ARTEFACT_NAME.fullmatch(n) or os.path.islink(os.path.join(path, n)) or not os.path.isfile(os.path.join(path, n))]",
+  "new": "    bad = []",
+  "fails": "FAIL GR-29"
+ },
+ {
+  "id": "GRM-46",
+  "what": "a release without install.sh is accepted",
+  "old": "    if \"install.sh\" not in names:",
+  "new": "    if False:",
+  "fails": "FAIL GR-29"
+ },
+ {
+  "id": "GRM-47",
+  "what": "G9 counts without the install",
+  "old": "    if events is None:",
+  "new": "    if False:",
+  "fails": "FAIL GR-28"
+ },
+ {
+  "id": "GRM-48",
+  "what": "G2 does not fail when the install exits non-zero",
+  "old": "    if inst.rc != 0:",
+  "new": "    if False:",
+  "fails": "FAIL GR-26"
+ },
+ {
+  "id": "GRM-49",
+  "what": "a password prompt does not fail G2",
+  "old": "    if any(e[\"kind\"] == \"password\" for e in inst.events):\n        return \"FAIL\", \"the install asked",
+  "new": "    if False:\n        return \"FAIL\", \"the install asked",
+  "fails": "FAIL GR-25"
+ },
+ {
+  "id": "GRM-50",
+  "what": "the environment may be sent over ssh",
+  "old": "\"-o\", \"SendEnv=-*\"",
+  "new": "\"-o\", \"SendEnv=LANG\"",
+  "fails": "FAIL GR-29"
+ },
+ {
+  "id": "GRM-51",
+  "what": "the migrate image is not compared with stack.env",
+  "old": "        elif server_image is not None and (len(parts) < 2 or parts[1].decode(\"utf-8\", \"replace\") != server_image):",
+  "new": "        elif False:",
+  "fails": "FAIL GR-40"
+ },
+ {
+  "id": "GRM-52",
+  "what": "a stack.env with no server image passes",
+  "old": "    if server_image is None:\n        fails.append(\"stack.env is unreadable or names no CORTEX_SERVER_IMAGE\")",
+  "new": "    if False:\n        fails.append(\"stack.env is unreadable or names no CORTEX_SERVER_IMAGE\")",
+  "fails": "FAIL GR-40"
+ },
+ {
+  "id": "GRM-58",
+  "what": "G5 ignores the row counts",
+  "old": "COMPONENTS = (\"packages\", \"containers\", \"files\", \"timers\", \"rows\")",
+  "new": "COMPONENTS = (\"packages\", \"containers\", \"files\", \"timers\")",
+  "fails": "FAIL GR-42"
+ },
+ {
+  "id": "GRM-59",
+  "what": "G5 ignores the containers",
+  "old": "COMPONENTS = (\"packages\", \"containers\", \"files\", \"timers\", \"rows\")",
+  "new": "COMPONENTS = (\"packages\", \"files\", \"timers\", \"rows\")",
+  "fails": "FAIL GR-42"
+ },
+ {
+  "id": "GRM-60",
+  "what": "G5 ignores the package list",
+  "old": "COMPONENTS = (\"packages\", \"containers\", \"files\", \"timers\", \"rows\")",
+  "new": "COMPONENTS = (\"containers\", \"files\", \"timers\", \"rows\")",
+  "fails": "FAIL GR-42"
+ },
+ {
+  "id": "GRM-61",
+  "what": "G5 ignores the files",
+  "old": "COMPONENTS = (\"packages\", \"containers\", \"files\", \"timers\", \"rows\")",
+  "new": "COMPONENTS = (\"packages\", \"containers\", \"timers\", \"rows\")",
+  "fails": "FAIL GR-42"
+ },
+ {
+  "id": "GRM-62",
+  "what": "G5 ignores the timers",
+  "old": "COMPONENTS = (\"packages\", \"containers\", \"files\", \"timers\", \"rows\")",
+  "new": "COMPONENTS = (\"packages\", \"containers\", \"files\", \"rows\")",
+  "fails": "FAIL GR-42"
+ },
+ {
+  "id": "GRM-63",
+  "what": "G5 does not sort before comparing",
+  "old": "texts = {k: sorted(v.out.decode(\"utf-8\", \"replace\").splitlines()) for k, v in steps.items()}",
+  "new": "texts = {k: v.out.decode(\"utf-8\", \"replace\").splitlines() for k, v in steps.items()}",
+  "fails": "FAIL GR-42"
+ },
+ {
+  "id": "GRM-64",
+  "what": "G5 ignores a question on the second run",
+  "old": "    if rerun.events:",
+  "new": "    if False:",
+  "fails": "FAIL GR-42"
+ },
+ {
+  "id": "GRM-65",
+  "what": "G5 ignores the exit code of the second run",
+  "old": "    elif rerun.rc != 0:",
+  "new": "    elif False:",
+  "fails": "FAIL GR-42"
+ },
+ {
+  "id": "GRM-66",
+  "what": "G5 runs without the install",
+  "old": "    if ctx.state.get(\"g2_events\") is None:\n        return \"NOT RUN\", \"G2 did not run the install; there is nothing",
+  "new": "    if False:\n        return \"NOT RUN\", \"G2 did not run the install; there is nothing",
+  "fails": "FAIL GR-42"
+ },
+ {
+  "id": "GRM-67",
+  "what": "G5 hard-codes the db container",
+  "old": "fingerprint(ctx, \"before\", db)",
+  "new": "fingerprint(ctx, \"before\", \"cv2-s5-db\")",
+  "fails": "FAIL GR-43"
+ },
+ {
+  "id": "GRM-68",
+  "what": "G8 does not detect private keys",
+  "old": "(\"private_key\", re.compile(rb\"-----BEGIN [A-Z ]*PRIVATE KEY-----\")),",
+  "new": "(\"private_key\", re.compile(rb\"NEVERMATCHES\")),",
+  "fails": "FAIL GR-50"
+ },
+ {
+  "id": "GRM-69",
+  "what": "G8 does not detect bearer tokens",
+  "old": "(\"bearer\", re.compile(rb\"(?i)\\bbearer\\s+[A-Za-z0-9._~+/=-]{16,}\")),",
+  "new": "(\"bearer\", re.compile(rb\"NEVERMATCHES\")),",
+  "fails": "FAIL GR-50"
+ },
+ {
+  "id": "GRM-70",
+  "what": "G8 does not detect credential assignments",
+  "old": "(\"credential\", re.compile(",
+  "new": "(\"credential\", re.compile(rb\"NEVERMATCHES\")), (\"credential_off\", re.compile(",
+  "fails": "FAIL GR-50"
+ },
+ {
+  "id": "GRM-71",
+  "what": "G8 does not detect bare 64-hex strings",
+  "old": "(\"hex64\", re.compile(rb\"(?<![0-9A-Fa-f])[0-9a-f]{64}(?![0-9A-Fa-f])\")))",
+  "new": "(\"hex64\", re.compile(rb\"NEVERMATCHES\")))",
+  "fails": "FAIL GR-50"
+ },
+ {
+  "id": "GRM-72",
+  "what": "every sha256 digest is flagged",
+  "old": " or line[max(0, m.start() - 7):m.start()] == b\"sha256:\"",
+  "new": "",
+  "fails": "FAIL GR-50"
+ },
+ {
+  "id": "GRM-73",
+  "what": "every 64-hex string is allowed",
+  "old": "if cls == \"hex64\" and (hashes_allowed or line[max(0, m.start() - 7):m.start()] == b\"sha256:\"):",
+  "new": "if cls == \"hex64\":",
+  "fails": "FAIL GR-52"
+ },
+ {
+  "id": "GRM-74",
+  "what": "stderr is not scanned",
+  "old": "        if not fname.endswith((\".out\", \".err\")):",
+  "new": "        if not fname.endswith(\".out\"):",
+  "fails": "FAIL GR-51"
+ },
+ {
+  "id": "GRM-75",
+  "what": "no quarantine note",
+  "old": "    if rec.leaks:\n        extra[",
+  "new": "    if False:\n        extra[",
+  "fails": "FAIL GR-51"
+ },
+ {
+  "id": "GRM-76",
+  "what": "no container log needed",
+  "old": "    if read == 0:",
+  "new": "    if False:",
+  "fails": "FAIL GR-54"
+ },
+ {
+  "id": "GRM-77",
+  "what": "container names are hard-coded",
+  "old": "    names = [n for n in compose_scan(c.out.decode(\"utf-8\", \"replace\")).values() if n] if c.rc == 0 else []",
+  "new": "    names = [\"cv2-s5-db\", \"cv2-s5-server\"]",
+  "fails": "FAIL GR-50"
+ },
+ {
+  "id": "GRM-78",
+  "what": "G8 runs without the install",
+  "old": "    if ctx.state.get(\"g2_events\") is None:\n        return \"NOT RUN\", \"G2 did not run the install; there is no installer transcript to scan\"",
+  "new": "    if False:\n        return \"NOT RUN\", \"G2 did not run the install; there is no installer transcript to scan\"",
+  "fails": "FAIL GR-54"
+ },
+ {
+  "id": "GRM-79",
+  "what": "the hash-list receipts are scanned for hashes",
+  "old": "HASH_STEPS = (\"verify\", \"rocky_keys\", \"identity\")",
+  "new": "HASH_STEPS = ()",
+  "fails": "FAIL GR-50"
+ },
+ {
+  "id": "GRM-80",
+  "what": "the fingerprint receipts are scanned for hashes",
+  "old": "step in HASH_STEPS or step.startswith(\"fp_\")",
+  "new": "step in HASH_STEPS",
+  "fails": "FAIL GR-53"
+ },
+ {
+  "id": "GRM-81",
+  "what": "G11 does not wait for the logout",
+  "old": "    time.sleep(a.logout_wait)",
+  "new": "    pass",
+  "fails": "FAIL GR-60"
+ },
+ {
+  "id": "GRM-82",
+  "what": "G11 does not look again after the logout",
+  "old": "    after, r2 = g11_phase(ctx, \"after\")",
+  "new": "    after, r2 = [], []",
+  "fails": "FAIL GR-61"
+ },
+ {
+  "id": "GRM-83",
+  "what": "G11 does not require linger",
+  "old": "    if props.get(\"Linger\") != \"yes\":",
+  "new": "    if False:",
+  "fails": "FAIL GR-61"
+ },
+ {
+  "id": "GRM-84",
+  "what": "G11 accepts any user manager state",
+  "old": "    if props.get(\"State\") not in (\"active\", \"lingering\"):",
+  "new": "    if False:",
+  "fails": "FAIL GR-61"
+ },
+ {
+  "id": "GRM-85",
+  "what": "G11 does not require the timers to be active",
+  "old": "    if ac.rc != 0 or ac.out.decode(\"utf-8\", \"replace\").split() != [\"active\"] * len(timers):",
+  "new": "    if False:",
+  "fails": "FAIL GR-61"
+ },
+ {
+  "id": "GRM-86",
+  "what": "G11 does not require the timers to be enabled",
+  "old": "    if en.rc != 0 or en.out.decode(\"utf-8\", \"replace\").split() != [\"enabled\"] * len(timers):",
+  "new": "    if False:",
+  "fails": "FAIL GR-61"
+ },
+ {
+  "id": "GRM-87",
+  "what": "G11 ignores other open sessions",
+  "old": "    if others > 0:",
+  "new": "    if False:",
+  "fails": "FAIL GR-61"
+ },
+ {
+  "id": "GRM-88",
+  "what": "G11 runs without the install",
+  "old": "    if ctx.state.get(\"g2_events\") is None:\n        return \"NOT RUN\", \"G2 did not run the install; there are no backup timers",
+  "new": "    if False:\n        return \"NOT RUN\", \"G2 did not run the install; there are no backup timers",
+  "fails": "FAIL GR-62"
+ },
+ {
+  "id": "GRM-89",
+  "what": "an unsafe timers value is accepted",
+  "old": "or not re.fullmatch(r\"[a-z0-9@._-]+\\.timer(,[a-z0-9@._-]+\\.timer)*\", args.timers)",
+  "new": "or False",
+  "fails": "FAIL GR-62"
+ },
+ {
+  "id": "GRM-90",
+  "what": "G10 answers the consent yes",
+  "old": "run = ctx.pty_step(\"G10\", \"run_\" + kind, \"g10_run_\" + kind, consent=b\"n\\n\"",
+  "new": "run = ctx.pty_step(\"G10\", \"run_\" + kind, \"g10_run_\" + kind, consent=b\"y\\n\"",
+  "fails": "FAIL GR-71"
+ },
+ {
+  "id": "GRM-91",
+  "what": "G10 accepts a tampered release that installs",
+  "old": "    elif run.rc == 0:",
+  "new": "    elif False:",
+  "fails": "FAIL GR-71"
+ },
+ {
+  "id": "GRM-92",
+  "what": "G10 accepts any exit code",
+  "old": "    elif run.rc not in codes:",
+  "new": "    elif False:",
+  "fails": "FAIL GR-71"
+ },
+ {
+  "id": "GRM-93",
+  "what": "G10 does not say the trust step was not reached",
+  "old": "        if run.rc == 2 and run.events and 4 in codes:",
+  "new": "        if False:",
+  "fails": "FAIL GR-71"
+ },
+ {
+  "id": "GRM-94",
+  "what": "G10 does not need a plain cause",
+  "old": "    if run.rc != 0 and \"problem:\" not in text:",
+  "new": "    if False:",
+  "fails": "FAIL GR-71"
+ },
+ {
+  "id": "GRM-95",
+  "what": "G10 does not need a fix line",
+  "old": "    if run.rc != 0 and \"fix:\" not in text:",
+  "new": "    if False:",
+  "fails": "FAIL GR-71"
+ },
+ {
+  "id": "GRM-96",
+  "what": "G10 does not compare the state",
+  "old": "            fails += [\"tampered %s: %s\" % (kind, c) for c in state_changes(before, after)]",
+  "new": "            pass",
+  "fails": "FAIL GR-71"
+ },
+ {
+  "id": "GRM-97",
+  "what": "the state comparison ignores the packages",
+  "old": "    for key in STATE_KEYS:",
+  "new": "    for key in (\"state\",):",
+  "fails": "FAIL GR-71"
+ },
+ {
+  "id": "GRM-98",
+  "what": "G10 leaves the tampered copies",
+  "old": "        cl = ctx.step(\"G10\", \"cleanup\", \"g10_cleanup\")\n        receipts.append(cl.base)",
+  "new": "        pass",
+  "fails": "FAIL GR-70"
+ },
+ {
+  "id": "GRM-99",
+  "what": "G10 does not tamper",
+  "old": "            fl = ctx.step(\"G10\", \"flip_\" + kind, \"g10_flip_\" + kind, name=flipped)",
+  "new": "            fl = cp",
+  "fails": "FAIL GR-70"
+ },
+ {
+  "id": "GRM-100",
+  "what": "the upload is not shared",
+  "old": "    if \"upload\" in ctx.state:",
+  "new": "    if False:",
+  "fails": "FAIL GR-75"
+ },
+ {
+  "id": "GRM-101",
+  "what": "G10 ignores a failed upload",
+  "old": "    ok, why, receipts = ensure_upload(ctx, \"G10\")\n    if not ok:",
+  "new": "    ok, why, receipts = ensure_upload(ctx, \"G10\")\n    if False:",
+  "fails": "FAIL GR-77"
+ },
+ {
+  "id": "GRM-102",
+  "what": "G7 answers the consent yes",
+  "old": "run = ctx.pty_step(\"G7\", \"run_\" + name, run_key, consent=b\"n\\n\"",
+  "new": "run = ctx.pty_step(\"G7\", \"run_\" + name, run_key, consent=b\"y\\n\"",
+  "fails": "FAIL GR-72"
+ },
+ {
+  "id": "GRM-103",
+  "what": "G7 leaves its setups",
+  "old": "            for key in teardown:\n                td = ctx.step(\"G7\", \"%s_%s\" % (name, key), key)\n                receipts.append(td.base)",
+  "new": "            for key in ():\n                td = ctx.step(\"G7\", \"%s_%s\" % (name, key), key)\n                receipts.append(td.base)",
+  "fails": "FAIL GR-72"
+ },
+ {
+  "id": "GRM-104",
+  "what": "G7 always restores linger",
+  "old": "            if name == \"no_linger\" and linger_was_on:",
+  "new": "            if name == \"no_linger\":",
+  "fails": "FAIL GR-76"
+ },
+ {
+  "id": "GRM-105",
+  "what": "G7 never restores linger",
+  "old": "            if name == \"no_linger\" and linger_was_on:",
+  "new": "            if False:",
+  "fails": "FAIL GR-76"
+ },
+ {
+  "id": "GRM-106",
+  "what": "G7 does not check that the listener took",
+  "old": "                if b\":8604\" not in ports.out:",
+  "new": "                if False:",
+  "fails": "FAIL GR-73"
+ },
+ {
+  "id": "GRM-107",
+  "what": "G7 skips the static rule",
+  "old": "    ok_static, listed = g7_static(os.path.join(a.artefacts, \"install.sh\"))",
+  "new": "    ok_static, listed = True, []",
+  "fails": "FAIL GR-74"
+ },
+ {
+  "id": "GRM-108",
+  "what": "the static rule ignores fix cues",
+  "old": "or FIX_CUE.search(msg):",
+  "new": ":",
+  "fails": "FAIL GR-74"
+ },
+ {
+  "id": "GRM-109",
+  "what": "the static rule exempts nothing with a variable",
+  "old": "or \"$\" in msg or FIX_CUE",
+  "new": "or FIX_CUE",
+  "fails": "FAIL GR-74"
+ },
+ {
+  "id": "GRM-110",
+  "what": "G7 does not compare the state",
+  "old": "            problems = judge_run(run, codes, name) + [\"%s: %s\" % (name, c) for c in state_changes(before, after)]",
+  "new": "            problems = judge_run(run, codes, name)",
+  "fails": "FAIL GR-73"
+ },
+ {
+  "id": "GRM-111",
+  "what": "G7 ignores a failed upload",
+  "old": "    ok, why, receipts = ensure_upload(ctx, \"G7\")\n    if not ok:",
+  "new": "    ok, why, receipts = ensure_upload(ctx, \"G7\")\n    if False:",
+  "fails": "FAIL GR-77"
+ },
+ {
+  "id": "GRM-112",
+  "what": "G7 accepts an injection that exits 0",
+  "old": "    elif run.rc == 0:\n        fails.append(\"%s: the installer exited 0 (it went through)\" % label)",
+  "new": "    elif run.rc == 0:\n        pass",
+  "fails": "FAIL GR-73"
+ },
+ {
+  "id": "GRM-113",
+  "what": "G12 ignores a failed syntax check",
+  "old": "        if r.rc != 0:\n            fails.append(\"syntax: %s failed on the shipped install.sh\" % word)",
+  "new": "        if False:\n            fails.append(\"syntax: %s failed on the shipped install.sh\" % word)",
+  "fails": "FAIL GR-81"
+ },
+ {
+  "id": "GRM-114",
+  "what": "G12 does not compare the splice",
+  "old": "        elif rebuilt != shipped:",
+  "new": "        elif False:",
+  "fails": "FAIL GR-81"
+ },
+ {
+  "id": "GRM-115",
+  "what": "G12 does not need a final newline",
+  "old": "        if not data.endswith(b\"\\n\"):",
+  "new": "        if False:",
+  "fails": "FAIL GR-81"
+ },
+ {
+  "id": "GRM-116",
+  "what": "G12 does not check the last line of an include",
+  "old": "        elif data[:-1].split(b\"\\n\")[-1] not in (b\"}\", b\")\"):",
+  "new": "        elif False:",
+  "fails": "FAIL GR-81"
+ },
+ {
+  "id": "GRM-117",
+  "what": "G12 refuses a closing parenthesis",
+  "old": "not in (b\"}\", b\")\"):",
+  "new": "not in (b\"}\",):",
+  "fails": "FAIL GR-80"
+ },
+ {
+  "id": "GRM-118",
+  "what": "G12 does not compare the joined hash",
+  "old": "    if record.get(\"joined_sha256\") != before[\"shipped\"]:",
+  "new": "    if False:",
+  "fails": "FAIL GR-82"
+ },
+ {
+  "id": "GRM-119",
+  "what": "G12 does not compare the include order",
+  "old": "    if [i.get(\"name\") for i in record.get(\"includes\", [])] != markers:",
+  "new": "    if False:",
+  "fails": "FAIL GR-82"
+ },
+ {
+  "id": "GRM-120",
+  "what": "G12 does not compare the include hashes",
+  "old": "        if i.get(\"name\") in includes and i.get(\"sha256\") != before[i[\"name\"]]:",
+  "new": "        if False:",
+  "fails": "FAIL GR-82"
+ },
+ {
+  "id": "GRM-121",
+  "what": "G12 does not compare the commit",
+  "old": "    if record.get(\"commit\") != commit.out.decode().strip():",
+  "new": "    if False:",
+  "fails": "FAIL GR-82"
+ },
+ {
+  "id": "GRM-122",
+  "what": "G12 does not compare the tree",
+  "old": "    if record.get(\"tree\") != tree.out.decode().strip():",
+  "new": "    if False:",
+  "fails": "FAIL GR-82"
+ },
+ {
+  "id": "GRM-123",
+  "what": "G12 accepts a dirty development tree",
+  "old": "    if dirty.out.strip():",
+  "new": "    if False:",
+  "fails": "FAIL GR-82"
+ },
+ {
+  "id": "GRM-124",
+  "what": "G12 does not need the NOTE line",
+  "old": "    if lines.count(NOTE_LINE) != 1:",
+  "new": "    if False:",
+  "fails": "FAIL GR-83"
+ },
+ {
+  "id": "GRM-125",
+  "what": "G12 accepts the NOTE line twice",
+  "old": "    if lines.count(NOTE_LINE) != 1:",
+  "new": "    if lines.count(NOTE_LINE) < 1:",
+  "fails": "FAIL GR-83"
+ },
+ {
+  "id": "GRM-126",
+  "what": "G12 does not sweep for a proof claim",
+  "old": "    if claims:",
+  "new": "    if False:",
+  "fails": "FAIL GR-83"
+ },
+ {
+  "id": "GRM-127",
+  "what": "G12 ignores the checker's exit code",
+  "old": "    if orc.rc != 0:",
+  "new": "    if False:",
+  "fails": "FAIL GR-83"
+ },
+ {
+  "id": "GRM-128",
+  "what": "G12 does not compare the bytes again at the end",
+  "old": "    if after != before:",
+  "new": "    if False:",
+  "fails": "FAIL GR-84"
+ },
+ {
+  "id": "GRM-129",
+  "what": "G12 writes no binding receipt",
+  "old": "ctx.rec.data_receipt(\"G12\", \"binding\", \"shipped_sha256=",
+  "new": "ctx.rec.data_receipt(\"G12\", \"note\", \"shipped_sha256=",
+  "fails": "FAIL GR-80"
+ },
+ {
+  "id": "GRM-131",
+  "what": "G12 runs any local command",
+  "old": "        if not (any(p.fullmatch(cmd) for p in LOCAL_ALLOWED) or (keygen and re.fullmatch(re.escape(keygen) + \" -l -f \" + SAFE_PATH, cmd))):",
+  "new": "        if False:",
+  "fails": "FAIL GR-84"
+ },
+ {
+  "id": "GRM-132",
+  "what": "G12 runs without its inputs",
+  "old": "    if not a.dev_tree or not a.binding_record:",
+  "new": "    if False:",
+  "fails": "FAIL GR-83"
+ },
+ {
+  "id": "GRM-133",
+  "what": "G12 does not need an approved inventory",
+  "old": "        if a.inventory_approved_sha256 != inventory_sha:",
+  "new": "        if False:",
+  "fails": "FAIL GR-88"
+ },
+ {
+  "id": "GRM-134",
+  "what": "G12 ignores refused matrix cells",
+  "old": "            if refused:",
+  "new": "            if False:",
+  "fails": "FAIL GR-87"
+ },
+ {
+  "id": "GRM-135",
+  "what": "G12 swallows a matrix that could not run",
+  "old": "    except Exception as exc:\n        fails.append(\"the matrix could not run: %s: %s\" % (type(exc).__name__, exc))",
+  "new": "    except Exception as exc:\n        pass",
+  "fails": "FAIL GR-88"
+ },
+ {
+  "id": "GRM-136",
+  "what": "the oracle is always taken from the development tree",
+  "old": "            oracle_tree = a.oracle_tree or a.dev_tree",
+  "new": "            oracle_tree = a.dev_tree",
+  "fails": "FAIL GR-86"
+ },
+ {
+  "id": "GRM-137",
+  "what": "the matrix table is not a receipt",
+  "old": "receipts.append(ctx.rec.data_receipt(\"G12\", \"matrix\",",
+  "new": "receipts.append(ctx.rec.data_receipt(\"G12\", \"mx\",",
+  "fails": "FAIL GR-86"
+ },
+ {
+  "id": "GRM-138",
+  "what": "untestable variables are not listed",
+  "old": "\", \".join(sorted(untestable)) or \"none\",",
+  "new": "\"none\",",
+  "fails": "FAIL GR-93"
+ },
+ {
+  "id": "GRM-139",
+  "what": "the matrix has no unset cells",
+  "old": "        add(\"unset\", {}, [name], [], \"%s unset\" % name)",
+  "new": "        pass",
+  "fails": "FAIL GR-87",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-140",
+  "what": "the matrix has no empty cells",
+  "old": "        add(\"empty\", {name: \"\"}, [], [], \"%s empty\" % name)",
+  "new": "        pass",
+  "fails": "FAIL GR-86",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-141",
+  "what": "the matrix has no valid cells",
+  "old": "        for val in v[\"valid\"]:\n            add(\"valid\"",
+  "new": "        for val in []:\n            add(\"valid\"",
+  "fails": "FAIL GR-87",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-142",
+  "what": "the matrix has no hostile cells",
+  "old": "        for val in v[\"hostile\"]:\n            add(\"hostile\"",
+  "new": "        for val in []:\n            add(\"hostile\"",
+  "fails": "FAIL GR-86",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-144",
+  "what": "the context has no argument vector",
+  "old": "    args = (\"set --\" + \"\".join(\" \" + quote(a) for a in cell[\"argv\"]) + \"\\n\").encode()",
+  "new": "    args = b\"\"",
+  "fails": "FAIL GR-89",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-145",
+  "what": "the comparison ignores the state dump",
+  "old": "    if rc == oracle.ORACLE_SENTINEL_STATUS and out == base_out:",
+  "new": "    if rc == oracle.ORACLE_SENTINEL_STATUS:",
+  "fails": "FAIL GR-87",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-147",
+  "what": "the probe never finds an untestable variable",
+  "old": "        if run_cell(oracle, b\"\", cell, prefix)[0] == \"UNTESTABLE\":",
+  "new": "        if False:",
+  "fails": "FAIL GR-93",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-148",
+  "what": "the matrix skips an include",
+  "old": "        for name in sorted(files):\n            outcome, detail",
+  "new": "        for name in sorted(files)[:1]:\n            outcome, detail",
+  "fails": "FAIL GR-87",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-149",
+  "what": "a container run need not be admitted",
+  "old": "        if os.environ.get(\"CV2_ADMITTED\") != \"1\":",
+  "new": "        if False:",
+  "fails": "FAIL GR-101"
+ },
+ {
+  "id": "GRM-150",
+  "what": "a container that does not exist is accepted",
+  "old": "        if local_out([\"podman\", \"container\", \"exists\", args.container])[0] != 0:",
+  "new": "        if False:",
+  "fails": "FAIL GR-101"
+ },
+ {
+  "id": "GRM-151",
+  "what": "the container run does not skip the checks it cannot prove",
+  "old": "    skip = {g: \"not proved in a container: it needs the clean Rocky 10.2 VM\" for g in CONTAINER_NOT_PROVED} if container else None",
+  "new": "    skip = None",
+  "fails": "FAIL GR-100"
+ },
+ {
+  "id": "GRM-152",
+  "what": "no partial-dry-run note",
+  "old": "    if container:\n        extra[\"PARTIAL-DRY-RUN.txt\"]",
+  "new": "    if False:\n        extra[\"PARTIAL-DRY-RUN.txt\"]",
+  "fails": "FAIL GR-100"
+ },
+ {
+  "id": "GRM-153",
+  "what": "no partial banner in the table",
+  "old": "    if partial:\n        lines.append(\"PARTIAL DRY RUN",
+  "new": "    if False:\n        lines.append(\"PARTIAL DRY RUN",
+  "fails": "FAIL GR-100"
+ },
+ {
+  "id": "GRM-154",
+  "what": "the lingering injection runs in a container",
+  "old": "        if in_container and name == \"no_linger\":",
+  "new": "        if False:",
+  "fails": "FAIL GR-100"
+ },
+ {
+  "id": "GRM-155",
+  "what": "podman exec has no -i or -it",
+  "old": "return [\"podman\", \"exec\"] + ([\"-it\"] if tty else ([\"-i\"] if stdin else [])) + [self.target, \"sh\", \"-c\", cmd]",
+  "new": "return [\"podman\", \"exec\"] + [self.target, \"sh\", \"-c\", cmd]",
+  "fails": "FAIL GR-100"
+ },
+ {
+  "id": "GRM-156",
+  "what": "podman exec is given --all",
+  "old": "return [\"podman\", \"exec\"] + ([\"-it\"] if tty else ([\"-i\"] if stdin else [])) + [self.target, \"sh\", \"-c\", cmd]",
+  "new": "return [\"podman\", \"exec\", \"--all\"] + ([\"-it\"] if tty else ([\"-i\"] if stdin else [])) + [self.target, \"sh\", \"-c\", cmd]",
+  "fails": "FAIL GR-100"
+ },
+ {
+  "id": "GRM-157",
+  "what": "the container's identity is not a receipt",
+  "old": "ctx.local_step(\"00\", \"container_inspect\"",
+  "new": "ctx.local_step(\"00\", \"cinspect\"",
+  "fails": "FAIL GR-102"
+ },
+ {
+  "id": "GRM-158",
+  "what": "a local podman command is not checked",
+  "old": "        if not (any(p.fullmatch(cmd) for p in LOCAL_ALLOWED) or (keygen and re.fullmatch(re.escape(keygen) + \" -l -f \" + SAFE_PATH, cmd))):",
+  "new": "        if False:",
+  "fails": "FAIL GR-102"
+ },
+ {
+  "id": "GRM-159",
+  "what": "G4 does not check the lead's token mode",
+  "old": "        if lm.out.strip() != b\"600\":",
+  "new": "        if False:",
+  "fails": "FAIL GR-41b"
+ },
+ {
+  "id": "GRM-160",
+  "what": "G4 accepts a lead whoami that is not 200",
+  "old": "        if hl.rc != 0 or lw.out.strip() != b\"200\":",
+  "new": "        if False:",
+  "fails": "FAIL GR-41b"
+ },
+ {
+  "id": "GRM-161",
+  "what": "G4 issues without a worker UUID",
+  "old": "        if len(fields) != 2 or not re.fullmatch(UUID_RX, fields[0]):",
+  "new": "        if False:",
+  "fails": "FAIL GR-41b"
+ },
+ {
+  "id": "GRM-162",
+  "what": "G4 accepts an issue answer that is not 201",
+  "old": "        if iss.out.strip() != b\"201\":",
+  "new": "        if False:",
+  "fails": "FAIL GR-41b"
+ },
+ {
+  "id": "GRM-163",
+  "what": "G4 accepts an issue response without token_id",
+  "old": "        if len(parts) != 3 or parts[1] != \"True\" or not parts[0]:",
+  "new": "        if False:",
+  "fails": "FAIL GR-41b"
+ },
+ {
+  "id": "GRM-164",
+  "what": "G4 accepts a worker whoami that is not 200",
+  "old": "        if code.strip() != \"200\":",
+  "new": "        if False:",
+  "fails": "FAIL GR-41b"
+ },
+ {
+  "id": "GRM-165",
+  "what": "G4 does not check the whoami fields",
+  "old": "        missing = [f for f in WHOAMI_FIELDS if f not in who]",
+  "new": "        missing = []",
+  "fails": "FAIL GR-41b"
+ },
+ {
+  "id": "GRM-166",
+  "what": "G4 does not compare the worker",
+  "old": "        if who[\"worker\"] != worker_id:",
+  "new": "        if False:",
+  "fails": "FAIL GR-41b"
+ },
+ {
+  "id": "GRM-167",
+  "what": "G4 does not compare the token id",
+  "old": "        if who[\"token_id\"] != issued_token_id or who[\"token_id\"] == lead_token_id:",
+  "new": "        if False:",
+  "fails": "FAIL GR-41b"
+ },
+ {
+  "id": "GRM-168",
+  "what": "G4 leaves its header and response files",
+  "old": "        cl = ctx.step(\"G4\", \"cleanup\", \"g4_cleanup\")\n        receipts.append(cl.base)",
+  "new": "        pass",
+  "fails": "FAIL GR-41"
+ },
+ {
+  "id": "GRM-169",
+  "what": "G4 records the issued token in a receipt",
+  "old": "issued_secret = ctx.secret_step(\"G4\", \"secret_issued\", \"g4_secret_issued\")",
+  "new": "issued_secret = ctx.step(\"G4\", \"secret_issued\", \"g4_secret_issued\")",
+  "fails": "FAIL GR-41c"
+ },
+ {
+  "id": "GRM-170",
+  "what": "a secret step records the value",
+  "old": "        withheld = (\"(output withheld: a secret value, %d bytes, sha256 prefix %s)\\n\" % (len(out), hashlib.sha256(out).hexdigest()[:12])).encode()",
+  "new": "        withheld = out",
+  "fails": "FAIL GR-41c"
+ },
+ {
+  "id": "GRM-171",
+  "what": "the held secrets are not kept",
+  "old": "            self.secrets.append(out.strip())",
+  "new": "            pass",
+  "fails": "FAIL GR-41c"
+ },
+ {
+  "id": "GRM-172",
+  "what": "G8 does not search for the held secrets",
+  "old": "+ scan_known(data, ctx.secrets)",
+  "new": "+ scan_known(data, [])",
+  "fails": "FAIL GR-41c"
+ },
+ {
+  "id": "GRM-173",
+  "what": "G4 runs without the install",
+  "old": "    if ctx.state.get(\"g2_events\") is None:\n        return \"NOT RUN\", \"G2 did not run the install; there is no stack to sign in to\", []",
+  "new": "    if False:\n        return \"NOT RUN\", \"G2 did not run the install; there is no stack to sign in to\", []",
+  "fails": "FAIL GR-41d"
+ },
+ {
+  "id": "GRM-174",
+  "what": "the Idempotency-Key is always the same",
+  "old": "idem=str(uuid.uuid4())",
+  "new": "idem=\"00000000-0000-4000-8000-000000000000\"",
+  "fails": "FAIL GR-41"
+ },
+ {
+  "id": "GRM-175",
+  "what": "the issue request has no Idempotency-Key",
+  "old": "-H \\\"Idempotency-Key: {idem}\\\" ",
+  "new": "",
+  "fails": "FAIL GR-41"
+ },
+ {
+  "id": "GRM-176",
+  "what": "the stage check does not read the top of $HOME",
+  "old": "ls -A \\\"$HOME\\\"; echo \\\"@@home $?\\\"; } 2>&1\"",
+  "new": "echo \\\"@@home 0\\\"; } 2>&1\"",
+  "fails": "FAIL GR-71"
+ },
+ {
+  "id": "GRM-177",
+  "what": "the cells do not replay install.sh's prefix",
+  "old": "    return first + observations(cell) + args + prefix + b\"set -x\\n\" + body + oracle.ORACLE_EPILOGUE",
+  "new": "    return first + observations(cell) + args + b\"set -x\\n\" + body + oracle.ORACLE_EPILOGUE",
+  "fails": "FAIL GR-91",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-178",
+  "what": "here is not replaced in the replay",
+  "old": "        out.append(b\"here='/oracle/here'\\n\" if line.startswith(b\"here=$(\") else line)",
+  "new": "        out.append(line)",
+  "fails": "FAIL GR-91",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-179",
+  "what": "the launch environment is not applied",
+  "old": "    oracle.ORACLE_ENV = launch_env(oracle, cell)",
+  "new": "    pass",
+  "fails": "FAIL GR-91",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-180",
+  "what": "a value the leaf did not take is not checked",
+  "old": "        missed = took_launch_values(cell, base_out)\n        if missed:",
+  "new": "        missed = \"\"\n        if missed:",
+  "fails": "FAIL GR-92",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-181",
+  "what": "any SHELLOPTS value counts as taken",
+  "old": "(name in (\"SHELLOPTS\", \"BASHOPTS\") and value in seen)",
+  "new": "True",
+  "fails": "FAIL GR-92",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-182",
+  "what": "the matrix has no clean control",
+  "old": "    add(\"control\", {}, [], [], \"clean control: no caller variable, no argument\")",
+  "new": "    pass",
+  "fails": "FAIL GR-86",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-183",
+  "what": "the raw observations are not kept",
+  "old": "            raw.append((cell[\"id\"], name, outcome, base_out, out))",
+  "new": "            pass",
+  "fails": "FAIL GR-86",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-184",
+  "what": "an untestable cell is accepted",
+  "old": "            return \"UNTESTABLE\", \"the leaf cannot run this context: %s\" % why.strip()[:90], base_out, b\"\"",
+  "new": "            return \"ACCEPT\", \"the leaf cannot run this context: %s\" % why.strip()[:90], base_out, b\"\"",
+  "fails": "FAIL GR-93",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-185",
+  "what": "a control that is not accepted passes",
+  "old": "            if bad_control:",
+  "new": "            if False:",
+  "fails": "FAIL GR-93"
+ },
+ {
+  "id": "GRM-186",
+  "what": "a mostly untestable matrix passes",
+  "old": "            if counts[\"UNTESTABLE\"] * 2 > len(rows):",
+  "new": "            if False:",
+  "fails": "FAIL GR-93"
+ },
+ {
+  "id": "GRM-187",
+  "what": "an untestable variable stays in the profiles",
+  "old": "                vars_ = {v[\"name\"]: v[\"valid\"][0] for v in inv[\"variables\"] if v[\"name\"] not in untestable}",
+  "new": "                vars_ = {v[\"name\"]: v[\"valid\"][0] for v in inv[\"variables\"]}",
+  "fails": "FAIL GR-93",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-188",
+  "what": "a marker line in a form the builder refuses is accepted",
+  "old": "            if name is None:\n                fails.append(\"a marker line the builder would not accept",
+  "new": "            if False:\n                fails.append(\"a marker line the builder would not accept",
+  "fails": "FAIL GR-94"
+ },
+ {
+  "id": "GRM-189",
+  "what": "the marker form allows any number of spaces",
+  "old": "rb'\\. \"\\$here/([A-Za-z0-9._-]+)\"   # @include\\n'",
+  "new": "rb'\\. \"\\$here/([A-Za-z0-9._-]+)\" *# @include\\n'",
+  "fails": "FAIL GR-94"
+ },
+ {
+  "id": "GRM-191",
+  "what": "the guarded marker form is not recognised",
+  "old": "re.compile(rb'\\[ ! -f \"\\$here/([A-Za-z0-9._-]+)\" \\] \\|\\| \\. \"\\$here/\\1\"   # @include\\n'))",
+  "new": "re.compile(rb'NEVERMATCHES'))",
+  "fails": "FAIL GR-94"
+ },
+ {
+  "id": "GRM-192",
+  "what": "the plain marker form is not recognised",
+  "old": "MARKER_FORMS = (re.compile(rb'\\. \"\\$here/([A-Za-z0-9._-]+)\"   # @include\\n'),",
+  "new": "MARKER_FORMS = (re.compile(rb'NEVERMATCHES'),",
+  "fails": "FAIL GR-94"
+ },
+ {
+  "id": "GRM-193",
+  "what": "the PTY deadline is ignored while output keeps arriving",
+  "old": "                if exited_at is None and tick > deadline:",
+  "new": "                if exited_at is None and tick > deadline and not transcript:",
+  "fails": "FAIL GR-103"
+ },
+ {
+  "id": "GRM-194",
+  "what": "the PTY transcript is not bounded",
+  "old": "                        if len(transcript) > PTY_TRANSCRIPT_CAP:",
+  "new": "                        if False:",
+  "fails": "FAIL GR-103"
+ },
+ {
+  "id": "GRM-195",
+  "what": "the second communicate after a timeout is unbounded",
+  "old": "                out, err = proc.communicate(timeout=self.GRACE)",
+  "new": "                out, err = proc.communicate()",
+  "fails": "FAIL GR-104"
+ },
+ {
+  "id": "GRM-196",
+  "what": "a command that ignores SIGTERM is not killed",
+  "old": "        if getattr(proc, \"gate_group\", False) or not leader_exited(proc.pid):",
+  "new": "        if False:",
+  "fails": "FAIL GR-104"
+ },
+ {
+  "id": "GRM-197",
+  "what": "the output read before a stuck descendant is dropped",
+  "old": "late.stdout or out, late.stderr or err",
+  "new": "b\"\", b\"\"",
+  "fails": "FAIL GR-104"
+ },
+ {
+  "id": "GRM-198",
+  "what": "G1 does not judge a probe's exit code",
+  "old": "        if step_.rc not in normal:",
+  "new": "        if False:",
+  "fails": "FAIL GR-105"
+ },
+ {
+  "id": "GRM-199",
+  "what": "G1 accepts ssh 255 from the ports probe",
+  "old": "(\"ports\", ports, (0,))",
+  "new": "(\"ports\", ports, (0, 255))",
+  "fails": "FAIL GR-105"
+ },
+ {
+  "id": "GRM-200",
+  "what": "G1 accepts ssh 255 from the cargo probe",
+  "old": "(\"cmd_cargo\", cargo, (0, 1))",
+  "new": "(\"cmd_cargo\", cargo, (0, 1, 255))",
+  "fails": "FAIL GR-105"
+ },
+ {
+  "id": "GRM-201",
+  "what": "G1 accepts ssh 255 from the container-directory probe",
+  "old": "(\"podman_dirs\", dirs, (0,))",
+  "new": "(\"podman_dirs\", dirs, (0, 255))",
+  "fails": "FAIL GR-105"
+ },
+ {
+  "id": "GRM-202",
+  "what": "G1 accepts ssh 255 from the rocky-release probe",
+  "old": "(\"rocky_pkgs\", rel, (0,))",
+  "new": "(\"rocky_pkgs\", rel, (0, 255))",
+  "fails": "FAIL GR-105"
+ },
+ {
+  "id": "GRM-203",
+  "what": "G1 accepts a failed os-release read",
+  "old": "(\"os_release\", osr, (0,))",
+  "new": "(\"os_release\", osr, (0, 255, 127))",
+  "fails": "FAIL GR-105"
+ },
+ {
+  "id": "GRM-204",
+  "what": "G4 does not require the lead's token to be collected",
+  "old": "        if lead_secret.rc != 0 or not lead_secret.out.strip():",
+  "new": "        if False:",
+  "fails": "FAIL GR-106"
+ },
+ {
+  "id": "GRM-205",
+  "what": "G4 does not require the issued token to be collected",
+  "old": "        if issued_secret.rc != 0 or not issued_secret.out.strip():",
+  "new": "        if False:",
+  "fails": "FAIL GR-106"
+ },
+ {
+  "id": "GRM-206",
+  "what": "G8 does not compare held and expected secrets",
+  "old": "    if ctx.secrets_collected < ctx.secrets_expected:",
+  "new": "    if False:",
+  "fails": "FAIL GR-106"
+ },
+ {
+  "id": "GRM-207",
+  "what": "secret steps do not count what was asked for",
+  "old": "        self.secrets_expected += 1\n",
+  "new": "        pass\n",
+  "fails": "FAIL GR-106"
+ },
+ {
+  "id": "GRM-208",
+  "what": "G12 does not reject a duplicate marker",
+  "old": "    for dup in sorted({n for n in markers if markers.count(n) > 1}):",
+  "new": "    for dup in []:",
+  "fails": "FAIL GR-107"
+ },
+ {
+  "id": "GRM-209",
+  "what": "G12 does not say the splice could not be rebuilt",
+  "old": "        if rebuilt is None:",
+  "new": "        if False:",
+  "fails": "FAIL GR-107"
+ },
+ {
+  "id": "GRM-210",
+  "what": "G12 does not require its git reads to succeed",
+  "old": "        if step_.rc != 0:",
+  "new": "        if False:",
+  "fails": "FAIL GR-108"
+ },
+ {
+  "id": "GRM-211",
+  "what": "the package list read is not checked in the state fingerprint",
+  "old": "    if pk.rc != 0 or not pk.out.strip():",
+  "new": "    if False:",
+  "fails": "FAIL GR-109"
+ },
+ {
+  "id": "GRM-212",
+  "what": "a state part's exit code is not checked",
+  "old": "        if rc not in normal:",
+  "new": "        if False:",
+  "fails": "FAIL GR-109"
+ },
+ {
+  "id": "GRM-213",
+  "what": "a missing state part is not an error",
+  "old": "        if name not in parts:",
+  "new": "        if False:",
+  "fails": "FAIL GR-109"
+ },
+ {
+  "id": "GRM-214",
+  "what": "G10 ignores state read errors",
+  "old": "            fails += [\"tampered %s: %s\" % (kind, e) for e in before[\"errors\"] + after[\"errors\"]]",
+  "new": "            pass",
+  "fails": "FAIL GR-109"
+ },
+ {
+  "id": "GRM-215",
+  "what": "G7 ignores state read errors",
+  "old": "[\"%s: %s\" % (name, e) for e in before[\"errors\"] + after[\"errors\"]]",
+  "new": "[]",
+  "fails": "FAIL GR-109"
+ },
+ {
+  "id": "GRM-216",
+  "what": "the runner's own gate- files count as a state change",
+  "old": "if not (name == \"home\" and RUNNER_HOME_NAMES.fullmatch(l))",
+  "new": "if True",
+  "fails": "FAIL GR-70"
+ },
+ {
+  "id": "GRM-217",
+  "what": "G8 passes with a subset of the container logs",
+  "old": "    if unread:",
+  "new": "    if False:",
+  "fails": "FAIL GR-110"
+ },
+ {
+  "id": "GRM-218",
+  "what": "the interrupted PTY transcript is not attached",
+  "old": "            exc.gate_partial = (bytes(transcript), list(events))",
+  "new": "            pass",
+  "fails": "FAIL GR-32"
+ },
+ {
+  "id": "GRM-219",
+  "what": "the interrupted PTY transcript is not written",
+  "old": "            partial = getattr(exc, \"gate_partial\", None)",
+  "new": "            partial = None",
+  "fails": "FAIL GR-32"
+ },
+ {
+  "id": "GRM-220",
+  "what": "the oracle's tree is always called the development tree",
+  "old": "\"yes\" if same_tree else \"NO\"",
+  "new": "\"yes\"",
+  "fails": "FAIL GR-111"
+ },
+ {
+  "id": "GRM-221",
+  "what": "the oracle file's hash is not recorded",
+  "old": "digest(open(oracle_file, \"rb\").read())",
+  "new": "\"-\"",
+  "fails": "FAIL GR-111"
+ },
+ {
+  "id": "GRM-222",
+  "what": "L2 missing no longer prevents an overall PASS",
+  "old": "    if \"NOT RUN\" in verdicts or L2_STATUS != \"PRESENT\":",
+  "new": "    if \"NOT RUN\" in verdicts:",
+  "fails": "FAIL GR-112"
+ },
+ {
+  "id": "GRM-223",
+  "what": "G12 PASS does not say L1 only",
+  "old": "    return \"PASS\", L1_ONLY + \"shipped install.sh bound",
+  "new": "    return \"PASS\", \"shipped install.sh bound",
+  "fails": "FAIL GR-112"
+ },
+ {
+  "id": "GRM-224",
+  "what": "the table does not say L2 is missing",
+  "old": "        lines.append(\"G12 layer L2 (the run-time matrix) is %s: this table can never be an overall PASS until it exists\" % L2_STATUS)",
+  "new": "        pass",
+  "fails": "FAIL GR-112"
+ },
+ {
+  "id": "GRM-225",
+  "what": "the matrix receipt does not state L2",
+  "old": "identity, L2_STATUS, len(gm.generate_cells",
+  "new": "identity, \"PRESENT\", len(gm.generate_cells",
+  "fails": "FAIL GR-112"
+ },
+ {
+  "id": "GRM-226",
+  "what": "the matrix runs only the second include",
+  "old": "        for name in sorted(files):\n            outcome, detail",
+  "new": "        for name in sorted(files)[1:]:\n            outcome, detail",
+  "fails": "FAIL GR-87",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-227",
+  "what": "the quarantine note drops a receipt name",
+  "old": "\"\".join(\"%s %s:%d\\n\" % (cls, f, n) for f, cls, n in rec.leaks)",
+  "new": "\"\".join(\"%s %s:%d\\n\" % (cls, f, n) for f, cls, n in rec.leaks[:-1])",
+  "fails": "FAIL GR-51"
+ },
+ {
+  "id": "GRM-228",
+  "what": "podman absent (rc 127) on the clean machine is read as an unreadable state",
+  "old": "\"podman_ps\": (\"0\", \"127\")",
+  "new": "\"podman_ps\": (\"0\",)",
+  "fails": "FAIL GR-109"
+ },
+ {
+  "id": "GRM-229",
+  "what": "a same-group descendant survives when the leader has already exited",
+  "old": "        if getattr(proc, \"gate_group\", False) or not leader_exited(proc.pid):",
+  "new": "        if not leader_exited(proc.pid):",
+  "fails": "FAIL GR-113"
+ },
+ {
+  "id": "GRM-230",
+  "what": "the post-exit drain is unbounded",
+  "old": "                if exited_at is not None and tick - exited_at > self.GRACE:",
+  "new": "                if False:",
+  "fails": "FAIL GR-114"
+ },
+ {
+  "id": "GRM-231",
+  "what": "the drain stop leaves no marker in the transcript",
+  "old": "transcript += b\"\\r\\ngate_runner: output still arriving after the command ended; the drain was stopped\\r\\n\"",
+  "new": "transcript += b\"\"",
+  "fails": "FAIL GR-114"
+ },
+ {
+  "id": "GRM-232",
+  "what": "G1 reads an unreadable container directory as absence",
+  "old": "            if l.startswith(\"unreadable\"):",
+  "new": "            if False:",
+  "fails": "FAIL GR-115"
+ },
+ {
+  "id": "GRM-233",
+  "what": "G1 does not check the shape of the directory answer",
+  "old": "    if len(dir_lines) != 2 or not all(re.fullmatch(r\"(present|absent|unreadable) /\\S+\", l) for l in dir_lines):",
+  "new": "    if False:",
+  "fails": "FAIL GR-115"
+ },
+ {
+  "id": "GRM-234",
+  "what": "G1 accepts an unreadable user-units directory",
+  "old": "unit_state[0] not in (\"0\", \"absent\")",
+  "new": "unit_state[0] not in (\"0\", \"absent\", \"unreadable\", \"notdir\", \"2\")",
+  "fails": "FAIL GR-115"
+ },
+ {
+  "id": "GRM-235",
+  "what": "G7 and G10 accept an unreadable trial home",
+  "old": "\"trial_home\": (\"0\", \"absent\")",
+  "new": "\"trial_home\": (\"0\", \"absent\", \"unreadable\", \"notdir\", \"2\")",
+  "fails": "FAIL GR-115"
+ },
+ {
+  "id": "GRM-236",
+  "what": "the directory probe does not search the parent before it says absent",
+  "old": "elif [ -d \"$cur\" ] && [ -x \"$cur\" ]; then st=absent; break;",
+  "new": "elif [ -d \"$cur\" ]; then st=absent; break;",
+  "fails": "FAIL GR-116"
+ },
+ {
+  "id": "GRM-237",
+  "what": "the walk does not count a dangling symlink as an existing entry",
+  "old": "if [ -e \"$nxt\" ] || [ -L \"$nxt\" ]; then cur=\"$nxt\";",
+  "new": "if [ -e \"$nxt\" ]; then cur=\"$nxt\";",
+  "fails": "FAIL GR-116"
+ },
+ {
+  "id": "GRM-238",
+  "what": "the directory probe lists a file as if it were a directory",
+  "old": "if [ -d \"$d\" ]; then ls -A \"$d\"; echo \"@@%s $?\"",
+  "new": "if [ -e \"$d\" ]; then ls -A \"$d\"; echo \"@@%s $?\"",
+  "fails": "FAIL GR-116"
+ },
+ {
+  "id": "GRM-239",
+  "what": "the directory probe reports a failed listing as exit 0",
+  "old": "ls -A \"$d\"; echo \"@@%s $?\"; else",
+  "new": "ls -A \"$d\"; echo \"@@%s 0\"; else",
+  "fails": "FAIL GR-116"
+ },
+ {
+  "id": "GRM-240",
+  "what": "the matrix drops the PATH-empty cell from every include",
+  "old": "        add(\"empty\", {name: \"\"}, [], [], \"%s empty\" % name)",
+  "new": "        if name != \"PATH\":\n            add(\"empty\", {name: \"\"}, [], [], \"%s empty\" % name)",
+  "fails": "FAIL GR-86",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-241",
+  "what": "the walk never says unreadable (an unsearchable directory is absent)",
+  "old": "else st=unreadable; break; fi; done; }",
+  "new": "else st=absent; break; fi; done; }",
+  "fails": "FAIL GR-117"
+ },
+ {
+  "id": "GRM-242",
+  "what": "the fingerprint drops each directory's answer token",
+  "old": "        lines.append(\"%s:@@%s\" % (name, rc))",
+  "new": "        pass",
+  "fails": "FAIL GR-118"
+ },
+ {
+  "id": "GRM-243",
+  "what": "the home filter hides every gate- name again",
+  "old": "RUNNER_HOME_NAMES = re.compile(r\"gate-(artefacts|",
+  "new": "RUNNER_HOME_NAMES = re.compile(r\"gate-(.*|artefacts|",
+  "fails": "FAIL GR-118"
+ },
+ {
+  "id": "GRM-244",
+  "what": "G1 reports an existing container directory as absent",
+  "old": "exists) echo \"present $HOME/$r\";;",
+  "new": "exists) echo \"absent $HOME/$r\";;",
+  "fails": "FAIL GR-116"
+ },
+ {
+  "id": "GRM-245",
+  "what": "the directory probe reports an unsearchable ancestor chain as a verified listing",
+  "old": "unreadable) echo \"@@%s unreadable\";;",
+  "new": "unreadable) echo \"@@%s absent\";;",
+  "fails": "FAIL GR-117"
+ },
+ {
+  "id": "GRM-246",
+  "what": "the outer state probe's own exit status is not read",
+  "old": "    if st.rc != 0:   # vera VR15-01",
+  "new": "    if False:   # vera VR15-01",
+  "fails": "FAIL GR-123"
+ },
+ {
+  "id": "GRM-247",
+  "what": "a duplicate JSON key is accepted",
+  "old": "        if key in out:",
+  "new": "        if False:",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-248",
+  "what": "a missing key is not rejected",
+  "old": "    if missing:\n        fails.append(\"missing key(s): %s\" % \", \".join(missing))",
+  "new": "    if False:\n        fails.append(\"missing key(s): %s\" % \", \".join(missing))",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-249",
+  "what": "an unknown key is not rejected",
+  "old": "    if unknown:",
+  "new": "    if False:",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-250",
+  "what": "a boolean schema is accepted",
+  "old": "type(schema) is not int or schema not in (1, 2):",
+  "new": "schema not in (1, 2):",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-251",
+  "what": "object_format is not checked",
+  "old": "    if width is None:",
+  "new": "    if False:",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-252",
+  "what": "upper-case ids are accepted",
+  "old": "re.fullmatch(\"[0-9a-f]{%d}\" % width, value)",
+  "new": "re.fullmatch(\"[0-9a-fA-F]{%d}\" % width, value)",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-253",
+  "what": "an includes element may carry other keys",
+  "old": "sorted(element) == [\"name\", \"sha256\"]",
+  "new": "\"name\" in element",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-254",
+  "what": "an include name the builder does not know is accepted",
+  "old": "if not isinstance(name, str) or name not in KNOWN_INCLUDES:",
+  "new": "if not isinstance(name, str):",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-255",
+  "what": "a repeated include name is accepted",
+  "old": "            elif name in seen:",
+  "new": "            elif False:",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-256",
+  "what": "the digest shape allows upper case",
+  "old": "HEX64 = re.compile(r\"[0-9a-f]{64}\")",
+  "new": "HEX64 = re.compile(r\"[0-9a-fA-F]{64}\")",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-257",
+  "what": "the splice sentence is not compared",
+  "old": "if rec[\"splice\"] != (SPLICE_SENTENCE_2 if schema == 2 else SPLICE_SENTENCE):",
+  "new": "if False:",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-258",
+  "what": "joined_sha256 is not shape-checked",
+  "old": "    if not (isinstance(rec[\"joined_sha256\"], str) and HEX64.fullmatch(rec[\"joined_sha256\"])):",
+  "new": "    if False:",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-259",
+  "what": "a record that is not UTF-8 is decoded leniently",
+  "old": "text = raw.decode(\"utf-8\")",
+  "new": "text = raw.decode(\"utf-8\", \"replace\")",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-260",
+  "what": "a top level that is not an object is not refused",
+  "old": "    if not isinstance(rec, dict):",
+  "new": "    if False:",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-261",
+  "what": "the known include names include another one",
+  "old": "KNOWN_INCLUDES = (\"install-prereq.sh\", \"install-fetch.sh\")",
+  "new": "KNOWN_INCLUDES = (\"install-prereq.sh\", \"install-fetch.sh\", \"install-evil.sh\")",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-262",
+  "what": "the sha256 object format has the sha1 width",
+  "old": "\"sha256\": 64}",
+  "new": "\"sha256\": 40}",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-263",
+  "what": "G12 does not stop on an invalid record",
+  "old": "    if record is None:",
+  "new": "    if False:",
+  "fails": "FAIL GR-121"
+ },
+ {
+  "id": "GRM-264",
+  "what": "a symlink development installer is accepted (the type is not checked before the read)",
+  "old": "(\"development install.sh\", dev_install)):",
+  "new": "(\"development install.sh\", shipped_path)):",
+  "fails": "FAIL GR-124"
+ },
+ {
+  "id": "GRM-265",
+  "what": "an include's type is not checked before it is read",
+  "old": "        problem = input_kind_problem(\"include \" + n, ipath)",
+  "new": "        problem = None",
+  "fails": "FAIL GR-124"
+ },
+ {
+  "id": "GRM-266",
+  "what": "a leftover marker in the rebuilt text is not seen",
+  "old": "        elif b\"# @include\" in rebuilt:",
+  "new": "        elif False:",
+  "fails": "FAIL GR-122"
+ },
+ {
+  "id": "GRM-267",
+  "what": "an include with a carriage return is accepted",
+  "old": "        if b\"\\r\" in data:",
+  "new": "        if False:",
+  "fails": "FAIL GR-122"
+ },
+ {
+  "id": "GRM-268",
+  "what": "an include with a shebang is accepted",
+  "old": "        if data.startswith(b\"#!\"):",
+  "new": "        if False:",
+  "fails": "FAIL GR-122"
+ },
+ {
+  "id": "GRM-269",
+  "what": "an include holding the marker text is accepted",
+  "old": "        if b\"# @include\" in data:",
+  "new": "        if False:",
+  "fails": "FAIL GR-122"
+ },
+ {
+  "id": "GRM-270",
+  "what": "an include with no function is accepted",
+  "old": "        if not FUNCTION_PATTERN.search(data):",
+  "new": "        if False:",
+  "fails": "FAIL GR-122"
+ },
+ {
+  "id": "GRM-271",
+  "what": "the record's object format is not compared with the tree's",
+  "old": "if fmt.rc != 0 or fmt.out.decode(\"utf-8\", \"replace\").strip() != record[\"object_format\"]:",
+  "new": "if fmt.rc != 0:",
+  "fails": "FAIL GR-122"
+ },
+ {
+  "id": "GRM-272",
+  "what": "a record that changes during the run is not noticed",
+  "old": "\"record\": digest(open(a.binding_record, \"rb\").read()),",
+  "new": "\"record\": before[\"record\"],",
+  "fails": "FAIL GR-122"
+ },
+ {
+  "id": "GRM-273",
+  "what": "the binding schema is declared frozen without a real record",
+  "old": "BINDING_SCHEMA_STATUS = \"UNFROZEN\"",
+  "new": "BINDING_SCHEMA_STATUS = \"FROZEN\"",
+  "fails": "FAIL GR-122"
+ },
+ {
+  "id": "GRM-274",
+  "what": "the binding record's type is not checked before it is read",
+  "old": "(\"binding record\", a.binding_record),",
+  "new": "(\"binding record\", shipped_path),",
+  "fails": "FAIL GR-124"
+ },
+ {
+  "id": "GRM-275",
+  "what": "the shipped installer's type is not checked before it is read",
+  "old": "(\"shipped install.sh\", shipped_path),",
+  "new": "(\"shipped install.sh\", dev_install),",
+  "fails": "FAIL GR-124"
+ },
+ {
+  "id": "GRM-276",
+  "what": "the input kind follows symlinks",
+  "old": "mode = os.lstat(path).st_mode",
+  "new": "mode = os.stat(path).st_mode",
+  "fails": "FAIL GR-122"
+ },
+ {
+  "id": "GRM-277",
+  "what": "the input kind never refuses",
+  "old": "    if stat.S_ISREG(mode):\n        return None\n    return \"the %s is not a regular file",
+  "new": "    if True:\n        return None\n    return \"the %s is not a regular file",
+  "fails": "FAIL GR-124"
+ },
+ {
+  "id": "GRM-278",
+  "what": "a missing known marker is not an error",
+  "old": "        if markers.count(known) == 0:",
+  "new": "        if False:",
+  "fails": "FAIL GR-125"
+ },
+ {
+  "id": "GRM-279",
+  "what": "an include marker the builder does not know is accepted",
+  "old": "    for unknown in sorted({n for n in markers if n not in KNOWN_INCLUDES}):",
+  "new": "    for unknown in []:",
+  "fails": "FAIL GR-125"
+ },
+ {
+  "id": "GRM-280",
+  "what": "the approved key file's kind is not checked before it is opened",
+  "old": "    problem = input_kind_problem(\"approved key file\", path)",
+  "new": "    problem = None",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-281",
+  "what": "an over-long approved key file is accepted",
+  "old": "    if len(buf) > KEY_FILE_MAX:",
+  "new": "    if False:",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-282",
+  "what": "an empty approved key file is not refused as empty",
+  "old": "    if not buf:",
+  "new": "    if False:",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-283",
+  "what": "a NUL in the approved key file is not seen",
+  "old": "    if b\"\\x00\" in buf:",
+  "new": "    if False:",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-284",
+  "what": "a CR in the approved key file is not seen",
+  "old": "    if b\"\\r\" in buf:",
+  "new": "    if False:",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-285",
+  "what": "a private-key header in the approved key file is not seen",
+  "old": "    if b\"PRIVATE KEY\" in buf:",
+  "new": "    if False:",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-286",
+  "what": "the approved key file is decoded leniently",
+  "old": "text = buf.decode(\"ascii\")",
+  "new": "text = buf.decode(\"utf-8\", \"replace\")",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-287",
+  "what": "a second line in the approved key file is not seen",
+  "old": "    if \"\\n\" in body:",
+  "new": "    if False:",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-288",
+  "what": "the field count of the approved key file is not checked",
+  "old": "    if len(fields) != 3:",
+  "new": "    if False:",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-289",
+  "what": "another key type is accepted in the approved key file",
+  "old": "        if kind != \"ssh-ed25519\":",
+  "new": "        if False:",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-290",
+  "what": "the principal grammar is not checked",
+  "old": "        if not PRINCIPAL_RX.fullmatch(principal):",
+  "new": "        if False:",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-291",
+  "what": "the key grammar is not checked",
+  "old": "        if not KEY_RX.fullmatch(key):",
+  "new": "        if False:",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-292",
+  "what": "one trailing LF is not tolerated",
+  "old": "    body = text[:-1] if text.endswith(\"\\n\") else text",
+  "new": "    body = text",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-293",
+  "what": "the approved key input hash is taken from the body, not from the buffer",
+  "old": "return {\"principal\": principal, \"key\": key, \"sha256\": hashlib.sha256(buf).hexdigest()}, []",
+  "new": "return {\"principal\": principal, \"key\": key, \"sha256\": hashlib.sha256(body.encode()).hexdigest()}, []",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-294",
+  "what": "the scratch directory is not private",
+  "old": "os.chmod(scratch, 0o700)",
+  "new": "os.chmod(scratch, 0o755)",
+  "fails": "FAIL GR-127"
+ },
+ {
+  "id": "GRM-295",
+  "what": "the scratch key file is not private",
+  "old": "os.chmod(keyfile, 0o600)",
+  "new": "os.chmod(keyfile, 0o644)",
+  "fails": "FAIL GR-127"
+ },
+ {
+  "id": "GRM-296",
+  "what": "a timeout of the fingerprint tool is not named",
+  "old": "        if step.rc == 124:",
+  "new": "        if False:",
+  "fails": "FAIL GR-127"
+ },
+ {
+  "id": "GRM-297",
+  "what": "a non-zero status of the fingerprint tool is accepted",
+  "old": "        if step.rc != 0:",
+  "new": "        if False:",
+  "fails": "FAIL GR-127"
+ },
+ {
+  "id": "GRM-298",
+  "what": "multiline or empty tool output is accepted",
+  "old": "        if len(lines) != 2 or lines[1] != \"\":",
+  "new": "        if False:",
+  "fails": "FAIL GR-127"
+ },
+ {
+  "id": "GRM-299",
+  "what": "malformed tool output is not refused",
+  "old": "        if not m:",
+  "new": "        if False:",
+  "fails": "FAIL GR-127"
+ },
+ {
+  "id": "GRM-300",
+  "what": "another key kind is accepted from the tool",
+  "old": "        if m.group(2) != \"ED25519\":",
+  "new": "        if False:",
+  "fails": "FAIL GR-127"
+ },
+ {
+  "id": "GRM-301",
+  "what": "the scratch directory is not removed",
+  "old": "        shutil.rmtree(scratch, ignore_errors=True)",
+  "new": "        pass",
+  "fails": "FAIL GR-127"
+ },
+ {
+  "id": "GRM-302",
+  "what": "the fingerprint tool has no timeout bound",
+  "old": "timeout=ctx.args.keygen_timeout)",
+  "new": "timeout=900)",
+  "fails": "FAIL GR-127"
+ },
+ {
+  "id": "GRM-303",
+  "what": "the fingerprint tool is always /usr/bin/ssh-keygen",
+  "old": "[ctx.args.ssh_keygen, \"-l\", \"-f\", keyfile]",
+  "new": "[DEFAULT_SSH_KEYGEN, \"-l\", \"-f\", keyfile]",
+  "fails": "FAIL GR-127"
+ },
+ {
+  "id": "GRM-304",
+  "what": "a failed fingerprint derivation does not stop the run",
+  "old": "        if fpr is None:",
+  "new": "        if False:",
+  "fails": "FAIL GR-127"
+ },
+ {
+  "id": "GRM-305",
+  "what": "a missing anchor statement is not named",
+  "old": "        elif count == 0:",
+  "new": "        elif False:",
+  "fails": "FAIL GR-128"
+ },
+ {
+  "id": "GRM-306",
+  "what": "an already-filled anchor statement is not named",
+  "old": "        if count == 0 and filled:",
+  "new": "        if False:",
+  "fails": "FAIL GR-128"
+ },
+ {
+  "id": "GRM-307",
+  "what": "a duplicated anchor statement is not refused",
+  "old": "        elif count > 1:",
+  "new": "        elif False:",
+  "fails": "FAIL GR-128"
+ },
+ {
+  "id": "GRM-308",
+  "what": "the position and order of the anchor statements are not checked",
+  "old": "    if not fails and lines[top:top + 3] != empties:",
+  "new": "    if False:",
+  "fails": "FAIL GR-128"
+ },
+ {
+  "id": "GRM-309",
+  "what": "the header is not skipped before the anchor statements",
+  "old": "    while top < len(lines) and (not lines[top].strip() or lines[top].startswith(b\"#\")):",
+  "new": "    while False:",
+  "fails": "FAIL GR-128"
+ },
+ {
+  "id": "GRM-310",
+  "what": "T2 fills a wrong value",
+  "old": "l = (\"%s='%s'\\n\" % (n, values[n])).encode()",
+  "new": "l = (\"%s='%s'\\n\" % (n, values[n][:-1])).encode()",
+  "fails": "FAIL GR-128"
+ },
+ {
+  "id": "GRM-311",
+  "what": "T2 is not applied to the rebuilt bytes",
+  "old": "        if rebuilt is not None and expected and not anchor_raw_failed:",
+  "new": "        if False:",
+  "fails": "FAIL GR-128"
+ },
+ {
+  "id": "GRM-312",
+  "what": "the T2 failures are not reported",
+  "old": "                fails.extend(t2_fails)",
+  "new": "                pass",
+  "fails": "FAIL GR-128"
+ },
+ {
+  "id": "GRM-313",
+  "what": "schema 2 has the key set of schema 1",
+  "old": "    keys = RECORD_KEYS_2 if schema == 2 else RECORD_KEYS",
+  "new": "    keys = RECORD_KEYS",
+  "fails": "FAIL GR-129"
+ },
+ {
+  "id": "GRM-314",
+  "what": "a schema 3 record is accepted",
+  "old": "type(schema) is not int or schema not in (1, 2):",
+  "new": "type(schema) is not int or schema not in (1, 2, 3):",
+  "fails": "FAIL GR-119"
+ },
+ {
+  "id": "GRM-315",
+  "what": "the anchor object may carry other keys",
+  "old": "        if not (isinstance(anchor, dict) and sorted(anchor) == sorted(ANCHOR_KEYS)):",
+  "new": "        if not isinstance(anchor, dict):",
+  "fails": "FAIL GR-129"
+ },
+ {
+  "id": "GRM-316",
+  "what": "the anchor principal grammar is not checked",
+  "old": "(\"principal\", PRINCIPAL_RX), (\"key\", KEY_RX), (\"fpr\", FPR_RX), (\"key_input_sha256\", HEX64)",
+  "new": "(\"principal\", re.compile(\".*\")), (\"key\", KEY_RX), (\"fpr\", FPR_RX), (\"key_input_sha256\", HEX64)",
+  "fails": "FAIL GR-129"
+ },
+ {
+  "id": "GRM-317",
+  "what": "the anchor key grammar is not checked",
+  "old": "(\"principal\", PRINCIPAL_RX), (\"key\", KEY_RX), (\"fpr\", FPR_RX), (\"key_input_sha256\", HEX64)",
+  "new": "(\"principal\", PRINCIPAL_RX), (\"key\", re.compile(\".*\")), (\"fpr\", FPR_RX), (\"key_input_sha256\", HEX64)",
+  "fails": "FAIL GR-129"
+ },
+ {
+  "id": "GRM-318",
+  "what": "the anchor fingerprint grammar is not checked",
+  "old": "(\"principal\", PRINCIPAL_RX), (\"key\", KEY_RX), (\"fpr\", FPR_RX), (\"key_input_sha256\", HEX64)",
+  "new": "(\"principal\", PRINCIPAL_RX), (\"key\", KEY_RX), (\"fpr\", re.compile(\".*\")), (\"key_input_sha256\", HEX64)",
+  "fails": "FAIL GR-129"
+ },
+ {
+  "id": "GRM-319",
+  "what": "the anchor input hash grammar is not checked",
+  "old": "(\"principal\", PRINCIPAL_RX), (\"key\", KEY_RX), (\"fpr\", FPR_RX), (\"key_input_sha256\", HEX64)",
+  "new": "(\"principal\", PRINCIPAL_RX), (\"key\", KEY_RX), (\"fpr\", FPR_RX), (\"key_input_sha256\", re.compile(\".*\"))",
+  "fails": "FAIL GR-129"
+ },
+ {
+  "id": "GRM-320",
+  "what": "a schema 2 record may carry the schema 1 sentence",
+  "old": "if rec[\"splice\"] != (SPLICE_SENTENCE_2 if schema == 2 else SPLICE_SENTENCE):",
+  "new": "if rec[\"splice\"] not in (SPLICE_SENTENCE_2, SPLICE_SENTENCE):",
+  "fails": "FAIL GR-129"
+ },
+ {
+  "id": "GRM-321",
+  "what": "a schema-1 record with a key supplied is accepted",
+  "old": "    if a.approved_key_file and record[\"schema\"] != 2:",
+  "new": "    if False:",
+  "fails": "FAIL GR-129"
+ },
+ {
+  "id": "GRM-322",
+  "what": "a schema-2 record without a key is accepted",
+  "old": "    if not a.approved_key_file and record[\"schema\"] == 2:",
+  "new": "    if False:",
+  "fails": "FAIL GR-129"
+ },
+ {
+  "id": "GRM-323",
+  "what": "an invalid approved key file does not stop the run",
+  "old": "        if approved is None:",
+  "new": "        if False:",
+  "fails": "FAIL GR-126"
+ },
+ {
+  "id": "GRM-324",
+  "what": "filled anchor statements are accepted when no key was supplied, whatever their origin",
+  "old": "                if any(l.startswith(n.encode() + b\"=\") and l != empty for l in data.splitlines(keepends=True)):",
+  "new": "            if False:",
+  "fails": "FAIL GR-129"
+ },
+ {
+  "id": "GRM-325",
+  "what": "a recorded anchor field is not compared with the expectation from the file",
+  "old": "            if record[\"anchor\"][k] != expected[k]:",
+  "new": "            if False:",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-326",
+  "what": "the installer's literals are not counted",
+  "old": "            if len(found) != 1:",
+  "new": "            if False:",
+  "fails": "FAIL GR-128"
+ },
+ {
+  "id": "GRM-327",
+  "what": "the installer's literals are not compared with the expectation from the file",
+  "old": "            elif found[0] != (\"%s='%s'\\n\" % (n, expected[field])).encode():",
+  "new": "            elif False:",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-328",
+  "what": "the approved key file is not read again at the end",
+  "old": "                after[\"approved\"] = digest(open(a.approved_key_file, \"rb\").read(KEY_FILE_MAX + 1))",
+  "new": "                after[\"approved\"] = before[\"approved\"]",
+  "fails": "FAIL GR-131"
+ },
+ {
+  "id": "GRM-329",
+  "what": "the receipt drops the fingerprint",
+  "old": "anchor_fpr=%s",
+  "new": "anchor_fpr=x%s",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-330",
+  "what": "the receipt drops the tool's hash",
+  "old": "ssh_keygen_sha256=%s",
+  "new": "ssh_keygen_sha256=0%s",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-331",
+  "what": "the custody sentence is dropped",
+  "old": "the approval is the CTO's, C-57",
+  "new": "the approval is the runner's",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-332",
+  "what": "the no-anchor note is dropped",
+  "old": "NO ANCHOR (schema 1, no approved key file",
+  "new": "ANCHOR OK (schema 1, no approved key file",
+  "fails": "FAIL GR-129"
+ },
+ {
+  "id": "GRM-333",
+  "what": "the recorded anchor principal is not compared with the expectation from the file",
+  "old": "        for k in ANCHOR_KEYS:   # vera VA-J3",
+  "new": "        for k in tuple(x for x in ANCHOR_KEYS if x != \"principal\"):   # vera VA-J3",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-334",
+  "what": "the recorded anchor key is not compared with the expectation from the file",
+  "old": "        for k in ANCHOR_KEYS:   # vera VA-J3",
+  "new": "        for k in tuple(x for x in ANCHOR_KEYS if x != \"key\"):   # vera VA-J3",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-335",
+  "what": "the recorded anchor fpr is not compared with the expectation from the file",
+  "old": "        for k in ANCHOR_KEYS:   # vera VA-J3",
+  "new": "        for k in tuple(x for x in ANCHOR_KEYS if x != \"fpr\"):   # vera VA-J3",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-336",
+  "what": "the recorded anchor key_input_sha256 is not compared with the expectation from the file",
+  "old": "        for k in ANCHOR_KEYS:   # vera VA-J3",
+  "new": "        for k in tuple(x for x in ANCHOR_KEYS if x != \"key_input_sha256\"):   # vera VA-J3",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-337",
+  "what": "the installer's principal literal is not compared with the expectation from the file",
+  "old": "zip(ANCHOR_STATEMENTS, (\"principal\", \"key\", \"fpr\"))",
+  "new": "zip(ANCHOR_STATEMENTS[1:], (\"key\", \"fpr\"))",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-338",
+  "what": "the installer's key literal is not compared with the expectation from the file",
+  "old": "zip(ANCHOR_STATEMENTS, (\"principal\", \"key\", \"fpr\"))",
+  "new": "zip((ANCHOR_STATEMENTS[0], ANCHOR_STATEMENTS[2]), (\"principal\", \"fpr\"))",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-339",
+  "what": "the installer's fpr literal is not compared with the expectation from the file",
+  "old": "zip(ANCHOR_STATEMENTS, (\"principal\", \"key\", \"fpr\"))",
+  "new": "zip(ANCHOR_STATEMENTS[:2], (\"principal\", \"key\"))",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-340",
+  "what": "the expected anchor principal is taken from the record, not from the approved file",
+  "old": "expected = {\"principal\": approved[\"principal\"], \"key\": approved[\"key\"], \"fpr\": fpr, \"key_input_sha256\": approved[\"sha256\"]}",
+  "new": "expected = {\"principal\": record[\"anchor\"][\"principal\"], \"key\": approved[\"key\"], \"fpr\": fpr, \"key_input_sha256\": approved[\"sha256\"]}",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-341",
+  "what": "the expected anchor key is taken from the record, not from the approved file",
+  "old": "expected = {\"principal\": approved[\"principal\"], \"key\": approved[\"key\"], \"fpr\": fpr, \"key_input_sha256\": approved[\"sha256\"]}",
+  "new": "expected = {\"principal\": approved[\"principal\"], \"key\": record[\"anchor\"][\"key\"], \"fpr\": fpr, \"key_input_sha256\": approved[\"sha256\"]}",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-342",
+  "what": "the expected anchor fpr is taken from the record, not from the approved file",
+  "old": "expected = {\"principal\": approved[\"principal\"], \"key\": approved[\"key\"], \"fpr\": fpr, \"key_input_sha256\": approved[\"sha256\"]}",
+  "new": "expected = {\"principal\": approved[\"principal\"], \"key\": approved[\"key\"], \"fpr\": record[\"anchor\"][\"fpr\"], \"key_input_sha256\": approved[\"sha256\"]}",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-343",
+  "what": "the expected anchor key_input_sha256 is taken from the record, not from the approved file",
+  "old": "expected = {\"principal\": approved[\"principal\"], \"key\": approved[\"key\"], \"fpr\": fpr, \"key_input_sha256\": approved[\"sha256\"]}",
+  "new": "expected = {\"principal\": approved[\"principal\"], \"key\": approved[\"key\"], \"fpr\": fpr, \"key_input_sha256\": record[\"anchor\"][\"key_input_sha256\"]}",
+  "fails": "FAIL GR-130"
+ },
+ {
+  "id": "GRM-344",
+  "what": "the raw development installer's anchor statements are not checked before T1",
+  "old": "        raw_problems = anchor_problems(dev_text)",
+  "new": "        raw_problems = []",
+  "fails": "FAIL GR-132"
+ },
+ {
+  "id": "GRM-345",
+  "what": "a failure of the raw development installer's anchor statements does not name its origin",
+  "old": "fails.append(\"development installer: \" + problem)",
+  "new": "fails.append(problem)",
+  "fails": "FAIL GR-132"
+ },
+ {
+  "id": "GRM-346",
+  "what": "without a key an include's filled anchor statement is not seen",
+  "old": "[(\"include \" + n, d) for n, d in includes.items()]",
+  "new": "[]",
+  "fails": "FAIL GR-133"
+ },
+ {
+  "id": "GRM-347",
+  "what": "without a key the shipped installer's filled anchor statement is not seen",
+  "old": " + [(\"shipped installer\", shipped)]:",
+  "new": ":",
+  "fails": "FAIL GR-133"
+ },
+ {
+  "id": "GRM-348",
+  "what": "without a key the development installer's filled anchor statement is not seen",
+  "old": "for origin, data in [(\"development installer\", dev_text)] + [(\"include \"",
+  "new": "for origin, data in [] + [(\"include \"",
+  "fails": "FAIL GR-129"
+ },
+ {
+  "id": "GRM-349",
+  "what": "T2 runs after the raw check failed (the same failure is reported twice)",
+  "old": "        if rebuilt is not None and expected and not anchor_raw_failed:",
+  "new": "        if rebuilt is not None and expected:",
+  "fails": "FAIL GR-132"
+ },
+ {
+  "id": "GRM-350",
+  "what": "a refused include does not stop the run before the delegated checker",
+  "old": "    if kind_failed:   # vera VR18-01",
+  "new": "    if False:   # vera VR18-01",
+  "fails": "FAIL GR-135"
+ },
+ {
+  "id": "GRM-351",
+  "what": "the final reread has no input-kind guard",
+  "old": "        if any(input_kind_problem(\"input\", path) for path in reread):",
+  "new": "        if False:",
+  "fails": "FAIL GR-136"
+ },
+ {
+  "id": "GRM-352",
+  "what": "the final reread guard skips the shipped installer",
+  "old": "reread = [shipped_path, dev_install, a.binding_record] + [os.path.join(a.dev_tree, \"deploy\", n) for n in includes] + ([a.approved_key_file] if approved else [])",
+  "new": "reread = [dev_install, a.binding_record] + [os.path.join(a.dev_tree, \"deploy\", n) for n in includes] + ([a.approved_key_file] if approved else [])",
+  "fails": "FAIL GR-136"
+ },
+ {
+  "id": "GRM-353",
+  "what": "the final reread guard skips the development installer",
+  "old": "reread = [shipped_path, dev_install, a.binding_record] + [os.path.join(a.dev_tree, \"deploy\", n) for n in includes] + ([a.approved_key_file] if approved else [])",
+  "new": "reread = [shipped_path, a.binding_record] + [os.path.join(a.dev_tree, \"deploy\", n) for n in includes] + ([a.approved_key_file] if approved else [])",
+  "fails": "FAIL GR-136"
+ },
+ {
+  "id": "GRM-354",
+  "what": "the final reread guard skips the binding record",
+  "old": "reread = [shipped_path, dev_install, a.binding_record] + [os.path.join(a.dev_tree, \"deploy\", n) for n in includes] + ([a.approved_key_file] if approved else [])",
+  "new": "reread = [shipped_path, dev_install] + [os.path.join(a.dev_tree, \"deploy\", n) for n in includes] + ([a.approved_key_file] if approved else [])",
+  "fails": "FAIL GR-136"
+ },
+ {
+  "id": "GRM-355",
+  "what": "the final reread guard skips the includes",
+  "old": "reread = [shipped_path, dev_install, a.binding_record] + [os.path.join(a.dev_tree, \"deploy\", n) for n in includes] + ([a.approved_key_file] if approved else [])",
+  "new": "reread = [shipped_path, dev_install, a.binding_record] + [] + ([a.approved_key_file] if approved else [])",
+  "fails": "FAIL GR-136"
+ },
+ {
+  "id": "GRM-356",
+  "what": "the final reread guard skips the approved key file",
+  "old": "reread = [shipped_path, dev_install, a.binding_record] + [os.path.join(a.dev_tree, \"deploy\", n) for n in includes] + ([a.approved_key_file] if approved else [])",
+  "new": "reread = [shipped_path, dev_install, a.binding_record] + [os.path.join(a.dev_tree, \"deploy\", n) for n in includes] + []",
+  "fails": "FAIL GR-136"
+ },
+ {
+  "id": "GRM-357",
+  "what": "way C: the oracle tree's checker is never used (the candidate's own checker always runs)",
+  "old": "    if a.oracle_tree:\n        # way C: the checker",
+  "new": "    if False:\n        # way C: the checker",
+  "fails": "FAIL GR-139"
+ },
+ {
+  "id": "GRM-358",
+  "what": "way C: the oracle's checker is given the TOOL tree's deploy directory, not the development tree's",
+  "old": "    return [\"sh\", os.path.join(a.oracle_tree, \"scripts\", \"s5-check.sh\"), os.path.join(a.dev_tree, \"deploy\")]",
+  "new": "    return [\"sh\", os.path.join(a.oracle_tree, \"scripts\", \"s5-check.sh\"), os.path.join(a.oracle_tree, \"deploy\")]",
+  "fails": "FAIL GR-141"
+ },
+ {
+  "id": "GRM-359",
+  "what": "way C: the oracle's identity is not receipted",
+  "old": "        receipts += way_c_receipts\n",
+  "new": "        pass\n",
+  "fails": "FAIL GR-139"
+ },
+ {
+  "id": "GRM-360",
+  "what": "way C: the oracle is always said to be the development tree",
+  "old": "\"yes\" if same else \"NO\"",
+  "new": "\"yes\"",
+  "fails": "FAIL GR-142"
+ },
+ {
+  "id": "GRM-361",
+  "what": "way C: the oracle is never said to be the development tree",
+  "old": "\"yes\" if same else \"NO\"",
+  "new": "\"NO\"",
+  "fails": "FAIL GR-142"
+ },
+ {
+  "id": "GRM-362",
+  "what": "way C: an unreadable oracle commit is not recorded as 'none (git rc N)'",
+  "old": "commit_id or \"none (git rc %d)\" % gc.rc",
+  "new": "commit_id or \"unknown\"",
+  "fails": "FAIL GR-142"
+ },
+ {
+  "id": "GRM-363",
+  "what": "way C: an unreadable oracle tree id is not recorded as 'none (git rc N)'",
+  "old": "tree_id or \"none (git rc %d)\" % gt.rc",
+  "new": "tree_id or \"unknown\"",
+  "fails": "FAIL GR-142"
+ },
+ {
+  "id": "GRM-364",
+  "what": "way C: the receipt names a command that was not run",
+  "old": "candidate_tree, shlex.join(argv),",
+  "new": "candidate_tree, shlex.join(argv[:2]),",
+  "fails": "FAIL GR-139"
+ },
+ {
+  "id": "GRM-365",
+  "what": "way C: the oracle's checker runs in the oracle tree's directory, not the development tree's (the way-C step refuses it)",
+  "old": "            orc = ctx.way_c_step(way_c_argv, a.dev_tree)",
+  "new": "            orc = ctx.way_c_step(way_c_argv, a.oracle_tree)",
+  "fails": "FAIL GR-139"
+ },
+ {
+  "id": "GRM-366",
+  "what": "way C: the way-C step compares only the script, not the deploy argument or the argument count",
+  "old": "argv != way_c_command(a)",
+  "new": "argv[:2] != way_c_command(a)[:2]",
+  "fails": "FAIL GR-144"
+ },
+ {
+  "id": "GRM-367",
+  "what": "way C: the way-C step compares only the deploy argument, any script and any tool tree is taken",
+  "old": "argv != way_c_command(a)",
+  "new": "argv[2:] != way_c_command(a)[2:]",
+  "fails": "FAIL GR-144"
+ },
+ {
+  "id": "GRM-368",
+  "what": "way C: without --oracle-tree the default command changes to the absolute form",
+  "old": "        orc = ctx.local_step(\"G12\", \"oracle\", [\"sh\", \"scripts/s5-check.sh\", \"deploy\"], cwd=a.dev_tree)",
+  "new": "        orc = ctx.local_step(\"G12\", \"oracle\", [\"sh\", os.path.join(a.dev_tree, \"scripts\", \"s5-check.sh\"), os.path.join(a.dev_tree, \"deploy\")], cwd=a.dev_tree)",
+  "fails": "FAIL GR-143"
+ },
+ {
+  "id": "GRM-369",
+  "what": "way C: the receipt names the oracle's deploy directory as the candidate's",
+  "old": "deploy, candidate_commit, candidate_tree",
+  "new": "os.path.join(root, \"deploy\"), candidate_commit, candidate_tree",
+  "fails": "FAIL GR-139"
+ },
+ {
+  "id": "GRM-370",
+  "what": "way C: the receipt hashes the wrong checker file",
+  "old": "        wrapper_sha, deploy, candidate_commit, candidate_tree, shlex.join(argv),",
+  "new": "        file_sha, deploy, candidate_commit, candidate_tree, shlex.join(argv),",
+  "fails": "FAIL GR-139"
+ },
+ {
+  "id": "GRM-371",
+  "what": "way C: an unreadable oracle commit does not fail G12",
+  "old": "    if gc.rc != 0:\n",
+  "new": "    if False:\n",
+  "fails": "FAIL GR-145"
+ },
+ {
+  "id": "GRM-372",
+  "what": "way C: an unreadable oracle tree id does not fail G12",
+  "old": "    if gt.rc != 0:\n",
+  "new": "    if False:\n",
+  "fails": "FAIL GR-145"
+ },
+ {
+  "id": "GRM-373",
+  "what": "way C: an unreadable oracle checker file does not fail G12",
+  "old": "    for fname, value in ((\"s5-check.sh\", wrapper_sha), (\"s5_check.py\", file_sha)):\n        if value == \"unreadable\":\n",
+  "new": "    for fname, value in ((\"s5-check.sh\", wrapper_sha), (\"s5_check.py\", file_sha)):\n        if False:\n",
+  "fails": "FAIL GR-146"
+ },
+ {
+  "id": "GRM-374",
+  "what": "way C: the numeric git status of the commit is dropped from the verdict",
+  "old": "its commit cannot be read (git rc %d)\" % gc.rc)",
+  "new": "its commit cannot be read\")",
+  "fails": "FAIL GR-145"
+ },
+ {
+  "id": "GRM-375",
+  "what": "way C: the numeric git status of the tree id is dropped from the verdict",
+  "old": "its tree id cannot be read (git rc %d)\" % gt.rc)",
+  "new": "its tree id cannot be read\")",
+  "fails": "FAIL GR-145"
+ },
+ {
+  "id": "GRM-376",
+  "what": "way C: the identity problems are computed but not reported as failures",
+  "old": "        fails += way_c_problems\n",
+  "new": "        pass\n",
+  "fails": "FAIL GR-145"
+ },
+ {
+  "id": "GRM-377",
+  "what": "way C: the checker-hash problem does not name the file",
+  "old": "\"the oracle's checker hash is unavailable: scripts/%s cannot be read\" % fname)",
+  "new": "\"the oracle's checker hash is unavailable\")",
+  "fails": "FAIL GR-146"
+ },
+ {
+  "id": "GRM-378",
+  "what": "way C: the checker-hash check looks at the wrong second file",
+  "old": "((\"s5-check.sh\", wrapper_sha), (\"s5_check.py\", file_sha)):",
+  "new": "((\"s5-check.sh\", wrapper_sha), (\"s5_check.py\", wrapper_sha)):",
+  "fails": "FAIL GR-146"
+ },
+ {
+  "id": "GRM-379",
+  "what": "way C F1: an oracle whose scripts/ has uncommitted changes does not fail G12",
+  "old": "    elif gs.out.strip():\n",
+  "new": "    elif False:\n",
+  "fails": "FAIL GR-148"
+ },
+ {
+  "id": "GRM-380",
+  "what": "way C F1: a cleanliness read that fails does not fail G12",
+  "old": "    if gs.rc != 0:\n",
+  "new": "    if False:\n",
+  "fails": "FAIL GR-149"
+ },
+ {
+  "id": "GRM-381",
+  "what": "way C F1: the cleanliness is read on the development tree, not the oracle tree",
+  "old": "[\"git\", \"-C\", root, \"status\", \"--porcelain\", \"--untracked-files=no\", \"--\", \"scripts\"]",
+  "new": "[\"git\", \"-C\", a.dev_tree, \"status\", \"--porcelain\", \"--untracked-files=no\", \"--\", \"scripts\"]",
+  "fails": "FAIL GR-148"
+ },
+ {
+  "id": "GRM-382",
+  "what": "way C F1: the receipt always says the oracle's scripts/ are clean",
+  "old": "clean = (\"yes\" if not gs.out.strip() else \"NO\") if gs.rc == 0 else \"unknown (git rc %d)\" % gs.rc",
+  "new": "clean = \"yes\"",
+  "fails": "FAIL GR-148"
+ },
+ {
+  "id": "GRM-383",
+  "what": "way C: an oracle tree inside another repository is not refused",
+  "old": "    elif top != os.path.realpath(root):\n",
+  "new": "    elif False:\n",
+  "fails": "FAIL GR-154"
+ },
+ {
+  "id": "GRM-384",
+  "what": "way C: a top-level read that fails is not reported",
+  "old": "    if gl.rc != 0:\n",
+  "new": "    if False:\n",
+  "fails": "FAIL GR-149"
+ },
+ {
+  "id": "GRM-385",
+  "what": "way C: the top level is compared with the path as given, not by real path",
+  "old": "    elif top != os.path.realpath(root):\n",
+  "new": "    elif top != root:\n",
+  "fails": "FAIL GR-155"
+ },
+ {
+  "id": "GRM-386",
+  "what": "way C F2: a scripts/ directory that is a symbolic link is not refused",
+  "old": "(\"scripts directory\", os.path.join(root, \"scripts\")), ",
+  "new": "",
+  "fails": "FAIL GR-151"
+ },
+ {
+  "id": "GRM-387",
+  "what": "way C F2: a wrapper that is a symbolic link is not refused",
+  "old": "(\"wrapper scripts/s5-check.sh\", os.path.join(root, \"scripts\", \"s5-check.sh\")), ",
+  "new": "",
+  "fails": "FAIL GR-151"
+ },
+ {
+  "id": "GRM-388",
+  "what": "way C F2: a checker that is a symbolic link is not refused",
+  "old": ", (\"checker scripts/s5_check.py\", os.path.join(root, \"scripts\", \"s5_check.py\"))",
+  "new": "",
+  "fails": "FAIL GR-151"
+ },
+ {
+  "id": "GRM-389",
+  "what": "way C F2: the checker is run although a refusal was made",
+  "old": "        if way_c_refused:",
+  "new": "        if False:",
+  "fails": "FAIL GR-151"
+ },
+ {
+  "id": "GRM-390",
+  "what": "way C F2: a deploy directory that resolves outside the development tree is not refused",
+  "old": "    if real_deploy != os.path.join(os.path.realpath(a.dev_tree), \"deploy\"):\n",
+  "new": "    if False:\n",
+  "fails": "FAIL GR-152"
+ },
+ {
+  "id": "GRM-391",
+  "what": "way C F2: the deploy directory is compared with the development tree's path as given, not its real path",
+  "old": "    if real_deploy != os.path.join(os.path.realpath(a.dev_tree), \"deploy\"):\n",
+  "new": "    if real_deploy != os.path.join(a.dev_tree, \"deploy\"):\n",
+  "fails": "FAIL GR-152"
+ },
+ {
+  "id": "GRM-392",
+  "what": "way C F2: the receipt hashes the wrong file as the running runner",
+  "old": "real_deploy, runner_path, runner_sha,\n",
+  "new": "real_deploy, runner_path, wrapper_sha,\n",
+  "fails": "FAIL GR-150"
+ },
+ {
+  "id": "GRM-393",
+  "what": "way C F2: the receipt gives the tool tree's path as given for its real path",
+  "old": "os.path.realpath(root), real_deploy, runner_path, runner_sha,",
+  "new": "root, real_deploy, runner_path, runner_sha,",
+  "fails": "FAIL GR-155"
+ },
+ {
+  "id": "GRM-394",
+  "what": "way C: the matrix's later identity read is not cross-checked with step (g)'s",
+  "old": "                later = way_c_consistency(way_c_seen, oc, ot, oracle_file)\n",
+  "new": "                later = []\n",
+  "fails": "FAIL GR-153"
+ },
+ {
+  "id": "GRM-395",
+  "what": "way C: a commit that changes between step (g) and the matrix is not noticed",
+  "old": "((\"commit\", oc, seen[\"commit\"]), (\"tree id\", ot, seen[\"tree\"]))",
+  "new": "((\"tree id\", ot, seen[\"tree\"]),)",
+  "fails": "FAIL GR-153"
+ },
+ {
+  "id": "GRM-396",
+  "what": "way C: a tree id that changes between step (g) and the matrix is not noticed",
+  "old": "((\"commit\", oc, seen[\"commit\"]), (\"tree id\", ot, seen[\"tree\"]))",
+  "new": "((\"commit\", oc, seen[\"commit\"]),)",
+  "fails": "FAIL GR-153"
+ },
+ {
+  "id": "GRM-397",
+  "what": "way C: an unreadable tree id at the matrix is not reported",
+  "old": "((\"commit\", oc), (\"tree id\", ot)):",
+  "new": "((\"commit\", oc),):",
+  "fails": "FAIL GR-153"
+ },
+ {
+  "id": "GRM-398",
+  "what": "way C: an unreadable commit at the matrix is not reported",
+  "old": "((\"commit\", oc), (\"tree id\", ot)):",
+  "new": "((\"tree id\", ot),):",
+  "fails": "FAIL GR-153"
+ },
+ {
+  "id": "GRM-399",
+  "what": "way C: the numeric git status at the matrix is dropped from the verdict",
+  "old": "its %s cannot be read (git rc %d)\" % (what, st.rc))",
+  "new": "its %s cannot be read\" % what)",
+  "fails": "FAIL GR-153"
+ },
+ {
+  "id": "GRM-400",
+  "what": "way C: a checker file that changes between step (g) and the matrix is not noticed",
+  "old": "    if later != seen[\"file\"]:\n",
+  "new": "    if False:\n",
+  "fails": "FAIL GR-153"
+ },
+ {
+  "id": "GRM-401",
+  "what": "way C: the checker runs BEFORE the identity is receipted",
+  "old": "        way_c_receipts, way_c_problems, way_c_refused, way_c_seen = way_c_identity(",
+  "new": "        _early = ctx.way_c_step(way_c_argv, a.dev_tree)\n        way_c_receipts, way_c_problems, way_c_refused, way_c_seen = way_c_identity(",
+  "fails": "FAIL GR-155"
+ },
+ {
+  "id": "GRM-402",
+  "what": "way C: the receipt hashes the wrong file as the oracle's checker (s5_check.py)",
+  "old": "file_sha = sha_of(os.path.join(root, \"scripts\", \"s5_check.py\"))",
+  "new": "file_sha = sha_of(os.path.join(root, \"scripts\", \"s5-check.sh\"))",
+  "fails": "FAIL GR-139"
+ },
+ {
+  "id": "GRM-403",
+  "what": "way C: the oracle is the development tree only when the paths are the same string, not the same real path",
+  "old": "same = os.path.realpath(root) == os.path.realpath(a.dev_tree)",
+  "new": "same = root == a.dev_tree",
+  "fails": "FAIL GR-155"
+ },
+ {
+  "id": "GRM-404",
+  "what": "way C: the way-C step takes any working directory",
+  "old": " or cwd != a.dev_tree:",
+  "new": ":",
+  "fails": "FAIL GR-144"
+ },
+ {
+  "id": "GRM-405",
+  "what": "way C: the way-C step does not need --oracle-tree to have been given",
+  "old": "if not (getattr(a, \"oracle_tree\", None) and getattr(a, \"dev_tree\", None)) or argv",
+  "new": "if argv",
+  "fails": "FAIL GR-144"
+ },
+ {
+  "id": "GRM-406",
+  "what": "way C: the generic local allow-list takes the way-C form again",
+  "old": "rev-parse --show-toplevel\",   # way C, pin A (F1)",
+  "new": "rev-parse --show-toplevel\", r\"sh \" + SAFE_PATH + r\"/scripts/s5-check\\.sh \" + SAFE_PATH + r\"/deploy\",   # way C, pin A (F1)",
+  "fails": "FAIL GR-144"
+ },
+ {
+  "id": "GRM-407",
+  "what": "way C F2: the receipt hashes the runner as the matrix module the runner loads",
+  "old": "        matrix_sha)   # the matrix module",
+  "new": "        runner_sha)   # the matrix module",
+  "fails": "FAIL GR-150"
+ },
+ {
+  "id": "GRM-449",
+  "what": "F4: the matrix loads the oracle although step (g) has problems",
+  "old": "        elif way_c_problems:   # F4",
+  "new": "        elif False:   # F4",
+  "fails": "FAIL GR-173"
+ },
+ {
+  "id": "GRM-450",
+  "what": "F4: the matrix guard looks only at the refusals (links, deploy outside), not at the identity problems of step (g)",
+  "old": "        elif way_c_problems:   # F4",
+  "new": "        elif any(\"symbolic link\" in x or \"outside the development tree\" in x for x in way_c_problems):   # F4",
+  "fails": "FAIL GR-173"
+ },
+ {
+  "id": "GRM-451",
+  "what": "F4: the matrix guard names no reason",
+  "old": "fails.append(\"the matrix was NOT run: the oracle is not bound (%d problem(s) of step (g) above): its code is not loaded\" % len(way_c_problems))",
+  "new": "fails.append(\"the matrix did not run\")",
+  "fails": "FAIL GR-173"
+ },
+ {
+  "id": "GRM-452",
+  "what": "F4: load_oracle follows a linked scripts/ directory",
+  "old": "    for link in (os.path.join(dev_tree, \"scripts\"), path):",
+  "new": "    for link in (path,):",
+  "fails": "FAIL GR-174",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-453",
+  "what": "F4: load_oracle follows a linked checker",
+  "old": "    for link in (os.path.join(dev_tree, \"scripts\"), path):",
+  "new": "    for link in (os.path.join(dev_tree, \"scripts\"),):",
+  "fails": "FAIL GR-174",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-454",
+  "what": "F4: load_oracle does not refuse any link",
+  "old": "        if os.path.islink(link):\n            raise OracleMissing(\"%s is a symbolic link",
+  "new": "        if False:\n            raise OracleMissing(\"%s is a symbolic link",
+  "fails": "FAIL GR-174",
+  "file": "gate_matrix.py"
+ },
+ {
+  "id": "GRM-455",
+  "what": "F5: an unreadable running runner does not fail G12",
+  "old": "    if runner_sha == \"unreadable\":\n",
+  "new": "    if False:\n",
+  "fails": "FAIL GR-175"
+ },
+ {
+  "id": "GRM-456",
+  "what": "F5: an unreadable matrix module does not fail G12",
+  "old": "    if matrix_sha == \"unreadable\":\n",
+  "new": "    if False:\n",
+  "fails": "FAIL GR-175"
+ },
+ {
+  "id": "GRM-457",
+  "what": "F5: the runner problem does not name the file",
+  "old": "\"the running gate_runner.py cannot be hashed (%s): the receipt cannot name the tool that ran\" % runner_path)",
+  "new": "\"the running tool cannot be hashed: the receipt cannot name the tool that ran\")",
+  "fails": "FAIL GR-175"
+ },
+ {
+  "id": "GRM-458",
+  "what": "F5: the matrix problem does not name the file",
+  "old": "\"gate_matrix.py cannot be hashed (%s): the receipt cannot name the matrix module that ran\" % matrix_path)",
+  "new": "\"the matrix module cannot be hashed: the receipt cannot name the module that ran\")",
+  "fails": "FAIL GR-175"
+ },
+ {
+  "id": "GRM-459",
+  "what": "F5: the wrapper hash is read a second time for the check",
+  "old": "    for fname, value in ((\"s5-check.sh\", wrapper_sha), (\"s5_check.py\", file_sha)):",
+  "new": "    for fname, value in ((\"s5-check.sh\", sha_of(os.path.join(root, \"scripts\", \"s5-check.sh\"))), (\"s5_check.py\", file_sha)):",
+  "fails": "FAIL GR-175"
+ },
+ {
+  "id": "GRM-460",
+  "what": "F5: the checker hash is read a second time for the check",
+  "old": "    for fname, value in ((\"s5-check.sh\", wrapper_sha), (\"s5_check.py\", file_sha)):",
+  "new": "    for fname, value in ((\"s5-check.sh\", wrapper_sha), (\"s5_check.py\", sha_of(os.path.join(root, \"scripts\", \"s5_check.py\")))):",
+  "fails": "FAIL GR-175"
+ },
+ {
+  "id": "GRM-461",
+  "what": "F5: the runner hash is read a second time for the receipt",
+  "old": "        clean, top or \"none (git rc %d)\" % gl.rc, os.path.realpath(root), real_deploy, runner_path, runner_sha,",
+  "new": "        clean, top or \"none (git rc %d)\" % gl.rc, os.path.realpath(root), real_deploy, runner_path, sha_of(runner_path),",
+  "fails": "FAIL GR-175"
+ },
+ {
+  "id": "GRM-462",
+  "what": "F4: the matrix guard looks only at the identity problems, not at the refusals of step (g)",
+  "old": "        elif way_c_problems:   # F4",
+  "new": "        elif any(\"not bound\" in x for x in way_c_problems):   # F4",
+  "fails": "FAIL GR-173"
+ },
+ {
+  "id": "GRM-500",
+  "what": "F4 later read: the problems of the later identity read are not reported as failures",
+  "old": "                fails += later\n",
+  "new": "                pass\n",
+  "fails": "FAIL GR-153"
+ },
+ {
+  "id": "GRM-501",
+  "what": "F4 later read: an oracle that changed after step (g) is still loaded",
+  "old": "                if later:   # cox's read",
+  "new": "                if False:   # cox's read",
+  "fails": "FAIL GR-178"
+ },
+ {
+  "id": "GRM-502",
+  "what": "F4 later read: the verdict does not say that the matrix was not run",
+  "old": "\"the matrix was NOT run: the oracle is not the one step (g) bound (%d problem(s) above): its code is not loaded\" % len(later))",
+  "new": "\"the matrix did not run (%d)\" % len(later))",
+  "fails": "FAIL GR-178"
+ },
+ {
+  "id": "GRM-503",
+  "what": "F4 later read: the not-run verdict of the matrix is dropped",
+  "old": "    except MatrixNotRun as exc:\n        fails.append(str(exc))",
+  "new": "    except MatrixNotRun as exc:\n        pass",
+  "fails": "FAIL GR-178"
+ },
+ {
+  "id": "GRM-504",
+  "what": "F4 later read: the guard looks only at a changed commit, tree or unreadable identity, not at a changed checker file",
+  "old": "                if later:   # cox's read",
+  "new": "                if any(\"s5_check.py changed\" not in x for x in later):   # cox's read",
+  "fails": "FAIL GR-178"
+ },
+ {
+  "id": "GRM-505",
+  "what": "F4 later read: the guard looks only at a changed checker file",
+  "old": "                if later:   # cox's read",
+  "new": "                if any(\"s5_check.py changed\" in x for x in later):   # cox's read",
+  "fails": "FAIL GR-178"
+ },
+ {
+  "id": "GRM-506",
+  "what": "F4 later read: the oracle is loaded BEFORE the later identity read is compared",
+  "old": "            if a.oracle_tree:\n                later = way_c_consistency(way_c_seen, oc, ot, oracle_file)\n",
+  "new": "            oracle = gm.load_oracle(oracle_tree)\n            if a.oracle_tree:\n                later = way_c_consistency(way_c_seen, oc, ot, oracle_file)\n",
+  "fails": "FAIL GR-178"
+ },
+ {
+  "id": "GRM-507",
+  "what": "F4: the list of step (g)'s problems is not initialised for the default path (no --oracle-tree)",
+  "old": "    way_c_problems = []\n",
+  "new": "",
+  "fails": "FAIL GR-184"
+ }
+]

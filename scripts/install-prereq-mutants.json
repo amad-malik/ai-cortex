@@ -1,0 +1,1108 @@
+[
+  {
+    "id": "IPM-01",
+    "what": "accepts AlmaLinux as Rocky",
+    "old": "  [ \"$pq_os_id\" = rocky ] || { PREREQ_OS_REASON=distribution; return 1; }",
+    "new": "  case $pq_os_id in rocky|almalinux) ;; *) PREREQ_OS_REASON=distribution; return 1 ;; esac",
+    "fails": "FAIL IP-03/04: alma10"
+  },
+  {
+    "id": "IPM-02",
+    "what": "accepts Rocky 9",
+    "old": "  if [ \"$pq_os_major\" != 10 ]; then",
+    "new": "  if [ \"$pq_os_major\" != 10 ] && [ \"$pq_os_major\" != 9 ]; then",
+    "fails": "FAIL IP-03/04: rocky9"
+  },
+  {
+    "id": "IPM-03",
+    "what": "sources os-release",
+    "old": "  pq_os_id='' pq_os_version='' pq_os_id_seen=0 pq_os_version_seen=0",
+    "new": "  . \"$1\"\n  pq_os_id='' pq_os_version='' pq_os_id_seen=0 pq_os_version_seen=0",
+    "fails": "FAIL IP-03/04: injected"
+  },
+  {
+    "id": "IPM-04",
+    "what": "rejects x86_64 instead of other architectures",
+    "old": "if [ \"$pq_machine_arch\" != x86_64 ]; then",
+    "new": "if [ \"$pq_machine_arch\" = x86_64 ]; then",
+    "fails": "FAIL IP-machine: healthy"
+  },
+  {
+    "id": "IPM-05",
+    "what": "accepts root",
+    "old": "    ''|*[!0123456789]*|0) prereq_msg is_root || return \"${EX_PREREQ:-3}\"; pq_machine_block=1 ;;",
+    "new": "    ''|*[!0123456789]*) prereq_msg is_root || return \"${EX_PREREQ:-3}\"; pq_machine_block=1 ;;",
+    "fails": "FAIL IP-machine: root"
+  },
+  {
+    "id": "IPM-06",
+    "what": "does not require cgroup v2",
+    "old": "if [ ! -f \"$(prereq_system_root)/sys/fs/cgroup/cgroup.controllers\" ]; then",
+    "new": "if [ -f \"$(prereq_system_root)/sys/fs/cgroup/cgroup.controllers\" ]; then",
+    "fails": "FAIL W1-73 entry: approved returned 3, expected 0"
+  },
+  {
+    "id": "IPM-07",
+    "what": "accepts account-name prefixes",
+    "old": "NF == 3 && $1 == pq_user &&\n    $2 ~",
+    "new": "NF == 3 && index($1, pq_user) == 1 &&\n    $2 ~",
+    "fails": "FAIL IP-08: prefix"
+  },
+  {
+    "id": "IPM-08",
+    "what": "accepts an undersized subordinate range",
+    "old": "$3 + 0 >= 65536",
+    "new": "$3 + 0 >= 65535",
+    "fails": "FAIL IP-08: short"
+  },
+  {
+    "id": "IPM-09",
+    "what": "ignores an unsynchronized clock",
+    "old": "    no) prereq_msg time_not_synced || return \"${EX_PREREQ:-3}\"; pq_machine_block=1 ;;",
+    "new": "    no) : ;;",
+    "fails": "FAIL IP-machine: time_no"
+  },
+  {
+    "id": "IPM-10",
+    "what": "treats lingering as enabled",
+    "old": "if [ \"$pq_machine_linger\" != yes ]; then",
+    "new": "if [ \"$pq_machine_linger\" = yes ]; then",
+    "fails": "FAIL IP-01: an otherwise ready machine"
+  },
+  {
+    "id": "IPM-11",
+    "what": "rejects the exact disk boundary",
+    "old": "[ \"$pq_disk_free\" -ge \"$pq_disk_min\" ]",
+    "new": "[ \"$pq_disk_free\" -gt \"$pq_disk_min\" ]",
+    "fails": "FAIL IP-machine: healthy"
+  },
+  {
+    "id": "IPM-12",
+    "what": "accepts a network filesystem",
+    "old": "    xfs|ext4) ;;",
+    "new": "    xfs|ext4|nfs) ;;",
+    "fails": "FAIL IP-machine: fs_home_nfs"
+  },
+  {
+    "id": "IPM-13",
+    "what": "does not check the container filesystem",
+    "old": "      prereq_disk_ok \"$pq_machine_graph\" container \"$pq_machine_min_bytes\" || pq_machine_disk_rc=$?",
+    "new": "      : # mutant: ignore container filesystem check",
+    "fails": "FAIL IP-machine: disk_graph_low"
+  },
+  {
+    "id": "IPM-14",
+    "what": "matches port substrings",
+    "old": "if (endpoint == pq_port) found = 1",
+    "new": "if (index(endpoint, pq_port) > 0) found = 1",
+    "fails": "FAIL IP-machine: port_substring"
+  },
+  {
+    "id": "IPM-15",
+    "what": "does not inspect proc sockets when ss is absent",
+    "old": "  pq_port_hex=$(printf '%04X' \"$pq_port\") ||",
+    "new": "  prereq_msg port_unknown; return 1\n  pq_port_hex=$(printf '%04X' \"$pq_port\") ||",
+    "fails": "FAIL IP-machine: proc_free"
+  },
+  {
+    "id": "IPM-16",
+    "what": "does not block when sudo is absent",
+    "old": "if [ \"$PREREQ_NEED_SUDO\" -eq 1 ] && ! [ -x /usr/bin/sudo ]; then",
+    "new": "if false; then",
+    "fails": "FAIL IP-machine: sudo_missing"
+  },
+  {
+    "id": "IPM-17",
+    "what": "does not refuse absent tty",
+    "old": "if [ \"${check_only:-0}\" != 1 ] && [ -n \"$PREREQ_MISSING$PREREQ_FIXES\" ] && [ \"${CORTEX_YES:-0}\" != 1 ] && ! prereq_tty_available; then",
+    "new": "if false; then",
+    "fails": "FAIL IP-machine: no_tty"
+  },
+  {
+    "id": "IPM-18",
+    "what": "echoes an untrusted message argument",
+    "old": "  case ${2-} in home|container) pq_msg_location=$2 ;; esac",
+    "new": "  pq_msg_location=${2-}",
+    "fails": "FAIL IP-53/54: message disk_low"
+  },
+  {
+    "id": "IPM-19",
+    "what": "omits SELinux information",
+    "old": "      say \"SELinux: $pq_info_selinux\"",
+    "new": "      :",
+    "fails": "FAIL IP-13: healthy"
+  },
+  {
+    "id": "IPM-20",
+    "what": "reads the token during completion",
+    "old": "  prereq_info done_token \"$3\"",
+    "new": "  cat \"$3\" || :\n  prereq_info done_token \"$3\"",
+    "fails": "FAIL IP-50: completion omitted"
+  },
+  {
+    "id": "IPM-21",
+    "what": "rejects Compose version 1.5",
+    "old": "[ \"$pq_compose_minor\" -ge 5 ]",
+    "new": "[ \"$pq_compose_minor\" -gt 5 ]",
+    "fails": "FAIL IP-compose-version: 1.5.0"
+  },
+  {
+    "id": "IPM-22",
+    "what": "does not list missing podman",
+    "old": "    prereq_missing_add podman\n",
+    "new": "    :\n",
+    "fails": "FAIL IP-15: podman"
+  },
+  {
+    "id": "IPM-23",
+    "what": "does not list missing gzip",
+    "old": "curl:curl tar:tar gzip:gzip python3:python3 ssh-keygen:openssh",
+    "new": "curl:curl tar:tar python3:python3 ssh-keygen:openssh",
+    "fails": "FAIL IP-15: gzip"
+  },
+  {
+    "id": "IPM-24",
+    "what": "accepts an unverified provider path",
+    "old": "prereq_compose_path() {\n  return 1\n}",
+    "new": "prereq_compose_path() {\n  printf \"%s\\n\" \"$PREREQ_COMPOSE\"\n}",
+    "fails": "FAIL IP-compose-trust: unverified provider"
+  },
+  {
+    "id": "IPM-25",
+    "what": "retains an injected provider across machine checks",
+    "old": "  PREREQ_MISSING='' PREREQ_FIXES='' PREREQ_NEED_SUDO=0 PREREQ_COMPOSE=''",
+    "new": "  PREREQ_MISSING='' PREREQ_FIXES='' PREREQ_NEED_SUDO=0",
+    "fails": "FAIL IP-compose-trust: machine look retained"
+  },
+  {
+    "id": "IPM-26",
+    "what": "dumps the machine environment",
+    "old": "  pq_machine_block=0 pq_machine_supported=1\n",
+    "new": "  set\n  pq_machine_block=0 pq_machine_supported=1\n",
+    "fails": "FAIL IP-54: machine look leaked"
+  },
+  {
+    "id": "IPM-27",
+    "what": "ignores malformed proc socket records",
+    "old": "      END { if (NR == 0 || bad) exit 2; if (found) exit 0; exit 1 }",
+    "new": "      END { if (NR == 0) exit 2; if (found) exit 0; exit 1 }",
+    "fails": "FAIL IP-machine: proc_bad"
+  },
+  {
+    "id": "IPM-28",
+    "what": "executes a command at source time",
+    "old": "# Installer prerequisite messages and checks. This file is joined into install.sh.",
+    "new": "# Installer prerequisite messages and checks. This file is joined into install.sh.\nprintf injected\\n",
+    "fails": "FAIL IP-60: sourcing"
+  },
+  {
+    "id": "IPM-29",
+    "what": "accepts Compose 1.4",
+    "old": "[ \"$pq_compose_minor\" -ge 5 ]",
+    "new": "[ \"$pq_compose_minor\" -ge 4 ]",
+    "fails": "FAIL IP-compose-version: 1.4.9"
+  },
+  {
+    "id": "IPM-30",
+    "what": "accepts duplicate OS IDs",
+    "old": "[ \"$pq_os_id_seen\" -eq 0 ] || return 1; pq_os_id_seen=1; pq_os_id=$pq_os_value",
+    "new": ":; pq_os_id_seen=1; pq_os_id=$pq_os_value",
+    "fails": "FAIL IP-03/04: duplicate"
+  },
+  {
+    "id": "IPM-31",
+    "what": "accepts tmpfs for container storage",
+    "old": "    xfs|ext4) ;;",
+    "new": "    xfs|ext4|tmpfs) ;;",
+    "fails": "FAIL IP-machine: fs_graph_tmpfs"
+  },
+  {
+    "id": "IPM-32",
+    "what": "omits the installed provider requalification finding",
+    "old": "        prereq_missing_add 'podman-compose (requalify)'",
+    "new": "        :",
+    "fails": "FAIL IP-01: the installed provider"
+  },
+  {
+    "id": "IPM-33",
+    "what": "marks missing prerequisites as ready in check mode",
+    "old": "  if [ \"${check_only:-0}\" = 1 ] && [ -n \"$PREREQ_MISSING$PREREQ_FIXES\" ]; then",
+    "new": "  if false; then",
+    "fails": "FAIL IP-machine: check_provider"
+  },
+  {
+    "id": "IPM-34",
+    "what": "executes the provider during machine look",
+    "old": "        prereq_info compose_pending || return \"${EX_PREREQ:-3}\"\n",
+    "new": "        podman-compose --version || :\n        prereq_info compose_pending || return \"${EX_PREREQ:-3}\"\n",
+    "fails": "FAIL IP-02: machine look tried"
+  },
+  {
+    "id": "IPM-35",
+    "what": "uses the network during machine look",
+    "old": "        prereq_info compose_pending || return \"${EX_PREREQ:-3}\"\n",
+    "new": "        curl https://invalid.example/ || :\n        prereq_info compose_pending || return \"${EX_PREREQ:-3}\"\n",
+    "fails": "FAIL IP-02: machine look tried"
+  },
+  {
+    "id": "IPM-36",
+    "what": "treats an absent provider as installed",
+    "old": "if rpm -q --quiet podman-compose >/dev/null 2>&1; then",
+    "new": "if true; then",
+    "fails": "FAIL IP-15: podman-compose"
+  },
+  {
+    "id": "IPM-37",
+    "what": "requires a terminal in read-only check mode",
+    "old": "if [ \"${check_only:-0}\" != 1 ] && [ -n \"$PREREQ_MISSING$PREREQ_FIXES\" ] && [ \"${CORTEX_YES:-0}\" != 1 ] && ! prereq_tty_available; then",
+    "new": "if [ -n \"$PREREQ_MISSING$PREREQ_FIXES\" ] && [ \"${CORTEX_YES:-0}\" != 1 ] && ! prereq_tty_available; then",
+    "fails": "FAIL IP-check: read-only --check"
+  },
+  {
+    "id": "IPM-38",
+    "what": "does not plan a missing EPEL release package",
+    "old": "      PREREQ_FIXES=\"${PREREQ_FIXES:+$PREREQ_FIXES }epel\"",
+    "new": "      :",
+    "fails": "FAIL IP-machine: epel_missing was not planned"
+  },
+  {
+    "id": "IPM-39",
+    "what": "checks EPEL on unsupported systems",
+    "old": "  if [ \"$pq_machine_supported\" -eq 1 ]; then",
+    "new": "  if true; then",
+    "fails": "FAIL IP-03/05: EPEL was inspected"
+  },
+  {
+    "id": "IPM-40",
+    "what": "ignores a missing package manager",
+    "old": "    if ! command -v dnf >/dev/null 2>&1; then",
+    "new": "    if false; then",
+    "fails": "FAIL IP-machine: dnf_missing"
+  },
+  {
+    "id": "IPM-41",
+    "what": "does not list a missing key verifier",
+    "old": "ssh-keygen:openssh gpg:gnupg2",
+    "new": "ssh-keygen:openssh",
+    "fails": "FAIL IP-15: gnupg2"
+  },
+  {
+    "id": "IPM-42",
+    "what": "lists a shared package more than once",
+    "old": "  case \"$pq_missing_newline$PREREQ_MISSING$pq_missing_newline\" in *\"$pq_missing_newline$1$pq_missing_newline\"*) return 0 ;; esac",
+    "new": "  :",
+    "fails": "FAIL IP-15: a package shared"
+  },
+  {
+    "id": "IPM-43",
+    "what": "uses a fixed subordinate-ID allocation",
+    "old": "first = highest + 1; last = first + 65535",
+    "new": "first = 100000; last = first + 65535",
+    "fails": "FAIL IP-35: occupied allocation"
+  },
+  {
+    "id": "IPM-44",
+    "what": "allows a changed subordinate-ID plan",
+    "old": "[ -z \"$pq_fix_current\" ] || [ \"$pq_fix_current\" != \"$pq_fix_range\" ]",
+    "new": "[ -z \"$pq_fix_current\" ]",
+    "fails": "FAIL IP-35: stale repair"
+  },
+  {
+    "id": "IPM-45",
+    "what": "accepts a declined prerequisite plan",
+    "old": "y|Y|yes|yEs|yeS|yES|Yes|YEs|YeS|YES) return 0 ;;",
+    "new": "y|Y|yes|yEs|yeS|yES|Yes|YEs|YeS|YES|n) return 0 ;;",
+    "fails": "FAIL IP-23/25: 'n'"
+  },
+  {
+    "id": "IPM-46",
+    "what": "accepts a shortened primary fingerprint",
+    "old": " || fingerprint != \"7D8D15CBFC4E62688591FB2633D98517E37ED158\"",
+    "new": "",
+    "fails": "FAIL IP-compose-trust: short key"
+  },
+  {
+    "id": "IPM-47",
+    "what": "accepts a signed header without a verified payload",
+    "old": "\n    line ~ /payload sha256 digest/ && line ~ /: ok[[:space:]]*$/ { digest = 1 }",
+    "new": "\n    line ~ /digest/ && line ~ /: ok[[:space:]]*$/ { digest = 1 }",
+    "fails": "FAIL IP-compose-trust: header_only signature"
+  },
+  {
+    "id": "IPM-48",
+    "what": "accepts a provider owned by a different package",
+    "old": " && [ \"$pq_payload_installed\" = \"$pq_payload_owner\" ]",
+    "new": "",
+    "fails": "FAIL IP-compose-trust: owner installed payload"
+  },
+  {
+    "id": "IPM-49",
+    "what": "accepts ghost runtime files",
+    "old": "has($2, 8) || has($2, 64) || !has($3, 8)",
+    "new": "has($2, 8) || !has($3, 8)",
+    "fails": "FAIL IP-compose-trust: ghost installed payload"
+  },
+  {
+    "id": "IPM-50",
+    "what": "accepts a runtime file without digest verification",
+    "old": "(!has($3, 1) || !has($3, 2))",
+    "new": "(!has($3, 2))",
+    "fails": "FAIL IP-compose-trust: skip_digest installed payload"
+  },
+  {
+    "id": "IPM-51",
+    "what": "accepts a package without the Python runtime module",
+    "old": "bad || executable != 1 || module != 1",
+    "new": "bad || executable != 1",
+    "fails": "FAIL IP-compose-trust: missing_module installed payload"
+  },
+  {
+    "id": "IPM-52",
+    "what": "accepts repository metadata that differs from the metalink",
+    "old": "require(digest(repomd) == expected_repomd)",
+    "new": "require(True)",
+    "fails": "FAIL IP-compose-trust: repomd_mismatch metadata fetch"
+  },
+  {
+    "id": "IPM-53",
+    "what": "accepts an archive that differs from repository metadata",
+    "old": "require(digest(archive) == expected_package)",
+    "new": "require(True)",
+    "fails": "FAIL IP-compose-trust: package_mismatch metadata fetch"
+  },
+  {
+    "id": "IPM-54",
+    "what": "accepts metadata signed by a foreign primary key",
+    "old": "require(len(signer) == 40 and primary_signer == \"7D8D15CBFC4E62688591FB2633D98517E37ED158\")",
+    "new": "require(len(signer) == 40)",
+    "fails": "FAIL IP-compose-trust: metadata_foreign_sig metadata fetch"
+  },
+  {
+    "id": "IPM-55",
+    "what": "accepts an RPM without isolated signature verification",
+    "old": "     ! prereq_rpm_signature_ok \"$pq_requalify_stage/gpg\" \"$pq_requalify_stage/empty\" \"$pq_requalify_stage/pinned\" \"$pq_requalify_stage/compose.rpm\" ||\n",
+    "new": "",
+    "fails": "FAIL IP-compose-trust: verified provider path was not returned"
+  },
+  {
+    "id": "IPM-56",
+    "what": "accepts an RPM whose installed runtime payload differs",
+    "old": "! prereq_rpm_payload_ok \"$pq_requalify_stage/compose.rpm\" \"$pq_requalify_provider\"; then",
+    "new": "false; then",
+    "fails": "FAIL IP-compose-trust: bad_payload requalification"
+  },
+  {
+    "id": "IPM-57",
+    "what": "repeats provider work after the first successful run",
+    "old": "  PREREQ_MISSING='' PREREQ_FIXES=''\n  return 0\n}\n\n# Resolve a not-yet-created install directory",
+    "new": "  PREREQ_FIXES=''\n  return 0\n}\n\n# Resolve a not-yet-created install directory",
+    "fails": "FAIL IP-37: second prerequisite run"
+  },
+  {
+    "id": "IPM-58",
+    "what": "accepts an EPEL candidate without its pinned signature",
+    "old": "  prereq_rpm_signature_ok \"$pq_epelcandidate_stage/gpg\" \"$pq_epelcandidate_stage/empty\" \"$pq_epelcandidate_stage/pinned\" \"$pq_epelcandidate_file\" || return 1",
+    "new": "  :",
+    "fails": "FAIL W1-73 EPEL candidate: foreign_signature"
+  },
+  {
+    "id": "IPM-59",
+    "what": "extracts EPEL config from changed bootstrap bytes",
+    "old": "if len(data) > 134217728 or hashlib.sha256(data).hexdigest() != expected:",
+    "new": "if len(data) > 134217728:",
+    "fails": "FAIL W1-73 EPEL bootstrap extraction: changed"
+  },
+  {
+    "id": "IPM-60",
+    "what": "combines an archive whose bytes changed",
+    "old": "if len(data) > 134217728 or hashlib.sha256(data).hexdigest() != digest:",
+    "new": "if len(data) > 134217728:",
+    "fails": "FAIL W1-73 combined closures: changed"
+  },
+  {
+    "id": "IPM-61",
+    "what": "assigns unmatched metadata to a Rocky repository",
+    "old": "matches[row[0]][0] if matches[row[0]] else \"unmatched\"",
+    "new": "matches[row[0]][0] if matches[row[0]] else \"baseos\"",
+    "fails": "FAIL IP-rocky-trust: unmatched archive"
+  },
+  {
+    "id": "IPM-62",
+    "what": "continues after the Extras bootstrap fails",
+    "old": "    if ! ( umask 022; /usr/bin/sudo dnf \"--releasever=$pq_locked_release\" '--disablerepo=*' install -y \"$@\" ); then\n      prereq_msg rocky_install_failed; return \"${EX_PREREQ:-3}\"\n    fi\n    pq_locked_after",
+    "new": "    if ! ( umask 022; /usr/bin/sudo dnf \"--releasever=$pq_locked_release\" '--disablerepo=*' install -y \"$@\" ); then :; fi\n    pq_locked_after",
+    "fails": "FAIL W1-73 ordered bootstrap: first_failure"
+  },
+  {
+    "id": "IPM-63",
+    "what": "does not recheck archive bytes after bootstrap",
+    "old": "[ \"$pq_locked_after\" != \"$pq_locked_expected\" ] || [ \"$pq_locked_manifest_after\" != \"$PREREQ_ROCKY_ROOT_MANIFEST\" ]",
+    "new": "[ \"$pq_locked_manifest_after\" != \"$PREREQ_ROCKY_ROOT_MANIFEST\" ]",
+    "fails": "FAIL W1-73 ordered bootstrap: changed_after_first"
+  },
+  {
+    "id": "IPM-64",
+    "what": "accepts a package manager success without installed packages",
+    "old": "if ! printf '%s\\n' \"$pq_post_installed\" | LC_ALL=C grep -Fx -- \"$pq_post_expected\" >/dev/null; then",
+    "new": "if false; then",
+    "fails": "FAIL W1-73 entry: missing_dependency returned 0, expected 3"
+  },
+  {
+    "id": "IPM-65",
+    "what": "leaves the provider-verification stage after a signal",
+    "old": "  trap 'if [ -n \"$pq_requalify_stage\" ]; then rm -rf -- \"$pq_requalify_stage\"; fi' EXIT",
+    "new": "  :",
+    "fails": "FAIL W1-73 signal cleanup"
+  },
+  {
+    "id": "IPM-66",
+    "what": "lets privileged copy read an untrusted user-owned source",
+    "old": "head -c \"$pq_apply_size\" -- \"$pq_apply_source\" | /usr/bin/sudo tee -- \"$pq_apply_file\" >/dev/null",
+    "new": "/usr/bin/sudo install -m 0644 -- \"$pq_apply_source\" \"$pq_apply_file\"",
+    "fails": "FAIL IP-W1-73: valid approved copy"
+  },
+  {
+    "id": "IPM-67",
+    "what": "accepts epel-release outside Rocky Extras",
+    "old": "[ \"$pq_extract_row_repo\" = extras ] || { prereq_msg rocky_install_failed; return \"${EX_PREREQ:-3}\"; }",
+    "new": ":",
+    "fails": "FAIL W1-73 EPEL bootstrap extraction: foreign_origin"
+  },
+  {
+    "id": "IPM-68",
+    "what": "allows an HTTPS metadata fetch to redirect to HTTP",
+    "old": "\n            require(urlsplit(newurl).scheme == \"https\")\n            return super().redirect_request(req, fp, code, msg, headers, newurl)",
+    "new": "\n            require(True)\n            return super().redirect_request(req, fp, code, msg, headers, newurl)",
+    "fails": "FAIL W1-73 missing curl: rocky_redirect"
+  },
+  {
+    "id": "IPM-69",
+    "what": "allows an HTTPS metadata fetch to redirect to HTTP",
+    "old": "\n                    require(urlsplit(newurl).scheme == \"https\")\n                    return super().redirect_request(req, fp, code, msg, headers, newurl)",
+    "new": "\n                    require(True)\n                    return super().redirect_request(req, fp, code, msg, headers, newurl)",
+    "fails": "FAIL W1-73 missing curl: redirect"
+  },
+  {
+    "id": "IPM-70",
+    "what": "hides the missing Rocky metadata verifier until after download",
+    "old": "  prereq_metadata_policy_ready \"$pq_pre_policy\" || return \"${EX_PREREQ:-3}\"",
+    "new": "  :",
+    "fails": "FAIL W1-73: preverification hid the missing metadata verifier"
+  },
+  {
+    "id": "IPM-71",
+    "what": "drops the authenticated EPEL metadata receipt",
+    "old": "      while IFS= read -r pq_archive_receipt_line; do\n        [ -z \"$pq_archive_receipt_line\" ] || pq_archives_receipts=\"$pq_archives_receipts\nepel_$pq_archive_receipt_line\"\n      done < \"$pq_epelcandidate_temp/receipt.txt\"",
+    "new": "      :",
+    "fails": "FAIL W1-73 mixed apply: EPEL metadata receipt was not retained"
+  },
+  {
+    "id": "IPM-72",
+    "what": "runs sudo even after the unprivileged linger attempt succeeds",
+    "old": "  [ \"$pq_linger_state\" != yes ] || return 0\n  if ! ( umask 022; /usr/bin/sudo loginctl enable-linger -- \"$pq_linger_user\" ); then",
+    "new": "  if ! ( umask 022; /usr/bin/sudo loginctl enable-linger -- \"$pq_linger_user\" ); then",
+    "fails": "FAIL F-3: successful user attempt still invoked sudo or failed"
+  },
+  {
+    "id": "IPM-73",
+    "what": "does not preflight the EPEL signed-metadata verifier",
+    "old": "    1) command -v gpg >/dev/null 2>&1 && command -v gpgv >/dev/null 2>&1 || { prereq_msg metadata_verifier_missing; return 1; }\n       mkdir",
+    "new": "    1) mkdir",
+    "fails": "FAIL W1-73: EPEL metadata verifier missing without an actionable refusal"
+  },
+  {
+    "id": "IPM-74",
+    "what": "uses a replaceable private-staging parent",
+    "old": "  if ! prereq_home_safe; then prereq_msg home_unsafe || return \"${EX_PREREQ:-3}\"; return \"${EX_PREREQ:-3}\"; fi",
+    "new": "  :",
+    "fails": "FAIL IP-prereq-flow: unsafe_home"
+  },
+  {
+    "id": "IPM-75",
+    "what": "uses a replaceable private-staging parent",
+    "old": "  if ! prereq_home_safe; then prereq_msg home_unsafe || exit \"${EX_PREREQ:-3}\"; exit \"${EX_PREREQ:-3}\"; fi",
+    "new": "  :",
+    "fails": "FAIL W1-73 entry: unsafe_home_install"
+  },
+  {
+    "id": "IPM-76",
+    "what": "requires missing Rocky metalink",
+    "old": "split(\"baseurl mirrorlist gpgcheck gpgkey sslverify sslcacert repo_gpgcheck proxy proxy_sslverify proxy_sslcacert\", required, \" \")",
+    "new": "split(\"baseurl metalink mirrorlist gpgcheck gpgkey sslverify sslcacert repo_gpgcheck proxy proxy_sslverify proxy_sslcacert\", required, \" \")",
+    "fails": "FAIL IP-real-A:"
+  },
+  {
+    "id": "IPM-77",
+    "what": "rejects the real Rocky section",
+    "old": "    /^\\[[^]]+\\]$/ { if ($0 != \"[\" section \"]\" || ++headers > 1) bad = 1; next }\n",
+    "new": "",
+    "fails": "FAIL IP-real-B:"
+  },
+  {
+    "id": "IPM-78",
+    "what": "accepts invalid or duplicate Rocky headers",
+    "old": "if ($0 != \"[\" section \"]\" || ++headers > 1) bad = 1",
+    "new": "if (0) bad = 1",
+    "fails": "FAIL IP-real-B:"
+  },
+  {
+    "id": "IPM-79",
+    "what": "rejects the real EPEL section",
+    "old": "    /^\\[[^]]+\\]$/ { if ($0 != \"[epel]\" || ++headers > 1) bad = 1; next }\n",
+    "new": "",
+    "fails": "FAIL IP-real-B:"
+  },
+  {
+    "id": "IPM-80",
+    "what": "retains the old Rocky metadata read limit",
+    "old": "ROCKY_PRIMARY_LIMIT = 536870912",
+    "new": "ROCKY_PRIMARY_LIMIT = 268435456",
+    "fails": "FAIL IP-real-C:"
+  },
+  {
+    "id": "IPM-81",
+    "what": "does not reject oversized Rocky metadata",
+    "old": "require(total <= ROCKY_PRIMARY_LIMIT)",
+    "new": "require(True)",
+    "fails": "FAIL IP-real-C:"
+  },
+  {
+    "id": "IPM-82",
+    "what": "allows an oversized decompression read",
+    "old": "source.read(min(65536, ROCKY_PRIMARY_LIMIT + 1 - total))",
+    "new": "source.read(min(131072, ROCKY_PRIMARY_LIMIT + 1 - total))",
+    "fails": "FAIL IP-real-C:"
+  },
+  {
+    "id": "IPM-83",
+    "what": "requires missing EPEL mirrorlist",
+    "old": "split(\"baseurl metalink gpgcheck gpgkey sslverify sslcacert repo_gpgcheck proxy proxy_sslverify proxy_sslcacert\", required, \" \")",
+    "new": "split(\"baseurl metalink mirrorlist gpgcheck gpgkey sslverify sslcacert repo_gpgcheck proxy proxy_sslverify proxy_sslcacert\", required, \" \")",
+    "fails": "FAIL IP-real-D:"
+  },
+  {
+    "id": "IPM-84",
+    "what": "rejects RPM operators in root paths",
+    "old": "case $pq_locked_path in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_./+~^-]",
+    "new": "case $pq_locked_path in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_./+-]",
+    "fails": "FAIL IP-real-E:"
+  },
+  {
+    "id": "IPM-85",
+    "what": "rejects RPM operators in private paths",
+    "old": "case $pq_private_path in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_./+~^-]",
+    "new": "case $pq_private_path in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_./+-]",
+    "fails": "FAIL IP-real-E:"
+  },
+  {
+    "id": "IPM-86",
+    "what": "rejects RPM operators in archived paths",
+    "old": "case $pq_archive_file in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_./+~^-]",
+    "new": "case $pq_archive_file in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_./+-]",
+    "fails": "FAIL IP-real-E:"
+  },
+  {
+    "id": "IPM-87",
+    "what": "rejects RPM operators in versions",
+    "old": "pq_archive_version:$pq_archive_release in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.+~^:-]*",
+    "new": "pq_archive_version:$pq_archive_release in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.+:-]*",
+    "fails": "FAIL IP-real-E:"
+  },
+  {
+    "id": "IPM-88",
+    "what": "rejects RPM operators in candidate versions",
+    "old": "$3 !~ /^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.+~^]+$/",
+    "new": "$3 !~ /^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.+]+$/",
+    "fails": "FAIL IP-real-E:"
+  },
+  {
+    "id": "IPM-89",
+    "what": "rejects RPM operators in candidate releases",
+    "old": "$4 !~ /^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.+~^]+$/",
+    "new": "$4 !~ /^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.+]+$/",
+    "fails": "FAIL IP-real-E:"
+  },
+  {
+    "id": "IPM-90",
+    "what": "rejects RPM operators in combined names",
+    "old": "\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.+~^-\" for c in path.name",
+    "new": "\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_.+-\" for c in path.name",
+    "fails": "FAIL IP-real-E:"
+  },
+  {
+    "id": "IPM-91",
+    "what": "includes alternate EPEL hashes",
+    "old": "for e in verification if local(e.tag) == \"hash\"",
+    "new": "for e in record.iter() if local(e.tag) == \"hash\"",
+    "fails": "FAIL IP-real-F:"
+  },
+  {
+    "id": "IPM-92",
+    "what": "accepts duplicate current EPEL hashes",
+    "old": "expected_repomd = sha256(one(hashes))",
+    "new": "expected_repomd = sha256(hashes[0])",
+    "fails": "FAIL IP-real-F:"
+  },
+  {
+    "id": "IPM-93",
+    "what": "accepts multiple current EPEL verification records",
+    "old": "verification = one([e for e in record if local(e.tag) == \"verification\"])",
+    "new": "verification = [e for e in record if local(e.tag) == \"verification\"][0]",
+    "fails": "FAIL IP-real-F:"
+  },
+  {
+    "id": "IPM-94",
+    "what": "trusts an unsafe filesystem root",
+    "old": "require(root.st_uid == 0 and stat.S_ISDIR(root.st_mode) and not (root.st_mode & 0o022))",
+    "new": "require(True)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-95",
+    "what": "trusts a library component owned by another user",
+    "old": "require(info.st_uid == 0)",
+    "new": "require(True)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-96",
+    "what": "does not allow trusted library symlinks",
+    "old": "require(links <= 40)",
+    "new": "require(links <= 0)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-97",
+    "what": "trusts writable library components",
+    "old": "require(not (info.st_mode & 0o022))",
+    "new": "require(True)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-98",
+    "what": "does not check library ancestors are directories",
+    "old": "require(stat.S_ISDIR(info.st_mode))",
+    "new": "require(True)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-99",
+    "what": "does not check library target is regular",
+    "old": "require(stat.S_ISREG(info.st_mode))",
+    "new": "require(True)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-100",
+    "what": "allows a library resolved outside allowed roots",
+    "old": "require(current.startswith(\"/usr/lib64/\") or current.startswith(\"/lib64/\"))",
+    "new": "require(True)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-101",
+    "what": "accepts a nonregular frame",
+    "old": "require(compressed.startswith(b\"\\x28\\xb5\\x2f\\xfd\"))",
+    "new": "require(True)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-102",
+    "what": "does not enforce declared frame size",
+    "old": "require(declared != error and (declared == unknown or (declared <= limit and declared == open_size)))",
+    "new": "require(True)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-103",
+    "what": "rejects legitimate unknown declared size",
+    "old": "require(declared != error and (declared == unknown or (declared <= limit and declared == open_size)))",
+    "new": "require(declared != error and declared <= limit and declared == open_size)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-104",
+    "what": "accepts trailing or additional frames",
+    "old": "require(not library.ZSTD_isError(frame_size) and frame_size == len(compressed))",
+    "new": "require(not library.ZSTD_isError(frame_size))",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-105",
+    "what": "ignores a native frame error",
+    "old": "require(not library.ZSTD_isError(frame_size) and frame_size == len(compressed))",
+    "new": "require(frame_size == len(compressed))",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-106",
+    "what": "ignores a native decode error",
+    "old": "require(not library.ZSTD_isError(decoded) and decoded == open_size)",
+    "new": "require(decoded == open_size)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-107",
+    "what": "does not require exact decoded length",
+    "old": "require(not library.ZSTD_isError(decoded) and decoded == open_size)",
+    "new": "require(not library.ZSTD_isError(decoded))",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-108",
+    "what": "does not check compressed primary hash",
+    "old": "require(digest(compressed) == sha256((checksum.text or \"\").strip().lower()))",
+    "new": "require(True)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-109",
+    "what": "does not check open primary hash",
+    "old": "require(len(raw) <= 268435456 and digest(raw) == sha256((open_checksum.text or \"\").strip().lower()))",
+    "new": "require(len(raw) <= 268435456)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-110",
+    "what": "accepts nondecimal open-size fields",
+    "old": "require(size_text.isascii() and size_text.isdigit() and len(size_text) <= 9)",
+    "new": "require(True)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-111",
+    "what": "accepts duplicate open-size fields",
+    "old": "open_size = one([e for e in primary if local(e.tag) == (\"open\" + \"-size\")])",
+    "new": "open_size = [e for e in primary if local(e.tag) == (\"open\" + \"-size\")][0]",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-112",
+    "what": "rejects the supported zstd format",
+    "old": "require(primary_href.endswith((\".xml.gz\", \".xml.zst\")))",
+    "new": "require(primary_href.endswith(\".xml.gz\"))",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-113",
+    "what": "permits a library search fallback",
+    "old": "raise ValueError(\"safe OS zstd library unavailable\")",
+    "new": "return ctypes.CDLL(\"libzstd.so.1\")",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-114",
+    "what": "does not bound the open-size before allocating",
+    "old": "require(isinstance(open_size, int) and 0 < open_size <= limit)",
+    "new": "require(True)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-115",
+    "what": "accepts foreign or duplicate EPEL headers",
+    "old": "if ($0 != \"[epel]\" || ++headers > 1) bad = 1",
+    "new": "if (0) bad = 1",
+    "fails": "FAIL IP-real-B:"
+  },
+  {
+    "id": "IPM-116",
+    "what": "accepts an alternate digest when the current one is wrong",
+    "old": "require(digest(repomd) == expected_repomd)",
+    "new": "require(digest(repomd) == expected_repomd or digest(repomd) in [(e.text or \"\").strip().lower() for e in record.iter() if local(e.tag) == \"hash\" and e.get(\"type\", \"\").lower() == \"sha256\"])",
+    "fails": "FAIL IP-real-F:"
+  },
+  {
+    "id": "IPM-117",
+    "what": "accepts a release without a minor",
+    "old": "case $pq_os_version in *.*) ;; *) return 1 ;; esac",
+    "new": ":",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-118",
+    "what": "accepts malformed minor components",
+    "old": "case $pq_os_minor in ''|*[!0123456789]*) return 1 ;; esac",
+    "new": ":",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-119",
+    "what": "misclassifies leading-zero Rocky minors",
+    "old": "while :; do case $pq_os_minor_normal in 0*) pq_os_minor_normal=${pq_os_minor_normal#0} ;; *) break ;; esac; done",
+    "new": ":",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-120",
+    "what": "does not label a newer Rocky minor unproven",
+    "old": "case $pq_os_minor_normal in ''|1|2) PREREQ_OS_CONFIDENCE=SUPPORTED ;; *) PREREQ_OS_CONFIDENCE=UNPROVEN ;; esac",
+    "new": "PREREQ_OS_CONFIDENCE=SUPPORTED",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-121",
+    "what": "labels known Rocky minors unproven",
+    "old": "case $pq_os_minor_normal in ''|1|2) PREREQ_OS_CONFIDENCE=SUPPORTED ;; *) PREREQ_OS_CONFIDENCE=UNPROVEN ;; esac",
+    "new": "PREREQ_OS_CONFIDENCE=UNPROVEN",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-122",
+    "what": "hides the unsupported distribution reason",
+    "old": "PREREQ_OS_REASON=distribution; return 1",
+    "new": "PREREQ_OS_REASON=invalid_version; return 1",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-123",
+    "what": "hides the missing major-version trust chain",
+    "old": "PREREQ_OS_REASON=untrusted_major ;; esac",
+    "new": "PREREQ_OS_REASON=invalid_version ;; esac",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-124",
+    "what": "does not stop package entry on wrong architecture",
+    "old": "if [ \"$pq_entry_arch\" != x86_64 ]; then",
+    "new": "if [ \"$pq_entry_arch\" = x86_64 ]; then",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-125",
+    "what": "does not stop requalification on wrong architecture",
+    "old": "if [ \"$pq_requalify_arch\" != x86_64 ]; then",
+    "new": "if [ \"$pq_requalify_arch\" = x86_64 ]; then",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-126",
+    "what": "allows a bare major in repository policy",
+    "old": "    10.*) case ${1#10.} in",
+    "new": "    10|10.*) case ${1#10.} in",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-127",
+    "what": "allows malformed repository minors",
+    "old": "10.*) case ${1#10.} in ''|*[!0123456789]*) return 1 ;; esac ;;",
+    "new": "10.*) : ;;",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-128",
+    "what": "allows a major-only EPEL repo URL",
+    "old": "require(query.get(\"arch\") == \"x86_64\" and repo.startswith(\"epel-z-10.\") and minor.isascii() and minor.isdigit())",
+    "new": "require(query.get(\"arch\") == \"x86_64\" and (repo == \"epel-10\" or (repo.startswith(\"epel-z-10.\") and minor.isascii() and minor.isdigit())))",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-129",
+    "what": "omits the unproven warning at package entry",
+    "old": "if [ \"$PREREQ_OS_CONFIDENCE\" = UNPROVEN ]; then prereq_info os_unproven \"$pq_os_version\" || exit \"${EX_PREREQ:-3}\"; fi",
+    "new": ":",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-130",
+    "what": "omits the unproven warning during machine inspection",
+    "old": "elif [ \"$PREREQ_OS_CONFIDENCE\" = UNPROVEN ]; then\n    prereq_info os_unproven \"$pq_os_version\" || return \"${EX_PREREQ:-3}\"",
+    "new": "elif [ 1 = 0 ]; then\n    :",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-131",
+    "what": "allows untrusted text in the unproven warning",
+    "old": "case ${2-} in 10.*) pq_info_minor=${2#10.}; case $pq_info_minor in ''|*[!0123456789]*) return 1 ;; esac ;; *) return 1 ;; esac",
+    "new": ":",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-132",
+    "what": "accepts an empty Rocky minor",
+    "old": "case $pq_os_minor in ''|*[!0123456789]*) return 1 ;; esac",
+    "new": "case $pq_os_minor in *[!0123456789]*) return 1 ;; esac",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-133",
+    "what": "does not check expanded Rocky metadata hash",
+    "old": "require(digest.hexdigest() == expected_hash)",
+    "new": "require(True)",
+    "fails": "FAIL IP-real-C:"
+  },
+  {
+    "id": "IPM-134",
+    "what": "allows a document type in Rocky metadata",
+    "old": "require(b\"<!DOCTYPE\" not in scan and b\"<!ENTITY\" not in scan)",
+    "new": "require(b\"<!ENTITY\" not in scan)",
+    "fails": "FAIL IP-real-C:"
+  },
+  {
+    "id": "IPM-135",
+    "what": "allows an entity declaration in Rocky metadata",
+    "old": "require(b\"<!DOCTYPE\" not in scan and b\"<!ENTITY\" not in scan)",
+    "new": "require(b\"<!DOCTYPE\" not in scan)",
+    "fails": "FAIL IP-real-C:"
+  },
+  {
+    "id": "IPM-136",
+    "what": "skips the Rocky memory preflight",
+    "old": "        require_rocky_memory(ROCKY_MIN_AVAILABLE_KIB)",
+    "new": "        pass",
+    "fails": "FAIL IP-real-C:"
+  },
+  {
+    "id": "IPM-137",
+    "what": "accepts duplicate available-memory records",
+    "old": "len(rows) != 1 or len(rows[0]) != 3",
+    "new": "len(rows) == 0 or len(rows[0]) != 3",
+    "fails": "FAIL IP-real-C:"
+  },
+  {
+    "id": "IPM-138",
+    "what": "accepts inadequate available memory",
+    "old": "if int(rows[0][1]) < minimum_kib:",
+    "new": "if False:",
+    "fails": "FAIL IP-real-C:"
+  },
+  {
+    "id": "IPM-139",
+    "what": "ignores unreadable memory information",
+    "old": "    except (OSError, UnicodeError, ValueError):\n        raise MemoryError(\"memory availability unavailable\") from None",
+    "new": "    except (OSError, UnicodeError, ValueError):\n        return",
+    "fails": "FAIL IP-real-C:"
+  },
+  {
+    "id": "IPM-140",
+    "what": "retains completed metadata elements",
+    "old": "                root.remove(element)",
+    "new": "                pass",
+    "fails": "FAIL IP-real-C:"
+  },
+  {
+    "id": "IPM-141",
+    "what": "retains completed package contents",
+    "old": "                element.clear()",
+    "new": "                pass",
+    "fails": "FAIL IP-real-C:"
+  },
+  {
+    "id": "IPM-142",
+    "what": "skips verification of the expanded metadata",
+    "old": "        verify_rocky_primary(packed, raw_hash)",
+    "new": "        pass",
+    "fails": "FAIL IP-real-C:"
+  },
+  {
+    "id": "IPM-143",
+    "what": "accepts non-ASCII digits in EPEL minor",
+    "old": "minor.isascii() and minor.isdigit()",
+    "new": "minor.isdigit()",
+    "fails": "FAIL IP-real-L:"
+  },
+  {
+    "id": "IPM-144",
+    "what": "allows an extra untrusted library symlink traversal",
+    "old": "require(links <= 40)",
+    "new": "require(links <= 41)",
+    "fails": "FAIL IP-real-G:"
+  },
+  {
+    "id": "IPM-145",
+    "what": "reports pending Compose verification as a problem",
+    "old": "prereq_info compose_pending || return",
+    "new": "prereq_msg compose_verify_failed || return",
+    "fails": "FAIL O:"
+  },
+  {
+    "id": "IPM-146",
+    "what": "uses locale-dependent shell glob order for RPM candidates",
+    "old": "printf '%s\\n' \"$pq_candidates_output\" | LC_ALL=C sort -t '|' -k1,1",
+    "new": "printf '%s\\n' \"$pq_candidates_output\"",
+    "fails": "FAIL IP-real-ORDER:"
+  },
+  {
+    "id": "IPM-147",
+    "what": "does not set the C locale inside protected prerequisite calls",
+    "old": "  LC_ALL=C\n  export PATH LC_ALL",
+    "new": "  :\n  export PATH LC_ALL",
+    "fails": "FAIL IP-real-ORDER:"
+  },
+  {
+    "id": "IPM-148",
+    "what": "does not restore the caller locale after protected calls",
+    "old": "  if [ \"$1\" = x ]; then LC_ALL=$2; export LC_ALL; else unset LC_ALL; fi",
+    "new": "  :",
+    "fails": "FAIL IP-real-ORDER:"
+  },
+  {
+    "id": "IPM-149",
+    "what": "does not retry transient metalink fetch",
+    "old": "    for attempt in range(2):\n        checkpoint = len(created)",
+    "new": "    for attempt in range(1):\n        checkpoint = len(created)",
+    "fails": "FAIL IP-mirror:"
+  },
+  {
+    "id": "IPM-150",
+    "what": "allows a ninth mirror attempt",
+    "old": "    for repomd_url in mirrors[:8]:",
+    "new": "    for repomd_url in mirrors[:9]:",
+    "fails": "FAIL IP-mirror:"
+  },
+  {
+    "id": "IPM-151",
+    "what": "skips authenticated index hash verification",
+    "old": "            require(digest(repomd) == expected_repomd)",
+    "new": "            pass",
+    "fails": "FAIL IP-mirror:"
+  },
+  {
+    "id": "IPM-152",
+    "what": "skips authenticated package hash verification",
+    "old": "            require(digest(archive) == expected_package)",
+    "new": "            pass",
+    "fails": "FAIL IP-mirror:"
+  },
+  {
+    "id": "IPM-153",
+    "what": "does not limit a stuck curl subprocess",
+    "old": "\"LC_ALL\": \"C\"}, timeout=timeout + 1, check=False,",
+    "new": "\"LC_ALL\": \"C\"}, timeout=10, check=False,",
+    "fails": "FAIL IP-mirror:"
+  },
+  {
+    "id": "IPM-154",
+    "what": "continues to another mirror after an RPM signature failure",
+    "old": "! prereq_rpm_signature_ok \"$pq_requalify_stage/gpg\" \"$pq_requalify_stage/empty\" \"$pq_requalify_stage/pinned\" \"$pq_requalify_stage/compose.rpm\" ||",
+    "new": "! { prereq_rpm_signature_ok \"$pq_requalify_stage/gpg\" \"$pq_requalify_stage/empty\" \"$pq_requalify_stage/pinned\" \"$pq_requalify_stage/compose.rpm\" || { pq_next_url=$(python3 -c 'import sys,xml.etree.ElementTree as E; print([x.text for x in E.parse(sys.argv[1]).getroot().iter() if x.tag.endswith(\"}url\")][1])' \"$pq_requalify_stage/metalink.xml\"); curl \"$pq_next_url\" >/dev/null 2>&1; return 1; }; } ||",
+    "fails": "FAIL IP-signature-order:"
+  },
+  {
+    "id": "IPM-155",
+    "what": "stops after the first mirror chain failure",
+    "old": "            del created[checkpoint:]\n            continue",
+    "new": "            del created[checkpoint:]\n            break",
+    "fails": "FAIL IP-mirror:"
+  },
+  {
+    "id": "IPM-156",
+    "what": "does not retry interrupted HTTP mirror responses",
+    "old": "except (OSError, ValueError, KeyError, TypeError, AttributeError, ctypes.ArgumentError, EOFError, OverflowError, ET.ParseError, http.client.HTTPException, subprocess.SubprocessError):\n            failures[phase]",
+    "new": "except (OSError, ValueError, KeyError, TypeError, AttributeError, ctypes.ArgumentError, EOFError, OverflowError, ET.ParseError, subprocess.SubprocessError):\n            failures[phase]",
+    "fails": "FAIL IP-urllib-interrupt:"
+  },
+  {
+    "id": "IPM-157",
+    "what": "does not retry interrupted HTTP metalink responses",
+    "old": "except (OSError, ValueError, http.client.HTTPException, subprocess.SubprocessError):",
+    "new": "except (OSError, ValueError, subprocess.SubprocessError):",
+    "fails": "FAIL IP-urllib-interrupt:"
+  },
+  {
+    "id": "IPM-158",
+    "what": "keeps caller-supplied EPEL boot state at the public prerequisite entry",
+    "old": "  unset PREREQ_EPEL_BOOT_STAGE PREREQ_EPEL_BOOT_KEY_HASH PREREQ_EPEL_BOOT_CONFIG_HASH || return 1",
+    "new": "  :",
+    "fails": "FAIL IP-prereq-flow:"
+  }
+]

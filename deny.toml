@@ -1,0 +1,55 @@
+# The licence and supply-chain gate (LAYOUT §6; F1-02; SPEC §2.4, G10; D86).
+# Licences are an ALLOW list: anything not listed is refused, which covers AGPL, SSPL, BUSL,
+# Commons Clause, non-commercial terms and unknown or missing licences (D86).
+# `cargo deny check` runs on every change; `xtask licences` runs this same file against fixtures.
+
+[graph]
+all-features = true
+
+[advisories]
+# Every RustSec advisory fails the check; an exception needs kai's line and its reason here.
+ignore = []
+yanked = "deny"
+
+[licenses]
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-3.0",
+    "Zlib",
+]
+confidence-threshold = 0.93
+# One exception, with its reason (kai's line for piece 14, relayed by cox, 6 Nov): `webpki-roots` is the bundled Mozilla
+# root-certificate DATA that `ureq` brings with `rustls`; its licence CDLA-Permissive-2.0 is permissive, and D94 makes
+# licences report-only until the January commercial release. CLEARED BEFORE JANUARY by one of: CDLA-Permissive-2.0 added to
+# `allow` by decision (kai is fine with that), or the platform certificate verifier instead of the bundled roots.
+exceptions = [
+    { allow = ["CDLA-Permissive-2.0"], crate = "webpki-roots@1.0.11" },
+]
+
+[licenses.private]
+# Our own crates are `publish = false` and carry no licence field yet; they are not third-party code.
+ignore = true
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+allow-wildcard-paths = true
+# TLS is rustls with the ring provider and nothing else (kai, piece 14): none of these may ever enter the build.
+deny = [
+    { crate = "aws-lc-rs" },
+    { crate = "aws-lc-sys" },
+    { crate = "native-tls" },
+    { crate = "openssl-sys" },
+    { crate = "openssl" },
+]
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

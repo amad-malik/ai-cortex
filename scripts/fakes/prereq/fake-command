@@ -1,0 +1,475 @@
+#!/bin/sh
+# A test-only command dispatcher. Every name is linked inside the test's private PATH.
+set -eu
+fake_name=${0##*/}
+if { [ "$fake_name" = curl ] || [ "$fake_name" = gpg ] || [ "$fake_name" = gpgv ]; } && [ -z "${FAKE_LOG:-}" ]; then
+  fake_test_dir=${0%/*}/..
+  FAKE_LOG=$fake_test_dir/log FAKE_STATE_DIR=$fake_test_dir/state FAKE_ALLOW_FETCH=1 FAKE_ALLOW_KEY_READ=1
+  IFS= read -r FAKE_FETCH_FIXTURES < "$fake_test_dir/state/fetch-fixtures"
+  IFS= read -r FAKE_FETCH_CASE < "$fake_test_dir/state/fetch-case"
+fi
+if [ "$fake_name" = rpm2cpio ] && [ -z "${FAKE_LOG:-}" ]; then
+  fake_test_dir=${0%/*}/..
+  FAKE_LOG=$fake_test_dir/log FAKE_STATE_DIR=$fake_test_dir/state FAKE_ALLOW_EXTRACT=1
+  IFS= read -r FAKE_EPEL_CPIO < "$fake_test_dir/state/epel-cpio"
+fi
+: "${FAKE_LOG:?}" "${FAKE_STATE_DIR:?}"
+if [ "${FAKE_PROBE_FD3:-0}" = 1 ]; then
+  ( printf '%s\n' 'unexpected-child-fd3' >&3 ) 2>/dev/null || :
+fi
+{
+  printf '%s' "$fake_name"
+  for fake_arg do printf ' <%s>' "$fake_arg"; done
+  printf '\n'
+} >> "$FAKE_LOG"
+
+fake_archive_identity() {
+  case $1 in
+    */one.rpm|*/dependency+one.rpm)
+      if [ "${FAKE_MAIN_PACKAGE:-gnupg2}" = curl ]; then printf '%s\n' 'curl|0|8.0.0|1.el10|x86_64'; else printf '%s\n' 'gnupg2|0|2.4.5|1.el10|x86_64'; fi ;;
+    */two.rpm) printf '%s\n' 'epel-release|0|10|8.el10|noarch' ;;
+    */dep1.rpm|*/dep+1.rpm) printf '%s\n' 'dependency-one|0|1.0|1.el10|noarch' ;;
+    */dep2.rpm) printf '%s\n' 'dependency-two|0|1.0|1.el10|noarch' ;;
+    */compose.rpm) printf '%s\n' "${FAKE_EPEL_IDENTITY:-podman-compose|0|1.5.0|1.el10_1|noarch}" ;;
+    *) return 1 ;;
+  esac
+}
+
+case $fake_name in
+  stat)
+    [ "${FAKE_ALLOW_ROOT_STAT:-0}" = 1 ] && [ "${1-}" = -c ] || exit 95
+    if [ "${FAKE_STAT_CASE:-valid}" = mixed ]; then
+      if [ "${4-}" = "${FAKE_PRIVATE_PARENT:-/not-private}" ]; then exec "$FAKE_REAL_STAT" "$@"; fi
+      case ${4-} in "${FAKE_PRIVATE_STAGE:-/not-private}"|"${FAKE_PRIVATE_STAGE:-/not-private}"/*) exec "$FAKE_REAL_STAT" "$@" ;; esac
+      case ${4-} in "${FAKE_PRIVATE_PARENT:-/not-private}"/.cortex-prereq.*|"${FAKE_PRIVATE_PARENT:-/not-private}"/.cortex-prereq.*/*) exec "$FAKE_REAL_STAT" "$@" ;; esac
+    fi
+    case ${2-} in %a) printf '%s\n' 700; exit 0 ;; %u) printf '%s\n' 1000; exit 0 ;; '%u|%a') ;; *) exit 95 ;; esac
+    case ${FAKE_STAT_CASE:-valid} in
+      private) printf '%s\n' '1000|700' ;;
+      unowned) printf '%s\n' '1000|755' ;;
+      writable) printf '%s\n' '0|775' ;;
+      *) printf '%s\n' '0|755' ;;
+    esac ;;
+  id)
+    case ${1-} in
+      -u) printf '%s\n' "${FAKE_UID:-1000}" ;;
+      -un|-nu) printf '%s\n' "${FAKE_USER:-cortexuser}" ;;
+      *) exit 2 ;;
+    esac ;;
+  uname)
+    [ "${1-}" = -m ] || exit 2
+    printf '%s\n' "${FAKE_ARCH:-x86_64}" ;;
+  df)
+    fake_path=''
+    for fake_arg do fake_path=$fake_arg; done
+    case ${FAKE_DF_MODE:-ok} in
+      fail) exit 1 ;;
+      malformed) printf 'Filesystem Type 1B-blocks Used Available Capacity Mounted on\n/dev/fake xfs 100 0 unknown 1%% /fake\n'; exit 0 ;;
+    esac
+    case $fake_path in
+      "${FAKE_GRAPH_ROOT:-/not-a-graph-root}"*) fake_type=${FAKE_GRAPH_FS:-xfs}; fake_free=${FAKE_GRAPH_FREE:-21474836480} ;;
+      *) fake_type=${FAKE_HOME_FS:-xfs}; fake_free=${FAKE_HOME_FREE:-21474836480} ;;
+    esac
+    fake_device=/dev/fake
+    [ "${FAKE_DF_MODE:-ok}" != long ] || fake_device=/dev/mapper/an-extremely-long-container-storage-device-name-that-must-not-wrap
+    printf 'Filesystem Type 1B-blocks Used Available Capacity Mounted on\n'
+    printf '%s %s 100000000000 0 %s 1%% /fake\n' "$fake_device" "$fake_type" "$fake_free" ;;
+  ss)
+    [ "${FAKE_PORT_BUSY:-0}" = 0 ] || printf 'LISTEN 0 128 127.0.0.1:%s 0.0.0.0:*\n' "${FAKE_BUSY_PORT:-8601}" ;;
+  timedatectl) printf '%s\n' "${FAKE_TIME_SYNC:-yes}" ;;
+  loginctl)
+    case ${1-} in
+      show-user)
+        if [ -f "$FAKE_STATE_DIR/linger" ]; then printf '%s\n' yes; else printf '%s\n' "${FAKE_LINGER:-yes}"; fi ;;
+      enable-linger)
+        [ "${2-}" != -- ] || shift
+        [ "${FAKE_ALLOW_LINGER:-0}" = 1 ] && [ "${2-}" = cortexuser ] || exit 95
+        case ${FAKE_LINGER_MODE:-user} in
+          user) : > "$FAKE_STATE_DIR/linger" ;;
+          sudo) [ "${FAKE_PRIVILEGED:-0}" = 1 ] || exit 1; : > "$FAKE_STATE_DIR/linger" ;;
+          noop) : ;;
+          fail) exit 1 ;;
+          *) exit 95 ;;
+        esac ;;
+      *) exit 95 ;;
+    esac ;;
+  getenforce) printf '%s\n' "${FAKE_SELINUX:-Enforcing}" ;;
+  podman)
+    case ${1-} in
+      --version) printf 'podman version %s\n' "${FAKE_PODMAN_VERSION:-5.8.2}" ;;
+      info) printf '%s\n' "${FAKE_GRAPH_ROOT:-$FAKE_STATE_DIR/graph}" ;;
+      compose) printf 'podman-compose version %s\n' "${FAKE_COMPOSE_VERSION:-1.5.0}" ;;
+      *) exit 95 ;;
+    esac ;;
+  rpm)
+    if [ "${FAKE_ALLOW_ROCKY_INSTALL:-0}" = 1 ] && [ "${1-}" = -q ] && [ "${2-}" = --queryformat ]; then
+      case ${4-} in
+        gnupg2|curl|dependency-one|dependency-two|epel-release|podman-compose)
+          fake_installed_file=$FAKE_STATE_DIR/installed.${4}
+          if [ -f "$fake_installed_file" ]; then cat "$fake_installed_file"; exit 0; fi
+          if [ "$4" = podman-compose ] && [ "${FAKE_EXPECT_NEW_COMPOSE:-0}" != 1 ] && [ "${FAKE_COMPOSE_INSTALLED:-yes}" = yes ]; then
+            printf '%s\n' "${FAKE_EPEL_IDENTITY:-podman-compose|0|1.5.0|1.el10_1|noarch}"; exit 0
+          fi
+          exit 1 ;;
+      esac
+    fi
+    fake_nevra_query=0
+    case ${3-} in *'%{NAME}'*'%{EPOCHNUM}'*) fake_nevra_query=1 ;; esac
+    if [ "${FAKE_ALLOW_ROCKY_ARCHIVES:-0}" = 1 ] && [ "${1-}" = -qp ] && [ "$fake_nevra_query" = 1 ]; then
+      fake_archive=''
+      for fake_arg do fake_archive=$fake_arg; done
+      fake_identity=$(fake_archive_identity "$fake_archive") || fake_identity=''
+      if [ -n "$fake_identity" ]; then
+        [ "${FAKE_ARCHIVE_CASE:-valid}" != nevra ] || fake_identity='gnupg2|1|2.4.5|1.el10|x86_64'
+        printf '%s\n' "$fake_identity"
+        exit 0
+      fi
+      [ "${FAKE_ALLOW_PAYLOAD:-0}" = 1 ] || exit 95
+    fi
+    if [ "${FAKE_ALLOW_ROOTS:-0}" = 1 ] && [ "${4-}" != "${FAKE_PROVIDER:-/not-a-provider}" ]; then
+      case ${1-} in
+        -qf)
+          case ${3-} in
+            *FILEDIGESTALGO*) [ "${FAKE_ROOT_CASE:-valid}" != weak_hash ] && printf '8\n' || printf '1\n' ;;
+            *FILEVERIFYFLAGS*)
+              fake_root_flags=0 fake_root_verify=255
+              [ "${FAKE_ROOT_CASE:-valid}" != ghost ] || fake_root_flags=64
+              [ "${FAKE_ROOT_CASE:-valid}" != no_digest ] || fake_root_verify=254
+              printf '%s|%s|%s|root|root|33188\n' "$4" "$fake_root_flags" "$fake_root_verify" ;;
+            *) [ "${FAKE_ROOT_CASE:-valid}" != foreign ] && printf 'rocky-gpg-keys\n' || printf 'unrelated-package\n' ;;
+          esac
+          exit 0 ;;
+        -Vf)
+          [ "${FAKE_ROOT_CASE:-valid}" != modified ] || { printf '%s\n' 'S.5...... key'; exit 1; }
+          exit 0 ;;
+      esac
+    fi
+    if { [ "${FAKE_ALLOW_PAYLOAD:-0}" = 1 ] || [ "${FAKE_ALLOW_ROOTS:-0}" = 1 ]; } && [ "${1-}" = --version ]; then printf '%s\n' 'RPM version 4.19.1.1'; exit 0; fi
+    if [ "${FAKE_ALLOW_PAYLOAD:-0}" = 1 ]; then
+      fake_nevra=${FAKE_EPEL_IDENTITY:-'podman-compose|0|1.5.0|1.el10_1|noarch'}
+      [ "${FAKE_PAYLOAD_CASE:-valid}" != old ] || fake_nevra='podman-compose|0|1.4.9|1.el10_1|noarch'
+      case ${1-} in
+        -q|-qp|-qf)
+          case ${3-} in
+            *FILEDIGESTALGO*) printf '%s\n' 8; exit 0 ;;
+            *FILEVERIFYFLAGS*)
+              fake_flags=0 fake_verify=255
+              [ "${FAKE_PAYLOAD_CASE:-valid}" != ghost ] || fake_flags=64
+              [ "${FAKE_PAYLOAD_CASE:-valid}" != skip_digest ] || fake_verify=254
+              printf '%s|0|255|33261\n' "$FAKE_PROVIDER"
+              if [ "${FAKE_PAYLOAD_CASE:-valid}" != missing_module ]; then
+                printf '/usr/lib/python3.12/site-packages/podman_compose.py|%s|%s|33188\n' "$fake_flags" "$fake_verify"
+              fi
+              exit 0 ;;
+          esac
+          case ${FAKE_PAYLOAD_CASE:-valid}:${1-} in
+            epoch:-qp) fake_nevra='podman-compose|1|1.5.0|1.el10_1|noarch' ;;
+            arch:-qp) fake_nevra='podman-compose|0|1.5.0|1.el10_1|x86_64' ;;
+            owner:-qf) fake_nevra='foreign|0|1.5.0|1.el10_1|noarch' ;;
+          esac
+          case ${3-} in
+            *VERSION_ONLY*) [ "${FAKE_PAYLOAD_CASE:-valid}" != old ] && printf '1.5.0\n' || printf '1.4.9\n' ;;
+            *) printf '%s\n' "$fake_nevra" ;;
+          esac
+          exit 0 ;;
+        -Vp)
+          case ${FAKE_PAYLOAD_CASE:-valid} in
+            mismatch) printf '%s\n' 'S.5...... /usr/lib/python/site-packages/podman_compose.py'; exit 1 ;;
+            noisy) printf '%s\n' 'missing /usr/lib/python/site-packages/podman_compose.py'; exit 0 ;;
+            *) exit 0 ;;
+          esac ;;
+      esac
+      exit 95
+    fi
+    case "${1-} ${2-} ${3-}" in
+      '-q --quiet epel-release') [ "${FAKE_EPEL:-present}" = present ] ;;
+      '-q --quiet podman-compose') [ "${FAKE_COMPOSE_INSTALLED:-yes}" = yes ] ;;
+      *) exit 95 ;;
+    esac ;;
+  rpm2cpio)
+    [ "${FAKE_ALLOW_EXTRACT:-0}" = 1 ] && [ "$#" -eq 1 ] || exit 95
+    case $1 in /proc/self/fd/*) ;; *) exit 95 ;; esac
+    cat "$FAKE_EPEL_CPIO" ;;
+  gpg)
+    [ "${FAKE_ALLOW_KEY_READ:-0}" = 1 ] || exit 95
+    if [ "${1-}" = --version ]; then printf '%s\n' 'gpg (GnuPG) 2.4.5'; exit 0; fi
+    fake_output='' fake_dearmor=0
+    while [ "$#" -gt 0 ]; do
+      case $1 in --dearmor) fake_dearmor=1 ;; --output) shift; fake_output=${1-} ;; esac
+      shift
+    done
+    if [ "$fake_dearmor" = 1 ]; then
+      [ -n "$fake_output" ] || exit 95
+      printf '%s\n' 'synthetic keyring' > "$fake_output"
+      exit 0
+    fi
+    case ${FAKE_KEY_CASE:-valid} in
+      valid) printf '%s\n' 'pub:u:4096:1:33D98517E37ED158::::::::' 'fpr:::::::::7D8D15CBFC4E62688591FB2633D98517E37ED158:' 'sub:u:4096:1:1111111111111111::::::::' 'fpr:::::::::1111111111111111111111111111111111111111:' ;;
+      short) printf '%s\n' 'pub:u:4096:1:33D98517E37ED158::::::::' 'fpr:::::::::33D98517E37ED158:' ;;
+      foreign) printf '%s\n' 'pub:u:4096:1:33D98517E37ED158::::::::' 'fpr:::::::::00000000000000000000000033D98517E37ED158:' ;;
+      multiple) printf '%s\n' 'pub:u:4096:1:33D98517E37ED158::::::::' 'fpr:::::::::7D8D15CBFC4E62688591FB2633D98517E37ED158:' 'pub:u:4096:1:1111111111111111::::::::' 'fpr:::::::::1111111111111111111111111111111111111111:' ;;
+      fail) exit 1 ;;
+      *) exit 95 ;;
+    esac ;;
+  gpgv)
+    [ "${FAKE_ALLOW_KEY_READ:-0}" = 1 ] || exit 95
+    fake_signer=7D8D15CBFC4E62688591FB2633D98517E37ED158
+    if [ -r "$FAKE_STATE_DIR/gpgv-signer" ]; then IFS= read -r fake_signer < "$FAKE_STATE_DIR/gpgv-signer"; fi
+    case ${FAKE_FETCH_CASE:-valid} in
+      metadata_bad_sig) exit 1 ;;
+      metadata_foreign_sig) printf '%s\n' '[GNUPG:] VALIDSIG 1111111111111111111111111111111111111111 2026-11-07 0 0 4 0 1 8 00 1111111111111111111111111111111111111111' ;;
+      *) printf '[GNUPG:] VALIDSIG %s 2026-11-07 0 0 4 0 1 8 00 %s\n' "$fake_signer" "$fake_signer" ;;
+    esac ;;
+  rpmkeys)
+    [ "${FAKE_ALLOW_RPMKEYS:-0}" = 1 ] || exit 95
+    if [ "${1-}" = --version ]; then printf '%s\n' 'RPM version 4.19.1.1'; exit 0; fi
+    [ "$#" -eq 13 ] || exit 95
+    [ "$1" = --define ] && [ "$2" = '_keyring fs' ] && [ "$3" = --define ] || exit 95
+    case $4 in '_keyringpath '*) fake_keydir=${4#_keyringpath } ;; *) exit 95 ;; esac
+    [ -n "$fake_keydir" ] || exit 95
+    shift 4
+    [ "$1" = --define ] && [ "$2" = '_pkgverify_level all' ] &&
+      [ "$3" = --define ] && [ "$4" = '_pkgverify_flags 0' ] &&
+      [ "$5" = --define ] && [ "$6" = '__vsflags 0' ] &&
+      [ "$7" = --checksig ] && [ "$8" = --verbose ] && [ -n "$9" ] || exit 95
+    if [ ! -f "$fake_keydir/certificate.key" ] && [ ! -f "$fake_keydir/root-1.key" ]; then
+      [ "${FAKE_SIGNATURE_CASE:-valid}" = isolation_broken ] && exit 0
+      exit 1
+    fi
+    fake_signature_case=${FAKE_SIGNATURE_CASE:-valid}
+    if [ -f "$fake_keydir/certificate.key" ]; then fake_signature_case=${FAKE_EPEL_SIGNATURE_CASE:-$fake_signature_case}; fi
+    case $fake_signature_case in
+      valid|isolation_broken) printf '%s\n' 'Header V4 RSA/SHA256 Signature, key ID e37ed158: OK' 'Payload SHA256 digest: OK' ;;
+      digest_only) printf '%s\n' 'Header SHA256 digest: OK' 'Payload SHA256 digest: OK' ;;
+      header_only) printf '%s\n' 'Header V4 RSA/SHA256 Signature, key ID e37ed158: OK' 'Header SHA256 digest: OK' ;;
+      unsigned) printf '%s\n' 'package: digests OK' ;;
+      bad) printf '%s\n' 'Header V4 RSA/SHA256 Signature: BAD' 'Payload SHA256 digest: OK'; exit 1 ;;
+      wrong_key) printf '%s\n' 'Header V4 RSA/SHA256 Signature: NOKEY'; exit 1 ;;
+      swap)
+        fake_archive=''
+        for fake_arg do fake_archive=$fake_arg; done
+        printf '%s\n' swapped >> "$fake_archive"
+        printf '%s\n' 'Header V4 RSA/SHA256 Signature, key ID fake: OK' 'Payload SHA256 digest: OK' ;;
+      *) exit 95 ;;
+    esac ;;
+  dnf)
+    if [ "${1-}" = --version ] && { [ "${FAKE_ALLOW_ROCKY_CONFIG:-0}" = 1 ] || [ "${FAKE_ALLOW_ROCKY_DOWNLOAD:-0}" = 1 ]; }; then printf '%s\n' '4.21.1'; exit 0; fi
+    case " $* " in *' download '*) fake_is_download=1 ;; *) fake_is_download=0 ;; esac
+    if [ "${FAKE_ALLOW_ROCKY_DOWNLOAD:-0}" = 1 ] && [ "$fake_is_download" = 1 ]; then
+      fake_dest='' fake_resolve=0 fake_download=0 fake_assumeno=0 fake_bootstrap_package=0
+      for fake_arg do
+        case $fake_arg in
+          --destdir=*) fake_dest=${fake_arg#--destdir=} ;;
+          --resolve) fake_resolve=1 ;;
+          download) fake_download=1 ;;
+          --assumeno) fake_assumeno=1 ;;
+          epel-release) fake_bootstrap_package=1 ;;
+          install|reinstall|upgrade|update|--nogpgcheck) exit 95 ;;
+        esac
+      done
+      case $fake_dest in
+        "${FAKE_DOWNLOAD_STAGE:-$FAKE_ROOT_STAGE}"/packages) ;;
+        "${FAKE_DOWNLOAD_PARENT:-/not-private}"/.cortex-prereq.*/packages) ;;
+        "${FAKE_DOWNLOAD_PARENT:-/not-private}"/.cortex-prereq.*/bootstrap/packages|"${FAKE_DOWNLOAD_PARENT:-/not-private}"/.cortex-prereq.*/mixed/packages) ;;
+        *) exit 95 ;;
+      esac
+      [ "$fake_resolve$fake_download$fake_assumeno" = 111 ] || exit 95
+      [ "${FAKE_DOWNLOAD_FAIL:-0}" = 0 ] || exit 1
+      if [ "${FAKE_BOOTSTRAP_DOWNLOAD:-0}" = 1 ] && [ "$fake_bootstrap_package" = 1 ]; then
+        printf '%s\n' 'synthetic downloaded archive' > "$fake_dest/two.rpm"
+      else
+        printf '%s\n' 'synthetic downloaded archive' > "$fake_dest/one.rpm"
+      fi
+      if [ "${FAKE_EPEL_MIX:-0}" = 1 ] && [ "$fake_bootstrap_package" = 0 ]; then
+        IFS= read -r fake_fixture_dir < "$FAKE_STATE_DIR/fetch-fixtures"
+        cp "$fake_fixture_dir/package" "$fake_dest/compose.rpm"
+      fi
+      if [ "${FAKE_INCLUDE_DEPS:-0}" = 1 ]; then
+        fake_dep1=dep1.rpm
+        [ "${FAKE_PLUS_DEP:-0}" != 1 ] || fake_dep1=dep+1.rpm
+        printf '%s\n' 'synthetic dependency one' > "$fake_dest/$fake_dep1"
+        printf '%s\n' 'synthetic dependency two' > "$fake_dest/dep2.rpm"
+      fi
+      exit 0
+    fi
+    if [ "${FAKE_ALLOW_ROCKY_INSTALL:-0}" = 1 ] && [ "${1-} ${2-} ${3-} ${4-}" = '--releasever=10.2 --disablerepo=* install -y' ]; then
+      [ "${FAKE_INSTALL_FAIL:-0}" = 0 ] || exit 1
+      shift 4
+      [ "$#" -gt 0 ] || exit 95
+      fake_boot_group=0
+      for fake_arg do
+        case $fake_arg in "$FAKE_ROOT_STAGE"/packages/*.rpm) ;; *) exit 95 ;; esac
+        case $fake_arg in */two.rpm) fake_boot_group=1 ;; esac
+      done
+      if [ "${FAKE_TWO_PHASE:-0}" = 1 ] && [ "$fake_boot_group" = 1 ] && [ "${FAKE_BOOT_FAIL:-0}" != 0 ]; then exit 1; fi
+      if [ "${FAKE_INSTALL_NOOP:-0}" = 0 ]; then
+        for fake_arg do
+          fake_identity=$(fake_archive_identity "$fake_arg") || exit 95
+          fake_package=${fake_identity%%|*}
+          [ "$fake_package" != "${FAKE_SKIP_INSTALL_PACKAGE:-}" ] || continue
+          printf '%s\n' "$fake_identity" > "$FAKE_STATE_DIR/installed.$fake_package"
+        done
+      fi
+      if [ "${FAKE_TWO_PHASE:-0}" = 1 ] && [ "$fake_boot_group" = 1 ]; then
+        printf '%s\n' installed > "$FAKE_STATE_DIR/bootstrap-installed"
+        if [ "${FAKE_BOOT_SWAP:-0}" = 1 ]; then printf '%s\n' swapped >> "$FAKE_ROOT_STAGE/packages/compose.rpm"; fi
+        exit 0
+      fi
+      [ "${FAKE_INSTALL_NOOP:-0}" = 1 ] || printf '%s\n' installed > "$FAKE_STATE_DIR/rocky-installed"
+      if [ -n "${FAKE_CREATE_CURL:-}" ]; then
+        case $FAKE_CREATE_CURL in "${FAKE_STATE_DIR%/state}"/flow-nocurl-bin/curl) ;; *) exit 95 ;; esac
+        ln -s "$FAKE_BIN/curl" "$FAKE_CREATE_CURL"
+      fi
+      if [ -n "${FAKE_CREATE_GPG:-}" ] && [ -f "$FAKE_STATE_DIR/installed.gnupg2" ]; then
+        case $FAKE_CREATE_GPG in "${FAKE_STATE_DIR%/state}"/flow-nogpg-bin) ;; *) exit 95 ;; esac
+        ln -s "$FAKE_BIN/gpg" "$FAKE_CREATE_GPG/gpg"
+        ln -s "$FAKE_BIN/gpgv" "$FAKE_CREATE_GPG/gpgv"
+      fi
+      exit 0
+    fi
+    if [ "${FAKE_ALLOW_ROCKY_CONFIG:-0}" = 1 ] && [ "$#" -eq 6 ] && [ "$6" != epel ] &&
+       [ "$1 $2 $3 $4 $5" = '--releasever=10.2 --cacheonly --assumeno config-manager --dump' ]; then
+      fake_id=$6
+      case $fake_id in baseos) fake_channel=BaseOS ;; appstream) fake_channel=AppStream ;; crb) fake_channel=CRB ;; extras) fake_channel=extras ;; *) exit 95 ;; esac
+      fake_host=mirrors.rockylinux.org fake_gpg=1 fake_ssl=1 fake_base='' fake_key='file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-10' fake_metadata=1
+      case ${FAKE_ROCKY_CASE:-valid} in
+        foreign) fake_host=evil.example ;;
+        gpg_off) fake_gpg=0 ;;
+        tls_off) fake_ssl=0 ;;
+        baseurl) fake_base=https://evil.example/repo ;;
+        wrong_repo) fake_channel=devel ;;
+        wrong_key) fake_key='file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-10-Testing' ;;
+        metadata_off) fake_metadata=0 ;;
+      esac
+      printf '======== repo: %s ========\nbaseurl = %s\nmetalink =\nmirrorlist = https://%s/mirrorlist?arch=x86_64&repo=%s-10.2\ngpgcheck = %s\ngpgkey = %s\nsslverify = %s\nsslcacert =\nrepo_gpgcheck = %s\nproxy =\nproxy_sslverify = 1\nproxy_sslcacert =\n' \
+        "$fake_id" "$fake_base" "$fake_host" "$fake_channel" "$fake_gpg" "$fake_key" "$fake_ssl" "$fake_metadata"
+      exit 0
+    fi
+    fake_dnf_args='' fake_epel_key='file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-10' fake_epel_repos=0 fake_epel_stage=${FAKE_PRIVATE_EPEL_STAGE:-}
+    for fake_arg do
+      case $fake_arg in
+        --setopt=reposdir=*)
+          if [ -z "$fake_epel_stage" ]; then
+            fake_epel_stage=${fake_arg#--setopt=reposdir=${PREREQ_ROOT:-}/etc/yum.repos.d,}
+            fake_epel_stage=${fake_epel_stage%/epel-config}
+            case $fake_epel_stage in "${FAKE_PRIVATE_EPEL_PARENT:-/not-private}"/.cortex-prereq.*|"${FAKE_PRIVATE_EPEL_PARENT:-/not-private}"/.cortex-prereq.*/mixed) ;; *) exit 95 ;; esac
+          fi
+          [ "$fake_arg" = "--setopt=reposdir=${PREREQ_ROOT:-}/etc/yum.repos.d,$fake_epel_stage/epel-config" ] || exit 95; fake_epel_repos=1 ;;
+        --setopt=epel.gpgkey=*) [ -n "$fake_epel_stage" ] || exit 95; fake_epel_key=${fake_arg#--setopt=epel.gpgkey=} ;;
+        *) fake_dnf_args="$fake_dnf_args $fake_arg" ;;
+      esac
+    done
+    [ "${FAKE_ALLOW_DNF_CONFIG:-0}" = 1 ] && [ "${fake_dnf_args# }" = '--releasever=10.2 --cacheonly --assumeno config-manager --dump epel' ] || exit 95
+    if [ "$fake_epel_repos" = 1 ]; then [ "$fake_epel_key" = "file://$fake_epel_stage/pinned/certificate.key" ] || exit 95; fi
+    fake_repo='epel-z-10.2' fake_arch=x86_64 fake_host=mirrors.fedoraproject.org fake_gpg=1 fake_ssl=1 fake_base='' fake_mirror='' fake_ca='' fake_metadata=1
+    case ${FAKE_REPO_CASE:-valid} in
+      testing) fake_repo='epel-testing-10.2' ;;
+      wrong_minor) fake_repo='epel-z-10.1' ;;
+      wrong_arch) fake_arch=aarch64 ;;
+      foreign) fake_host=evil.example ;;
+      gpg_off) fake_gpg=0 ;;
+      tls_off) fake_ssl=0 ;;
+      baseurl) fake_base=https://evil.example/repo ;;
+      mirrorlist) fake_mirror=https://evil.example/list ;;
+      custom_ca) fake_ca=/home/user/other-ca ;;
+      metadata_off) fake_metadata=0 ;;
+    esac
+    printf '======== repo: epel ========\nbaseurl = %s\nmetalink = https://%s/metalink?repo=%s&arch=%s&infra=stock&content=rocky\nmirrorlist = %s\ngpgcheck = %s\ngpgkey = %s\nsslverify = %s\nsslcacert = %s\nrepo_gpgcheck = %s\nproxy =\nproxy_sslverify = 1\nproxy_sslcacert =\n' \
+      "$fake_base" "$fake_host" "$fake_repo" "$fake_arch" "$fake_mirror" "$fake_gpg" "$fake_epel_key" "$fake_ssl" "$fake_ca" "$fake_metadata"
+    [ "${FAKE_REPO_CASE:-valid}" != duplicate ] || printf '%s\n' 'sslverify = 0'
+    ;;
+  curl)
+    [ "${FAKE_ALLOW_FETCH:-0}" = 1 ] && [ -f "$FAKE_FETCH_FIXTURES/metalink" ] || exit 95
+    [ "$#" -eq 15 ] || exit 95
+    [ "$1" = --disable ] && [ "$2" = --fail ] && [ "$3" = --silent ] &&
+      [ "$4" = --show-error ] && [ "$5" = --location ] && [ "$6" = --proto ] &&
+      [ "$7" = '=https' ] && [ "$8" = --proto-redir ] && [ "$9" = '=https' ] || exit 95
+    shift 9
+    [ "$1" = --max-time ] && [ "$2" = 45 ] && [ "$3" = --max-filesize ] && [ "$5" = -- ] || exit 95
+    case $4 in ''|*[!0123456789]*) exit 95 ;; esac
+    [ "$4" -gt 0 ] 2>/dev/null || exit 95
+    fake_url=$6
+    case $fake_url in
+      'https://mirrors.fedoraproject.org/metalink?'*) fake_object=metalink ;;
+      https://mirror.example/epel/repodata/repomd.xml) fake_object=repomd ;;
+      https://mirror.example/epel/repodata/repomd.xml.asc) fake_object=signature ;;
+      https://mirror.example/epel/repodata/primary.xml.gz) fake_object=primary ;;
+      https://mirror.example/epel/Packages/p/podman-compose.rpm) fake_object=package ;;
+      https://dl.rockylinux.org/pub/rocky/10.2/BaseOS/x86_64/os/repodata/repomd.xml) fake_object=baseos-repomd ;;
+      https://dl.rockylinux.org/pub/rocky/10.2/BaseOS/x86_64/os/repodata/repomd.xml.asc) fake_object=baseos-signature ;;
+      https://dl.rockylinux.org/pub/rocky/10.2/BaseOS/x86_64/os/repodata/primary.xml.gz) fake_object=baseos-primary ;;
+      https://dl.rockylinux.org/pub/rocky/10.2/AppStream/x86_64/os/repodata/repomd.xml) fake_object=appstream-repomd ;;
+      https://dl.rockylinux.org/pub/rocky/10.2/AppStream/x86_64/os/repodata/primary.xml.gz) fake_object=appstream-primary ;;
+      https://dl.rockylinux.org/pub/rocky/10.2/CRB/x86_64/os/repodata/repomd.xml) fake_object=crb-repomd ;;
+      https://dl.rockylinux.org/pub/rocky/10.2/CRB/x86_64/os/repodata/primary.xml.gz) fake_object=crb-primary ;;
+      https://dl.rockylinux.org/pub/rocky/10.2/extras/x86_64/os/repodata/repomd.xml) fake_object=extras-repomd ;;
+      https://dl.rockylinux.org/pub/rocky/10.2/extras/x86_64/os/repodata/primary.xml.gz) fake_object=extras-primary ;;
+      *) exit 95 ;;
+    esac
+    [ "${FAKE_FETCH_CASE:-valid}" != "fail_$fake_object" ] || exit 1
+    case ${FAKE_FETCH_CASE:-valid}:$fake_object in metadata_missing_sig:signature|metadata_missing_sig:baseos-signature) exit 1 ;; esac
+    cat "$FAKE_FETCH_FIXTURES/$fake_object" ;;
+  sudo)
+    case ${1-} in
+      mkdir)
+        [ "${FAKE_ALLOW_STAGE:-0}" = 1 ] || exit 95
+        shift; [ "${1-} ${2-} ${3-}" = '-m 755 --' ] || exit 95
+        shift 3
+        if [ "${FAKE_STAGE_FAIL:-0}" = children ] && [ "${1-}" != "$FAKE_ROOT_STAGE" ]; then exit 1; fi
+        for fake_arg do case $fake_arg in "$FAKE_ROOT_STAGE"|"$FAKE_ROOT_STAGE"/*) ;; *) exit 95 ;; esac; done
+        exec "$FAKE_BIN/mkdir" -m 755 -- "$@" ;;
+      install)
+        [ "${FAKE_ALLOW_STAGE:-0}" = 1 ] && [ "${2-} ${3-} ${4-}" = '-m 0644 --' ] && [ "$#" -eq 6 ] || exit 95
+        case $5 in "${FAKE_STATE_DIR%/state}"/*) ;; *) exit 95 ;; esac
+        case $6 in "$FAKE_ROOT_STAGE"/rocky-ring/root-*.key|"$FAKE_ROOT_STAGE"/packages/*.rpm|"$FAKE_ROOT_STAGE"/candidates.manifest|"$FAKE_ROOT_STAGE"/transaction.manifest) ;; *) exit 95 ;; esac
+        case $6 in "$FAKE_ROOT_STAGE"/packages/*|"$FAKE_ROOT_STAGE"/transaction.manifest) exit 95 ;; esac
+        cp -- "$5" "$6"
+        case ${FAKE_COPY_SWAP:-0}:$6 in 1:"$FAKE_ROOT_STAGE"/packages/*.rpm) printf '%s\n' swapped >> "$6" ;; esac ;;
+      tee)
+        [ "${FAKE_ALLOW_STAGE:-0}" = 1 ] && [ "$#" -eq 3 ] && [ "$2" = -- ] || exit 95
+        case $3 in "$FAKE_ROOT_STAGE"/packages/*.rpm|"$FAKE_ROOT_STAGE"/transaction.manifest) ;; *) exit 95 ;; esac
+        "$FAKE_BIN/cat" > "$3"
+        case ${FAKE_COPY_SWAP:-0}:$3 in 1:"$FAKE_ROOT_STAGE"/packages/*.rpm) printf '%s\n' swapped >> "$3" ;; esac ;;
+      rm)
+        [ "${FAKE_ALLOW_STAGE:-0}" = 1 ] && [ "$#" -eq 4 ] && [ "${2-} ${3-}" = '-rf --' ] && [ "$4" = "$FAKE_ROOT_STAGE" ] || exit 95
+        exec "$FAKE_BIN/rm" -rf -- "$4" ;;
+      usermod)
+        [ "${FAKE_ALLOW_SUBIDS:-0}" = 1 ] || exit 95
+        [ "${FAKE_SUDO_FAIL:-0}" = 0 ] || exit 1
+        shift; exec "$FAKE_BIN/usermod" "$@" ;;
+      loginctl)
+        [ "${FAKE_ALLOW_LINGER:-0}" = 1 ] || exit 95
+        shift; FAKE_PRIVILEGED=1; export FAKE_PRIVILEGED
+        exec "$FAKE_BIN/loginctl" "$@" ;;
+      dnf)
+        [ "${FAKE_ALLOW_ROCKY_INSTALL:-0}" = 1 ] || [ "${FAKE_ALLOW_ROCKY_DOWNLOAD:-0}" = 1 ] || exit 95
+        [ "${FAKE_SUDO_FAIL:-0}" = 0 ] || exit 1
+        shift; exec "$FAKE_BIN/dnf" "$@" ;;
+      *) exit 95 ;;
+    esac ;;
+  usermod)
+    [ "${FAKE_ALLOW_SUBIDS:-0}" = 1 ] && [ -f "$FAKE_ROOT/.fake-root" ] || exit 95
+    fake_uid_range='' fake_gid_range=''
+    while [ "$#" -gt 1 ]; do
+      case $1 in
+        --add-subuids) fake_uid_range=$2 ;;
+        --add-subgids) fake_gid_range=$2 ;;
+        --) shift; break ;;
+        *) exit 95 ;;
+      esac
+      shift 2
+    done
+    [ "$#" -eq 1 ] && [ "$1" = cortexuser ] || exit 95
+    [ "${FAKE_USERMOD_NOOP:-0}" = 0 ] || exit 0
+    if [ -n "$fake_uid_range" ]; then
+      fake_start=${fake_uid_range%-*}; fake_end=${fake_uid_range#*-}
+      printf '\n%s:%s:%s\n' "$1" "$fake_start" "$((fake_end - fake_start + 1))" >> "$FAKE_ROOT/etc/subuid"
+    fi
+    if [ -n "$fake_gid_range" ]; then
+      fake_start=${fake_gid_range%-*}; fake_end=${fake_gid_range#*-}
+      printf '\n%s:%s:%s\n' "$1" "$fake_start" "$((fake_end - fake_start + 1))" >> "$FAKE_ROOT/etc/subgid"
+    fi ;;
+  # Test fakes refuse every mutation unless an explicit later fake implements it.
+  cat|systemctl|systemd-run|systemd-analyze|wget|pip|pip3|podman-compose|setenforce|semanage|chcon|restorecon) exit 95 ;;
+  *) exit 96 ;;
+esac

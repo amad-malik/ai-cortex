@@ -1,0 +1,294 @@
+# One writing lane per path (LAYOUT §4). `xtask owners` will check every commit against this
+# file (LAYOUT §6); it is not built in F-1a. A change to another lane's path goes to that
+# lane's owner as a diff; cox decides a dispute. The most specific matching path wins.
+
+[lanes]
+# Kai ruling f59d2201 (2026-11-15): Finn is the sole INSTALLSH writer for
+# 0.2.2 item B2 and S5PREREQ writer for item B3 (CRB advice only).
+# Applies until Cox names the 0.2.2 batch head; INSTALLSH returns to Nemo
+# after 0.2.2. Earlier owner comments below remain historical provenance.
+S5PREREQ = "finn"   # install lane steps 6a and 6b, the prerequisite file install-prereq.sh and its tests (kai row fc8c43de, 7 Nov; hue's INSTALL-LANES-INTERFACE-hue-r0.md section 1; cox cut the lane off wave1/s5 0305969) REASSIGNED from nix to bob by kai (row 19b74211, 7 Nov 18:27Z: nix could not be reached, nothing of his was written in this lane); cox changed the owner here. REASSIGNED AGAIN from bob to nemo by kai (row 5a3036d1, 7 Nov 19:42Z, on cox's row 9d52acab: bob holds unsent composer text and the CTO prefers nemo for Cortex); the lane stays as cut. MOVED A THIRD TIME from nemo to marv by kai (row 7c638c63, 7 Nov 20:29Z, GO on cox's rows 3348135c and d6d9e46d: nemo's composer held unsent text at 20:11, 20:20, 20:28 and 20:29Z; marv is idle until the engine chain merges).
+A = "finn"
+B = "nemo"
+C = "bob"
+S5 = "hue"   # build and install skeleton (MVP plan piece S5; cox row dbd2adea)
+S5CHECK = "marv"   # S5-10 round five (cox W1-76, kai row 3ff04e26, 8 Nov): the oracle checker, its self-test and its fixtures, a ONE-TIME exception on hue's paths for marv; hue leaves them
+INSTALLSH = "finn"   # 6e (resumable install, exit codes) and the W1-68 wiring (kai row e5e9e428, cox, 8 Nov): the ONE WRITER of install.sh and its tests; a ONE-TIME exception on hue's files
+MACBK = "bob"   # Mac work M-1c (kai row e5e9e428, cox, 8 Nov): macOS launchd agents for the backup timers: deploy/launchd/** and scripts/launchd-*, new files only
+GATE = "nix"   # the 6f gate runner (kai rows de780294 and e5e9e428: NIX, not nemo; cox, 8 Nov): scripts/install-gate/**, new files only
+HTTP = "finn"   # cortex-http, the request chain (Wave 0 plug; cox rows 05926c22 and 0df539d3); REASSIGNED from mira to finn (CTO 7 Nov: mira is Cairn-only; kai rows 7bcefbbb, 83956c6a, f7ea55cf)
+UPGRADE = "hue"   # cortex-upgrade, piece 14 (Wave 1; cox row ede00053; W1-5: my own glob only)
+RELEASE = "marv"   # piece 14 release builder and the SHA256SUMS verification of a resumed release directory (hue's offer, cox 6 Nov 20:3xZ; hue keeps the engine, cli.rs and UP-16)
+SERVER = "cox"   # cortex-server, piece 11 (Wave 1 W1-5: the owner changes her own glob in her own branch)
+BOOT = "tate"   # mod-boot, piece 9 (Wave 1 start row 1533678a; cox W1-5)
+ID = "sophi"   # mod-identity (Wave 1 piece 2; cox start row 7a08bf86)
+DOCS = "cox"   # piece 13 tools: tools/ and docs/generated/ (cox W1-29; tate stopped by the CTO order of 14:03Z, cox holds the lane); docs/ prose is quill's. The MOST SPECIFIC glob wins (docs/generated/** beats docs/**)
+# Most specific matching path wins (this file's header; cox's F-4 ruling 14:44Z). DOC owns docs/ prose;
+# docs/generated/** is DOCS (the renderer's output) because that glob is more specific, and tools/** is DOCS only.
+DOC = "quill"   # piece 13 documentation: docs/** prose (cox W1-28/W1-29)
+CLI = "sophi"   # cortex-client and cortex-cli, piece 10 (cox row 99c37d1b, W1-5); an owner adds his group in his own file under crates/cortex-cli/src/groups/
+MACDC = "bob"   # Mac work M-1b (kai row 64dbf491, cox, 8 Nov): compose for Docker Desktop as an OVERRIDE file: deploy/docker/** and scripts/docker-compose-*, new files only
+MACPORT = "bob"   # Mac work M-1a tooling (kai row 64dbf491, cox, 8 Nov): the static GNU-only rule and the bash 3.2 harness: scripts/mac-port-*, new files only; install.sh edits are nemo's (W1-77)
+BK = "bob"   # piece 12 backup by dump: scripts/cortex-dump*, cortex-restore*, restore-* (cox b04b22c9, W1-42)
+S5FETCH = "hue"   # install lane step 6c MOVED from marv to HUE (kai row a41e5818, cox W1-89, 8 Nov: marv keeps 6b r3 and the release lane); install lane step 6c, the release-fetch file install-fetch.sh and its tests (kai row fc8c43de, 7 Nov; hue's INSTALL-LANES-INTERFACE-hue-r0.md section 1; cox cut the lane off wave1/s5 0305969)
+
+[[path]]
+glob = "crates/cortex-types/**"
+lane = "A"
+[[path]]
+glob = "crates/cortex-config/**"
+lane = "A"
+[[path]]
+glob = "crates/cortex-db/**"
+lane = "A"
+[[path]]
+glob = "crates/cortex-module/**"
+lane = "A"
+[[path]]
+glob = "crates/cortex-http/**"
+lane = "HTTP"
+[[path]]
+glob = "crates/cortex-upgrade/**"
+lane = "UPGRADE"
+[[path]]
+glob = "crates/cortex-server/**"
+lane = "SERVER"
+[[path]]
+glob = "crates/cortex-server/src/assembly.rs"
+lane = "HTTP"   # mira's `serve` increments S1 to S4 (cox 6 Nov 17:0xZ, her ask): the most specific glob wins
+[[path]]
+glob = "crates/cortex-server/src/health_routes.rs"
+lane = "HTTP"   # mira's `serve` increments S1 to S4 (cox 6 Nov 17:0xZ, her ask): the most specific glob wins
+[[path]]
+glob = "crates/cortex-server/src/serve.rs"
+lane = "HTTP"   # mira's `serve` increments S1 to S4 (cox 6 Nov 17:0xZ, her ask): the most specific glob wins
+[[path]]
+glob = "crates/cortex-server/src/probe.rs"
+lane = "HTTP"   # mira's `serve` increments S1 to S4 (cox 6 Nov 17:0xZ, her ask): the most specific glob wins
+[[path]]
+glob = "crates/cortex-server/src/ledger.rs"
+lane = "HTTP"   # mira's `serve` increments S1 to S4 (cox 6 Nov 17:0xZ, her ask): the most specific glob wins
+[[path]]
+glob = "crates/cortex-server/tests/serve_*.rs"
+lane = "HTTP"   # mira's serve tests
+[[path]]
+glob = "crates/cortex-testkit/**"
+lane = "A"
+# Wave 0 plug fixture: the minimal IdentityApi provider (not mod-identity).
+[[path]]
+glob = "crates/plug-identity/**"
+lane = "A"
+[[path]]
+glob = "crates/cortex-api/src/lib.rs"
+lane = "A"
+[[path]]
+glob = "crates/cortex-api/src/registry.rs"
+lane = "A"
+[[path]]
+glob = "crates/cortex-api/src/error.rs"
+lane = "A"
+[[path]]
+glob = "crates/cortex-api/src/ops/records.rs"
+lane = "B"
+[[path]]
+glob = "crates/cortex-api/src/ops/events.rs"
+lane = "B"
+[[path]]
+glob = "crates/cortex-events/**"
+lane = "B"
+[[path]]
+glob = "crates/mod-records/**"
+lane = "B"
+# Piece 7 mod-search (cox row cd652984, kai's staffing of 6 Nov 14:20Z): nemo, reviewer sam.
+[[path]]
+glob = "crates/mod-search/**"
+lane = "B"
+[[path]]
+glob = "crates/mod-boot/**"
+lane = "BOOT"
+[[path]]
+glob = "crates/cortex-client/**"
+lane = "CLI"
+[[path]]
+glob = "crates/cortex-cli/**"
+lane = "CLI"
+# The host-socket commands stay lane A (cox row 99c37d1b); the most specific glob wins.
+[[path]]
+glob = "crates/cortex-cli/src/host/**"
+lane = "A"
+# Piece 13 (cox W1-28, W1-29): the doc build and its generated pages; the prose under docs/ is quill's.
+[[path]]
+glob = "tools/**"
+lane = "DOCS"
+[[path]]
+glob = "docs/generated/**"
+lane = "DOCS"
+[[path]]
+glob = "xtask/**"
+lane = "A"
+[[path]]
+glob = "deny.toml"
+lane = "A"
+[[path]]
+glob = "rust-toolchain.toml"
+lane = "A"
+[[path]]
+glob = "Cargo.toml"
+lane = "A"
+[[path]]
+glob = "AGENTS.md"
+lane = "A"
+[[path]]
+glob = "OWNERS.toml"
+lane = "A"
+[[path]]
+glob = ".cargo/config.toml"
+lane = "A"
+
+# S5: build and install skeleton.
+[[path]]
+glob = "deploy/**"
+lane = "S5"
+[[path]]
+glob = "deploy/docker/**"
+lane = "MACDC"
+[[path]]
+glob = "scripts/docker-compose-*"
+lane = "MACDC"
+[[path]]
+glob = "scripts/**"
+lane = "S5"
+[[path]]
+glob = "scripts/s5_check.py"
+lane = "S5CHECK"
+[[path]]
+glob = "scripts/s5_selftest.py"
+lane = "S5CHECK"
+[[path]]
+glob = "scripts/s5-check-fixtures/**"
+lane = "S5CHECK"
+[[path]]
+glob = "deploy/install.sh"
+lane = "INSTALLSH"
+[[path]]
+glob = "scripts/install-test.sh"
+lane = "INSTALLSH"
+[[path]]
+glob = "scripts/install-mutants.json"
+lane = "INSTALLSH"
+[[path]]
+glob = "scripts/install_mutants.py"
+lane = "INSTALLSH"
+[[path]]
+glob = "scripts/launchd-*"
+lane = "MACBK"
+[[path]]
+glob = "deploy/launchd/**"
+lane = "MACBK"
+[[path]]
+glob = "scripts/check-home-corpus.txt"
+lane = "INSTALLSH"
+[[path]]
+glob = "scripts/mac-port-*"
+lane = "MACPORT"
+[[path]]
+glob = "scripts/install-gate/**"
+lane = "GATE"
+[[path]]
+glob = ".gitleaks.toml"
+lane = "S5"
+# Shared: merge order follows cox's daily slice order; a conflict is resolved by
+# `cargo update -p` on the later branch (LAYOUT §4).
+[[path]]
+glob = "Cargo.lock"
+lane = "shared"
+# Install lane 6c (marv): the release-fetch file and its tests. These exact paths win over deploy/** and scripts/** (the most specific glob wins). The lane adds ONE line for its own test to scripts/ci.sh in its own branch: that file stays hue's (S5) and hue reviews the line (interface section 1). The runner-copy file name is cox's convention (the interface names none): it follows hue's scripts/install_mutants.py; the owner may name it otherwise and cox changes this line.
+[[path]]
+glob = "deploy/install-fetch.sh"
+lane = "S5FETCH"
+[[path]]
+glob = "scripts/install-fetch-test.sh"
+lane = "S5FETCH"
+[[path]]
+glob = "scripts/install-fetch-mutants.json"
+lane = "S5FETCH"
+[[path]]
+glob = "scripts/install_fetch_mutants.py"
+lane = "S5FETCH"
+[[path]]
+glob = "scripts/fakes/fetch/**"
+lane = "S5FETCH"
+
+# Wave 1 piece 2 (cox WAVE1-RULINGS W1-5: each piece adds its own glob; cox resolves it at MERGE OK).
+[[path]]
+glob = "crates/mod-identity/**"
+lane = "ID"
+
+# Wave 1 piece 8 (cox WAVE1-RULINGS W1-5: each piece adds its own glob; cox resolves it at MERGE OK).
+[[path]]
+glob = "crates/mod-handoffs/**"
+lane = "C"
+# Wave 1 piece 12 (cox b04b22c9, W1-42): the three script families win over S5's `scripts/**` for these files only.
+# The five unit files deploy/systemd/cortex-dump* are NEW files and mine (cox W1-42); the rest of deploy/** stays hue's. hue gets the same bytes as a patch
+# and his install.sh installs them.
+[[path]]
+glob = "scripts/cortex-dump*"
+lane = "BK"
+[[path]]
+glob = "scripts/cortex-restore*"
+lane = "BK"
+[[path]]
+glob = "scripts/restore-*"
+lane = "BK"
+[[path]]
+glob = "deploy/systemd/cortex-dump*"
+lane = "BK"
+# The remaining crates take their lane from LAYOUT §3 when they are created: each module's own
+# crate and its `crates/cortex-api/src/ops/<module>.rs` belong to that module's lane.
+[[path]]
+glob = "scripts/release*"
+lane = "RELEASE"
+[[path]]
+glob = "scripts/release-fixtures/**"
+lane = "RELEASE"
+[[path]]
+glob = "scripts/release_manifest.py"
+lane = "RELEASE"
+[[path]]
+glob = "crates/cortex-upgrade/src/verify.rs"
+lane = "RELEASE"
+[[path]]
+glob = "crates/cortex-upgrade/tests/group_verify.rs"
+lane = "RELEASE"
+[[path]]
+glob = "crates/cortex-upgrade/tests/group_release.rs"
+lane = "RELEASE"
+[[path]]
+glob = "crates/cortex-upgrade/mutants/verify.json"
+lane = "RELEASE"
+[[path]]
+glob = "crates/cortex-upgrade/mutants/release.json"
+lane = "RELEASE"
+[[path]]
+glob = "docs/**"
+lane = "DOC"
+
+[[path]]
+glob = "deploy/install-prereq.sh"
+lane = "S5PREREQ"
+
+[[path]]
+glob = "scripts/install-prereq-test.sh"
+lane = "S5PREREQ"
+
+[[path]]
+glob = "scripts/install-prereq-mutants.json"
+lane = "S5PREREQ"
+
+[[path]]
+glob = "scripts/install_prereq_mutants.py"
+lane = "S5PREREQ"
+
+[[path]]
+glob = "scripts/fakes/prereq/**"
+lane = "S5PREREQ"

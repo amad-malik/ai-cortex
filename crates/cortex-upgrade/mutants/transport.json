@@ -1,0 +1,1087 @@
+[
+ {
+  "id": "FM-03",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_06_the_manifest_is_fetched_with_the_token_and_capped_at_one_mib",
+   "fe_11_a_redirect_inside_the_release_host_keeps_the_token_and_one_leaving_it_is_refused_before_any_request"
+  ],
+  "what": "the token is never sent",
+  "old": "            let bearer = self.token.as_ref().map(Secret::expose);",
+  "new": "            let bearer: Option<&str> = None;"
+ },
+ {
+  "id": "FM-07",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_02_urls_that_are_not_plain_https_paths_are_refused"
+  ],
+  "what": "dot segments are accepted",
+  "old": "            .all(|seg| !seg.is_empty() && seg != \".\" && seg != \"..\")",
+  "new": "            .all(|seg| !seg.is_empty())"
+ },
+ {
+  "id": "FM-08",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_02_urls_that_are_not_plain_https_paths_are_refused"
+  ],
+  "what": "empty segments are accepted",
+  "old": "            .all(|seg| !seg.is_empty() && seg != \".\" && seg != \"..\")",
+  "new": "            .all(|seg| seg != \".\" && seg != \"..\")"
+ },
+ {
+  "id": "FM-09",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_02_urls_that_are_not_plain_https_paths_are_refused"
+  ],
+  "what": "a query string is accepted in a path",
+  "old": "matches!(b, b'.' | b'_' | b'~' | b'-' | b'/')",
+  "new": "matches!(b, b'.' | b'_' | b'~' | b'-' | b'/' | b'?')"
+ },
+ {
+  "id": "FM-10",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_03_plain_http_is_refused_unless_the_test_hook_allows_it_and_a_bad_base_is_refused",
+   "fe_08_plain_http_is_refused_before_any_request"
+  ],
+  "what": "plain http is always accepted",
+  "old": "        \"http\" if allow_http => false,",
+  "new": "        \"http\" => false,"
+ },
+ {
+  "id": "FM-11",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_06_the_manifest_is_fetched_with_the_token_and_capped_at_one_mib"
+  ],
+  "what": "the manifest cap is off by one",
+  "old": "        if body.len() > MANIFEST_MAX_BYTES {",
+  "new": "        if body.len() >= MANIFEST_MAX_BYTES {"
+ },
+ {
+  "id": "FM-12",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_06_the_manifest_is_fetched_with_the_token_and_capped_at_one_mib"
+  ],
+  "what": "the manifest cap is not enforced",
+  "old": "        if body.len() > MANIFEST_MAX_BYTES {",
+  "new": "        if false {"
+ },
+ {
+  "id": "FM-13",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_14_a_changed_byte_a_wrong_digest_or_a_too_large_file_leaves_no_file"
+  ],
+  "what": "the asset cap is off by one",
+  "old": "            if total > max {",
+  "new": "            if total >= max {"
+ },
+ {
+  "id": "FM-14",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_14_a_changed_byte_a_wrong_digest_or_a_too_large_file_leaves_no_file"
+  ],
+  "what": "the digest is not checked",
+  "old": "        if !got.ct_eq(&Sha256(want.0)) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "FM-15",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_14_a_changed_byte_a_wrong_digest_or_a_too_large_file_leaves_no_file",
+   "fe_15_status_errors_broken_streams_and_an_existing_destination_leave_things_as_they_were"
+  ],
+  "what": "a failed download leaves its file",
+  "old": "            let _ = std::fs::remove_file(dest);",
+  "new": "            let _ = dest;"
+ },
+ {
+  "id": "FM-16",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_15_status_errors_broken_streams_and_an_existing_destination_leave_things_as_they_were"
+  ],
+  "what": "an existing destination is overwritten",
+  "old": "            .create_new(true)\n            .mode(0o600)",
+  "new": "            .create(true)\n            .truncate(true)\n            .mode(0o600)"
+ },
+ {
+  "id": "FM-17",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_13_a_download_is_written_0600_and_checked_against_its_digest"
+  ],
+  "what": "a download is created 0644",
+  "old": "            .create_new(true)\n            .mode(0o600)",
+  "new": "            .create_new(true)\n            .mode(0o644)"
+ },
+ {
+  "id": "FM-18",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_07_only_status_200_is_an_answer_and_no_body_text_is_ever_in_an_error"
+  ],
+  "what": "any 2xx status is an answer",
+  "old": "                200 => return Ok(response),",
+  "new": "                200..=299 => return Ok(response),"
+ },
+ {
+  "id": "FM-19",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_05_same_origin_means_scheme_host_and_port"
+  ],
+  "what": "the port is ignored in the origin",
+  "old": "self.effective_port() == other.effective_port()",
+  "new": "true"
+ },
+ {
+  "id": "FM-20",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_05_same_origin_means_scheme_host_and_port",
+   "fe_04_redirect_targets_follow_the_same_rules_and_never_downgrade"
+  ],
+  "what": "the scheme is ignored in the origin",
+  "old": "        self.https == other.https\n            && self.host == other.host\n",
+  "new": "        self.host == other.host\n"
+ },
+ {
+  "id": "FM-21",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_01_relative_assets_resolve_against_the_directory_of_the_manifest",
+   "fe_05_same_origin_means_scheme_host_and_port"
+  ],
+  "what": "host names are not lower-cased",
+  "old": "    let host = host.to_ascii_lowercase();",
+  "new": "    let host = host.to_string();"
+ },
+ {
+  "id": "FM-22",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_02_urls_that_are_not_plain_https_paths_are_refused"
+  ],
+  "what": "the length of an absolute URL is not capped",
+  "old": "    if url.len() > URL_MAX_BYTES || !url.bytes().all(|b| (0x21..=0x7e).contains(&b)) {",
+  "new": "    if !url.bytes().all(|b| (0x21..=0x7e).contains(&b)) {"
+ },
+ {
+  "id": "FM-23",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_12_an_absolute_asset_url_on_another_host_is_refused_before_any_request_and_the_token_is_never_printed"
+  ],
+  "what": "Debug shows the token",
+  "old": "&self.token.as_ref().map(|_| \"<redacted>\")",
+  "new": "&self.token.as_ref().map(|t| t.expose())"
+ },
+ {
+  "id": "FM-24",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_02_urls_that_are_not_plain_https_paths_are_refused"
+  ],
+  "what": "port 0 is accepted",
+  "old": "            if port == 0 {",
+  "new": "            if false {"
+ },
+ {
+  "id": "FM-25",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_02_urls_that_are_not_plain_https_paths_are_refused"
+  ],
+  "what": "a host label may start with a dash",
+  "old": "                && !label.starts_with('-')\n",
+  "new": ""
+ },
+ {
+  "id": "UM-01",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_03_only_regular_files_and_directories_are_allowed"
+  ],
+  "what": "any entry type is accepted",
+  "old": "            _ => return Err(forbidden),",
+  "new": "            _ => false,"
+ },
+ {
+  "id": "UM-02",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_04_only_the_names_a_release_may_hold_are_allowed"
+  ],
+  "what": "the ustar prefix field is ignored",
+  "old": "        if block[345..500].iter().any(|b| *b != 0) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "UM-03",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_04_only_the_names_a_release_may_hold_are_allowed"
+  ],
+  "what": "hidden files are allowed in initdb",
+  "old": "                && !f.starts_with('.')\n",
+  "new": ""
+ },
+ {
+  "id": "UM-04",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_04_only_the_names_a_release_may_hold_are_allowed"
+  ],
+  "what": "an initdb file name may be 640 bytes",
+  "old": "(1..=64).contains(&f.len())",
+  "new": "(1..=640).contains(&f.len())"
+ },
+ {
+  "id": "UM-05",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_04_only_the_names_a_release_may_hold_are_allowed"
+  ],
+  "what": "any characters in an initdb file name",
+  "old": "|b| b.is_ascii_alphanumeric() || matches!(b, b'.' | b'_' | b'-')",
+  "new": "|_| true"
+ },
+ {
+  "id": "UM-06",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_05_a_repeated_name_and_a_missing_required_file_are_refused"
+  ],
+  "what": "a repeated name is accepted",
+  "old": "        if !seen.insert(key.clone()) {",
+  "new": "        if false && !seen.insert(key.clone()) {"
+ },
+ {
+  "id": "UM-07",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_05_a_repeated_name_and_a_missing_required_file_are_refused"
+  ],
+  "what": "a missing required file is accepted",
+  "old": "for name in [\"cortex\", \"compose.yml\", \"stack.env\", \"db-roles.sh\"] {\n        if !seen.contains(name) {",
+  "new": "for name in [\"cortex\", \"compose.yml\", \"stack.env\", \"db-roles.sh\"] {\n        if false {"
+ },
+ {
+  "id": "UM-08",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_06_sizes_and_counts_are_capped_before_anything_large_is_read"
+  ],
+  "what": "the file cap is off by one",
+  "old": "        if size > limits.max_file_bytes || total.saturating_add(size) > limits.max_total_bytes {",
+  "new": "        if size >= limits.max_file_bytes || total.saturating_add(size) > limits.max_total_bytes {"
+ },
+ {
+  "id": "UM-09",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_06_sizes_and_counts_are_capped_before_anything_large_is_read"
+  ],
+  "what": "the total cap is off by one",
+  "old": "        if size > limits.max_file_bytes || total.saturating_add(size) > limits.max_total_bytes {",
+  "new": "        if size > limits.max_file_bytes || total.saturating_add(size) >= limits.max_total_bytes {"
+ },
+ {
+  "id": "UM-10",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_06_sizes_and_counts_are_capped_before_anything_large_is_read"
+  ],
+  "what": "the entry cap is off by one",
+  "old": "        if index >= limits.max_entries {",
+  "new": "        if index > limits.max_entries {"
+ },
+ {
+  "id": "UM-11",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_07_damaged_or_incomplete_archives_are_refused"
+  ],
+  "what": "the header checksum is not checked",
+  "old": "        if octal(&block[148..156])? != sum {",
+  "new": "        if false {"
+ },
+ {
+  "id": "UM-12",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_07_damaged_or_incomplete_archives_are_refused"
+  ],
+  "what": "any size field is read as octal",
+  "old": "|| !digits.iter().all(|b| (b'0'..=b'7').contains(b))",
+  "new": ""
+ },
+ {
+  "id": "UM-13",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_07_damaged_or_incomplete_archives_are_refused"
+  ],
+  "what": "a stream without an end marker is accepted",
+  "old": "            None => return Err(UnpackError::Corrupt), // no end marker",
+  "new": "            None => return finish(&seen, names),"
+ },
+ {
+  "id": "UM-14",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_07_damaged_or_incomplete_archives_are_refused"
+  ],
+  "what": "one zero block is enough as an end marker",
+  "old": "                _ => Err(UnpackError::Corrupt),\n            };",
+  "new": "                _ => finish(&seen, names),\n            };"
+ },
+ {
+  "id": "UM-15",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_08_an_existing_target_is_never_merged_into_and_a_missing_parent_is_an_error"
+  ],
+  "what": "an existing target is merged into (and a missing parent is created)",
+  "old": "fs::DirBuilder::new().mode(0o700).create(path)",
+  "new": "fs::DirBuilder::new().mode(0o700).recursive(true).create(path)"
+ },
+ {
+  "id": "UM-16",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_03_only_regular_files_and_directories_are_allowed"
+  ],
+  "what": "the target is not removed after a refusal",
+  "old": "    if result.is_err() {\n        let _ = fs::remove_dir_all(into);",
+  "new": "    if result.is_err() {\n        let _ = into;"
+ },
+ {
+  "id": "UM-17",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_01_a_good_release_is_unpacked_with_modes_set_by_us"
+  ],
+  "what": "the staging directory is 0755",
+  "old": "fs::Permissions::from_mode(0o700)",
+  "new": "fs::Permissions::from_mode(0o755)"
+ },
+ {
+  "id": "UM-18",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_09_the_reader_stops_at_the_end_marker_and_does_not_read_what_follows"
+  ],
+  "what": "the reader reads one block past the end marker",
+  "old": "                Some(b) if b.iter().all(|x| *x == 0) => finish(&seen, names),",
+  "new": "                Some(b) if b.iter().all(|x| *x == 0) => {\n                    let _ = read_block(tar)?;\n                    finish(&seen, names)\n                }"
+ },
+ {
+  "id": "UM-19",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_01_a_good_release_is_unpacked_with_modes_set_by_us"
+  ],
+  "what": "the padding after the data is not skipped",
+  "old": "    let pad = (BLOCK as u64 - size % BLOCK as u64) % BLOCK as u64;",
+  "new": "    let pad = 0u64;"
+ },
+ {
+  "id": "UM-20",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_10_a_directory_entry_that_carries_data_is_refused"
+  ],
+  "what": "a directory entry may carry data",
+  "old": "        if is_dir && size != 0 {",
+  "new": "        if false {"
+ },
+ {
+  "id": "UM-21",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_01_a_good_release_is_unpacked_with_modes_set_by_us"
+  ],
+  "what": "a directory name keeps its trailing slash in the list",
+  "old": "        let key = name.trim_end_matches('/').to_string();",
+  "new": "        let key = name.to_string();"
+ },
+ {
+  "id": "FM-27",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_01_relative_assets_resolve_against_the_directory_of_the_manifest",
+   "fe_12_an_absolute_asset_url_on_another_host_is_refused_before_any_request_and_the_token_is_never_printed"
+  ],
+  "what": "an absolute asset URL on another host is accepted",
+  "old": "        if !base.same_origin(&target) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "FM-28",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_04_redirect_targets_follow_the_same_rules_and_never_downgrade"
+  ],
+  "what": "a redirect to another host is followed",
+  "old": "        if !cur.same_origin(&target) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "UM-22",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_15_the_staging_directory_is_created_0700_by_the_mkdir_itself_whatever_the_umask"
+  ],
+  "what": "the staging directory is asked for with mode 0777",
+  "old": "fs::DirBuilder::new().mode(0o700).create(path)",
+  "new": "fs::DirBuilder::new().mode(0o777).create(path)"
+ },
+ {
+  "id": "UM-23",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_15_the_staging_directory_is_created_0700_by_the_mkdir_itself_whatever_the_umask"
+  ],
+  "what": "the staging directory is created under the process umask (the defect mike found)",
+  "old": "fs::DirBuilder::new().mode(0o700).create(path)",
+  "new": "fs::create_dir(path)"
+ },
+ {
+  "id": "UM-24",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_08_an_existing_target_is_never_merged_into_and_a_missing_parent_is_an_error"
+  ],
+  "what": "an existing path is no longer reported as Exists",
+  "old": "Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => Err(UnpackError::Exists),",
+  "new": "Err(e) if false => Err(UnpackError::Exists),"
+ },
+ {
+  "id": "UM-25",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_15_the_staging_directory_is_created_0700_by_the_mkdir_itself_whatever_the_umask"
+  ],
+  "what": "the unpack makes its directory with the umask-limited helper",
+  "old": "    create_private_dir_exact(into)?;",
+  "new": "    create_private_dir(into)?;"
+ },
+ {
+  "id": "FM-29",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_16_the_debug_form_of_a_request_does_not_show_the_bearer"
+  ],
+  "what": "the Debug form of a Request shows the bearer",
+  "old": "            .field(\"bearer\", &self.bearer.map(|_| \"<redacted>\"))",
+  "new": "            .field(\"bearer\", &self.bearer)"
+ },
+ {
+  "id": "FM-30",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_16_the_debug_form_of_a_request_does_not_show_the_bearer"
+  ],
+  "what": "the Debug form of a Request hides whether there is a bearer",
+  "old": "            .field(\"bearer\", &self.bearer.map(|_| \"<redacted>\"))",
+  "new": "            .field(\"bearer\", &\"<redacted>\")"
+ },
+ {
+  "id": "FM-31",
+  "design": null,
+  "file": "src/fetch.rs",
+  "tests": [
+   "group_fetch"
+  ],
+  "fails": [
+   "fe_16_the_debug_form_of_a_request_does_not_show_the_bearer"
+  ],
+  "what": "the Debug form of a Request leaves the url out",
+  "old": "            .field(\"url\", &self.url)",
+  "new": "            .field(\"url\", &\"\")"
+ },
+ {
+  "id": "UM-26",
+  "design": null,
+  "file": "src/unpack.rs",
+  "fails": [
+   "un_18_db_roles_sh_gets_mode_0755_whatever_the_archive_says_and_keeps_its_bytes"
+  ],
+  "what": "db-roles.sh is written 0644",
+  "old": "\"db-roles.sh\" => Some(Kind::File(0o755)),",
+  "new": "\"db-roles.sh\" => Some(Kind::File(0o644)),",
+  "tests": [
+   "group_unpack"
+  ]
+ },
+ {
+  "id": "UM-27",
+  "design": null,
+  "file": "src/unpack.rs",
+  "fails": [
+   "un_18_db_roles_sh_gets_mode_0755_whatever_the_archive_says_and_keeps_its_bytes"
+  ],
+  "what": "db-roles.sh is written world-writable",
+  "old": "\"db-roles.sh\" => Some(Kind::File(0o755)),",
+  "new": "\"db-roles.sh\" => Some(Kind::File(0o777)),",
+  "tests": [
+   "group_unpack"
+  ]
+ },
+ {
+  "id": "UM-28",
+  "design": null,
+  "file": "src/unpack.rs",
+  "fails": [
+   "un_17_db_roles_sh_is_required_and_the_message_names_it"
+  ],
+  "what": "db-roles.sh is not required",
+  "old": "for name in [\"cortex\", \"compose.yml\", \"stack.env\", \"db-roles.sh\"] {",
+  "new": "for name in [\"cortex\", \"compose.yml\", \"stack.env\"] {",
+  "tests": [
+   "group_unpack"
+  ]
+ },
+ {
+  "id": "UM-29",
+  "design": null,
+  "file": "src/unpack.rs",
+  "fails": [
+   "un_19_only_the_one_exact_name_is_db_roles_sh"
+  ],
+  "what": "any name that starts with db-roles.sh is the script",
+  "old": "\"db-roles.sh\" => Some(Kind::File(0o755)),",
+  "new": "n if n.starts_with(\"db-roles.sh\") => Some(Kind::File(0o755)),",
+  "tests": [
+   "group_unpack"
+  ]
+ },
+ {
+  "id": "UM-30",
+  "design": null,
+  "file": "src/unpack.rs",
+  "fails": [
+   "un_19_only_the_one_exact_name_is_db_roles_sh"
+  ],
+  "what": "the name is matched without regard to case",
+  "old": "\"db-roles.sh\" => Some(Kind::File(0o755)),",
+  "new": "n if n.eq_ignore_ascii_case(\"db-roles.sh\") => Some(Kind::File(0o755)),",
+  "tests": [
+   "group_unpack"
+  ]
+ },
+ {
+  "id": "UM-31",
+  "design": null,
+  "file": "src/unpack.rs",
+  "fails": [
+   "un_17_db_roles_sh_is_required_and_the_message_names_it"
+  ],
+  "what": "the missing-file message names another file",
+  "old": "for name in [\"cortex\", \"compose.yml\", \"stack.env\", \"db-roles.sh\"] {",
+  "new": "for name in [\"cortex\", \"compose.yml\", \"stack.env\", \"db-roles\"] {",
+  "tests": [
+   "group_unpack"
+  ]
+ },
+ {
+  "id": "UM-32",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_21_create_private_dir_exact_is_0700_and_usable_under_any_umask",
+   "un_15_the_staging_directory_is_created_0700_by_the_mkdir_itself_whatever_the_umask"
+  ],
+  "what": "the exact helper does not set the mode",
+  "old": "    if let Err(e) = fs::set_permissions(path, fs::Permissions::from_mode(0o700)) {",
+  "new": "    if let Err(e) = Ok::<(), std::io::Error>(()) {"
+ },
+ {
+  "id": "UM-33",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_21_create_private_dir_exact_is_0700_and_usable_under_any_umask"
+  ],
+  "what": "the exact helper sets 0755",
+  "old": "    if let Err(e) = fs::set_permissions(path, fs::Permissions::from_mode(0o700)) {",
+  "new": "    if let Err(e) = fs::set_permissions(path, fs::Permissions::from_mode(0o755)) {"
+ },
+ {
+  "id": "UM-34",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_22_a_release_without_initdb_is_refused_and_the_message_names_it"
+  ],
+  "what": "initdb is not a required directory",
+  "old": "    for name in DIRS {\n        if !seen.contains(name)",
+  "new": "    for name in DIRS.into_iter().filter(|d| *d != \"initdb\") {\n        if !seen.contains(name)"
+ },
+ {
+  "id": "UM-35",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_22_a_release_without_initdb_is_refused_and_the_message_names_it"
+  ],
+  "what": "a directory implied by a file under it does not count (initdb: a file alone is refused)",
+  "old": ".any(|k| k.strip_prefix(name).is_some_and(|r| r.starts_with('/')))",
+  "new": ".any(|k| k.strip_prefix(name).is_some_and(|_| false))"
+ },
+ {
+  "id": "UM-36",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_22_a_release_without_initdb_is_refused_and_the_message_names_it"
+  ],
+  "what": "only a file under a release directory counts (a directory entry alone is refused)",
+  "old": "        if !seen.contains(name)\n            && !seen\n                .iter()",
+  "new": "        if true\n            && !seen\n                .iter()"
+ },
+ {
+  "id": "UM-37",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_22_a_release_without_initdb_is_refused_and_the_message_names_it"
+  ],
+  "what": "a missing directory is reported as initdb/",
+  "old": "            return Err(UnpackError::Missing { name });\n        }\n    }\n    for name in BIN_MEMBERS",
+  "new": "            return Err(UnpackError::Missing { name: \"initdb/\" });\n        }\n    }\n    for name in BIN_MEMBERS"
+ },
+ {
+  "id": "UM-38",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_23_every_member_of_list_2_is_accepted_and_gets_its_mode_from_us"
+  ],
+  "what": "bin/ is not a release directory",
+  "old": "const DIRS: [&str; 3] = [\"initdb\", \"bin\", \"systemd\"];",
+  "new": "const DIRS: [&str; 3] = [\"initdb\", \"initdb\", \"systemd\"];"
+ },
+ {
+  "id": "UM-39",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_23_every_member_of_list_2_is_accepted_and_gets_its_mode_from_us"
+  ],
+  "what": "the backup scripts are written 0644",
+  "old": "_ if BIN_MEMBERS.contains(&name) => Some(Kind::File(0o755)),",
+  "new": "_ if BIN_MEMBERS.contains(&name) => Some(Kind::File(0o644)),"
+ },
+ {
+  "id": "UM-40",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_23_every_member_of_list_2_is_accepted_and_gets_its_mode_from_us"
+  ],
+  "what": "the user units are written 0755",
+  "old": "_ if UNIT_MEMBERS.contains(&name) => Some(Kind::File(0o644)),",
+  "new": "_ if UNIT_MEMBERS.contains(&name) => Some(Kind::File(0o755)),"
+ },
+ {
+  "id": "UM-41",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_23_every_member_of_list_2_is_accepted_and_gets_its_mode_from_us"
+  ],
+  "what": "the example config is written 0755",
+  "old": "\"compose.yml\" | \"stack.env\" | \"cortex.toml.example\" => Some(Kind::File(0o644)),",
+  "new": "\"compose.yml\" | \"stack.env\" => Some(Kind::File(0o644)),\n        \"cortex.toml.example\" => Some(Kind::File(0o755)),"
+ },
+ {
+  "id": "UM-42",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_24_every_missing_member_of_list_2_is_refused_and_the_message_names_it"
+  ],
+  "what": "the example config is not required",
+  "old": "if !seen.contains(\"cortex.toml.example\") {",
+  "new": "if false {"
+ },
+ {
+  "id": "UM-43",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_24_every_missing_member_of_list_2_is_refused_and_the_message_names_it"
+  ],
+  "what": "only initdb is a required directory",
+  "old": "    for name in DIRS {\n        if !seen.contains(name)",
+  "new": "    for name in DIRS.into_iter().filter(|d| *d == \"initdb\") {\n        if !seen.contains(name)"
+ },
+ {
+  "id": "UM-44",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_27_the_directories_of_list_2_may_be_implied_by_a_file_under_them"
+  ],
+  "what": "a directory implied by a file does not count",
+  "old": ".any(|k| k.strip_prefix(name).is_some_and(|r| r.starts_with('/')))",
+  "new": ".any(|k| k.strip_prefix(name).is_some_and(|_| false))"
+ },
+ {
+  "id": "UM-45",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_24_every_missing_member_of_list_2_is_refused_and_the_message_names_it"
+  ],
+  "what": "the last backup script is not required",
+  "old": "for name in BIN_MEMBERS.into_iter().chain(UNIT_MEMBERS) {",
+  "new": "for name in BIN_MEMBERS.into_iter().take(4).chain(UNIT_MEMBERS) {"
+ },
+ {
+  "id": "UM-46",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_24_every_missing_member_of_list_2_is_refused_and_the_message_names_it"
+  ],
+  "what": "the first user unit is not required",
+  "old": "for name in BIN_MEMBERS.into_iter().chain(UNIT_MEMBERS) {",
+  "new": "for name in BIN_MEMBERS.into_iter().chain(UNIT_MEMBERS.into_iter().skip(1)) {"
+ },
+ {
+  "id": "UM-47",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_25_a_name_that_list_2_does_not_have_is_refused_even_next_to_a_good_member"
+  ],
+  "what": "any name under bin/ is a backup script",
+  "old": "_ if BIN_MEMBERS.contains(&name) => Some(Kind::File(0o755)),",
+  "new": "_ if name.starts_with(\"bin/\") => Some(Kind::File(0o755)),"
+ },
+ {
+  "id": "UM-48",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_25_a_name_that_list_2_does_not_have_is_refused_even_next_to_a_good_member"
+  ],
+  "what": "any name under systemd/ is a user unit",
+  "old": "_ if UNIT_MEMBERS.contains(&name) => Some(Kind::File(0o644)),",
+  "new": "_ if name.starts_with(\"systemd/\") => Some(Kind::File(0o644)),"
+ },
+ {
+  "id": "UM-49",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_27_the_directories_of_list_2_may_be_implied_by_a_file_under_them"
+  ],
+  "what": "a directory implied by a file is not made",
+  "old": "                    && make_dir(into, d, &mut dirs_made)?",
+  "new": "                    && false"
+ },
+ {
+  "id": "UM-50",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_24_every_missing_member_of_list_2_is_refused_and_the_message_names_it"
+  ],
+  "what": "a missing directory is reported as initdb",
+  "old": "            return Err(UnpackError::Missing { name });\n        }\n    }\n    for name in BIN_MEMBERS",
+  "new": "            return Err(UnpackError::Missing { name: \"initdb\" });\n        }\n    }\n    for name in BIN_MEMBERS"
+ },
+ {
+  "id": "UM-51",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_24_every_missing_member_of_list_2_is_refused_and_the_message_names_it"
+  ],
+  "what": "the missing-example message names another file",
+  "old": "name: \"cortex.toml.example\",\n        });",
+  "new": "name: \"cortex.toml\",\n        });"
+ },
+ {
+  "id": "UM-52",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_25b_a_directory_that_list_2_does_not_have_is_refused"
+  ],
+  "what": "any name ending in a slash is a release directory",
+  "old": ".any(|d| name == *d || name.strip_suffix('/') == Some(*d))",
+  "new": ".any(|d| name == *d || name.ends_with('/'))"
+ }
+]

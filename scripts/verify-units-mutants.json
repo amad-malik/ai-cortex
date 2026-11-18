@@ -1,0 +1,67 @@
+{
+ "target": "scripts/verify-units.sh",
+ "command": [
+  "sh",
+  "-c",
+  "exec sh \"$(dirname \"$1\")/verify-units-test.sh\"",
+  "sh",
+  "{copy}"
+ ],
+ "kill_marker": "VERIFY-UNITS WRONG",
+ "mutants": [
+  {
+   "id": "VM-1",
+   "what": "the live runtime directory is kept when one is set (the harm kai found)",
+   "old": "XDG_RUNTIME_DIR=$priv DBUS_SESSION_BUS_ADDRESS= systemd-analyze",
+   "new": "XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-$priv} DBUS_SESSION_BUS_ADDRESS= systemd-analyze"
+  },
+  {
+   "id": "VM-2",
+   "what": "the private directory is 0755, not 0700",
+   "old": "chmod 0700 \"$priv\"",
+   "new": "chmod 0755 \"$priv\""
+  },
+  {
+   "id": "VM-3",
+   "what": "the private directory is not removed on exit",
+   "old": "trap cleanup EXIT",
+   "new": "trap : EXIT"
+  },
+  {
+   "id": "VM-4",
+   "what": "the session bus is not emptied",
+   "old": "DBUS_SESSION_BUS_ADDRESS= systemd-analyze",
+   "new": "systemd-analyze"
+  },
+  {
+   "id": "VM-5",
+   "what": "--man=no is dropped",
+   "old": "systemd-analyze --user --man=no verify",
+   "new": "systemd-analyze --user verify"
+  },
+  {
+   "id": "VM-6",
+   "what": "--user is dropped",
+   "old": "systemd-analyze --user --man=no verify",
+   "new": "systemd-analyze --man=no verify"
+  },
+  {
+   "id": "VM-7",
+   "what": "the tool's exit status is swallowed",
+   "old": "verify \"$@\"\n",
+   "new": "verify \"$@\" || true\n"
+  },
+  {
+   "id": "VM-8",
+   "what": "a call with no unit is accepted",
+   "old": "[ $# -gt 0 ] ||",
+   "new": "[ $# -ge 0 ] ||"
+  },
+  {
+   "id": "VM-9",
+   "what": "the cleanup pattern never matches, so nothing is removed",
+   "old": "*/verify-units.??????)",
+   "new": "*/verify-unitz.??????)"
+  }
+ ]
+}

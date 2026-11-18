@@ -1,0 +1,13 @@
+#!/bin/sh
+# Synthetic sha256sum: logs its arguments, then runs the real tool, fails, answers a wrong digest, or answers the one fixed string it is given (FAKE_SHA256SUM_ANSWER).
+set -eu
+printf 'sha256sum' >> "$FAKE_LOG"
+for fetch_arg do printf ' %s' "$fetch_arg" >> "$FAKE_LOG"; done
+printf '\n' >> "$FAKE_LOG"
+case ${FAKE_SHA256SUM_MODE:-ok} in
+    fail|absent) exit 1 ;;
+    zero) printf '%s  -\n' 0000000000000000000000000000000000000000000000000000000000000000 ;;
+    fixed) printf '%s  -\n' "$FAKE_SHA256SUM_ANSWER" ;;
+    ok) exec /usr/bin/sha256sum "$@" ;;
+    *) exit 2 ;;
+esac

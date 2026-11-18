@@ -1,0 +1,5 @@
+# Wave 1 ports (d) fixture workspace (role-forms): the spellings the rule reads and the look-alikes it does not.
+# Standalone; never a member of the repository workspace.
+[workspace]
+resolver = "3"
+members = ["mod-forms"]

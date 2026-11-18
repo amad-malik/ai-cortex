@@ -1,0 +1,322 @@
+#!/bin/sh
+# cortex-dump: write one verified dump set of the Cortex v2 database (piece 12, backup by dump; bob@helix).
+# INTERIM(ponytail): pg_dump shell script and timer, replaced in 0.2.003 by cortex backup on pgBackRest.
+#
+#   cortex-dump --target <db-container> --out <dir> --status-dir <dir> [--label <label>] [--timeout <seconds>]
+#
+# Writes the set <dir>/<UTC stamp>/ (platform.dump, globals.sql, SHA256SUMS) under a temporary name and renames it only
+# after every check passed; then publishes LAST_GOOD (one line) into the STATUS directory. The status directory is a different
+# directory from --out (neither inside the other): it is the only thing the server's read-only mount sees, so the private dump
+# sets are never in a mount. Nothing but LAST_GOOD is ever written there: a temp file inside it, mode 0644 before the atomic
+# rename, removed on any failure. --status-dir (or CORTEX_DUMP_STATUS; the flag wins) is required for a daily run and is NEVER derived
+# from --out; it must already exist (the installer makes it) and be writable. With --label (letters, digits, dots and hyphens; for
+# example pre-upgrade-0.1.0-to-0.2.0) the set goes to <dir>/pre-upgrade/ with its own retention, the status directory is not used
+# and LAST_GOOD is not touched.
+#
+# Exit codes: 0 a verified set; 1 the dump or a check failed; 2 refused (bad argument, unsafe output directory, no
+# container, not enough free space); 3 another dump holds the lock; 4 timed out. The last line of stdout, on success, is the
+# absolute path of the set. The last line of stderr, on success, is the fixed restore warning.
+#
+# How it reaches the database: `podman exec --user postgres <container> ...` over the unix socket (peer authentication).
+# There is no password anywhere, no TCP, and nothing is matched by name when a process is stopped.
+#
+# One writer: flock(1) on <dir>/.dump.lock. The kernel frees the lock when its owner dies, however it dies, so there is no stale lock to
+# reclaim and no way for two dumps to reclaim it at once. --out is resolved (links followed, no . or .. components) BEFORE the
+# denied-directory checks. A set is published only after pg_restore has read the WHOLE archive (--list reads only the table of contents).
+set -eu
+umask 077
+LC_ALL=C
+export LC_ALL
+# nothing from the caller's PG* variables may steer a client (they would not cross `podman exec`, but nothing here relies on that)
+for v in $(env | sed -n 's/^\(PG[A-Za-z0-9_]*\)=.*/\1/p'); do unset "$v"; done
+
+me=cortex-dump
+warning='restore ONLY with cortex-restore; a plain pg_restore can make revoked tokens valid again'
+keep=3
+dbname=cortex
+
+tmp="" cpid="" status_tmp=""
+
+cleanup() {
+  # only what this run made, by its exact path
+  if [ -n "$cpid" ]; then kill "$cpid" 2> /dev/null || true; fi
+  if [ -n "$tmp" ] && [ -d "$tmp" ]; then rm -rf -- "$tmp"; fi
+  if [ -n "$status_tmp" ]; then rm -f -- "$status_tmp"; fi
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+die() { # die <exit code> <one-line reason>
+  printf '%s: %s\n' "$me" "$2" >&2
+  exit "$1"
+}
+
+usage() {
+  awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"
+}
+
+target="" out="" status="" label="" have_label=0 timeout_s=1800
+while [ $# -gt 0 ]; do
+  case $1 in
+    --target) [ $# -ge 2 ] || die 2 "--target needs a value"; target=$2; shift 2 ;;
+    --out) [ $# -ge 2 ] || die 2 "--out needs a value"; out=$2; shift 2 ;;
+    --status-dir) [ $# -ge 2 ] || die 2 "--status-dir needs a value"; status=$2; shift 2 ;;
+    --label) [ $# -ge 2 ] || die 2 "--label needs a value"; label=$2; have_label=1; shift 2 ;;
+    --timeout) [ $# -ge 2 ] || die 2 "--timeout needs a value"; timeout_s=$2; shift 2 ;;
+    -h | --help) usage; exit 0 ;;
+    *) die 2 "unknown argument" ;;
+  esac
+done
+
+# ---- arguments: every one is checked before anything is read, made or removed ----------------------------------
+
+case $target in
+  '') die 2 "--target is required" ;;
+  *[!A-Za-z0-9_.-]* | [!A-Za-z0-9]*) die 2 "--target is not a container name" ;;
+esac
+
+[ -n "$out" ] || die 2 "--out is required and must not be empty"
+out=${out%/}
+[ -n "$out" ] || die 2 "--out must not be the root directory"
+case $out in
+  /*) ;;
+  *) die 2 "--out must be an absolute path" ;;
+esac
+case $out in
+  *'
+'*) die 2 "--out must not contain a newline" ;;
+esac
+# no . or .. component, and links resolved in the part of the path that exists: the checks below must see the real place (BK12-12)
+case /$out/ in
+  */./* | */../*) die 2 "--out must not contain . or .. components" ;;
+esac
+probe=$out rest=""
+while [ ! -d "$probe" ]; do
+  rest=/${probe##*/}$rest
+  probe=${probe%/*}
+  [ -n "$probe" ] || probe=/
+done
+real=$(CDPATH= cd -P -- "$probe" && pwd -P) || die 2 "--out cannot be resolved"
+if [ "$real" = / ]; then out=$rest; else out=$real$rest; fi
+[ -n "$out" ] || die 2 "--out must not be the root directory"
+home=${HOME:-}
+home=${home%/}
+if [ -n "$home" ]; then
+  if [ "$out" = "$home" ]; then die 2 "--out must not be the home directory"; fi
+  home_real=$(CDPATH= cd -P -- "$home" 2> /dev/null && pwd -P) || home_real=""
+  if [ -n "$home_real" ] && [ "$out" = "$home_real" ]; then die 2 "--out must not be the home directory"; fi
+fi
+case $out in
+  /bin | /boot | /dev | /etc | /home | /lib | /lib64 | /opt | /proc | /root | /run | /sbin | /srv | /sys | /tmp | /usr | /var)
+    die 2 "--out is a system directory" ;;
+esac
+
+# the status directory: a daily run publishes LAST_GOOD there and ONLY there. Never derived from --out; it must exist already (the installer
+# makes it), be writable, be a different directory from --out and neither inside the other (the dump sets must stay out of every mount).
+if [ "$have_label" -eq 0 ]; then
+  [ -n "$status" ] || status=${CORTEX_DUMP_STATUS:-}
+  [ -n "$status" ] || die 2 "--status-dir (or CORTEX_DUMP_STATUS) is required for a daily dump"
+  status=${status%/}
+  [ -n "$status" ] || die 2 "--status-dir must not be the root directory"
+  case $status in
+    /*) ;;
+    *) die 2 "--status-dir must be an absolute path" ;;
+  esac
+  case $status in
+    *'
+'*) die 2 "--status-dir must not contain a newline" ;;
+  esac
+  case /$status/ in
+    */./* | */../*) die 2 "--status-dir must not contain . or .. components" ;;
+  esac
+  [ -d "$status" ] || die 2 "--status-dir is not an existing directory (the installer makes it)"
+  status=$(CDPATH= cd -P -- "$status" && pwd -P) || die 2 "--status-dir cannot be resolved"
+  # the early guard strips ONE trailing slash, so // and a link to / reach this point; after physical resolution the root is refused for good
+  # (the descendant pattern below would be //*, which misses every ordinary --out)
+  [ "$status" != / ] || die 2 "--status-dir must not be the root directory"
+  [ -w "$status" ] && [ -x "$status" ] || die 2 "--status-dir is not writable"
+  if [ "$status" = "$out" ]; then die 2 "--status-dir must be a different directory from --out"; fi
+  case $status/ in
+    "$out"/*) die 2 "--status-dir must not be inside --out" ;;
+  esac
+  case $out/ in
+    "$status"/*) die 2 "--out must not be inside --status-dir" ;;
+  esac
+fi
+
+if [ "$have_label" -eq 1 ]; then
+  case $label in
+    '') die 2 "--label must not be empty" ;;
+    [!A-Za-z0-9]*) die 2 "--label must start with a letter or a digit" ;;
+    *[!A-Za-z0-9.-]*) die 2 "--label may hold letters, digits, dots and hyphens only" ;;
+  esac
+  [ "${#label}" -le 64 ] || die 2 "--label is longer than 64 characters"
+fi
+
+case $timeout_s in
+  '' | *[!0-9]*) die 2 "--timeout must be a number of seconds" ;;
+esac
+[ "$timeout_s" -ge 1 ] && [ "$timeout_s" -le 86400 ] || die 2 "--timeout must be between 1 and 86400 seconds"
+hard=$((timeout_s + 30)) # the host-side deadline on the podman client, after the in-container one
+
+command -v podman > /dev/null 2>&1 || die 2 "podman is not installed"
+podman container exists "$target" > /dev/null 2>&1 || die 2 "the database container does not exist"
+
+# ---- the output directory ----------------------------------------------------------------------------------
+
+mkdir -p -- "$out" || die 2 "cannot create the output directory"
+# 0700: the dump sets are private. The server reads only the status directory, through its own read-only mount; this one is in no mount.
+chmod 0700 -- "$out" || die 2 "cannot set the mode of the output directory"
+
+if [ "$have_label" -eq 1 ]; then
+  area=$out/pre-upgrade
+  mkdir -p -- "$area" && chmod 0700 -- "$area" || die 2 "cannot create the pre-upgrade directory"
+else
+  area=$out
+fi
+
+# disk preflight: at least 1.2 times the database size free
+size=$(timeout 60 podman exec --user postgres "$target" psql -U postgres -d "$dbname" -Atc "select pg_database_size('$dbname')" 2> /dev/null) ||
+  die 2 "cannot read the database size"
+case $size in
+  '' | *[!0-9]*) die 2 "the database size is not a number" ;;
+esac
+free_kib=$(df -Pk -- "$out" | awk 'NR == 2 { print $4 }') || die 2 "cannot read the free space"
+case $free_kib in
+  '' | *[!0-9]*) die 2 "the free space is not a number" ;;
+esac
+if [ $((free_kib * 1024)) -lt $((size / 5 * 6 + 6)) ]; then
+  die 2 "not enough free space (need 1.2 times the database size)"
+fi
+
+# ---- the lock: flock on a file; the kernel releases it with its owner, so there is nothing stale to reclaim -----------
+
+command -v flock > /dev/null 2>&1 || die 2 "flock is required (util-linux)"
+lockfile=$out/.dump.lock
+{ : >> "$lockfile"; } 2> /dev/null || die 2 "cannot open the lock file"
+exec 9>> "$lockfile"
+flock -n 9 || die 3 "another dump is running"
+# fd 9 is closed (9>&-) for every child below, so a child that outlives this script cannot keep the lock
+
+# ---- the dump, under a temporary name --------------------------------------------------------------------------
+
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+tmp=$out/.tmp-$stamp-$$
+mkdir -- "$tmp" || die 1 "cannot make the temporary directory"
+
+# Each command runs in the background and is waited for, so a signal to this script stops it by its exact pid.
+# pg_dump runs under GNU timeout INSIDE the container, so a timeout ends pg_dump by its own pid; the host-side timeout
+# is the second line for a podman client that hangs.
+run_rc=0
+bg_in=/dev/null
+run_bg_to() { # run_bg_to <outfile> <logfile> <command...>: stdin from $bg_in, fd 9 (the lock) closed in the child; sets run_rc
+  _o=$1
+  _l=$2
+  shift 2
+  "$@" < "$bg_in" > "$_o" 2> "$_l" 9>&- &
+  cpid=$!
+  run_rc=0
+  wait "$cpid" || run_rc=$?
+  cpid=""
+}
+
+run_bg_to "$tmp/platform.dump" "$tmp/pg_dump.err" \
+  timeout -k 10 "$hard" podman exec --user postgres "$target" timeout "$timeout_s" pg_dump -U postgres -Fc -Z 0 "$dbname"
+case $run_rc in
+  0) ;;
+  124) die 4 "the dump timed out" ;;
+  *) die 1 "pg_dump failed (exit $run_rc)" ;;
+esac
+[ -s "$tmp/platform.dump" ] || die 1 "pg_dump wrote nothing"
+
+# the check: pg_restore must be able to read the whole archive. Both reads are tracked background jobs (a foreground child would defer a TERM to
+# this script until it ended: BK12-R1-01), and neither holds the lock.
+bg_in=$tmp/platform.dump
+run_bg_to /dev/null "$tmp/pg_restore.err" timeout -k 10 "$hard" podman exec -i --user postgres "$target" pg_restore --list
+[ "$run_rc" -eq 0 ] || die 1 "the dump failed the pg_restore --list check"
+# --list reads only the table of contents: an archive cut inside its data passes it. Reading every data block is the real check (BK12-03).
+run_bg_to /dev/null "$tmp/pg_restore2.err" timeout -k 10 "$hard" podman exec -i --user postgres "$target" pg_restore --file=/dev/null
+[ "$run_rc" -eq 0 ] || die 1 "the dump failed the full-read check (pg_restore --file=/dev/null)"
+bg_in=/dev/null
+
+run_bg_to "$tmp/globals.sql" "$tmp/pg_dumpall.err" \
+  timeout -k 10 "$hard" podman exec --user postgres "$target" pg_dumpall -U postgres --globals-only
+[ "$run_rc" -eq 0 ] || die 1 "pg_dumpall --globals-only failed (exit $run_rc)"
+[ -s "$tmp/globals.sql" ] || die 1 "pg_dumpall wrote nothing"
+
+rm -f -- "$tmp/pg_dump.err" "$tmp/pg_restore.err" "$tmp/pg_restore2.err" "$tmp/pg_dumpall.err"
+# the checksums: tracked jobs too (a large dump takes a while to hash), `exec` so the tracked pid is sha256sum itself, no lock held
+run_bg_to "$tmp/SHA256SUMS" /dev/null sh -c 'cd "$1" && exec sha256sum platform.dump globals.sql' sh "$tmp"
+[ "$run_rc" -eq 0 ] || die 1 "the checksums could not be written"
+run_bg_to /dev/null /dev/null sh -c 'cd "$1" && exec sha256sum -c SHA256SUMS' sh "$tmp"
+[ "$run_rc" -eq 0 ] || die 1 "the checksums do not verify"
+chmod 0700 -- "$tmp"
+chmod 0600 -- "$tmp/platform.dump" "$tmp/globals.sql" "$tmp/SHA256SUMS"
+
+# ---- publish: the rename is the only moment the set gets its final name ------------------------------------------
+
+if [ "$have_label" -eq 1 ]; then base=$stamp-$label; else base=$stamp; fi
+# A name must never sort before an existing set of the same stamp (retention keeps the newest by name, and a pruned
+# base name must not be reused): the base name counts as 1, the next is the highest suffix present plus one.
+n=0
+for d in "$area/$base" "$area/$base"-[0-9][0-9]; do
+  [ -e "$d" ] || continue
+  k=${d##*/}
+  if [ "$k" = "$base" ]; then k=1; else k=${k#"$base"-}; k=${k#0}; fi
+  if [ "$k" -gt "$n" ]; then n=$k; fi
+done
+if [ "$n" -eq 0 ]; then
+  final=$area/$base
+else
+  [ "$n" -lt 99 ] || die 1 "too many sets with the same name"
+  final=$area/$base-$(printf '%02d' $((n + 1)))
+fi
+mv -- "$tmp" "$final" || die 1 "cannot publish the set"
+tmp=""
+name=${final##*/}
+
+bytes=0
+for f in platform.dump globals.sql SHA256SUMS; do
+  b=$(wc -c < "$final/$f")
+  bytes=$((bytes + b))
+done
+
+# ---- LAST_GOOD: the daily set only, into the status directory, by a temp file INSIDE it and an atomic rename ----------
+
+if [ "$have_label" -eq 0 ]; then
+  sums=$(sha256sum "$final/SHA256SUMS" 9>&-) || die 1 "cannot hash SHA256SUMS"
+  sha=${sums%% *}
+  now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  # the temp name is removed by cleanup on ANY failure; the mode is final (0644) before the rename, whatever the umask
+  status_tmp=$status/.LAST_GOOD.new.$$
+  ( umask 022; printf '{"set":"%s","utc":"%s","bytes":%s,"sha256":"%s"}\n' "$name" "$now" "$bytes" "$sha" > "$status_tmp" ) || die 1 "cannot write LAST_GOOD"
+  chmod 0644 -- "$status_tmp" || die 1 "cannot set the mode of LAST_GOOD"
+  # a link at LAST_GOOD (to a file or a directory: mv would move INTO a directory link) is removed as the link it is, never followed
+  if [ -L "$status/LAST_GOOD" ]; then rm -f -- "$status/LAST_GOOD"; fi
+  [ ! -d "$status/LAST_GOOD" ] || die 1 "LAST_GOOD in the status directory is a directory; refusing"
+  mv -f -- "$status_tmp" "$status/LAST_GOOD" || die 1 "cannot publish LAST_GOOD"
+  status_tmp=""
+fi
+
+# ---- retention: only after a success, only names that look like a set, oldest first, by exact name -----------------
+
+count=0
+for d in "$area"/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]T[0-9][0-9][0-9][0-9][0-9][0-9]Z*; do
+  [ -d "$d" ] && count=$((count + 1))
+done
+remove=$((count - keep))
+if [ "$remove" -gt 0 ]; then
+  for d in "$area"/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]T[0-9][0-9][0-9][0-9][0-9][0-9]Z*; do
+    [ "$remove" -gt 0 ] || break
+    [ -d "$d" ] || continue
+    [ "$d" != "$final" ] || continue
+    rm -rf -- "$d" 9>&-
+    remove=$((remove - 1))
+  done
+fi
+
+printf '%s: ok, %s bytes, %s\n' "$me" "$bytes" "$name" >&2
+printf '%s\n' "$final"
+printf '%s\n' "$warning" >&2
+exit 0

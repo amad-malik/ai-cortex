@@ -1,0 +1,32 @@
+error[E0615]: attempted to take value of method `principal` on type `&Ctx`
+ --> tests/ui/d4b_read_field_fail.rs:5:17
+  |
+5 |     let _ = ctx.principal.worker;
+  |                 ^^^^^^^^^ method, not a field
+  |
+help: use parentheses to call the method
+  |
+5 |     let _ = ctx.principal().worker;
+  |                          ++
+
+error[E0615]: attempted to take value of method `project` on type `&Ctx`
+ --> tests/ui/d4b_read_field_fail.rs:6:17
+  |
+6 |     let _ = ctx.project;
+  |                 ^^^^^^^ method, not a field
+  |
+help: use parentheses to call the method
+  |
+6 |     let _ = ctx.project();
+  |                        ++
+
+error[E0615]: attempted to take value of method `request_id` on type `&Ctx`
+ --> tests/ui/d4b_read_field_fail.rs:7:17
+  |
+7 |     let _ = ctx.request_id;
+  |                 ^^^^^^^^^^ method, not a field
+  |
+help: use parentheses to call the method
+  |
+7 |     let _ = ctx.request_id();
+  |                           ++

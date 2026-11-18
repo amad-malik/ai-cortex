@@ -1,0 +1,8 @@
+#!/usr/bin/python3
+import json, os, sys
+loc = json.load(open(os.environ["FAKE_LOCAL"]))
+if sys.argv[1:] != ["-o", "addr", "show"]:
+    sys.stderr.write("fake ip: unexpected arguments\n"); sys.exit(2)
+for i, a in enumerate(loc["addrs"], 2):
+    fam = "inet6" if ":" in a else "inet"
+    print("%d: eth%d    %s %s/24 scope global eth%d" % (i, i, fam, a, i))

@@ -1,0 +1,5 @@
+[package]
+name = "b"
+version = "0.1.0"
+[target.'cfg(unix)'.build-dependencies.serde_ignored]
+version = "~0.1"

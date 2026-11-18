@@ -1,0 +1,309 @@
+[
+  {
+    "id": "VM-01",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "checksum_line_limit_accepts_1000_and_rejects_1001"
+    ],
+    "what": "1001 checksum lines accepted",
+    "old": "if index >= MAX_LINES {",
+    "new": "if index > MAX_LINES {"
+  },
+  {
+    "id": "VM-02",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_noncanonical_lines_in_an_otherwise_valid_checksum_file"
+    ],
+    "what": "final newline not required",
+    "old": "if !bytes.ends_with(b\"\\n\") {",
+    "new": "if false && !bytes.ends_with(b\"\\n\") {"
+  },
+  {
+    "id": "VM-03",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_manifest_present_but_omitted_from_checksums"
+    ],
+    "what": "manifest present but omitted from the checksums",
+    "edits": [
+      [
+        "if !listed.contains_key(*name) {",
+        "if *name != \"manifest.json\" && !listed.contains_key(*name) {"
+      ],
+      [
+        "if rel == \"SHA256SUMS\" {",
+        "if rel == \"SHA256SUMS\" || rel == \"manifest.json\" {"
+      ]
+    ]
+  },
+  {
+    "id": "VM-04",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_each_wrong_mode"
+    ],
+    "what": "mode comparison ignored",
+    "old": "if md.permissions().mode() & 0o7777 != expected {",
+    "new": "if false && md.permissions().mode() & 0o7777 != expected {"
+  },
+  {
+    "id": "VM-05",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_changed_or_missing_files"
+    ],
+    "what": "file digest mismatch ignored",
+    "old": "if &actual != expected {",
+    "new": "if false && &actual != expected {"
+  },
+  {
+    "id": "VM-06",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_changed_or_missing_files"
+    ],
+    "what": "missing files ignored",
+    "old": "if seen.len() != listed.len() {",
+    "new": "if false && seen.len() != listed.len() {"
+  },
+  {
+    "id": "VM-07",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_invalid_names_and_duplicate_in_otherwise_valid_inventory"
+    ],
+    "what": "duplicate list paths accepted",
+    "old": "        if listed\n            .insert(name.to_owned(), line[..64].to_owned())\n            .is_some()\n",
+    "new": "        if listed\n            .insert(name.to_owned(), line[..64].to_owned())\n            .is_some() && false\n"
+  },
+  {
+    "id": "VM-08",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_release_without_the_initdb_directory"
+    ],
+    "what": "release may omit initdb",
+    "old": "    for name in list.dirs {\n        let md = metadata(&dir.join(name)).map_err(|e| e.at(name))?;\n        if !md.file_type().is_dir() {\n            return Err(refused(\"required member is not a real directory\").at(name));\n        }\n        mode(&md, 0o755).map_err(|e| e.at(name))?;\n    }\n",
+    "new": ""
+  },
+  {
+    "id": "VM-09",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_invalid_names_and_duplicate_in_otherwise_valid_inventory"
+    ],
+    "what": "dot-first names accepted",
+    "old": "b.is_ascii_alphanumeric() || matches!(b, b'_' | b'-')",
+    "new": "b.is_ascii_alphanumeric() || matches!(b, b'_' | b'-' | b'.')"
+  },
+  {
+    "id": "VM-10",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_invalid_names_and_duplicate_in_otherwise_valid_inventory"
+    ],
+    "what": "65-character components accepted",
+    "old": "(1..=64).contains(&name.len())",
+    "new": "(1..=65).contains(&name.len())"
+  },
+  {
+    "id": "VM-11",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_extra_inventory_and_directories"
+    ],
+    "what": "unlisted files ignored",
+    "old": "        let expected = listed\n            .get(&rel)",
+    "new": "        if !listed.contains_key(&rel) { continue; }\n        let expected = listed\n            .get(&rel)"
+  },
+  {
+    "id": "VM-12",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_symlink_as_release_directory"
+    ],
+    "what": "release directory symlink followed",
+    "old": "    if !md.file_type().is_dir() {\n        return Err(refused(\"release is not a real directory\"));\n    }",
+    "new": "    if false && !md.file_type().is_dir() {\n        return Err(refused(\"release is not a real directory\"));\n    }"
+  },
+  {
+    "id": "VM-13",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "accepts_real_unpacked_release_and_binary_checksum_format"
+    ],
+    "what": "executable file permissions changed",
+    "old": "        let expected_mode = if rel == \"cortex\" || rel == \"db-roles.sh\" || rel.starts_with(\"bin/\") {\n            0o755",
+    "new": "        let expected_mode = if rel == \"cortex\" || rel == \"db-roles.sh\" || rel.starts_with(\"bin/\") {\n            0o644"
+  },
+  {
+    "id": "VM-14",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "accepts_real_unpacked_release_and_binary_checksum_format"
+    ],
+    "what": "db roles executable mode not required",
+    "old": "rel == \"cortex\" || rel == \"db-roles.sh\"",
+    "new": "rel == \"cortex\""
+  },
+  {
+    "id": "VM-15",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_each_wrong_mode"
+    ],
+    "what": "checksum file mode ignored",
+    "old": "    mode(&md, 0o644)?;",
+    "new": "    let _ = &md;"
+  },
+  {
+    "id": "VM-16",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_noncanonical_lines_in_an_otherwise_valid_checksum_file"
+    ],
+    "what": "CRLF checksum lines accepted",
+    "old": "text.split_terminator('\\n').enumerate()",
+    "new": "text.lines().enumerate()"
+  },
+  {
+    "id": "VM-17",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_noncanonical_lines_in_an_otherwise_valid_checksum_file"
+    ],
+    "what": "checksum separator can be a tab",
+    "old": "|| raw[64] != b' '",
+    "new": "|| false"
+  },
+  {
+    "id": "VM-18",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "roles_script_must_match_manifest_even_when_checksums_are_rewritten"
+    ],
+    "what": "roles digest comparison ignored",
+    "old": "if actual != expected {",
+    "new": "if false && actual != expected {"
+  },
+  {
+    "id": "VM-19",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "roles_script_must_match_manifest_even_when_checksums_are_rewritten"
+    ],
+    "what": "roles verification call skipped",
+    "old": "    verify_roles_against_manifest(dir, &release)?;",
+    "new": "    let _ = &release;"
+  },
+  {
+    "id": "VM-20",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "manifest_binding_selects_the_stack_version_not_the_first_entry"
+    ],
+    "what": "first manifest entry chosen without version match",
+    "old": "if release.version == env.version",
+    "new": "if true || release.version == env.version"
+  },
+  {
+    "id": "VM-21",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "member_list_version_is_read_and_unknown_versions_are_refused"
+    ],
+    "what": "unknown list version accepted",
+    "old": "_ => return Err(refused(\"unknown member list version\").at(\"manifest.json\")),",
+    "new": "_ => &LIST_2,"
+  },
+  {
+    "id": "VM-22",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_each_missing_expanded_member_even_when_unlisted"
+    ],
+    "what": "required files omitted from checksum inventory",
+    "old": "if !listed.contains_key(*name) {",
+    "new": "if false && !listed.contains_key(*name) {"
+  },
+  {
+    "id": "VM-23",
+    "file": "src/verify.rs",
+    "tests": [
+      "group_verify"
+    ],
+    "fails": [
+      "rejects_extra_bin_and_systemd_names_even_when_checksummed"
+    ],
+    "what": "unknown bin and systemd members accepted",
+    "old": "if list.files.contains(&path) {",
+    "new": "if list.files.contains(&path) || path.starts_with(\"bin/\") || path.starts_with(\"systemd/\") {"
+  }
+]

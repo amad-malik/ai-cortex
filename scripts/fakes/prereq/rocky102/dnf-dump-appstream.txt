@@ -1,0 +1,50 @@
+=============================== repo: appstream ================================
+[appstream]
+bandwidth = 0
+baseurl = 
+cachedir = /var/cache/dnf
+cost = 1000
+countme = 1
+deltarpm = 0
+deltarpm_percentage = 75
+enabled = 1
+enabled_metadata = 
+enablegroups = 1
+exclude = 
+excludepkgs = 
+fastestmirror = 0
+gpgcheck = 1
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-Rocky-10
+includepkgs = 
+ip_resolve = whatever
+max_downloads_per_mirror = 3
+max_parallel_downloads = 3
+mediaid = 
+metadata_expire = 21600
+minrate = 1000
+mirrorlist = https://mirrors.rockylinux.org/mirrorlist?arch=x86_64&repo=AppStream-10.2
+module_hotfixes = 0
+name = Rocky Linux 10.2 - AppStream
+password = 
+priority = 99
+protected_packages = dnf, grub2-efi-x64, grub2-pc, grub2-tools-minimal, selinux-policy-targeted, setup, shim-aa64, shim-arm, shim-ia32, shim-x64, sudo, systemd, systemd-udev, yum, grub2-efi-x64, grub2-pc, grub2-tools-minimal, selinux-policy-targeted, setup, shim-aa64, shim-arm, shim-ia32, shim-x64, sudo, systemd, systemd-udev, yum
+proxy = 
+proxy_auth_method = any
+proxy_sslcacert = 
+proxy_sslclientcert = 
+proxy_sslclientkey = 
+proxy_sslverify = 1
+repo_gpgcheck = 0
+retries = 10
+skip_if_unavailable = 0
+sslcacert = 
+sslclientcert = 
+sslclientkey = 
+sslverify = 1
+sslverifystatus = 0
+throttle = 0
+timeout = 30
+type = 
+user_agent = libdnf (Rocky Linux 10.2; generic; Linux.x86_64)
+username = 
+

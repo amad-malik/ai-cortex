@@ -1,0 +1,15 @@
+error[E0061]: this method takes 5 arguments but 4 arguments were supplied
+ --> tests/ui/po05_route_without_a_target_rule_fail.rs:6:27
+  |
+6 |     let _ = Routes::new().read(Method::GET, "/v2/x", "x:read", || async { "x" });
+  |                           ^^^^                                 ---------------- argument #4 of type `TargetRule` is missing
+  |
+note: method defined here
+ --> $WORKSPACE/crates/cortex-module/src/route.rs
+  |
+  |     pub fn read<H, T>(
+  |            ^^^^
+help: provide the argument
+  |
+6 |     let _ = Routes::new().read(Method::GET, "/v2/x", "x:read", /* TargetRule */, || async { "x" });
+  |                                                                +++++++++++++++++

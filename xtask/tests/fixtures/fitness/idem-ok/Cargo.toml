@@ -1,0 +1,4 @@
+# Delta 4 fixture workspace (idem-ok). Standalone; never a member of the repository workspace.
+[workspace]
+resolver = "3"
+members = ["cortex-db", "cortex-http", "mod-tokens", "mod-identity", "mod-policy"]

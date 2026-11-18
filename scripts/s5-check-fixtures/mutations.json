@@ -1,0 +1,4556 @@
+{
+  "rules": [
+    "S5-01",
+    "S5-02",
+    "S5-03",
+    "S5-04",
+    "S5-05",
+    "S5-06",
+    "S5-07",
+    "S5-08",
+    "S5-09",
+    "S5-10",
+    "S5-11",
+    "S5-12",
+    "S5-13",
+    "S5-14",
+    "S5-15",
+    "S5-16",
+    "S5-17",
+    "S5-18",
+    "S5-19",
+    "S5-20",
+    "S5-21",
+    "S5-22",
+    "S5-23"
+  ],
+  "mutations": [
+    {
+      "id": "m01",
+      "rule": "S5-01",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "127.0.0.1:${CORTEX_PORT:-8601}:8601",
+      "new": "0.0.0.0:${CORTEX_PORT:-8601}:8601",
+      "note": "published on every interface"
+    },
+    {
+      "id": "m02",
+      "rule": "S5-01",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "127.0.0.1:${CORTEX_PORT:-8601}:8601",
+      "new": "${CORTEX_PORT:-8601}:8601",
+      "note": "published with no host address"
+    },
+    {
+      "id": "m03",
+      "rule": "S5-02",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "${CORTEX_PORT:-8601}",
+      "new": "8501",
+      "note": "host port is v1's cortex-api port"
+    },
+    {
+      "id": "m04",
+      "rule": "S5-02",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "${CORTEX_PORT:-8601}",
+      "new": "${CORTEX_PORT:-5499}",
+      "note": "default host port is v1's database port"
+    },
+    {
+      "id": "m05",
+      "rule": "S5-03",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "container_name: cv2-s5-db",
+      "new": "container_name: cortex-pg",
+      "note": "container named like v1's"
+    },
+    {
+      "id": "m06",
+      "rule": "S5-03",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "cv2-s5-pg-data",
+      "new": "cortex-pg18-data",
+      "note": "volume named like v1's data volume"
+    },
+    {
+      "id": "m07",
+      "rule": "S5-03",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "name: cv2-s5\n\nservices:",
+      "new": "name: harness-appdb\n\nservices:",
+      "note": "project named like v1's"
+    },
+    {
+      "id": "m08",
+      "rule": "S5-04",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      POSTGRES_DB: cortex\n",
+      "new": "      POSTGRES_DB: cortex\n      POSTGRES_PASSWORD: hunter2\n",
+      "note": "a password value in environment"
+    },
+    {
+      "id": "m09",
+      "rule": "S5-04",
+      "file": "cortex.toml.example",
+      "op": "append",
+      "text": "app_password = \"hunter2\"\n",
+      "note": "a literal password in the config example"
+    },
+    {
+      "id": "m10",
+      "rule": "S5-05",
+      "file": "Containerfile",
+      "op": "append",
+      "text": "COPY cortex.toml /etc/cortex/cortex.toml\n",
+      "note": "config baked into the image"
+    },
+    {
+      "id": "m11",
+      "rule": "S5-05",
+      "file": "Containerfile",
+      "op": "append",
+      "text": "ENV DB_PASSWORD=hunter2\n",
+      "note": "a secret in an ENV line"
+    },
+    {
+      "id": "m12",
+      "rule": "S5-06",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "@sha256:42e7f6b4e1eceb02ff14e3e6bc6108bbe259abbe83879dc1845d0da1ddeb555d",
+      "new": "",
+      "note": "database image without a digest"
+    },
+    {
+      "id": "m13",
+      "rule": "S5-06",
+      "file": "Containerfile",
+      "op": "replace",
+      "old": "quay.io/rockylinux/rockylinux@sha256:e372170ca8630f0f03e9b70fdd0bf4a3ce3426b0de7cdba615f06337389de176 AS build",
+      "new": "quay.io/rockylinux/rockylinux:latest AS build",
+      "note": "base image on latest"
+    },
+    {
+      "id": "m14",
+      "rule": "S5-07",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "read_only: true",
+      "new": "read_only: false",
+      "note": "server root file system writable"
+    },
+    {
+      "id": "m15",
+      "rule": "S5-07",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    cap_drop:\n      - ALL\n",
+      "new": "    cap_drop:\n      - NET_RAW\n",
+      "note": "server keeps capabilities"
+    },
+    {
+      "id": "m16",
+      "rule": "S5-07",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "no-new-privileges:true",
+      "new": "no-new-privileges:false",
+      "note": "new privileges allowed"
+    },
+    {
+      "id": "m17",
+      "rule": "S5-08",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      test: [\"CMD-SHELL\", \"pg_isready -q -U postgres -h 127.0.0.1 -d cortex >/dev/null 2>&1\"]\n",
+      "new": "",
+      "note": "database health check has no test"
+    },
+    {
+      "id": "m18",
+      "rule": "S5-08",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    healthcheck:\n      test: [\"CMD\", \"/usr/local/bin/cortex-server\", \"health\", \"--ready\"]\n      interval: 15s\n      timeout: 10s\n      retries: 10\n      start_period: 20s\n",
+      "new": "",
+      "note": "server has no health check"
+    },
+    {
+      "id": "m19",
+      "rule": "S5-09",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      cortexv2: dev\n",
+      "new": "      owner: hue\n",
+      "note": "the cortexv2=dev label is missing"
+    },
+    {
+      "id": "m20",
+      "rule": "S5-10",
+      "file": "install.sh",
+      "op": "replace",
+      "old": "set -eu\n",
+      "new": "",
+      "note": "install.sh without set -eu"
+    },
+    {
+      "id": "m21",
+      "rule": "S5-10",
+      "file": "install.sh",
+      "op": "append",
+      "text": "fi\n",
+      "note": "install.sh with a syntax error"
+    },
+    {
+      "id": "m22",
+      "rule": "S5-10",
+      "file": "initdb/00-cortex-roles.sh",
+      "op": "replace",
+      "old": "set -eu",
+      "new": "set -u",
+      "note": "initdb script without -e"
+    },
+    {
+      "id": "m23",
+      "rule": "S5-11",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "  cv2-s5-db-superuser:\n    external: true\n",
+      "new": "  cv2-s5-db-superuser:\n    file: ./superuser.txt\n",
+      "note": "a secret read from a file in the tree"
+    },
+    {
+      "id": "m24",
+      "rule": "S5-12",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    init: true\n    read_only: true\n",
+      "new": "    init: true\n    privileged: true\n    read_only: true\n",
+      "note": "privileged container"
+    },
+    {
+      "id": "m25",
+      "rule": "S5-12",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    container_name: cv2-s5-server\n",
+      "new": "    container_name: cv2-s5-server\n    network_mode: host\n",
+      "note": "host network"
+    },
+    {
+      "id": "m26",
+      "rule": "S5-13",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "${CORTEX_CONFIG:?set by install.sh}:/etc/cortex/cortex.toml:ro,z",
+      "new": "${CORTEX_CONFIG:?set by install.sh}:/etc/cortex/cortex.toml:z",
+      "note": "config mounted writable"
+    },
+    {
+      "id": "m27",
+      "rule": "S5-13",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_CONFIG:?set by install.sh}:/etc/cortex/cortex.toml:ro,z\n",
+      "new": "",
+      "note": "no config mount at all"
+    },
+    {
+      "id": "m28",
+      "rule": "S5-14",
+      "file": "compose.yml",
+      "op": "delete_file",
+      "note": "compose.yml missing"
+    },
+    {
+      "id": "m29",
+      "rule": "S5-14",
+      "file": "Containerfile",
+      "op": "delete_file",
+      "note": "Containerfile missing"
+    },
+    {
+      "id": "m30",
+      "rule": "S5-14",
+      "file": "install.sh",
+      "op": "delete_file",
+      "note": "install.sh missing"
+    },
+    {
+      "id": "m31",
+      "rule": "S5-14",
+      "file": "initdb/00-cortex-roles.sh",
+      "op": "delete_file",
+      "note": "initdb script missing"
+    },
+    {
+      "id": "m32",
+      "rule": "S5-14",
+      "file": "cortex.toml.example",
+      "op": "delete_file",
+      "note": "config example missing"
+    },
+    {
+      "id": "m33",
+      "rule": "S5-07",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "user: \"10001:10001\"",
+      "new": "user: \"0:0\"",
+      "note": "server runs as root"
+    },
+    {
+      "id": "m34",
+      "rule": "S5-01",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - \"127.0.0.1:${CORTEX_PORT:-8601}:8601\"\n",
+      "new": "      - target: 8601\n        published: 8601\n",
+      "note": "long port syntax is refused (fail closed)"
+    },
+    {
+      "id": "m35",
+      "rule": "S5-02",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "${CORTEX_PORT:-8601}",
+      "new": "${CORTEX_PORT}",
+      "note": "host port not resolvable (no default)"
+    },
+    {
+      "id": "m36",
+      "rule": "S5-03",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "localhost/cv2-s5-server:dev",
+      "new": "localhost/cortex-api:dev",
+      "note": "built image named like v1's"
+    },
+    {
+      "id": "m37",
+      "rule": "S5-05",
+      "file": "Containerfile",
+      "op": "append",
+      "text": "ARG API_TOKEN\n",
+      "note": "a secret passed as a build argument"
+    },
+    {
+      "id": "m38",
+      "rule": "S5-06",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "localhost/cv2-s5-server:dev",
+      "new": "localhost/cv2-s5-server:latest",
+      "note": "built image on latest"
+    },
+    {
+      "id": "m39",
+      "rule": "S5-11",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "  cv2-s5-app-password:\n    external: true\n",
+      "new": "",
+      "note": "a service uses a secret that is not declared"
+    },
+    {
+      "id": "m40",
+      "rule": "S5-12",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    init: true\n    read_only: true\n",
+      "new": "    init: true\n    cap_add:\n      - SYS_ADMIN\n    read_only: true\n",
+      "note": "extra capability"
+    },
+    {
+      "id": "m41",
+      "rule": "S5-12",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    container_name: cv2-s5-server\n",
+      "new": "    container_name: cv2-s5-server\n    pid: host\n",
+      "note": "host process namespace"
+    },
+    {
+      "id": "m42",
+      "rule": "S5-12",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - no-new-privileges:true\n",
+      "new": "      - no-new-privileges:true\n      - seccomp=unconfined\n",
+      "note": "seccomp switched off"
+    },
+    {
+      "id": "m43",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "pkill -f cortex\n",
+      "note": "pkill by pattern"
+    },
+    {
+      "id": "m44",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "killall cortex-server\n",
+      "note": "killall"
+    },
+    {
+      "id": "m45",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "kill -9 \"$pid\"\n",
+      "note": "kill -9"
+    },
+    {
+      "id": "m46",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "kill -TERM -- -1234\n",
+      "note": "a group signal"
+    },
+    {
+      "id": "m47",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "podman rm -f -a\n",
+      "note": "podman rm -f -a"
+    },
+    {
+      "id": "m48",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "podman rm --all\n",
+      "note": "podman rm --all"
+    },
+    {
+      "id": "m49",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "podman system prune -a\n",
+      "note": "podman system prune"
+    },
+    {
+      "id": "m50",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "podman compose -f x down -v\n",
+      "note": "compose down with volumes"
+    },
+    {
+      "id": "m51",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "git push origin main\n",
+      "note": "a push"
+    },
+    {
+      "id": "m52",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "cat \"$token\"\n",
+      "note": "printing the content of a token file"
+    },
+    {
+      "id": "m53",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "printf '%s\\n' \"$password\"\n",
+      "note": "printing a password variable"
+    },
+    {
+      "id": "m54",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "echo \"$val\"\n",
+      "note": "printing the secret variable val"
+    },
+    {
+      "id": "m55",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "podman stop cortex-api\n",
+      "note": "touching v1's cortex-api"
+    },
+    {
+      "id": "m56",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "podman exec harness-appdb true\n",
+      "note": "touching v1's harness-appdb"
+    },
+    {
+      "id": "m57",
+      "rule": "S5-15",
+      "file": "scripts/helper.sh",
+      "op": "append",
+      "text": "pkill -f x\n",
+      "note": "pkill in scripts/, found in never-list mode",
+      "mode": "never-list",
+      "dir": "scripts"
+    },
+    {
+      "id": "m58",
+      "rule": "S5-15",
+      "file": "scripts/helper.sh",
+      "op": "append",
+      "text": "podman rm -a\n",
+      "note": "podman rm -a in scripts/, found in never-list mode",
+      "mode": "never-list",
+      "dir": "scripts"
+    },
+    {
+      "id": "m59",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "pkill -f x   # s5-never: ok\n",
+      "note": "the allow marker without a reason exempts nothing"
+    },
+    {
+      "id": "m60",
+      "rule": "S5-15",
+      "file": "scripts/helper-test.sh",
+      "op": "append",
+      "text": "pkill -f x\n",
+      "note": "a *-test.sh script is still held to the destructive-verb rules",
+      "mode": "never-list",
+      "dir": "scripts"
+    },
+    {
+      "id": "m61",
+      "rule": "S5-15",
+      "file": "initdb/00-cortex-roles.sh",
+      "op": "append",
+      "text": "cat /run/secrets/cv2-s5-owner-password\n",
+      "note": "a plain cat of a secret file is still flagged; only psql's \\set assignment is allowed"
+    },
+    {
+      "id": "m62",
+      "rule": "S5-16",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    secrets:\n      - cv2-s5-app-password\n    volumes:\n",
+      "new": "    secrets:\n      - cv2-s5-owner-password\n      - cv2-s5-app-password\n    volumes:\n",
+      "note": "the long-running server mounts the owner password"
+    },
+    {
+      "id": "m63",
+      "rule": "S5-16",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      migrate:\n        condition: service_completed_successfully\n",
+      "new": "",
+      "note": "the server does not wait for the one-shot migrate"
+    },
+    {
+      "id": "m64",
+      "rule": "S5-08",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    restart: \"no\"\n",
+      "new": "",
+      "note": "a service without restart: no and without a health check"
+    },
+    {
+      "id": "m65",
+      "rule": "S5-07",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    container_name: cv2-s5-migrate\n    restart: \"no\"\n    user: \"10001:10001\"\n    init: true\n    read_only: true\n",
+      "new": "    container_name: cv2-s5-migrate\n    restart: \"no\"\n    user: \"10001:10001\"\n    init: true\n    read_only: false\n",
+      "note": "the migrate container (our image, no build) is held to the hardening rules too"
+    },
+    {
+      "id": "m66",
+      "rule": "S5-06",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    image: localhost/cv2-s5-server:dev\n    command: [\"migrate\"]",
+      "new": "    image: localhost/cv2-s5-server\n    command: [\"migrate\"]",
+      "note": "our image without a tag"
+    },
+    {
+      "id": "m67",
+      "rule": "S5-16",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      migrate:\n        condition: service_completed_successfully\n",
+      "new": "      migrate:\n        condition: service_started\n",
+      "note": "the server waits for migrate to start, not to finish"
+    },
+    {
+      "id": "m68",
+      "rule": "S5-16",
+      "file": "compose.yml",
+      "op": "multi",
+      "edits": [
+        [
+          "    container_name: cv2-s5-server\n    restart: unless-stopped\n",
+          "    container_name: cv2-s5-server\n    restart: \"no\"\n"
+        ],
+        [
+          "    secrets:\n      - cv2-s5-app-password\n    volumes:\n",
+          "    secrets:\n      - cv2-s5-owner-password\n      - cv2-s5-app-password\n    volumes:\n"
+        ]
+      ],
+      "note": "the server given restart: \"no\" (compose's default) and the owner secret is not thereby a one-shot"
+    },
+    {
+      "id": "m69",
+      "rule": "S5-16",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      cortexv2: dev\n    depends_on:\n      db:\n        condition: service_healthy\n      migrate:",
+      "new": "      cortexv2: dev\n      cortexv2.role: oneshot\n    depends_on:\n      db:\n        condition: service_healthy\n      migrate:",
+      "note": "the server labelled as a one-shot but running serve"
+    },
+    {
+      "id": "m70",
+      "rule": "S5-16",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      cortexv2.role: oneshot\n",
+      "new": "",
+      "note": "the migrate container without its one-shot role label"
+    },
+    {
+      "id": "m71",
+      "rule": "S5-16",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    command: [\"migrate\"]\n",
+      "new": "    command: [\"serve\"]\n",
+      "note": "a one-shot whose command is not the known one-shot"
+    },
+    {
+      "id": "m76",
+      "rule": "S5-06",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    command: [\"migrate\"]\n    pull_policy: never\n",
+      "new": "    command: [\"migrate\"]\n",
+      "note": "our image without pull_policy: never (migrate would try to pull a local tag)"
+    },
+    {
+      "id": "m72",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "podman rm -f $(podman ps -aq)\n",
+      "note": "podman rm -f of a command substitution listing every container"
+    },
+    {
+      "id": "m73",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "podman ps -aq | xargs podman rm -f\n",
+      "note": "xargs podman rm over a list of every container"
+    },
+    {
+      "id": "m74",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "podman container ls -aq | xargs -r podman stop\n",
+      "note": "xargs podman stop over a list of every container"
+    },
+    {
+      "id": "m75",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "kill -TERM -- -\"$pgid\"\n",
+      "note": "a group signal with a variable pid after --"
+    },
+    {
+      "id": "m77",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "kill -TERM -$pgid\n",
+      "note": "a group signal with a negative variable pid"
+    },
+    {
+      "id": "m78",
+      "rule": "S5-01",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "\"127.0.0.1:${CORTEX_PORT:-8601}:8601\"",
+      "new": "\"[::1]:${CORTEX_PORT:-8601}:8601\"",
+      "note": "published on IPv6 loopback only: 127.0.0.1 is the one allowed address"
+    },
+    {
+      "id": "m79",
+      "rule": "S5-17",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    container_name: cv2-s5-db\n    restart: unless-stopped\n",
+      "new": "    container_name: cv2-s5-db\n",
+      "note": "the database has no restart policy"
+    },
+    {
+      "id": "m80",
+      "rule": "S5-17",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    container_name: cv2-s5-server\n    restart: unless-stopped\n",
+      "new": "    container_name: cv2-s5-server\n",
+      "note": "the server has no restart policy"
+    },
+    {
+      "id": "m81",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "kill -TERM -1234\n",
+      "note": "a group signal: a named signal to a literal negative pid"
+    },
+    {
+      "id": "m82",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "echo \"$val\" >&2\n",
+      "note": "printing the secret variable to stderr"
+    },
+    {
+      "id": "m83",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "cat \"$new\"\n",
+      "note": "cat of a token path variable (the content is the token)"
+    },
+    {
+      "id": "m84",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "podman kill --all\n",
+      "note": "podman kill --all"
+    },
+    {
+      "id": "m85",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "podman stop -a\n",
+      "note": "podman stop -a"
+    },
+    {
+      "id": "m86",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "pgrep -f cortex | xargs kill\n",
+      "note": "pgrep piped to xargs kill"
+    },
+    {
+      "id": "m87",
+      "rule": "S5-15",
+      "file": "install.sh",
+      "op": "append",
+      "text": "kill $(pgrep -f cortex)\n",
+      "note": "kill of a pgrep substitution"
+    },
+    {
+      "id": "m88",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--auth-local=peer --auth-host=scram-sha-256 ",
+      "new": "--auth-local=peer ",
+      "note": "the database loses --auth-host=scram-sha-256 (loopback TCP would be trust)"
+    },
+    {
+      "id": "m89",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--auth-local=peer --auth-host=scram-sha-256 ",
+      "new": "--auth-local=trust --auth-host=scram-sha-256 ",
+      "note": "the local socket is trust, not peer"
+    },
+    {
+      "id": "m90",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      POSTGRES_INITDB_ARGS: --auth-local=peer --auth-host=scram-sha-256 --locale-provider=builtin --builtin-locale=C.UTF-8 --locale=C.UTF-8 --data-checksums\n",
+      "new": "",
+      "note": "no POSTGRES_INITDB_ARGS at all on the database service"
+    },
+    {
+      "id": "m91",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--auth-local=peer --auth-host=scram-sha-256 ",
+      "new": "--auth-local=peer --auth-host=trust ",
+      "note": "TCP made trust"
+    },
+    {
+      "id": "m92",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      POSTGRES_DB: cortex\n",
+      "new": "      POSTGRES_DB: cortex\n      POSTGRES_HOST_AUTH_METHOD: trust\n",
+      "note": "the entrypoint told to trust every connection"
+    },
+    {
+      "id": "m93",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums -A trust\n",
+      "note": "-A trust appended AFTER the right flags (initdb takes the last)"
+    },
+    {
+      "id": "m94",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums --auth=trust\n",
+      "note": "--auth=trust appended after the right flags"
+    },
+    {
+      "id": "m95",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums --auth-host=trust\n",
+      "note": "--auth-host=trust appended after the right flags"
+    },
+    {
+      "id": "m96",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums --auth-local=trust\n",
+      "note": "--auth-local=trust appended after the right flags"
+    },
+    {
+      "id": "m97",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      POSTGRES_DB: cortex\n",
+      "new": "      POSTGRES_DB: cortex\n      POSTGRES_HOST_AUTH_METHOD: md5\n",
+      "note": "POSTGRES_HOST_AUTH_METHOD: md5 (only absent or scram-sha-256 is allowed)"
+    },
+    {
+      "id": "m98",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    secrets:\n      - cv2-s5-db-superuser\n",
+      "new": "    command: [\"postgres\", \"-c\", \"hba_file=/tmp/x\"]\n    secrets:\n      - cv2-s5-db-superuser\n",
+      "note": "the server told to read another hba_file"
+    },
+    {
+      "id": "m99",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--auth-local=peer --auth-host=scram-sha-256 ",
+      "new": "--auth-host=trust --auth-local=peer --auth-host=scram-sha-256 ",
+      "note": "a weak auth token placed BEFORE the right ones (overridden, but suspicious: every token must be peer or scram)"
+    },
+    {
+      "id": "m100",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums --auth-h=trust\n",
+      "note": "an abbreviated long option (getopt_long accepts an unambiguous prefix): --auth-h=trust (nix N29 B1)"
+    },
+    {
+      "id": "m101",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums --auth-ho trust\n",
+      "note": "an abbreviated long option with a space: --auth-ho trust (nix N29 B2)"
+    },
+    {
+      "id": "m102",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums --auth-l=trust\n",
+      "note": "an abbreviated long option: --auth-l=trust (nix N29 B3)"
+    },
+    {
+      "id": "m103",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums -kA trust\n",
+      "note": "combined short options: -kA trust (-k is --data-checksums) (nix N29 B4)"
+    },
+    {
+      "id": "m104",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums -kAtrust\n",
+      "note": "combined short options with the value attached: -kAtrust (nix N29 B5)"
+    },
+    {
+      "id": "m105",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums --au''th-host=trust\n",
+      "note": "quotes inside the option name: the entrypoint evals the string, so the shell removes them (nix N29 B6)"
+    },
+    {
+      "id": "m106",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums --no-such-option\n",
+      "note": "an option the checker does not know is a finding, not silently ignored (nix N29 B9; fail closed)"
+    },
+    {
+      "id": "m107",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums $(cat /etc/initdb-args)\n",
+      "note": "a command substitution that builds the arguments at run time (no flag visible to a parser)"
+    },
+    {
+      "id": "m108",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums `cat /etc/initdb-args`\n",
+      "note": "a backtick command that builds the arguments at run time"
+    },
+    {
+      "id": "m109",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums --auth-h\\ost=trust\n",
+      "note": "a backslash inside the option name: the shell removes it"
+    },
+    {
+      "id": "m110",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums ; echo x\n",
+      "note": "a shell separator in the initdb arguments (the entrypoint evals the string)"
+    },
+    {
+      "id": "m111",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "--data-checksums\n",
+      "new": "--data-checksums -E\n",
+      "note": "-E at the end with no value"
+    },
+    {
+      "id": "m112",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "POSTGRES_INITDB_ARGS: --auth-local=peer --auth-host=scram-sha-256 --locale-provider=builtin --builtin-locale=C.UTF-8 --locale=C.UTF-8 --data-checksums",
+      "new": "POSTGRES_INITDB_ARGS: \"--auth-local=peer\\n--auth-host=scram-sha-256 --locale-provider=builtin --builtin-locale=C.UTF-8 --locale=C.UTF-8 --data-checksums\"",
+      "note": "a NEWLINE between two allowed initdb arguments (the entrypoint evals the string and a newline ends a command; nix N33)"
+    },
+    {
+      "id": "m113",
+      "rule": "S5-18",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "POSTGRES_INITDB_ARGS: --auth-local=peer --auth-host=scram-sha-256 --locale-provider=builtin --builtin-locale=C.UTF-8 --locale=C.UTF-8 --data-checksums",
+      "new": "POSTGRES_INITDB_ARGS: \"--auth-local=peer\\r--auth-host=scram-sha-256 --locale-provider=builtin --builtin-locale=C.UTF-8 --locale=C.UTF-8 --data-checksums\"",
+      "note": "a CARRIAGE RETURN between two allowed initdb arguments (nix N33)"
+    },
+    {
+      "id": "m114",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n",
+      "new": "",
+      "note": "the server no longer mounts the status directory"
+    },
+    {
+      "id": "m115",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": ":/var/lib/cortex-dumps:ro,z",
+      "new": ":/var/lib/cortex-dumps:rw,z",
+      "note": "the status directory is mounted read-write"
+    },
+    {
+      "id": "m116",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": ":/var/lib/cortex-dumps:ro,z",
+      "new": ":/var/lib/cortex-dumps",
+      "note": "the status directory is mounted with no options (read-write)"
+    },
+    {
+      "id": "m117",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_CONFIG:?set by install.sh}:/etc/cortex/cortex.toml:ro,z\n    networks:\n      - cv2-s5-net\n\n  server:",
+      "new": "      - ${CORTEX_CONFIG:?set by install.sh}:/etc/cortex/cortex.toml:ro,z\n      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n    networks:\n      - cv2-s5-net\n\n  server:",
+      "note": "the one-shot migrate also mounts the status directory (only the server may)"
+    },
+    {
+      "id": "m118",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps",
+      "new": "/etc:/var/lib/cortex-dumps",
+      "note": "the status mount comes from a fixed host path instead of CORTEX_DUMP_STATUS"
+    },
+    {
+      "id": "m119",
+      "rule": "S5-20",
+      "file": "Containerfile",
+      "op": "replace",
+      "old": "ARG CORTEX_GIT_SHA=unknown\n",
+      "new": "",
+      "note": "the build stage has no ARG CORTEX_GIT_SHA"
+    },
+    {
+      "id": "m120",
+      "rule": "S5-20",
+      "file": "Containerfile",
+      "op": "replace",
+      "old": "ENV CORTEX_GIT_SHA=${CORTEX_GIT_SHA}\n",
+      "new": "",
+      "note": "the build stage has the ARG but never sets the ENV"
+    },
+    {
+      "id": "m121",
+      "rule": "S5-20",
+      "file": "Containerfile",
+      "op": "replace",
+      "old": "ENV CORTEX_GIT_SHA=${CORTEX_GIT_SHA}",
+      "new": "ENV CORTEX_GIT_SHA=0000000000000000000000000000000000000000",
+      "note": "the ENV is a constant, not the ARG"
+    },
+    {
+      "id": "m122",
+      "rule": "S5-20",
+      "file": "Containerfile",
+      "op": "replace",
+      "old": "ARG CORTEX_GIT_SHA=unknown\nENV CORTEX_GIT_SHA=${CORTEX_GIT_SHA}\nRUN cargo build --release --locked -p cortex-server",
+      "new": "RUN cargo build --release --locked -p cortex-server\nARG CORTEX_GIT_SHA=unknown\nENV CORTEX_GIT_SHA=${CORTEX_GIT_SHA}",
+      "note": "the ARG and ENV come after the cargo build"
+    },
+    {
+      "id": "m123",
+      "rule": "S5-20",
+      "file": "Containerfile",
+      "op": "replace",
+      "old": "ARG CORTEX_GIT_SHA=unknown",
+      "new": "ARG CORTEX_GIT_SHA=0123456789abcdef0123456789abcdef01234567",
+      "note": "the ARG default is a baked-in sha (it must be `unknown`)"
+    },
+    {
+      "id": "m124",
+      "rule": "S5-20",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      args:\n        CORTEX_GIT_SHA: ${CORTEX_GIT_SHA:-unknown}\n",
+      "new": "",
+      "note": "the server's build does not pass CORTEX_GIT_SHA"
+    },
+    {
+      "id": "m125",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z",
+      "new": "      - ${CORTEX_DUMP_STATUS}/..:/var/lib/cortex-dumps:ro,z",
+      "note": "the source is the status directory's PARENT (the install home with the token files), read-only"
+    },
+    {
+      "id": "m126",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z",
+      "new": "      - ${CORTEX_DUMP_STATUS:-/}:/var/lib/cortex-dumps:ro,z",
+      "note": "the source has a default: an unset variable means the host root"
+    },
+    {
+      "id": "m127",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z",
+      "new": "      - ${CORTEX_DUMP_STATUS}:/var/lib/cortex-dumps:ro,z",
+      "note": "the source has no :? (an unset variable is not an error)"
+    },
+    {
+      "id": "m128",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z",
+      "new": "      - ${CORTEX_DUMP_STATUS_OTHER:?set by install.sh}:/var/lib/cortex-dumps:ro,z",
+      "note": "another variable whose name starts with CORTEX_DUMP_STATUS"
+    },
+    {
+      "id": "m129",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": ":/var/lib/cortex-dumps:ro,z",
+      "new": ":/var/lib/cortex-dumps:ro,rw,z",
+      "note": "ro and rw together"
+    },
+    {
+      "id": "m130",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": ":/var/lib/cortex-dumps:ro,z",
+      "new": ":/var/lib/cortex-dumps:rw,ro,z",
+      "note": "rw then ro"
+    },
+    {
+      "id": "m131",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z",
+      "new": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/dumps-rw",
+      "note": "the server also mounts the status directory read-write at /dumps-rw"
+    },
+    {
+      "id": "m132",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - cv2-s5-pg-data:/var/lib/postgresql",
+      "new": "      - cv2-s5-pg-data:/var/lib/postgresql\n      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/mnt/dumps:rw",
+      "note": "db mounts the status source read-write at /mnt/dumps"
+    },
+    {
+      "id": "m133",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - cv2-s5-pg-data:/var/lib/postgresql",
+      "new": "      - cv2-s5-pg-data:/var/lib/postgresql\n      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps/:rw",
+      "note": "db mounts the status source read-write at the target with a trailing slash"
+    },
+    {
+      "id": "m134",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": ":/var/lib/cortex-dumps:ro,z",
+      "new": ":/var/lib/cortex-dumps:ro,Z",
+      "note": "a PRIVATE relabel (Z) instead of the shared one (z)"
+    },
+    {
+      "id": "m135",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z",
+      "new": "      - ${CORTEX_DUMPS:?set by install.sh}:/var/lib/cortex-dumps:ro,z",
+      "note": "the PRIVATE dump tree is mounted instead of the status directory (vera option C)"
+    },
+    {
+      "id": "m136",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z",
+      "new": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n      - ${CORTEX_DUMPS:?set by install.sh}:/private:ro",
+      "note": "the private dump tree is mounted as well, at another target"
+    },
+    {
+      "id": "m137",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z",
+      "new": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n      - /srv/cortex/dumps:/private:ro",
+      "note": "a host path ending in /dumps is mounted as well"
+    },
+    {
+      "id": "m138",
+      "rule": "S5-20",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "        CORTEX_GIT_SHA: ${CORTEX_GIT_SHA:-unknown}",
+      "new": "        CORTEX_GIT_SHA: ${CORTEX_GIT_SHA:-0000000000000000000000000000000000000000}",
+      "note": "the compose default of the sha is a baked 40-zero sha, not unknown"
+    },
+    {
+      "id": "m139",
+      "rule": "S5-20",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "        CORTEX_GIT_SHA: ${CORTEX_GIT_SHA:-unknown}",
+      "new": "        CORTEX_GIT_SHA: ${CORTEX_GIT_SHA_X:-unknown}",
+      "note": "the arg reads another variable whose name starts with CORTEX_GIT_SHA"
+    },
+    {
+      "id": "m140",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "--target @DB_CONTAINER@",
+      "new": "--target @DB_NAME@",
+      "note": "a placeholder install.sh does not fill"
+    },
+    {
+      "id": "m141",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "ExecStart=@CORTEX_HOME@/bin/cortex-dump",
+      "new": "ExecStart=bin/cortex-dump",
+      "note": "ExecStart is a relative path (not under @CORTEX_HOME@)"
+    },
+    {
+      "id": "m142",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "Documentation=file:@CORTEX_HOME@/bin/cortex-dump",
+      "new": "Documentation=file:/etc/passwd",
+      "note": "Documentation points outside @CORTEX_HOME@"
+    },
+    {
+      "id": "m143",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "Description=Cortex backup by dump (pg_dump of the database container)",
+      "new": "Description=Cortex backup by dump on %H",
+      "note": "a % specifier in a unit"
+    },
+    {
+      "id": "m144",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "--timeout 1800\n",
+      "new": "--timeout $TIMEOUT\n",
+      "note": "a $ in a unit"
+    },
+    {
+      "id": "m145",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.timer",
+      "op": "replace",
+      "old": "Unit=cortex-dump.service",
+      "new": "Unit=@UNIT@",
+      "note": "an unknown placeholder in a timer"
+    },
+    {
+      "id": "m146",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "ExecStart=@CORTEX_HOME@/bin/cortex-dump",
+      "new": "ExecStartPre=/bin/true\nExecStart=@CORTEX_HOME@/bin/cortex-dump",
+      "note": "an ExecStartPre outside @CORTEX_HOME@"
+    },
+    {
+      "id": "m147",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "old": "budget=30",
+      "new": "budget=300",
+      "note": "the role script's server-side budget is 300 s, longer than the engine's margin allows"
+    },
+    {
+      "id": "m148",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "old": "budget=30\n",
+      "new": "",
+      "note": "the role script has no budget line"
+    },
+    {
+      "id": "m149",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "the psql session is not given the budget",
+      "expect": "exactly these options",
+      "op": "replace",
+      "old": "--env \"PGOPTIONS=-c transaction_timeout=${budget}s -c idle_in_transaction_session_timeout=${idle}s -c db_roles.guard_by=${guard_by}\" ",
+      "new": ""
+    },
+    {
+      "id": "m150",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "old": "transaction_timeout=${budget}s",
+      "new": "transaction_timout=${budget}s",
+      "note": "the option name is misspelt"
+    },
+    {
+      "id": "m151",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "old": "BEGIN\n  PERFORM pg_advisory_xact_lock",
+      "new": "BEGIN\n  SET LOCAL transaction_timeout = 1000;\n  PERFORM pg_advisory_xact_lock",
+      "note": "the bound is set with SET LOCAL inside the transaction (it may not arm)"
+    },
+    {
+      "id": "m152",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z",
+      "new": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n      - ${CORTEX_HOME:?x}:/mnt/home:ro",
+      "note": "a parent of the private tree (any variable naming the install home) is mounted read-only"
+    },
+    {
+      "id": "m153",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z",
+      "new": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n      - ${CORTEX_CONFIG:?set by install.sh}/..:/mnt/home:ro",
+      "note": "the parent of the config file (the install home) is mounted"
+    },
+    {
+      "id": "m154",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "append",
+      "text": "\nconfigs:\n  lastgood:\n    file: ${CORTEX_DUMPS:?x}/LAST_GOOD\n",
+      "note": "a top-level configs entry reads a file of the private tree"
+    },
+    {
+      "id": "m155",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n    networks:",
+      "new": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n    volumes_from:\n      - db\n    networks:",
+      "note": "the server inherits the mounts of another service (volumes_from)"
+    },
+    {
+      "id": "m156",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "Nice=10",
+      "new": "Nice=10\n  ExecStartPost=/usr/bin/evil",
+      "note": "an indented Exec line outside @CORTEX_HOME@ (systemd strips the blanks)"
+    },
+    {
+      "id": "m157",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "Nice=10",
+      "new": "Nice=10\n\tExecStartPost=/usr/bin/evil",
+      "note": "a tab-indented Exec line outside @CORTEX_HOME@"
+    },
+    {
+      "id": "m158",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "--timeout 1800\n",
+      "new": "--timeout 1800 ; /usr/bin/evil\n",
+      "note": "a second command after \" ; \" on an Exec line"
+    },
+    {
+      "id": "m159",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "--timeout 1800\n",
+      "new": "--timeout 1800 \\\n  /usr/bin/evil\n",
+      "note": "a backslash continuation on an Exec line"
+    },
+    {
+      "id": "m160",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "ExecStart=@CORTEX_HOME@/bin/cortex-dump --target",
+      "new": "ExecStart=-@CORTEX_HOME@/bin/cortex-dump --target",
+      "note": "the dash on ExecStart hides a failed backup from OnFailure (allowed on ExecStartPost only)"
+    },
+    {
+      "id": "m161",
+      "rule": "S5-06",
+      "base": "release",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "  server:\n    image: ${CORTEX_SERVER_IMAGE:?}\n",
+      "new": "  server:\n    image: ${CORTEX_IMAGE:?}\n",
+      "note": "release server: another variable name is not the release image",
+      "expect": "not pinned"
+    },
+    {
+      "id": "m162",
+      "rule": "S5-06",
+      "base": "release",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "  server:\n    image: ${CORTEX_SERVER_IMAGE:?}\n",
+      "new": "  server:\n    image: ${CORTEX_SERVER_IMAGE}\n",
+      "note": "release server: the variable without :? (an empty value would reach compose)",
+      "expect": "not pinned"
+    },
+    {
+      "id": "m163",
+      "rule": "S5-06",
+      "base": "release",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "  server:\n    image: ${CORTEX_SERVER_IMAGE:?}\n",
+      "new": "  server:\n    image: ${CORTEX_SERVER_IMAGE:-localhost/cv2-s5-server:dev}\n",
+      "note": "release server: a default hides an unpinned image",
+      "expect": "not pinned"
+    },
+    {
+      "id": "m164",
+      "rule": "S5-06",
+      "base": "release",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    image: ${CORTEX_SERVER_IMAGE:?}\n    pull_policy: never\n    container_name: cv2-s5-server",
+      "new": "    image: ${CORTEX_SERVER_IMAGE:?}\n    container_name: cv2-s5-server",
+      "note": "release server: no pull_policy never (a pull would look for a registry)",
+      "expect": "pull_policy"
+    },
+    {
+      "id": "m165",
+      "rule": "S5-07",
+      "base": "release",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    image: docker.io/pgvector/pgvector:0.8.2-pg18@sha256:42e7f6b4e1eceb02ff14e3e6bc6108bbe259abbe83879dc1845d0da1ddeb555d\n",
+      "new": "    image: ${CORTEX_SERVER_IMAGE:?}\n",
+      "note": "the release image variable on the db service: held to the hardening rules of ours, and db is not hardened that way"
+    },
+    {
+      "id": "m166",
+      "rule": "S5-19",
+      "base": "release",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - cv2-s5-owner-password\n    volumes:\n      - ${CORTEX_CONFIG:?set by install.sh}:/etc/cortex/cortex.toml:ro,z\n",
+      "new": "      - cv2-s5-owner-password\n    volumes:\n      - ${CORTEX_CONFIG:?set by install.sh}:/etc/cortex/cortex.toml:ro,z\n      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n",
+      "note": "release migrate one-shot mounts the status directory (only the server may)",
+      "expect": "only the server"
+    },
+    {
+      "id": "m167",
+      "rule": "S5-07",
+      "base": "release",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    container_name: cv2-s5-server\n    restart: unless-stopped\n    user: \"10001:10001\"\n    init: true\n    read_only: true\n",
+      "new": "    container_name: cv2-s5-server\n    restart: unless-stopped\n    user: \"10001:10001\"\n    init: true\n    read_only: false\n",
+      "note": "release server not read-only: S5-07 must run on a server with no build (it is ours by its image)"
+    },
+    {
+      "id": "m168",
+      "rule": "S5-13",
+      "base": "release",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    volumes:\n      - ${CORTEX_CONFIG:?set by install.sh}:/etc/cortex/cortex.toml:ro,z\n      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n",
+      "new": "    volumes:\n      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n",
+      "note": "release server without the config mount: S5-13 must run on a server with no build"
+    },
+    {
+      "id": "m169",
+      "rule": "S5-06",
+      "base": "good",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    image: localhost/cv2-s5-server:dev\n    pull_policy: never\n    container_name: cv2-s5-server",
+      "new": "    image: ${CORTEX_SERVER_IMAGE:?}\n    pull_policy: never\n    container_name: cv2-s5-server",
+      "note": "dev layout: the release image variable together with build: (the tag of the variable used to parse as ?} and pass)",
+      "expect": "together with build"
+    },
+    {
+      "id": "m170",
+      "rule": "S5-19",
+      "base": "release",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n",
+      "new": "",
+      "note": "release server without the status mount: it is the server we ship, so it must have it",
+      "expect": "must be bind-mounted"
+    },
+    {
+      "id": "m171",
+      "rule": "S5-06",
+      "base": "release",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    image: ${CORTEX_SERVER_IMAGE:?}\n    command: [\"migrate\"]",
+      "new": "    image: localhost/cv2-s5-server:dev\n    command: [\"migrate\"]",
+      "note": "release layout with migrate left on the dev image (release.sh rewrote only the server): nothing builds that image",
+      "expect": "nothing builds"
+    },
+    {
+      "id": "m172",
+      "rule": "S5-06",
+      "base": "release",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "  server:\n    image: ${CORTEX_SERVER_IMAGE:?}\n",
+      "new": "  server:\n    image: ${CORTEX_SERVER_IMAGE:?}${EVIL}\n",
+      "note": "release server: a second expansion after the variable is another image",
+      "expect": "not pinned"
+    },
+    {
+      "id": "m173",
+      "rule": "S5-06",
+      "base": "release",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "  server:\n    image: ${CORTEX_SERVER_IMAGE:?}\n",
+      "new": "  server:\n    image: ${CORTEX_SERVER_IMAGE:?}:latest\n",
+      "note": "release server: a tag after the variable is not the release image",
+      "expect": "not pinned"
+    },
+    {
+      "id": "m174",
+      "rule": "S5-06",
+      "base": "release",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "  server:\n    image: ${CORTEX_SERVER_IMAGE:?}\n",
+      "new": "  server:\n    image: ${CORTEX_SERVER_IMAGE:?$EVIL}\n",
+      "note": "release server: a $ inside the message is not the release image",
+      "expect": "not pinned"
+    },
+    {
+      "id": "m175",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: the deadline guard is gone from the roles SQL",
+      "expect": "deadline guard",
+      "op": "replace",
+      "old": "  cat <<'SQL'\nDO $$ BEGIN\n  IF extract(epoch FROM clock_timestamp()) > current_setting('db_roles.guard_by')::float8 THEN\n    RAISE EXCEPTION 'db-roles: past its deadline; nothing was committed';\n  END IF;\nEND $$;\nSQL\n",
+      "new": ""
+    },
+    {
+      "id": "m176",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: the guard is not the LAST statement (it runs before the roles are made)",
+      "expect": "deadline guard",
+      "op": "multi",
+      "edits": [
+        [
+          "  cat <<'SQL'\nDO $$ BEGIN\n  IF extract(epoch FROM clock_timestamp()) > current_setting('db_roles.guard_by')::float8 THEN\n    RAISE EXCEPTION 'db-roles: past its deadline; nothing was committed';\n  END IF;\nEND $$;\nSQL\n",
+          ""
+        ],
+        [
+          "  for id in \"$@\"; do\n    printf \"DO ",
+          "  cat <<'SQL'\nDO $$ BEGIN\n  IF extract(epoch FROM clock_timestamp()) > current_setting('db_roles.guard_by')::float8 THEN\n    RAISE EXCEPTION 'db-roles: past its deadline; nothing was committed';\n  END IF;\nEND $$;\nSQL\n  for id in \"$@\"; do\n    printf \"DO "
+        ]
+      ]
+    },
+    {
+      "id": "m177",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: no idle_in_transaction_session_timeout (a client stalled before COMMIT is unbounded)",
+      "expect": "exactly these options",
+      "op": "replace",
+      "old": " -c idle_in_transaction_session_timeout=${idle}s",
+      "new": ""
+    },
+    {
+      "id": "m178",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: the idle term is 60, far past the relation's 5",
+      "expect": "the relation",
+      "op": "replace",
+      "old": "\nidle=5\n",
+      "new": "\nidle=60\n"
+    },
+    {
+      "id": "m179",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: guard_by is not handed to the session",
+      "expect": "exactly these options",
+      "op": "replace",
+      "old": " -c db_roles.guard_by=${guard_by}",
+      "new": ""
+    },
+    {
+      "id": "m180",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: guard_by is the caller's deadline itself (no lead)",
+      "expect": "guard_by=$((deadline - lead))",
+      "op": "replace",
+      "old": "guard_by=$((deadline - lead))\n",
+      "new": "guard_by=$deadline\n"
+    },
+    {
+      "id": "m181",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: the script reads its own clock for the deadline (the hole mike found)",
+      "expect": "host clock",
+      "op": "replace",
+      "old": "deadline=$2\n",
+      "new": "deadline=$(date +%s)\n"
+    },
+    {
+      "id": "m182",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "note": "R-8: now() is the transaction's START, so the guard would never see lateness",
+      "expect": "deadline guard",
+      "old": "clock_timestamp()",
+      "new": "now()"
+    },
+    {
+      "id": "m183",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: a missing setting passes the guard (NULL) instead of failing closed",
+      "expect": "deadline guard",
+      "op": "replace",
+      "old": "current_setting('db_roles.guard_by')",
+      "new": "current_setting('db_roles.guard_by', true)"
+    },
+    {
+      "id": "m184",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "note": "R-8: the comparison is turned round (late runs pass, early runs fail)",
+      "expect": "deadline guard",
+      "old": "clock_timestamp()) > current_setting",
+      "new": "clock_timestamp()) < current_setting"
+    },
+    {
+      "id": "m185",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: the options are not the exact string (any change is looked at)",
+      "expect": "exactly these options",
+      "op": "replace",
+      "old": "transaction_timeout=${budget}s -c idle_in_transaction_session_timeout=${idle}s -c db_roles.guard_by=${guard_by}",
+      "new": "db_roles.guard_by=${guard_by} -c idle_in_transaction_session_timeout=${idle}s -c transaction_timeout=${budget}s"
+    },
+    {
+      "id": "m186",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "note": "R-8: a second PGOPTIONS on the exec line (the later one wins and drops the bound)",
+      "expect": "must be given",
+      "old": "--env \"PGOPTIONS=-c transaction_timeout=${budget}s",
+      "new": "--env \"PGOPTIONS=-c statement_timeout=0\" --env \"PGOPTIONS=-c transaction_timeout=${budget}s"
+    },
+    {
+      "id": "m187",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "note": "R-8: idle_in_transaction_session_timeout switched off with SET LOCAL inside the transaction",
+      "expect": "never inside the SQL",
+      "old": "BEGIN\n  PERFORM pg_advisory_xact_lock",
+      "new": "BEGIN\n  SET LOCAL idle_in_transaction_session_timeout = 0;\n  PERFORM pg_advisory_xact_lock"
+    },
+    {
+      "id": "m188",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: guard_by is computed AFTER the exec (too late to be handed over)",
+      "expect": "before the podman exec",
+      "op": "multi",
+      "edits": [
+        [
+          "guard_by=$((deadline - lead))\n",
+          ""
+        ],
+        [
+          "-d cortex -q\n",
+          "-d cortex -q\nguard_by=$((deadline - lead))\n"
+        ]
+      ]
+    },
+    {
+      "id": "m189",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: the commit-latency term is 0",
+      "expect": "the relation",
+      "op": "replace",
+      "old": "\nlatency=2\n",
+      "new": "\nlatency=0\n"
+    },
+    {
+      "id": "m190",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: the session is handed the caller's deadline instead of guard_by (the guard would only fire at E)",
+      "expect": "exactly these options",
+      "op": "replace",
+      "old": "db_roles.guard_by=${guard_by}",
+      "new": "db_roles.guard_by=${deadline}"
+    },
+    {
+      "id": "m191",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "note": "hale F-2 (a): a budget of 31 s is over the limit of 30 (the engine's deadline is 45 s)",
+      "old": "budget=30\n",
+      "new": "budget=31\n",
+      "expect": "1 to 30"
+    },
+    {
+      "id": "m192",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "note": "hale F-2 (a): a budget of 45 s equals the engine's deadline",
+      "old": "budget=30\n",
+      "new": "budget=45\n",
+      "expect": "1 to 30"
+    },
+    {
+      "id": "m193",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "note": "hale F-2 (b): two budget= lines",
+      "old": "budget=30\n",
+      "new": "budget=30\nbudget=30\n",
+      "expect": "exactly one"
+    },
+    {
+      "id": "m194",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale F-2 (c): the option twice on the exec line",
+      "expect": "exactly these options",
+      "op": "replace",
+      "old": "--env \"PGOPTIONS=-c transaction_timeout=${budget}s -c idle_in_transaction_session_timeout=${idle}s -c db_roles.guard_by=${guard_by}\" ",
+      "new": "--env \"PGOPTIONS=-c transaction_timeout=${budget}s -c idle_in_transaction_session_timeout=${idle}s -c db_roles.guard_by=${guard_by}\" --env \"PGOPTIONS=-c transaction_timeout=${budget}s -c idle_in_transaction_session_timeout=${idle}s -c db_roles.guard_by=${guard_by}\" "
+    },
+    {
+      "id": "m195",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "append",
+      "text": "podman exec -i --user postgres \"$db\" psql -U postgres -d cortex -c 'select 1'\n",
+      "note": "hale F-2 (c): a second podman exec ... psql line",
+      "expect": "exactly these options"
+    },
+    {
+      "id": "m196",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.timer",
+      "op": "replace",
+      "note": "hale N-3: a timer whose Unit= names a unit that is not installed",
+      "old": "Unit=cortex-dump.service",
+      "new": "Unit=cortex-dumpp.service",
+      "expect": "which is not a unit in this directory"
+    },
+    {
+      "id": "m197",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump-status.service",
+      "op": "replace",
+      "note": "hale N-3: a service whose OnFailure= names a unit that is not installed (the silent-backup-failure case)",
+      "old": "OnFailure=cortex-dump-alert.service",
+      "new": "OnFailure=cortex-dump-alerts.service",
+      "expect": "which is not a unit in this directory"
+    },
+    {
+      "id": "m198",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump-status.service",
+      "op": "replace",
+      "note": "hale MC12: two dashes on ExecStartPost",
+      "old": "ExecStartPost=-@CORTEX_HOME@",
+      "new": "ExecStartPost=--@CORTEX_HOME@",
+      "expect": "@CORTEX_HOME@/"
+    },
+    {
+      "id": "m199",
+      "rule": "S5-19",
+      "file": "compose.yml",
+      "op": "replace",
+      "note": "hale MC8: the long form with a private relabel Z",
+      "old": "      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z\n",
+      "new": "      - type: bind\n        source: ${CORTEX_DUMP_STATUS:?set by install.sh}\n        target: /var/lib/cortex-dumps\n        read_only: true\n        bind:\n          selinux: Z\n",
+      "expect": "ro,z"
+    },
+    {
+      "id": "m200",
+      "rule": "S5-06",
+      "base": "release",
+      "note": "hale 5h N-1: a trailing newline after the closing brace passes the release-image regex (Python's $ matches before a final newline)",
+      "expect": "not pinned",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "  server:\n    image: ${CORTEX_SERVER_IMAGE:?}\n",
+      "new": "  server:\n    image: \"${CORTEX_SERVER_IMAGE:?}\\n\"\n"
+    },
+    {
+      "id": "m201",
+      "rule": "S5-06",
+      "base": "release",
+      "note": "hale 5h N-2: a stack.env whose server image has no digest",
+      "expect": "stack.env",
+      "file": "stack.env",
+      "op": "write",
+      "text": "CORTEX_VERSION=1.2.3\nCORTEX_SERVER_IMAGE=localhost/cortex-server:dev\nCORTEX_DB_IMAGE=docker.io/pgvector/pgvector@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n"
+    },
+    {
+      "id": "m202",
+      "rule": "S5-06",
+      "base": "release",
+      "note": "hale 5h N-2: a stack.env that does not name the server image",
+      "expect": "stack.env",
+      "file": "stack.env",
+      "op": "write",
+      "text": "CORTEX_VERSION=1.2.3\nCORTEX_DB_IMAGE=docker.io/pgvector/pgvector@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n"
+    },
+    {
+      "id": "m203",
+      "rule": "S5-06",
+      "base": "release",
+      "note": "hale 5h N-2: a stack.env whose db image has upper-case hex in the digest",
+      "expect": "stack.env",
+      "file": "stack.env",
+      "op": "write",
+      "text": "CORTEX_VERSION=1.2.3\nCORTEX_SERVER_IMAGE=localhost/cortex-server@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nCORTEX_DB_IMAGE=docker.io/pgvector/pgvector@sha256:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n"
+    },
+    {
+      "id": "m204",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: the slack term is 1 (the latest commit would be E - 1)",
+      "expect": "the relation",
+      "op": "replace",
+      "old": "\nslack=2\n",
+      "new": "\nslack=1\n"
+    },
+    {
+      "id": "m205",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: the lead formula forgets the commit latency",
+      "expect": "lead=$((idle + latency + slack))",
+      "op": "replace",
+      "old": "lead=$((idle + latency + slack))\n",
+      "new": "lead=$((idle + slack))\n"
+    },
+    {
+      "id": "m206",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: the lead is a literal 7 (the arithmetic error cox found)",
+      "expect": "lead=$((idle + latency + slack))",
+      "op": "replace",
+      "old": "lead=$((idle + latency + slack))\n",
+      "new": "lead=7\n"
+    },
+    {
+      "id": "m207",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: the deadline is not taken from the argument",
+      "expect": "deadline=$2",
+      "op": "replace",
+      "old": "deadline=$2\n",
+      "new": "deadline=2000000000\n"
+    },
+    {
+      "id": "m208",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: lead is computed AFTER guard_by (guard_by would use an unset lead)",
+      "expect": "before the podman exec",
+      "op": "multi",
+      "edits": [
+        [
+          "lead=$((idle + latency + slack))\n",
+          ""
+        ],
+        [
+          "guard_by=$((deadline - lead))\n",
+          "guard_by=$((deadline - lead))\nlead=$((idle + latency + slack))\n"
+        ]
+      ]
+    },
+    {
+      "id": "m209",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: guard_by adds the lead to the deadline",
+      "expect": "guard_by=$((deadline - lead))",
+      "op": "replace",
+      "old": "guard_by=$((deadline - lead))\n",
+      "new": "guard_by=$((deadline + lead))\n"
+    },
+    {
+      "id": "m210",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: the idle term is missing",
+      "expect": "the relation",
+      "op": "replace",
+      "old": "\nidle=5\n",
+      "new": "\n"
+    },
+    {
+      "id": "m211",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "W1-55: the guard compares with the wrong sign (late runs pass)",
+      "expect": "deadline guard",
+      "op": "replace",
+      "old": "clock_timestamp()) > current_setting",
+      "new": "clock_timestamp()) < current_setting"
+    },
+    {
+      "id": "m212",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale F-2: the options sit in a trailing comment and the real command has none",
+      "expect": "exec line must be exactly",
+      "op": "multi",
+      "edits": [
+        [
+          "--env \"PGOPTIONS=-c transaction_timeout=${budget}s -c idle_in_transaction_session_timeout=${idle}s -c db_roles.guard_by=${guard_by}\" ",
+          ""
+        ],
+        [
+          "\"$db\" psql -v ON_ERROR_STOP=1 -1 -U postgres -d cortex -q\n",
+          "\"$db\" psql -v ON_ERROR_STOP=1 -1 -U postgres -d cortex -q # --env \"PGOPTIONS=-c transaction_timeout=${budget}s -c idle_in_transaction_session_timeout=${idle}s -c db_roles.guard_by=${guard_by}\"\n"
+        ]
+      ]
+    },
+    {
+      "id": "m213",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale F-1: an early COMMIT ends the transaction, so the guard runs outside it",
+      "expect": "no statement may end or split",
+      "op": "replace",
+      "old": "DO $$\nDECLARE r record;",
+      "new": "COMMIT;\nDO $$\nDECLARE r record;"
+    },
+    {
+      "id": "m214",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale F-1: an early ROLLBACK",
+      "expect": "no statement may end or split",
+      "op": "replace",
+      "old": "DO $$\nDECLARE r record;",
+      "new": "ROLLBACK;\nDO $$\nDECLARE r record;"
+    },
+    {
+      "id": "m215",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale F-1: a SAVEPOINT",
+      "expect": "no statement may end or split",
+      "op": "replace",
+      "old": "DO $$\nDECLARE r record;",
+      "new": "SAVEPOINT s1;\nDO $$\nDECLARE r record;"
+    },
+    {
+      "id": "m216",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale F-1: END; ends the transaction",
+      "expect": "no statement may end or split",
+      "op": "replace",
+      "old": "DO $$\nDECLARE r record;",
+      "new": "END;\nDO $$\nDECLARE r record;"
+    },
+    {
+      "id": "m217",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale F-1: a psql meta-command turns ON_ERROR_STOP off, so a failing guard would exit 0",
+      "expect": "ON_ERROR_STOP appears once",
+      "op": "replace",
+      "old": "DO $$\nDECLARE r record;",
+      "new": "\\set ON_ERROR_STOP off\nDO $$\nDECLARE r record;"
+    },
+    {
+      "id": "m218",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale F-3: set_config of the guard's setting before the guard",
+      "expect": "only through PGOPTIONS",
+      "op": "replace",
+      "old": "DO $$\nDECLARE r record;",
+      "new": "SELECT set_config('db_roles.guard_by', '9999999999', true);\nDO $$\nDECLARE r record;"
+    },
+    {
+      "id": "m219",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale F-2: the database is postgres, not cortex",
+      "expect": "exec line must be exactly",
+      "op": "replace",
+      "old": " -d cortex -q\n",
+      "new": " -d postgres -q\n"
+    },
+    {
+      "id": "m220",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale F-2: psql without -1 (not one transaction)",
+      "expect": "exec line must be exactly",
+      "op": "replace",
+      "old": " -v ON_ERROR_STOP=1 -1 -U postgres",
+      "new": " -v ON_ERROR_STOP=1 -U postgres"
+    },
+    {
+      "id": "m221",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale F-4: the idle term is 0",
+      "expect": "the relation",
+      "op": "replace",
+      "old": "\nidle=5\n",
+      "new": "\nidle=0\n"
+    },
+    {
+      "id": "m222",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale F-4: two deadline= lines",
+      "expect": "deadline=$2",
+      "op": "replace",
+      "old": "deadline=$2\n",
+      "new": "deadline=$2\ndeadline=$2\n"
+    },
+    {
+      "id": "m223",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale F-4: two lead= lines",
+      "expect": "lead=$((idle + latency + slack))",
+      "op": "replace",
+      "old": "lead=$((idle + latency + slack))\n",
+      "new": "lead=$((idle + latency + slack))\nlead=$((idle + latency + slack))\n"
+    },
+    {
+      "id": "m224",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "old": "DO $$\nDECLARE r record;",
+      "new": "START TRANSACTION;\nDO $$\nDECLARE r record;",
+      "note": "hale F-1: START TRANSACTION inside the one transaction",
+      "expect": "no statement may end or split"
+    },
+    {
+      "id": "m225",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "old": "DO $$\nDECLARE r record;",
+      "new": "SELECT current_setting('db_roles.guard_by'), set_config('db_roles.guard_by', '9999999999', true);\nDO $$\nDECLARE r record;",
+      "note": "hale F-3: a line that READS the setting through current_setting and also SETS it",
+      "expect": "only through PGOPTIONS"
+    },
+    {
+      "id": "hm1",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale 5m: the clock read is spelt `date -u +%s` (the rule is a word match; the other cell holds one spelling)",
+      "expect": "host clock",
+      "op": "replace",
+      "old": "deadline=$2\n",
+      "new": "deadline=$(date -u +%s)\n"
+    },
+    {
+      "id": "hm2",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale 5m: the clock read is spelt with backticks",
+      "expect": "host clock",
+      "op": "replace",
+      "old": "deadline=$2\n",
+      "new": "deadline=`date +%s`\n"
+    },
+    {
+      "id": "hm3",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "note": "hale 5m: the clock read is spelt with an absolute path",
+      "expect": "host clock",
+      "op": "replace",
+      "old": "deadline=$2\n",
+      "new": "deadline=$(/usr/bin/date +%s)\n"
+    },
+    {
+      "id": "hm4",
+      "rule": "S5-06",
+      "base": "release",
+      "file": "stack.env",
+      "op": "write",
+      "note": "hale 5m: a stack.env that does not name the DB image (the engine refuses it; the checker did, no cell held it)",
+      "expect": "does not name CORTEX_DB_IMAGE",
+      "text": "CORTEX_VERSION=1.2.3\nCORTEX_SERVER_IMAGE=localhost/cortex-server@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+    },
+    {
+      "id": "hm5",
+      "rule": "S5-06",
+      "base": "release",
+      "file": "stack.env",
+      "op": "write",
+      "note": "hale 5m: an image with an EMPTY name (@sha256:<64 hex>)",
+      "expect": "CORTEX_SERVER_IMAGE is not name@sha256",
+      "text": "CORTEX_VERSION=1.2.3\nCORTEX_SERVER_IMAGE=@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nCORTEX_DB_IMAGE=docker.io/pgvector/pgvector@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n"
+    },
+    {
+      "id": "hm6",
+      "rule": "S5-06",
+      "base": "release",
+      "file": "stack.env",
+      "op": "write",
+      "note": "hale 5m: a space in the image name",
+      "expect": "CORTEX_SERVER_IMAGE is not name@sha256",
+      "text": "CORTEX_VERSION=1.2.3\nCORTEX_SERVER_IMAGE=localhost/cortex server@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nCORTEX_DB_IMAGE=docker.io/pgvector/pgvector@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n"
+    },
+    {
+      "id": "hm7",
+      "rule": "S5-06",
+      "base": "release",
+      "file": "stack.env",
+      "op": "write",
+      "note": "hale 5m: a key given twice, a good value then a bad one (the LAST wins, as in compose; the engine refuses any duplicate)",
+      "expect": "CORTEX_SERVER_IMAGE is not name@sha256",
+      "text": "CORTEX_VERSION=1.2.3\nCORTEX_SERVER_IMAGE=localhost/cortex-server@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nCORTEX_SERVER_IMAGE=localhost/cortex-server:dev\nCORTEX_DB_IMAGE=docker.io/pgvector/pgvector@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n"
+    },
+    {
+      "id": "m226",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "OnFailure=cortex-dump-alert.service",
+      "new": "OnFailure=",
+      "note": "hale 5k N-1: an EMPTY OnFailure= (systemd: no failure handler at all): the silent-backup-failure case itself",
+      "expect": "OnFailure= must be exactly one line naming cortex-dump-alert.service"
+    },
+    {
+      "id": "m227",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "OnFailure=cortex-dump-alert.service\n",
+      "new": "",
+      "note": "hale 5k N-1: no OnFailure= line at all in the backup service",
+      "expect": "OnFailure= must be exactly one line naming cortex-dump-alert.service"
+    },
+    {
+      "id": "m228",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump-status.service",
+      "op": "replace",
+      "old": "OnFailure=cortex-dump-alert.service\n",
+      "new": "",
+      "note": "hale 5k N-1: no OnFailure= line in the freshness-check service",
+      "expect": "OnFailure= must be exactly one line naming cortex-dump-alert.service"
+    },
+    {
+      "id": "m229",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "OnFailure=cortex-dump-alert.service",
+      "new": "OnFailure=cortex-dump.service",
+      "note": "hale 5k N-1: OnFailure= names the service ITSELF (a loop, and the alarm never runs)",
+      "expect": "OnFailure= must be exactly one line naming cortex-dump-alert.service"
+    },
+    {
+      "id": "m230",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "OnFailure=cortex-dump-alert.service",
+      "new": "OnFailure=cortex-dump-status.service",
+      "note": "hale 5k N-1: OnFailure= names another installed unit, not the alarm",
+      "expect": "OnFailure= must be exactly one line naming cortex-dump-alert.service"
+    },
+    {
+      "id": "m231",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "OnFailure=cortex-dump-alert.service",
+      "new": "OnFailure=cortex-dump-alert.service cortex-dump-nothing.service",
+      "note": "hale 5k N-3 (MK4): a LIST of targets, the alarm first and a unit that is not installed after it",
+      "expect": "OnFailure= must be exactly one line naming cortex-dump-alert.service"
+    },
+    {
+      "id": "m232",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "OnFailure=cortex-dump-alert.service",
+      "new": "OnFailure=cortex-dump-nothing.service cortex-dump-alert.service",
+      "note": "hale 5k N-3 (MK4): a LIST of targets, the unit that is not installed first",
+      "expect": "OnFailure= must be exactly one line naming cortex-dump-alert.service"
+    },
+    {
+      "id": "m233",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.timer",
+      "op": "replace",
+      "old": "Unit=cortex-dump.service",
+      "new": "Unit=cortex-dump-status.service",
+      "note": "hale 5k N-1: a timer whose Unit= names another installed unit (its own service never runs)",
+      "expect": "Unit= must be absent or cortex-dump.service"
+    },
+    {
+      "id": "m234",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.timer",
+      "op": "replace",
+      "old": "Unit=cortex-dump.service",
+      "new": "Unit=cortex-dump.timer",
+      "note": "hale 5k N-1: a timer whose Unit= names itself",
+      "expect": "Unit= must be absent or cortex-dump.service"
+    },
+    {
+      "id": "m235",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump-alert.service",
+      "op": "append",
+      "text": "OnFailure=cortex-dump-alert.service\n",
+      "note": "hale 5k N-1: the alarm unit itself gets an OnFailure= (an alarm that fails must not start itself again)",
+      "expect": "OnFailure= must be absent"
+    },
+    {
+      "id": "m236",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "delete_file",
+      "note": "hale 5k N-3 (kept by the 5p handlers rule): the backup service is not in the directory but its timer's Unit= names it (the timer would never run it)",
+      "expect": "which is not a unit in this directory"
+    },
+    {
+      "id": "m237",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump-alert.service",
+      "op": "delete_file",
+      "note": "hale 5k N-3 (kept by the 5p handlers rule): the alarm unit is not in the directory but both backup services name it in OnFailure= (the silent-backup-failure case)",
+      "expect": "which is not a unit in this directory"
+    },
+    {
+      "id": "m238",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "replace",
+      "old": "# Fixture: an INCLUDED source",
+      "new": "#!/bin/sh\n# Fixture: an INCLUDED source",
+      "note": "cox S5-10: a shebang on an included source (it is joined into install.sh)",
+      "expect": "must not have a shebang"
+    },
+    {
+      "id": "m239",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "say \"at the top level\"\nprereq_end() {\n  :\n}\n",
+      "note": "cox S5-10: a top-level command in an included source",
+      "expect": "functions only"
+    },
+    {
+      "id": "m240",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_bad() {\n  if then\n}\n",
+      "note": "cox S5-10: a syntax error in an included source",
+      "expect": "sh -n"
+    },
+    {
+      "id": "m241",
+      "rule": "S5-10",
+      "file": "extra.sh",
+      "op": "write",
+      "text": "echo hi\n",
+      "note": "cox S5-10: a script that no @include names keeps the shebang rule",
+      "expect": "first line must be a #!/bin/sh or bash shebang"
+    },
+    {
+      "id": "m242",
+      "rule": "S5-10",
+      "file": "install.sh",
+      "op": "replace",
+      "old": "[ ! -f \"$here/install-prereq.sh\" ] || . \"$here/install-prereq.sh\"   # @include\n",
+      "new": "",
+      "note": "cox S5-10: the include line is removed, so the file is an ordinary script and needs its shebang",
+      "expect": "first line must be a #!/bin/sh or bash shebang"
+    },
+    {
+      "id": "m243",
+      "rule": "S5-10",
+      "file": "install.sh",
+      "op": "replace",
+      "old": "# @include",
+      "new": "# @included",
+      "note": "cox S5-10: only the exact trailing marker names an included source",
+      "expect": "first line must be a #!/bin/sh or bash shebang"
+    },
+    {
+      "id": "m244",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_after() {\n  :\n}\nprereq_after\nprereq_end() {\n  :\n}\n",
+      "note": "cox S5-10: a call after a function's closing brace is a top-level command",
+      "expect": "functions only"
+    },
+    {
+      "id": "m245",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "PREREQ_X=1\nprereq_end() {\n  :\n}\n",
+      "note": "cox S5-10: a top-level assignment (sourcing must change nothing)",
+      "expect": "functions only"
+    },
+    {
+      "id": "m246",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_open() {\n  :\nprereq_end() {\n  :\n}\n",
+      "note": "cox S5-10: a function that is never closed by a } at the start of a line",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn1",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_two() { :; }; echo \"printed at source time\"; : }\nprereq_end() {\n  :\n}\n",
+      "note": "hale 5r: a command after the one-line function's own closing brace (it prints when the file is sourced)",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn2",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_a() { :; }; x=1; prereq_b() { :; }\nprereq_end() {\n  :\n}\n",
+      "note": "hale 5r: an assignment between two one-line functions on one line",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn3",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_c() { :; } ; set +e ; : }\nprereq_end() {\n  :\n}\n",
+      "note": "hale 5r: `set +e` after a one-line function turns errexit off for the whole installer",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn4",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_d() { :; # }\nprereq_end() {\n  :\n}\n",
+      "note": "hale 5r: a comment in the body hides the closing brace; the function is not closed on this line",
+      "expect": "functions only"
+    },
+    {
+      "id": "hv1",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "multi",
+      "edits": [
+        [
+          "OnFailure=cortex-dump-alert.service\n",
+          ""
+        ],
+        [
+          "Type=oneshot\n",
+          "Type=oneshot\nOnFailure=cortex-dump-alert.service\n"
+        ]
+      ],
+      "note": "hale 5p: OnFailure= moved into [Service] (systemd ignores it there: no handler)",
+      "expect": "belongs in [Unit]"
+    },
+    {
+      "id": "hv2",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump-verify.service",
+      "op": "write",
+      "text": "[Unit]\nDescription=a fourth backup unit\n\n[Service]\nType=oneshot\nExecStart=@CORTEX_HOME@/bin/cortex-dump-verify\n",
+      "note": "hale 5p: a fourth service unit with no OnFailure= and no row in HANDLED_SERVICES",
+      "expect": "has no row in HANDLED_SERVICES"
+    },
+    {
+      "id": "hv3",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.timer",
+      "op": "multi",
+      "edits": [
+        [
+          "Persistent=true\nUnit=cortex-dump.service\n",
+          "Persistent=true\n"
+        ],
+        [
+          "WantedBy=timers.target\n",
+          "WantedBy=timers.target\nUnit=cortex-dump.service\n"
+        ]
+      ],
+      "note": "hale 5p: a timer's Unit= moved to [Install] (systemd ignores it there)",
+      "expect": "belongs in [Timer]"
+    },
+    {
+      "id": "hq1",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "old": "DO $$\nDECLARE r record;",
+      "new": "ABORT;\nDO $$\nDECLARE r record;",
+      "note": "hale 5n HN-01: ABORT ends the transaction like ROLLBACK (the word list had no cell for it)",
+      "expect": "no statement may end or split"
+    },
+    {
+      "id": "hq2",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "old": " -d cortex -q\n",
+      "new": " -d cortex -q ; : trailing\n",
+      "note": "hale 5n HN-12: the exec line is the one line EXACTLY: a command AFTER the correct line is not allowed (a prefix match would pass it)",
+      "expect": "exec line must be exactly"
+    },
+    {
+      "id": "hq3",
+      "rule": "S5-22",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "old": "DO $$\nDECLARE r record;",
+      "new": "SELECT set_config('db_roles.guard_by', '1', true); -- IF extract(epoch FROM clock_timestamp()) > current_setting('db_roles.guard_by')::float8 THEN\nDO $$\nDECLARE r record;",
+      "note": "hale 5n HN-14: a line that CONTAINS the guard text (in a comment) and also sets guard_by is not the exempt guard line (exact equality, not a substring)",
+      "expect": "only through PGOPTIONS"
+    },
+    {
+      "id": "hq4",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "OnFailure=cortex-dump-alert.service",
+      "new": "OnFailure=cortex-dump-alert.service\nOnFailure=",
+      "note": "hale 5n HN-05: a SECOND OnFailure= line, empty (systemd: an empty assignment RESETS the list: no handler at all)",
+      "expect": "OnFailure= must be exactly one line naming cortex-dump-alert.service"
+    },
+    {
+      "id": "hq5",
+      "rule": "S5-21",
+      "file": "systemd/cortex-dump.timer",
+      "op": "replace",
+      "old": "Unit=cortex-dump.service",
+      "new": "Unit=cortex-dump.service\nUnit=cortex-dump-status.service",
+      "note": "hale 5n HN-06: a SECOND Unit= line naming another unit",
+      "expect": "Unit= must be absent or cortex-dump.service"
+    },
+    {
+      "id": "hn5",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_semi() { :;# }\nprereq_end() {\n  :\n}\n",
+      "note": "5t: `;#` starts a comment too: the closing brace after it is hidden",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn6",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ma() {\n  :\n}; echo TOP_LEVEL\nprereq_mb() {\n  :\n}\n",
+      "note": "vera F5 (5t): a multi-line function closed by `}; echo TOP_LEVEL`: the closer is not alone on its line, so the command after it runs when the file is sourced",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn7",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_wb() { echo x{; }; echo TOP_LEVEL; echo x}\nprereq_end() {\n  :\n}\n",
+      "note": "vera F5 (5t): braces attached to a word are arguments, not group delimiters: the function really closes at `};` and the echo after it runs at top level",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn8",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_tr() {\n  :\n}  \necho TOP_LEVEL\nprereq_end() {\n  :\n}\n",
+      "note": "vera F5 (5t): a closer followed by blanks is not the exact closer the scanner waits for: the command after it must not be swallowed as body",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn11",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ax() { echo }\nprereq_end() {\n  :\n}\n",
+      "note": "5u: a lone } that is an argument (not at command position) is refused, never read as the closer",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn16",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_bx() { {a ; }; }\nprereq_end() {\n  :\n}\n",
+      "note": "5u: {a is a word, not a group opener: refused (the file would not even parse)",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn17",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_q2() { :; \"x\" }\nprereq_end() {\n  :\n}\n",
+      "note": "5u: a } after a quoted word is an argument, never the closer: refused",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn18",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_q3() { :; 'x' }\nprereq_end() {\n  :\n}\n",
+      "note": "5u: a } after a single-quoted word is an argument, never the closer: refused",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn19",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ia() {\n  :\n  }; echo TOP_LEVEL\n}\n",
+      "note": "vera F5 (5u): an INDENTED } closes the function in the shell (indentation means nothing to it) and the command after it runs at top level; the checker waited for a column-0 }",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn20",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ib() {\n  :\n  }\necho TOP_LEVEL\nprereq_ic() {\n  :\n}\n",
+      "note": "vera F5 (5u): an indented closer followed by a top-level line and another function",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn23",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ug() {\n  {\n    :\n}\n",
+      "note": "closed allow-list for body lines: a group opened in the body and not closed before the function's own closer is refused",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn27",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_uc() {\n  echo ${x\n}\n",
+      "note": "5v: a ${ that does not close on its line is refused in a body",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn28",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_c1() {\n  echo \\\n  {\n  }; echo TOP_LEVEL\necho \\\n}\n",
+      "note": "vera F5 (5v) witness 1, valid shell: a backslash-newline joins echo and the next brace (an ARGUMENT, not a group); the indented } closes the real function, so echo TOP_LEVEL runs when sourced; the last column-0 } is an echo argument too",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn29",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_c2() {\n  : \"$(echo \"; { \")\"\n  }; echo TOP_LEVEL\nprereq_c3() {\n  : \"$(echo \"; } \")\"\n}\n",
+      "note": "vera F5 (5v) witness 2, valid shell: quotes inside a $( ) inside double quotes spoof the brace depth; the indented } closes the real function and echo TOP_LEVEL runs when sourced",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn30",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_c2b() {\n  : \"$(echo \"; { \")\"\n  }\n  echo TOP_LEVEL\nprereq_c3b() {\n  : \"$(echo \"; } \")\"\n}\n",
+      "note": "vera F5 (5v) witness 2, variant: the indented } and the command on separate lines",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn31",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_c4() (\n  :\n  ); ( echo TOP_LEVEL\n)\n",
+      "note": "a function whose body is a subshell, closed early by an indented ): the command after it runs when sourced and a group takes the column-0 )",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn32",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_x1() {\n  :\n}\nset +x\nPREREQ_QUIET=1\nprereq_end() {\n  :\n}\n",
+      "note": "hale's sandbox note 3 (xtrace is not a complete witness): after `set +x` an assignment prints nothing; the epilogue finds xtrace off (status 99)",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn33",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_x2() {\n  :\n}\nset +x\nPREREQ_QUIET=1\nset -x\nprereq_end() {\n  :\n}\n",
+      "note": "a file that switches xtrace off and on again: its own `+ set +x` line is not the one an empty file prints",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn34",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_x3() {\n  echo \"unterminated\nprereq_end() {\n  :\n}\n",
+      "note": "an unterminated double quote swallows the end of the file and the oracle's epilogue: no accept",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn35",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_cr() {\n  : # a comment\r  }; echo TOP_LEVEL\n}\n",
+      "note": "hale F-1 (2): a carriage return is a line break for splitlines and an ordinary character for the shell",
+      "expect": "(CR)"
+    },
+    {
+      "id": "hn36",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ff() {\n  : # a comment\f  }; echo TOP_LEVEL\n}\n",
+      "note": "hale F-1 (2): a form feed",
+      "expect": "(FF)"
+    },
+    {
+      "id": "hn37",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_vt() {\n  : # a comment\u000b  }; echo TOP_LEVEL\n}\n",
+      "note": "hale F-1 (2): a vertical tab",
+      "expect": "(VT)"
+    },
+    {
+      "id": "hn38",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_nel() {\n  : # a comment  }; echo TOP_LEVEL\n}\n",
+      "note": "hale F-1 (2): NEL (U+0085)",
+      "expect": "control character"
+    },
+    {
+      "id": "hn39",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ls() {\n  : # a comment   }; echo TOP_LEVEL\n}\n",
+      "note": "hale F-1 (2): the Unicode line separator",
+      "expect": "control character"
+    },
+    {
+      "id": "hn40",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ps() {\n  : # a comment   }; echo TOP_LEVEL\n}\n",
+      "note": "hale F-1 (2): the Unicode paragraph separator",
+      "expect": "control character"
+    },
+    {
+      "id": "hn41",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_nn() {\n  :\n}",
+      "note": "cox W1-70: the file must end with a newline",
+      "expect": "last line is exactly one closer"
+    },
+    {
+      "id": "hn42",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ol() {\n  :\n}\nprereq_one_line() { :; }\n",
+      "note": "cox W1-70: the last line must be exactly one closer, not a one-line function",
+      "expect": "last line is exactly one closer"
+    },
+    {
+      "id": "hn43",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_in() {\n  :\n  }\n",
+      "note": "cox W1-70: an indented closer is not a column-0 closer",
+      "expect": "last line is exactly one closer"
+    },
+    {
+      "id": "hn44",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_nn2() {\n  :\n}\n  :",
+      "note": "cox W1-70: no final newline, and the line before the last is a closer: the missing newline alone is refused (the last-line test looks one line back)",
+      "expect": "last line is exactly one closer"
+    },
+    {
+      "id": "hn45",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_v1() {\n  :&# ; {\n  }; echo TOP_LEVEL\nprereq_v2()\n{\n  :&# ; }\n}\n",
+      "note": "vera's early objection (5V-DRAFT-REVIEW.md, F5 residual): a # after & starts a comment, so the braces on those lines are not delimiters; the indented } closes the real function and echo TOP_LEVEL runs when sourced; prereq_v2() with its brace on the next line is a valid second function",
+      "expect": "functions only"
+    },
+    {
+      "id": "hn46",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_v3() {\n  : & # ; {\n  }; echo TOP_LEVEL\nprereq_v4()\n{\n  : & # ; }\n}\n",
+      "note": "vera's control for hn45 (the comment written with blanks): the same valid shell, the same top-level command",
+      "expect": "functions only"
+    },
+    {
+      "id": "hh1",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ra() {\n  echo $(true) { echo hi ; }\n  echo TOP_LEVEL_RUNS \\\n}\n",
+      "note": "hale 5v F-1 (her hr1): `{` after the `)` of a command substitution is an ARGUMENT, so its `}` closes the function in the shell; the continuation makes the function's own `}` an argument too: `echo TOP_LEVEL_RUNS` runs when sourced",
+      "expect": "functions only"
+    },
+    {
+      "id": "hh2",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_rb() {\n  x=$(true) { :; }\n  true ; echo TOP_LEVEL_RUNS \\\n}\n",
+      "note": "hale 5v F-1 (her hr2): the same with an assignment before the command substitution",
+      "expect": "functions only"
+    },
+    {
+      "id": "hh3",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_rc() {\n  echo x \\\n  { echo hi; }\n  echo TOP_LEVEL_RUNS \\\n}\n",
+      "note": "hale 5v F-1 (her hr3): a line continuation joins the next line's `{` to `echo x`, where it is an argument",
+      "expect": "functions only"
+    },
+    {
+      "id": "hh4",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_rd() {\n  echo $'\\'' ; } ; echo TOP_LEVEL_RUNS ; x='\n}\n# it's\nprereq_re() { :; }\nprereq_end() {\n  :\n}\n",
+      "note": "hale 5v F-1 (her hr4, bash as sh): the ANSI-C quote is ONE quote for the shell",
+      "expect": "functions only"
+    },
+    {
+      "id": "hh7",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_rk() {\n  echo x\r  { echo hi; }\n  echo TOP_LEVEL_RUNS\r}\nprereq_end() {\n  :\n}\n",
+      "note": "hale 5v F-2 (her hr7): a CARRIAGE RETURN is a line break for Python and an ordinary character for the shell",
+      "expect": "control character"
+    },
+    {
+      "id": "hh8",
+      "rule": "S5-10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_rl() {\n  echo $(true) { echo hi ; }\n  echo TOP_LEVEL_RUNS\f}\nprereq_end() {\n  :\n}\n",
+      "note": "hale 5v F-2 (her hr8): the same with a FORM FEED",
+      "expect": "control character"
+    },
+    {
+      "id": "m300",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "replace",
+      "note": "a piece the server does not have is in the file",
+      "old": "mod-boot\n",
+      "new": "mod-boot,mod-extra\n",
+      "expect": "not an optional piece"
+    },
+    {
+      "id": "m301",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "a piece of the server is left out of the file (the build would lack it)",
+      "text": "mod-policy,mod-records,mod-search,mod-handoffs\n",
+      "expect": "missing from server-features"
+    },
+    {
+      "id": "m302",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "test-faults is in the release set",
+      "text": "mod-policy,mod-records,mod-search,mod-handoffs,mod-boot,test-faults\n",
+      "expect": "never in a release"
+    },
+    {
+      "id": "m303",
+      "rule": "S5-23",
+      "file": "../crates/cortex-server/Cargo.toml",
+      "op": "replace",
+      "note": "the server gains a piece (a feature) and the file does not name it",
+      "old": "mod-boot = [\"dep:mod-boot\", \"mod-records\", \"mod-handoffs\"]\n",
+      "new": "mod-boot = [\"dep:mod-boot\", \"mod-records\", \"mod-handoffs\"]\nmod-new = [\"dep:mod-new\"]\n",
+      "expect": "missing from server-features"
+    },
+    {
+      "id": "m304",
+      "rule": "S5-23",
+      "file": "../crates/cortex-server/Cargo.toml",
+      "op": "replace",
+      "note": "the server declares a default feature (the set would be hidden)",
+      "old": "mod-policy = [\"dep:mod-policy\"]\n",
+      "new": "default = [\"mod-policy\"]\nmod-policy = [\"dep:mod-policy\"]\n",
+      "expect": "default feature"
+    },
+    {
+      "id": "m305",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "a space after a comma",
+      "text": "mod-policy, mod-records, mod-search, mod-handoffs, mod-boot\n",
+      "expect": "ONE line"
+    },
+    {
+      "id": "m306",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "CRLF",
+      "text": "mod-policy,mod-records,mod-search,mod-handoffs,mod-boot\r\n",
+      "expect": "ONE line"
+    },
+    {
+      "id": "m307",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "two lines",
+      "text": "mod-policy,mod-records,mod-search\nmod-handoffs,mod-boot\n",
+      "expect": "ONE line"
+    },
+    {
+      "id": "m308",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "no final line feed",
+      "text": "mod-policy,mod-records,mod-search,mod-handoffs,mod-boot",
+      "expect": "ONE line"
+    },
+    {
+      "id": "m309",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "an empty file",
+      "text": "",
+      "expect": "ONE line"
+    },
+    {
+      "id": "m310",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "a piece twice",
+      "text": "mod-policy,mod-records,mod-search,mod-handoffs,mod-boot,mod-boot\n",
+      "expect": "ONE line"
+    },
+    {
+      "id": "m311",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "an upper-case letter",
+      "text": "Mod-policy,mod-records,mod-search,mod-handoffs,mod-boot\n",
+      "expect": "ONE line"
+    },
+    {
+      "id": "m312",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "a trailing comma",
+      "text": "mod-policy,mod-records,mod-search,mod-handoffs,mod-boot,\n",
+      "expect": "ONE line"
+    },
+    {
+      "id": "m313",
+      "rule": "S5-23",
+      "file": "../crates/cortex-server/Cargo.toml",
+      "op": "delete_file",
+      "note": "the manifest the set is compared with cannot be read",
+      "expect": "cannot read"
+    },
+    {
+      "id": "m314",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the build names no feature set",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server\n",
+      "expect": "must pass --features"
+    },
+    {
+      "id": "m315",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the build uses --all-features (test-faults would be built in)",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --all-features\n",
+      "expect": "--all-features"
+    },
+    {
+      "id": "m316",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the build carries its own literal list instead of reading the file",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features mod-policy,mod-records,mod-search,mod-handoffs,mod-boot\n",
+      "expect": "must pass --features"
+    },
+    {
+      "id": "m317",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the file is never copied into the build stage",
+      "old": "COPY deploy/server-features ./server-features\n",
+      "new": "",
+      "expect": "does not COPY"
+    },
+    {
+      "id": "m318",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "another file is copied, not deploy/server-features",
+      "old": "COPY deploy/server-features ./server-features\n",
+      "new": "COPY deploy/server-features.old ./server-features\n",
+      "expect": "does not COPY"
+    },
+    {
+      "id": "m319",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "multi",
+      "note": "the file is copied only after the cargo build",
+      "edits": [
+        [
+          "COPY deploy/server-features ./server-features\n",
+          ""
+        ],
+        [
+          "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+          "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nCOPY deploy/server-features ./server-features\n"
+        ]
+      ],
+      "expect": "after the cargo build"
+    },
+    {
+      "id": "m320",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the build reads another path than the one the file was copied to",
+      "old": "$(cat server-features)",
+      "new": "$(cat features.txt)",
+      "expect": "must pass --features"
+    },
+    {
+      "id": "m321",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the build names --features twice (a literal one after the file)",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\" --features mod-extra\n",
+      "expect": "more than once"
+    },
+    {
+      "id": "m322",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the build adds a short -F beside the file",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\" -F mod-extra\n",
+      "expect": "more than once"
+    },
+    {
+      "id": "m323",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a second cargo build with no feature set",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN cargo build --release --locked -p cortex-server\n",
+      "expect": "must pass --features"
+    },
+    {
+      "id": "m324",
+      "rule": "S5-23",
+      "file": "Containerfile.dockerignore",
+      "op": "replace",
+      "note": "the dockerignore keeps excluding deploy (no exception for the file)",
+      "old": "!deploy/server-features\n",
+      "new": "",
+      "expect": "excludes deploy/server-features"
+    },
+    {
+      "id": "m325",
+      "rule": "S5-23",
+      "file": "Containerfile.dockerignore",
+      "op": "multi",
+      "note": "the exception comes BEFORE the exclusion (the last match wins)",
+      "edits": [
+        [
+          "deploy\n!deploy/server-features\n",
+          "!deploy/server-features\ndeploy\n"
+        ]
+      ],
+      "expect": "excludes deploy/server-features"
+    },
+    {
+      "id": "m326",
+      "rule": "S5-23",
+      "file": "Containerfile.dockerignore",
+      "op": "append",
+      "note": "the file is excluded again after the exception",
+      "text": "deploy/server-features\n",
+      "expect": "excludes deploy/server-features"
+    },
+    {
+      "id": "m327",
+      "rule": "S5-14",
+      "file": "server-features",
+      "op": "delete_file",
+      "note": "the features file is missing",
+      "expect": "required file is missing"
+    },
+    {
+      "id": "m328",
+      "rule": "S5-23",
+      "file": "Containerfile.dockerignore",
+      "op": "multi",
+      "note": "the dockerignore drops deploy/ (trailing slash) and has no exception",
+      "edits": [
+        [
+          "\ndeploy\n!deploy/server-features\n",
+          "\ndeploy/\n"
+        ]
+      ],
+      "expect": "excludes deploy/server-features"
+    },
+    {
+      "id": "m329",
+      "rule": "S5-23",
+      "file": "Containerfile.dockerignore",
+      "op": "append",
+      "note": "a globbed exclusion at any depth drops the file again",
+      "text": "**/server-features\n",
+      "expect": "excludes deploy/server-features"
+    },
+    {
+      "id": "m330",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a COPY of two sources is not the COPY of the file",
+      "old": "COPY deploy/server-features ./server-features\n",
+      "new": "COPY deploy/server-features Cargo.toml ./server-features/\n",
+      "expect": "does not COPY"
+    },
+    {
+      "id": "m331",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "there is no cargo build to carry the set",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN echo nothing is built here\n",
+      "expect": "no cargo build"
+    },
+    {
+      "id": "m332",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "an upper-case letter later in a name",
+      "text": "mod-policy,mod-records,mod-search,mod-handoffs,mod-Boot\n",
+      "expect": "ONE line"
+    },
+    {
+      "id": "m333",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "a name that starts with a digit",
+      "text": "1mod-policy,mod-records,mod-search,mod-handoffs,mod-boot\n",
+      "expect": "ONE line"
+    },
+    {
+      "id": "m334",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "a name after a comma that starts with a digit",
+      "text": "mod-policy,1mod-records,mod-search,mod-handoffs,mod-boot\n",
+      "expect": "ONE line"
+    },
+    {
+      "id": "m335",
+      "rule": "S5-23",
+      "file": "../crates/cortex-server/Cargo.toml",
+      "op": "write",
+      "note": "the manifest has no [features] table (nothing to compare with)",
+      "text": "[package]\nname = \"cortex-server\"\nversion = \"0.0.0\"\n",
+      "expect": "no [features] table"
+    },
+    {
+      "id": "m336",
+      "rule": "S5-23",
+      "file": "server-features",
+      "op": "write",
+      "note": "an upper-case letter later in the FIRST name",
+      "text": "mod-Policy,mod-records,mod-search,mod-handoffs,mod-boot\n",
+      "expect": "ONE line"
+    },
+    {
+      "id": "m337",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "S523-1: a JOINED short flag beside the file (cargo takes -Ftest-faults)",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\" -Ftest-faults\n",
+      "expect": "more than once"
+    },
+    {
+      "id": "m338",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "S523-2: a second cargo build with no set in the SAME RUN line",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\" && cargo build --release --locked -p cortex-server\n",
+      "expect": "must pass --features"
+    },
+    {
+      "id": "m339",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "S523-3: cargo install with test-faults beside a good build",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN cargo install --path crates/cortex-server --features test-faults\n",
+      "expect": "only `cargo build`"
+    },
+    {
+      "id": "m340",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "S523-3: cargo rustc with test-faults beside a good build",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN cargo rustc --release -p cortex-server --features test-faults\n",
+      "expect": "only `cargo build`"
+    },
+    {
+      "id": "m341",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "S523-3: two spaces between cargo and build, another set",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN cargo  build --release --locked -p cortex-server --features test-faults\n",
+      "expect": "must pass --features"
+    },
+    {
+      "id": "m342",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "S523-3: the alias b with --all-features",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN cargo b --release --locked -p cortex-server --all-features\n",
+      "expect": "--all-features"
+    },
+    {
+      "id": "m343",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "S523-4: the exact set text only inside an echo, the real build has none",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN echo 'cargo build --features \"$(cat server-features)\"' && cargo build --release --locked -p cortex-server\n",
+      "expect": "must pass --features"
+    },
+    {
+      "id": "m344",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a RUN that names cargo and cannot be read as shell words (a quote that never closes)",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\" 'unclosed\n",
+      "expect": "cannot be read as shell words"
+    },
+    {
+      "id": "m345",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a toolchain word before the subcommand does not hide the build",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN cargo +nightly build --release --locked -p cortex-server --features test-faults\n",
+      "expect": "must pass --features"
+    },
+    {
+      "id": "m346",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a VAR=value before cargo does not hide the build",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN CARGO_TERM_COLOR=never cargo build --release --locked -p cortex-server\n",
+      "expect": "must pass --features"
+    },
+    {
+      "id": "m347",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a build inside parentheses is its own command",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN (cargo build --release --locked -p cortex-server)\n",
+      "expect": "must pass --features"
+    },
+    {
+      "id": "m348",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "hale: a build after if/then is not seen by a first-word reader (the old text rule saw it)",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN if true; then cargo build --release --locked -p cortex-server --features test-faults; fi\n",
+      "expect": "cannot judge"
+    },
+    {
+      "id": "m349",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "hale: a build inside braces",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN { cargo build --release --locked -p cortex-server --features test-faults; }\n",
+      "expect": "cannot judge"
+    },
+    {
+      "id": "m350",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "hale: a negated build",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN ! cargo build --release --locked -p cortex-server --features test-faults\n",
+      "expect": "cannot judge"
+    },
+    {
+      "id": "m351",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "hale: a build in a for loop",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN for f in 1; do cargo build --release --locked -p cortex-server --features test-faults; done\n",
+      "expect": "cannot judge"
+    },
+    {
+      "id": "m352",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "hale: a build behind timeout",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN timeout 600 cargo build --release --locked -p cortex-server --features test-faults\n",
+      "expect": "cannot judge"
+    },
+    {
+      "id": "m353",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "hale: a build behind sudo",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN sudo cargo build --release --locked -p cortex-server --features test-faults\n",
+      "expect": "cannot judge"
+    },
+    {
+      "id": "m354",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "hale: a build inside backticks",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN x=`cargo build --release --locked -p cortex-server --features test-faults`\n",
+      "expect": "cannot judge"
+    },
+    {
+      "id": "m355",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "hale: the exec form of RUN",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN [\"cargo\", \"build\", \"--release\", \"--features\", \"test-faults\"]\n",
+      "expect": "cannot judge"
+    },
+    {
+      "id": "m356",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "hale: a # inside a word does not end the line for a shell, the build after it is judged",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN echo x#y; cargo build --release --locked -p cortex-server --features test-faults\n",
+      "expect": "must pass --features"
+    },
+    {
+      "id": "m357",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "hale: a build behind setsid",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN setsid cargo build --release --locked -p cortex-server --features test-faults\n",
+      "expect": "cannot judge"
+    },
+    {
+      "id": "m358",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the word cargo inside an echo argument cannot be judged and is refused (fail closed; the old pass cell p17 is this case)",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN echo \"cargo build --all-features is not used here\"\n",
+      "expect": "cannot judge"
+    },
+    {
+      "id": "m359",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a build with a BuildKit flag that carries a wrong set is still judged",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\nRUN --mount=type=cache,target=/opt/cargo/registry cargo build --release --locked -p cortex-server --features test-faults\n",
+      "expect": "must pass --features"
+    },
+    {
+      "id": "m360",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "hale N23: a comment line inside a continued RUN does not end the instruction (the second flag after it is seen)",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\" \\\n    # a comment line inside the continued instruction\n    -Ftest-faults\n",
+      "expect": "more than once"
+    },
+    {
+      "id": "m361",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "sam S523-SAM01: a FILE bind mount over the COPY'd feature path (source from the build context) can put other bytes under the path the build reads: refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=bind,source=evil-features,target=/src/server-features cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "type=bind is refused"
+    },
+    {
+      "id": "m362",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a bind mount over the PARENT directory of the feature file (the build directory) is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=bind,source=other,target=/src cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "type=bind is refused"
+    },
+    {
+      "id": "m363",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a bind mount over a directory ABOVE the build directory (the root) is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=bind,source=other,target=/ cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "type=bind is refused"
+    },
+    {
+      "id": "m364",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the DEFAULT form (no type, so bind) over the feature path is refused, and the reason says there is no type",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=source=evil-features,target=/src/server-features cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "names no type"
+    },
+    {
+      "id": "m365",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the default form spelled with dst= over the feature path is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=dst=/src/server-features,source=evil-features cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "names no type"
+    },
+    {
+      "id": "m366",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a CACHE mount whose target is the feature path itself overlaps a COPY destination",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/src/server-features cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "overlaps"
+    },
+    {
+      "id": "m367",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a cache mount over the build directory /src (the parent of the feature file) is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/src cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "overlaps the build directory"
+    },
+    {
+      "id": "m368",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a cache mount over the root is refused (it is above everything that was copied in)",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/ cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "overlaps"
+    },
+    {
+      "id": "m369",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a cache mount over a COPY'd directory (/src/crates) is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/src/crates cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "overlaps"
+    },
+    {
+      "id": "m370",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a cache mount BELOW a COPY'd directory (/src/crates/cortex-server) is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/src/crates/cortex-server cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "overlaps"
+    },
+    {
+      "id": "m371",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the cache target given as dst= over the feature path is refused (an alias of target)",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,dst=/src/server-features cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "overlaps"
+    },
+    {
+      "id": "m372",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the cache target given as destination= with a dot-dot spelling (/opt/../src/server-features) is resolved and refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,destination=/opt/../src/server-features cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "overlaps"
+    },
+    {
+      "id": "m373",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the cache target spelled with repeated and trailing slashes (/src//server-features/) is resolved and refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/src//server-features/ cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "overlaps"
+    },
+    {
+      "id": "m374",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a cache mount on a default PATH directory (/usr/local/bin) could replace cat or cargo: refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/usr/local/bin cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "PATH directory"
+    },
+    {
+      "id": "m375",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a cache mount ABOVE a default PATH directory (/usr) is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/usr cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "PATH directory"
+    },
+    {
+      "id": "m376",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a RELATIVE cache target cannot be compared with the paths the build reads: refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=registry cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "is relative"
+    },
+    {
+      "id": "m377",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a cache target that holds a variable (/opt/${CARGO_HOME}/registry) is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/opt/${CARGO_HOME}/registry cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "variable or a quote"
+    },
+    {
+      "id": "m378",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "type=tmpfs is not an accepted form",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=tmpfs,target=/opt/tmp cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "type=tmpfs is refused"
+    },
+    {
+      "id": "m379",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "type=secret is not an accepted form",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=secret,id=token,target=/run/secrets/token cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "type=secret is refused"
+    },
+    {
+      "id": "m380",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "type=ssh is not an accepted form",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=ssh cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "type=ssh is refused"
+    },
+    {
+      "id": "m381",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a cache mount seeded from another stage (from=) is refused: the seed bytes are not seen",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/opt/cargo/registry,from=build cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "seeds the cache"
+    },
+    {
+      "id": "m382",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a cache mount seeded from a source path is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/opt/cargo/registry,source=/src cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "seeds the cache"
+    },
+    {
+      "id": "m383",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a cache mount with the src= alias is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/opt/cargo/registry,src=/src cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "seeds the cache"
+    },
+    {
+      "id": "m384",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a bare word in a mount (ro) is not in the allowlist",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/opt/cargo/registry,ro cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "bare word"
+    },
+    {
+      "id": "m385",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "an unknown mount key (foo=bar) is not in the allowlist",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/opt/cargo/registry,foo=bar cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "not in the allowlist"
+    },
+    {
+      "id": "m386",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a duplicate type key is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,type=cache,target=/opt/cargo/registry cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "given twice"
+    },
+    {
+      "id": "m387",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a target given twice through two aliases is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/opt/a,dst=/opt/b cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "given twice"
+    },
+    {
+      "id": "m388",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a cache mount with no target is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,id=cargo cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "no target"
+    },
+    {
+      "id": "m389",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "--mount with no value is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "has no value"
+    },
+    {
+      "id": "m390",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "any other RUN option (--foo=bar) is refused, not discarded",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --foo=bar cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "not accepted"
+    },
+    {
+      "id": "m391",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a --network value that is not none, default or host is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --network=weird cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "not accepted"
+    },
+    {
+      "id": "m392",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a valid cache mount does not excuse a second, bind mount in the same RUN (every option is judged)",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/opt/cargo/registry --mount=type=bind,source=x,target=/src/server-features cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "type=bind is refused"
+    },
+    {
+      "id": "m393",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the policy covers every RUN, not only the one that builds: a bind mount on the dnf line is refused",
+      "old": "RUN dnf -y install gcc make && dnf clean all\n",
+      "new": "RUN --mount=type=bind,source=x,target=/tmp/x dnf -y install gcc make && dnf clean all\n",
+      "expect": "type=bind is refused"
+    },
+    {
+      "id": "m394",
+      "rule": "S5-23",
+      "op": "many",
+      "note": "a mount BEFORE any WORKDIR is refused (sam S523-SAM02): with the WORKDIR line removed the build directory is not known, so even an otherwise valid cache mount is refused",
+      "steps": [
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "WORKDIR /src\n",
+          "new": ""
+        },
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+          "new": "RUN --mount=type=cache,target=/opt/cargo/registry cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+        }
+      ],
+      "expect": "no explicit absolute WORKDIR"
+    },
+    {
+      "id": "m395",
+      "rule": "S5-23",
+      "op": "many",
+      "note": "a RELATIVE WORKDIR is joined to the one before it (WORKDIR / then WORKDIR src is /src): a cache mount over /src/crates is refused",
+      "steps": [
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "WORKDIR /src\n",
+          "new": "WORKDIR /\nWORKDIR src\n"
+        },
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+          "new": "RUN --mount=type=cache,target=/src/crates cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+        }
+      ],
+      "expect": "overlaps"
+    },
+    {
+      "id": "m396",
+      "rule": "S5-23",
+      "op": "many",
+      "note": "a WORKDIR that is a variable makes every mount unjudgeable: even an otherwise valid cache mount is refused (fail closed)",
+      "steps": [
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "WORKDIR /src\n",
+          "new": "ARG B=/src\nWORKDIR $B\n"
+        },
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+          "new": "RUN --mount=type=cache,target=/opt/cargo/registry cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+        }
+      ],
+      "expect": "not a literal absolute path"
+    },
+    {
+      "id": "m397",
+      "rule": "S5-23",
+      "op": "many",
+      "note": "a COPY destination that is a variable makes every mount unjudgeable: even an otherwise valid cache mount is refused (fail closed)",
+      "steps": [
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "COPY crates ./crates\n",
+          "new": "COPY crates $DEST/crates\n"
+        },
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+          "new": "RUN --mount=type=cache,target=/opt/cargo/registry cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+        }
+      ],
+      "expect": "not a literal path"
+    },
+    {
+      "id": "m398",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the options on the first physical line of a CONTINUED RUN are judged (the line continues after them)",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=bind,source=x,target=/src/server-features \\\n    cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "type=bind is refused"
+    },
+    {
+      "id": "m399",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a quote in an option value cannot be read, so it is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=\"/opt/cargo/registry\" cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "cannot be read"
+    },
+    {
+      "id": "m400",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "cox's tightening: --network=host asks the builder for the host network (an entitlement that weakens the build's isolation) and is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --network=host cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "host network"
+    },
+    {
+      "id": "m401",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "cox's tightening: --security=insecure asks the builder for extra privileges (an entitlement that weakens the build's isolation) and is refused",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --security=insecure cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "extra privileges"
+    },
+    {
+      "id": "m402",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "append",
+      "note": "sam S523-SAM02: a stage built FROM a named EARLIER stage inherits its files and WORKDIR: every cache mount in it is refused, even an otherwise valid one",
+      "text": "\nFROM build AS packaged\nWORKDIR /w\nRUN --mount=type=cache,target=/opt/cargo/registry true\n",
+      "expect": "earlier stage"
+    },
+    {
+      "id": "m403",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "append",
+      "note": "the same with the earlier stage's name in another case (stage names are case-insensitive)",
+      "text": "\nFROM BUILD AS packaged\nWORKDIR /w\nRUN --mount=type=cache,target=/opt/cargo/registry true\n",
+      "expect": "earlier stage"
+    },
+    {
+      "id": "m404",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "append",
+      "note": "a stage whose FROM is a variable is not an external image: every cache mount in it is refused",
+      "text": "\nARG BASE=quay.io/rockylinux/rockylinux@sha256:e372170ca8630f0f03e9b70fdd0bf4a3ce3426b0de7cdba615f06337389de176\nFROM ${BASE}\nWORKDIR /w\nRUN --mount=type=cache,target=/opt/cargo/registry true\n",
+      "expect": "is a variable"
+    },
+    {
+      "id": "m405",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a cache mount on the dnf RUN, which comes BEFORE the first WORKDIR of its stage, is refused (the base image may set a WORKDIR of its own)",
+      "old": "RUN dnf -y install gcc make && dnf clean all\n",
+      "new": "RUN --mount=type=cache,target=/var/cache/dnf dnf -y install gcc make && dnf clean all\n",
+      "expect": "no explicit absolute WORKDIR"
+    },
+    {
+      "id": "m406",
+      "rule": "S5-23",
+      "op": "many",
+      "note": "a RELATIVE WORKDIR with no absolute WORKDIR before it leaves the build directory unknown: even a valid cache mount is refused",
+      "steps": [
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "WORKDIR /src\n",
+          "new": "WORKDIR src\n"
+        },
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+          "new": "RUN --mount=type=cache,target=/opt/cargo/registry cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+        }
+      ],
+      "expect": "not a literal absolute path"
+    },
+    {
+      "id": "m407",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the FINAL stage of the real Containerfile (FROM an external image) refuses a cache mount that comes before its own WORKDIR",
+      "old": "USER 10001:10001\n",
+      "new": "RUN --mount=type=cache,target=/var/cache/dnf true\nUSER 10001:10001\n",
+      "expect": "no explicit absolute WORKDIR"
+    },
+    {
+      "id": "m408",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "append",
+      "note": "a stage built FROM a named earlier stage WITHOUT any WORKDIR of its own refuses every cache mount too (cox's ruling: with and without a local WORKDIR)",
+      "text": "\nFROM build AS packaged\nRUN --mount=type=cache,target=/opt/cargo/registry true\n",
+      "expect": "earlier stage"
+    },
+    {
+      "id": "m409",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a DELIBERATE refusal of a quoted form (hue's p24, cox 22:48Z): the whole --mount spec in double quotes is refused, because a quote in an option cannot be read",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=\"type=cache,target=/opt/cargo/registry\" cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "expect": "cannot be read"
+    },
+    {
+      "id": "m410",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "append",
+      "note": "hue's survivor S21, isolated: in an external-image stage whose only COPY destination is /elsewhere/crates, a cache mount ON the build directory (WORKDIR /w) is refused by the build-directory rule alone",
+      "text": "\nFROM quay.io/rockylinux/rockylinux@sha256:e372170ca8630f0f03e9b70fdd0bf4a3ce3426b0de7cdba615f06337389de176 AS other\nWORKDIR /w\nCOPY crates /elsewhere/crates\nRUN --mount=type=cache,target=/w true\n",
+      "expect": "overlaps the build directory"
+    },
+    {
+      "id": "m411",
+      "rule": "S5-23",
+      "file": "Containerfile",
+      "op": "append",
+      "note": "the same stage: a cache mount ABOVE the build directory (the root) is refused by the build-directory rule alone",
+      "text": "\nFROM quay.io/rockylinux/rockylinux@sha256:e372170ca8630f0f03e9b70fdd0bf4a3ce3426b0de7cdba615f06337389de176 AS other\nWORKDIR /w\nCOPY crates /elsewhere/crates\nRUN --mount=type=cache,target=/ true\n",
+      "expect": "overlaps the build directory"
+    }
+  ],
+  "release_layout": {
+    "note": "the release layout release.sh builds from the good tree: the server and the migrate one-shot run the image named by stack.env, nothing builds here",
+    "file": "compose.yml",
+    "op": "multi",
+    "edits": [
+      [
+        "    image: localhost/cv2-s5-server:dev\n    command: [\"migrate\"]",
+        "    image: ${CORTEX_SERVER_IMAGE:?}\n    command: [\"migrate\"]"
+      ],
+      [
+        "  server:\n    build:\n      context: ..\n      dockerfile: deploy/Containerfile\n      args:\n        CORTEX_GIT_SHA: ${CORTEX_GIT_SHA:-unknown}\n    image: localhost/cv2-s5-server:dev\n    pull_policy: never",
+        "  server:\n    image: ${CORTEX_SERVER_IMAGE:?}\n    pull_policy: never"
+      ]
+    ]
+  },
+  "release_passes": [
+    {
+      "id": "p1",
+      "note": "the variable with a message after :? (like the other :? variables in this file) is still the release image",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "  server:\n    image: ${CORTEX_SERVER_IMAGE:?}\n",
+      "new": "  server:\n    image: ${CORTEX_SERVER_IMAGE:?set by stack.env}\n"
+    },
+    {
+      "id": "p2",
+      "note": "the variable with a message on the migrate one-shot too",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "    image: ${CORTEX_SERVER_IMAGE:?}\n    command: [\"migrate\"]",
+      "new": "    image: ${CORTEX_SERVER_IMAGE:?set by stack.env}\n    command: [\"migrate\"]"
+    }
+  ],
+  "good_passes": [
+    {
+      "id": "p3",
+      "note": "hale MC17: a bare ro on the status mount (no relabel) is still accepted",
+      "file": "compose.yml",
+      "op": "replace",
+      "old": "/var/lib/cortex-dumps:ro,z\n",
+      "new": "/var/lib/cortex-dumps:ro\n"
+    },
+    {
+      "id": "p4",
+      "note": "hale MR5: a line that only CONTAINS budget=31 is not a budget line",
+      "file": "db-roles.sh",
+      "op": "replace",
+      "old": "budget=30\n",
+      "new": "budget=30\n: \"an echo of budget=31 does not start a line\"\n"
+    },
+    {
+      "id": "p5",
+      "note": "hale 5k N-1: a timer with an EMPTY Unit= (systemd's default: its own service) still passes",
+      "file": "systemd/cortex-dump.timer",
+      "op": "replace",
+      "old": "Unit=cortex-dump.service",
+      "new": "Unit="
+    },
+    {
+      "id": "p6",
+      "note": "cox S5-10: an included source with a nested brace group, a case and a one-line function passes",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_more() {\n  if [ \"$1\" = x ]; then\n    { say a; say b; }\n  fi\n}\n"
+    },
+    {
+      "id": "hp1",
+      "note": "hale 5r: a one-line function with ${#1} and a quoted string passes",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_len() { [ \"${#1}\" -le 32 ]; }\nprereq_end() {\n  :\n}\n"
+    },
+    {
+      "id": "hp2",
+      "note": "hale 5r: a one-line function with a nested brace group passes",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_try() { \"$@\" || { say failed; return 1; }; }\nprereq_end() {\n  :\n}\n"
+    },
+    {
+      "id": "hp4",
+      "note": "hale 5p: whitespace around = in the OnFailure line is the same setting and still passes",
+      "file": "systemd/cortex-dump.service",
+      "op": "replace",
+      "old": "OnFailure=cortex-dump-alert.service",
+      "new": "OnFailure = cortex-dump-alert.service"
+    },
+    {
+      "id": "hqp1",
+      "note": "hale 5n HN-03: a timer with NO Unit= line (systemd's default is its own service) passes",
+      "file": "systemd/cortex-dump.timer",
+      "op": "replace",
+      "old": "Persistent=true\nUnit=cortex-dump.service\n",
+      "new": "Persistent=true\n"
+    },
+    {
+      "id": "hqp2",
+      "note": "hale 5n HN-08: an included function with a nested MULTI-LINE brace group (an indented }) passes: only a } at the start of a line closes a function",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_nest() {\n  if [ \"$1\" = x ]; then\n    {\n      say a\n    }\n  fi\n}\n"
+    },
+    {
+      "id": "hp5",
+      "note": "5t: a brace inside single quotes does not close the one-line function (and the function still ends with its own brace)",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_sq() { echo 'a } b'; }\nprereq_end() {\n  :\n}\n"
+    },
+    {
+      "id": "hp6",
+      "note": "5t: an escaped double quote inside a double-quoted string does not end the string",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_dq() { echo \"a \\\" } b\"; }\nprereq_end() {\n  :\n}\n"
+    },
+    {
+      "id": "hp7",
+      "note": "5t: an escaped closing brace outside quotes does not close the one-line function",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_bs() { echo a\\} b; }\nprereq_end() {\n  :\n}\n"
+    },
+    {
+      "id": "hp8",
+      "note": "5t: a nested brace group on one line passes",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ng() { { :; }; }\nprereq_end() {\n  :\n}\n"
+    },
+    {
+      "id": "hp15",
+      "note": "5u: a body with a comment holding braces, ${y:-}, a one-line group, a multi-line nested group with an indented closer and a case passes",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ok() {\n  # a comment with { and } braces and 'quotes\n  x=\"${y:-}\"\n  if [ -n \"$x\" ]; then\n    { echo a; echo b; } >&2\n  fi\n  {\n    echo nested\n  } >&2\n  case \"$x\" in\n    a) : ;;\n  esac\n}\n"
+    },
+    {
+      "id": "hp16",
+      "note": "5v: an unquoted ${x:-y} passes, in a body and on one line",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_pe() { echo ${x:-y}; }\nprereq_pf() {\n  echo ${x:-y} ${#x}\n}\n"
+    },
+    {
+      "id": "hn9",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_be() { echo {a,b}; }\nprereq_end() {\n  :\n}\n",
+      "note": "5w: was refused by the closed allow-list of 5u/5v (cox's closed allow-list (5u): a brace in a one-line body is a group delimiter at command position or part of $...); it is valid shell and runs nothing when sourced, so the shell that reads the file now admits it"
+    },
+    {
+      "id": "hn10",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_xb() { echo x}; }\nprereq_end() {\n  :\n}\n",
+      "note": "5w: was refused by the closed allow-list of 5u/5v (5u: a brace attached to a word is refused (it is an argument)...); it is valid shell and runs nothing when sourced, so the shell that reads the file now admits it"
+    },
+    {
+      "id": "hn12",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_qq() { :; \"x\" }; echo inside; }\nprereq_end() {\n  :\n}\n",
+      "note": "5w: was refused by the closed allow-list of 5u/5v (5u: a } after a quoted word is an argument: refused...); it is valid shell and runs nothing when sourced, so the shell that reads the file now admits it"
+    },
+    {
+      "id": "hn13",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_wx() { :; }x ; }\nprereq_end() {\n  :\n}\n",
+      "note": "5w: was refused by the closed allow-list of 5u/5v (5u: }x is a word, not the closer: refused...); it is valid shell and runs nothing when sourced, so the shell that reads the file now admits it"
+    },
+    {
+      "id": "hn14",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_dd() { { echo }; }; echo inside; }\nprereq_end() {\n  :\n}\n",
+      "note": "5w: was refused by the closed allow-list of 5u/5v (5u: an argument } inside a nested group on one line is refused...); it is valid shell and runs nothing when sourced, so the shell that reads the file now admits it"
+    },
+    {
+      "id": "hn15",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_pp() { :|{ :; }; }\nprereq_end() {\n  :\n}\n",
+      "note": "5w: was refused by the closed allow-list of 5u/5v (5u: a { glued to a | is a valid group in the shell, but the closed allow-list admits only the forms it knows:...); it is valid shell and runs nothing when sourced, so the shell that reads the file now admits it"
+    },
+    {
+      "id": "hn21",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_hd() {\n  cat <<EOF\nx\nEOF\n}\n",
+      "note": "5w: was refused by the closed allow-list of 5u/5v (closed allow-list for body lines: a here-document is refused (its lines cannot be classified)...); it is valid shell and runs nothing when sourced, so the shell that reads the file now admits it"
+    },
+    {
+      "id": "hn22",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_mq() {\n  echo 'a\nb'\n}\n",
+      "note": "5w: was refused by the closed allow-list of 5u/5v (closed allow-list for body lines: a quote that does not close on its line is refused...); it is valid shell and runs nothing when sourced, so the shell that reads the file now admits it"
+    },
+    {
+      "id": "hn24",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ab() {\n  echo }\n}\n",
+      "note": "5w: was refused by the closed allow-list of 5u/5v (closed allow-list for body lines: an argument } (not at command position) is refused...); it is valid shell and runs nothing when sourced, so the shell that reads the file now admits it"
+    },
+    {
+      "id": "hn25",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_bx() {\n  echo {a,b}\n}\n",
+      "note": "5w: was refused by the closed allow-list of 5u/5v (closed allow-list for body lines: a brace expansion is neither a delimiter nor part of ${...}: refused...); it is valid shell and runs nothing when sourced, so the shell that reads the file now admits it"
+    },
+    {
+      "id": "hn26",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_md() {\n  echo \"a\nb\"\n}\n",
+      "note": "5w: was refused by the closed allow-list of 5u/5v (5v: a double quote that does not close on its line is refused in a body...); it is valid shell and runs nothing when sourced, so the shell that reads the file now admits it"
+    },
+    {
+      "id": "hr1",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_s1() (\n    s=${1-}\n    case $s in /*) ;; *) return 1 ;; esac\n    n=$(wc -c < \"$s\") || { return 1; }\n    [ \"$n\" -gt 0 ] || return 1\n)\n",
+      "note": "marv's install-fetch.sh shape: a function whose body is a subshell, with a case, a command substitution and a one-line group"
+    },
+    {
+      "id": "hr2",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_s2() {\n  d=$(LC_ALL=C df -P -- \"$1\" 2>/dev/null | LC_ALL=C awk '\n    NR == 2 && NF >= 7 { print $2, $5; ok = 1 }\n    END { if (NR != 2 || !ok) exit 1 }\n  ') || { return 1; }\n  LC_ALL=C awk -F: '\n    BEGIN { highest = 99999 }\n    {\n      start = $2 + 0\n    }\n  ' /dev/null || return 1\n}\n",
+      "note": "marv's install-prereq.sh shape: multi-line single-quoted awk programs with braces, one inside a multi-line $( ) in a pipeline"
+    },
+    {
+      "id": "hr3",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_s3() {\n  for pq in \\\n    curl:curl tar:tar gzip:gzip \\\n    stat:coreutils wc:coreutils; do\n    :\n  done\n  if LC_ALL=C rpmkeys --define '_keyring fs' --define \"_keyringpath $1\" \\\n      --define '_pkgverify_level all' \\\n      --checksig --verbose \"$2\" >/dev/null 2>&1; then return 1; fi\n}\n",
+      "note": "marv's install-prereq.sh shape: backslash-newline in a for list and in a long command"
+    },
+    {
+      "id": "hr4",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_s4() {\n  q=${1-}\n  case $q in\n    \\'*\\') q=${q#\\'}; q=${q%\\'} ;;\n    \\\"*\\\") q=${q#\\\"}; q=${q%\\\"} ;;\n  esac\n  f='%{NAME}|%{EPOCHNUM}|%{VERSION}\\n'\n  g=$(podman info --format '{{.Store.GraphRoot}}' 2>/dev/null) || g=''\n  v=${f#*|}; v=${v%%|*}\n}\n",
+      "note": "marv's install-prereq.sh shape: escaped quotes in ${...} patterns, pipe characters in ${...}, rpm and podman format strings with braces in single quotes"
+    },
+    {
+      "id": "hp21",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_tab() {\n\t: # a tab, and a non-ASCII word in a comment: café\n}\n",
+      "note": "a TAB and a non-ASCII letter are allowed; only the line-break look-alikes are refused"
+    },
+    {
+      "id": "hp22",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_sub() (\n  :\n)\n",
+      "note": "the last function may be a subshell form: its closer ) alone at column 0 ends the file"
+    },
+    {
+      "id": "hh5",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ri() {\n  echo `true`\n}\n",
+      "note": "hale 5v F-1 (her hr5) was a REFUSAL of her scanner design (a backtick substitution); it is valid shell that runs nothing when sourced, so the shell that reads the file admits it"
+    },
+    {
+      "id": "hh6",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_rj() {\n  x=$(\n    true\n  )\n}\n",
+      "note": "hale 5v F-1 (her hr6) was a refusal of a command substitution that spans lines; valid shell, nothing runs when sourced: admitted (marv's install-prereq.sh has two)"
+    },
+    {
+      "id": "hp17",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_ya() {\n  p=\"$(command -v podman)\" || return 1\n  q=\"$(echo \"$p\" | sed 's/a/b/')\"\n  n=$(( ${#p} + 1 ))\n  say \"${p:-none} $q $n\"\n}\n",
+      "note": "hale 5v: the everyday forms pass: a command substitution inside double quotes with nested quotes, arithmetic, ${x:-y}"
+    },
+    {
+      "id": "hp18",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_yb() {\n  # a comment that ends in a backslash \\\n  case $1 in\n    a) { warn x; } ;;\n    b|c) say y ;;\n    *) : ;;\n  esac\n}\n",
+      "note": "hale 5v: a COMMENT line may end in a backslash (the shell does not continue a comment); a case arm may hold a group; a pattern list passes"
+    },
+    {
+      "id": "hp19",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_yc() { x=$(true); [ -n \"$x\" ] && { say y; }; }\nprereq_end() {\n  :\n}\n",
+      "note": "hale 5v: a one-line function with a command substitution and a group passes (a closing function follows it: the file must end with a column-0 closer)"
+    },
+    {
+      "id": "hp20",
+      "file": "install-prereq.sh",
+      "op": "append",
+      "text": "prereq_yd() {\n  echo \"$(echo ')\"')\" ; echo x\n}\n",
+      "note": "hale 5v: a quote of the OTHER kind nested inside $(...) inside double quotes is valid shell and passes"
+    },
+    {
+      "id": "p7",
+      "note": "S5-23: the set in another order is the same set",
+      "file": "server-features",
+      "op": "write",
+      "text": "mod-boot,mod-handoffs,mod-search,mod-records,mod-policy\n"
+    },
+    {
+      "id": "p8",
+      "note": "S5-23: another destination path, read from the same path",
+      "file": "Containerfile",
+      "op": "multi",
+      "edits": [
+        [
+          "COPY deploy/server-features ./server-features\n",
+          "COPY deploy/server-features /src/features.txt\n"
+        ],
+        [
+          "$(cat server-features)",
+          "$(cat /src/features.txt)"
+        ]
+      ]
+    },
+    {
+      "id": "p9",
+      "note": "S5-23: no dockerignore at all excludes nothing",
+      "file": "Containerfile.dockerignore",
+      "op": "delete_file"
+    },
+    {
+      "id": "p10",
+      "note": "S5-23: a glob exclusion with the exception after it lets the file through",
+      "file": "Containerfile.dockerignore",
+      "op": "multi",
+      "edits": [
+        [
+          "\ndeploy\n!deploy/server-features\n",
+          "\ndeploy/*\n!deploy/server-features\n"
+        ]
+      ]
+    },
+    {
+      "id": "p11",
+      "note": "S5-23: a new piece with a digit in its name, named in both places, is accepted",
+      "file": "server-features",
+      "op": "many",
+      "steps": [
+        {
+          "file": "../crates/cortex-server/Cargo.toml",
+          "op": "replace",
+          "old": "mod-boot = [\"dep:mod-boot\", \"mod-records\", \"mod-handoffs\"]\n",
+          "new": "mod-boot = [\"dep:mod-boot\", \"mod-records\", \"mod-handoffs\"]\nmod-x2 = [\"dep:mod-x2\"]\n"
+        },
+        {
+          "file": "server-features",
+          "op": "replace",
+          "old": "mod-boot\n",
+          "new": "mod-boot,mod-x2\n"
+        }
+      ]
+    },
+    {
+      "id": "p12",
+      "note": "S5-23: a directory exclusion with a trailing slash and the exception after it lets the file through",
+      "file": "Containerfile.dockerignore",
+      "op": "multi",
+      "edits": [
+        [
+          "\ndeploy\n!deploy/server-features\n",
+          "\ndeploy/\n!deploy/server-features\n"
+        ]
+      ]
+    },
+    {
+      "id": "p13",
+      "note": "S5-23: the file copied into a directory is read as <directory>/server-features",
+      "file": "Containerfile",
+      "op": "multi",
+      "edits": [
+        [
+          "COPY deploy/server-features ./server-features\n",
+          "COPY deploy/server-features /src/\n"
+        ],
+        [
+          "$(cat server-features)",
+          "$(cat /src/server-features)"
+        ]
+      ]
+    },
+    {
+      "id": "p14",
+      "note": "S523: the REAL RUN shape (guards, then cargo build in the same line) passes",
+      "file": "Containerfile",
+      "op": "replace",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN test \"$(wc -l < server-features)\" -eq 1 && grep -Eq '^[a-z][a-z0-9-]*(,[a-z][a-z0-9-]*)*$' server-features && cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+    },
+    {
+      "id": "p15",
+      "note": "S523: a harmless cargo subcommand beside the build is not a build",
+      "file": "Containerfile",
+      "op": "replace",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN cargo fetch --locked\nRUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+    },
+    {
+      "id": "p16",
+      "note": "S523: a VAR=value and a toolchain word before the build are read through",
+      "file": "Containerfile",
+      "op": "replace",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN CARGO_TERM_COLOR=never cargo +stable build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+    },
+    {
+      "id": "p18",
+      "note": "hale: a BuildKit flag on the RUN (a cache mount) is not part of the command: the only build still passes (no false alarm)",
+      "file": "Containerfile",
+      "op": "replace",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/opt/cargo/registry cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+    },
+    {
+      "id": "p19",
+      "note": "hale: an explicit path to cargo is the command; the path's own cargo directory is not a second use of the word",
+      "file": "Containerfile",
+      "op": "replace",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN /usr/local/cargo/bin/cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+    },
+    {
+      "id": "p20",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the cache mount with id, sharing, mode, uid and gid (every key of the allowlist) is accepted",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,id=cargo-registry,target=/opt/cargo/registry,sharing=locked,mode=0755,uid=0,gid=0 cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+    },
+    {
+      "id": "p21",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "two cache mounts (registry and git) and --network=default in one RUN are accepted",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,target=/opt/cargo/registry --mount=type=cache,target=/opt/cargo/git --network=default cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+    },
+    {
+      "id": "p22",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the dst= and destination= aliases on unrelated cache targets are accepted",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --mount=type=cache,dst=/usr/local/cargo/registry --mount=type=cache,destination=/root/.cargo/git cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+    },
+    {
+      "id": "p23",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "a cache mount on a RUN that comes AFTER the explicit WORKDIR of an external-image stage (/var/cache/dnf, unrelated to anything copied in) is accepted",
+      "old": "WORKDIR /src\n",
+      "new": "WORKDIR /src\nRUN --mount=type=cache,target=/var/cache/dnf dnf -y install make\n"
+    },
+    {
+      "id": "p24",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "--security=sandbox and --network=none on the build are accepted",
+      "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+      "new": "RUN --security=sandbox --network=none cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+    },
+    {
+      "id": "p25",
+      "op": "many",
+      "note": "a relative WORKDIR chain (WORKDIR / then WORKDIR src) with an unrelated cache mount is accepted",
+      "steps": [
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "WORKDIR /src\n",
+          "new": "WORKDIR /\nWORKDIR src\n"
+        },
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+          "new": "RUN --mount=type=cache,target=/opt/cargo/registry cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+        }
+      ]
+    },
+    {
+      "id": "p26",
+      "file": "Containerfile",
+      "op": "replace",
+      "note": "the FINAL stage (FROM an external image) with its own explicit WORKDIR and then a cache mount on an unrelated target is accepted",
+      "old": "USER 10001:10001\n",
+      "new": "WORKDIR /opt\nRUN --mount=type=cache,target=/var/cache/dnf true\nUSER 10001:10001\n"
+    },
+    {
+      "id": "p27",
+      "op": "many",
+      "note": "the two-stage shape of the real Containerfile: a cache mount in EACH stage, each after its own explicit WORKDIR, is accepted",
+      "steps": [
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "RUN cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n",
+          "new": "RUN --mount=type=cache,target=/opt/cargo/registry cargo build --release --locked -p cortex-server --features \"$(cat server-features)\"\n"
+        },
+        {
+          "file": "Containerfile",
+          "op": "replace",
+          "old": "USER 10001:10001\n",
+          "new": "WORKDIR /opt\nRUN --mount=type=cache,target=/var/cache/dnf true\nUSER 10001:10001\n"
+        }
+      ]
+    },
+    {
+      "id": "p28",
+      "note": "the same stage: a cache mount BELOW the build directory (/w/target), under no COPY destination, is accepted (a mount below the WORKDIR hides nothing copied in)",
+      "file": "Containerfile",
+      "op": "append",
+      "text": "\nFROM quay.io/rockylinux/rockylinux@sha256:e372170ca8630f0f03e9b70fdd0bf4a3ce3426b0de7cdba615f06337389de176 AS other\nWORKDIR /w\nCOPY crates /elsewhere/crates\nRUN --mount=type=cache,target=/w/target true\n"
+    }
+  ],
+  "good_stack_env": "CORTEX_VERSION=1.2.3\nCORTEX_SERVER_IMAGE=localhost/cortex-server@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\nCORTEX_DB_IMAGE=docker.io/pgvector/pgvector@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n"
+}

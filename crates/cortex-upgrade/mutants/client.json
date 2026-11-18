@@ -1,0 +1,295 @@
+[
+ {
+  "id": "HM-01",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_http"
+  ],
+  "fails": [
+   "ht_02_a_redirect_is_returned_not_followed"
+  ],
+  "what": "the client follows redirects itself",
+  "old": "        .max_redirects(0)",
+  "new": "        .max_redirects(5)"
+ },
+ {
+  "id": "HM-02",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_http"
+  ],
+  "fails": [
+   "ht_03_error_statuses_are_answers_not_errors"
+  ],
+  "what": "an error status becomes an error",
+  "old": "        .http_status_as_error(false)",
+  "new": "        .http_status_as_error(true)"
+ },
+ {
+  "id": "HM-03",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_http"
+  ],
+  "fails": [
+   "ht_04_the_production_constructor_refuses_plain_http_and_never_connects"
+  ],
+  "what": "https only is switched off",
+  "old": "        .https_only(https_only)",
+  "new": "        .https_only(false)"
+ },
+ {
+  "id": "HM-04",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_http"
+  ],
+  "fails": [
+   "ht_05_a_server_that_never_answers_times_out"
+  ],
+  "what": "no timeout",
+  "old": "        .timeout_global(Some(timeout))",
+  "new": "        .timeout_global(None)"
+ },
+ {
+  "id": "HM-05",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_http"
+  ],
+  "fails": [
+   "ht_01_a_get_returns_status_headers_and_body_and_sends_the_bearer_only_when_given"
+  ],
+  "what": "the bearer is never sent",
+  "edits": [
+   [
+    "impl Transport for UreqTransport {\n    fn get(&self, request: &Request<'_>) -> Result<Response, FetchError> {\n        let mut call = self.agent.get(request.url);\n        if let Some(token) = request.bearer {\n            call = call.header(\"Authorization\", format!(\"Bearer {token}\"));\n        }\n",
+    "impl Transport for UreqTransport {\n    fn get(&self, request: &Request<'_>) -> Result<Response, FetchError> {\n        let call = self.agent.get(request.url);\n"
+   ]
+  ]
+ },
+ {
+  "id": "HM-06",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_http"
+  ],
+  "fails": [
+   "ht_05_a_server_that_never_answers_times_out"
+  ],
+  "what": "a timeout is reported as a transport error",
+  "old": "        ureq::Error::Timeout(_) => FetchError::Timeout,",
+  "new": "        ureq::Error::Timeout(_) => FetchError::Transport,"
+ },
+ {
+  "id": "HM-07",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_http"
+  ],
+  "fails": [
+   "ht_04_the_production_constructor_refuses_plain_http_and_never_connects"
+  ],
+  "what": "the https-only refusal is reported as a transport error",
+  "old": "        ureq::Error::RequireHttpsOnly(_) => FetchError::InsecureUrl,",
+  "new": "        ureq::Error::RequireHttpsOnly(_) => FetchError::Transport,"
+ },
+ {
+  "id": "HM-08",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_http"
+  ],
+  "fails": [
+   "ht_02_a_redirect_is_returned_not_followed"
+  ],
+  "what": "the Location header is not read",
+  "edits": [
+   [
+    "impl Transport for UreqTransport {\n    fn get(&self, request: &Request<'_>) -> Result<Response, FetchError> {\n        let mut call = self.agent.get(request.url);\n        if let Some(token) = request.bearer {\n            call = call.header(\"Authorization\", format!(\"Bearer {token}\"));\n        }\n        let response = call.call().map_err(map)?;\n        let status = response.status().as_u16();\n        let location = response\n            .headers()\n            .get(\"location\")\n",
+    "impl Transport for UreqTransport {\n    fn get(&self, request: &Request<'_>) -> Result<Response, FetchError> {\n        let mut call = self.agent.get(request.url);\n        if let Some(token) = request.bearer {\n            call = call.header(\"Authorization\", format!(\"Bearer {token}\"));\n        }\n        let response = call.call().map_err(map)?;\n        let status = response.status().as_u16();\n        let location = response\n            .headers()\n            .get(\"x-location\")\n"
+   ]
+  ]
+ },
+ {
+  "id": "GM-01",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_12_damaged_gzip_is_corrupt_and_leaves_nothing"
+  ],
+  "what": "the rest of the gzip member is not read, so its checksum is not checked",
+  "old": "    if !matches!(drained, Ok(n) if n < GZ_TAIL_MAX) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "GM-02",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_14_a_long_tail_after_the_end_marker_inside_the_gzip_member_is_refused"
+  ],
+  "what": "the gzip tail has no length limit",
+  "old": "    if !matches!(drained, Ok(n) if n < GZ_TAIL_MAX) {",
+  "new": "    if !matches!(drained, Ok(_)) {"
+ },
+ {
+  "id": "GM-03",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_12_damaged_gzip_is_corrupt_and_leaves_nothing"
+  ],
+  "what": "decoder errors stay I/O errors instead of Corrupt",
+  "old": "        InvalidData | InvalidInput | UnexpectedEof => UnpackError::Corrupt,",
+  "new": "        InvalidData | InvalidInput => UnpackError::Corrupt,"
+ },
+ {
+  "id": "GM-04",
+  "design": null,
+  "file": "src/unpack.rs",
+  "tests": [
+   "group_unpack"
+  ],
+  "fails": [
+   "un_12_damaged_gzip_is_corrupt_and_leaves_nothing"
+  ],
+  "what": "a gzip tail failure leaves the unpacked directory behind",
+  "old": "        let _ = fs::remove_dir_all(into);\n        return Err(UnpackError::Corrupt);",
+  "new": "        let _ = into;\n        return Err(UnpackError::Corrupt);"
+ },
+ {
+  "id": "LT-01",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_local"
+  ],
+  "fails": [
+   "lt_06_the_local_transport_reads_no_proxy_from_the_environment",
+   "lt_07_the_release_transport_reads_no_proxy_from_the_environment"
+  ],
+  "what": "the environment's proxy is read",
+  "old": "        .proxy(None) // the environment's HTTP_PROXY, HTTPS_PROXY and ALL_PROXY are NOT read (cox, 13:30Z)\n",
+  "new": ""
+ },
+ {
+  "id": "LT-02",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_local"
+  ],
+  "fails": [
+   "lt_02_anything_but_the_literal_loopback_address_is_refused_before_any_connection"
+  ],
+  "what": "other 127.x addresses are accepted",
+  "old": "strip_prefix(\"http://127.0.0.1:\")",
+  "new": "strip_prefix(\"http://127.0.0.\")"
+ },
+ {
+  "id": "LT-03",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_local"
+  ],
+  "fails": [
+   "lt_02_anything_but_the_literal_loopback_address_is_refused_before_any_connection"
+  ],
+  "what": "port 0 is accepted",
+  "old": ".is_ok_and(|p| (1..=65535).contains(&p))",
+  "new": ".is_ok_and(|p| (0..=65535).contains(&p))"
+ },
+ {
+  "id": "LT-04",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_local"
+  ],
+  "fails": [
+   "lt_02_anything_but_the_literal_loopback_address_is_refused_before_any_connection"
+  ],
+  "what": "a URL without a path is accepted",
+  "old": "port_ok && path.starts_with('/') &&",
+  "new": "port_ok &&"
+ },
+ {
+  "id": "LT-05",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_local"
+  ],
+  "fails": [
+   "lt_02_anything_but_the_literal_loopback_address_is_refused_before_any_connection"
+  ],
+  "what": "the address is not checked at all",
+  "old": "        if !local_url_ok(request.url) {\n            return Err(FetchError::BadUrl);\n        }\n",
+  "new": ""
+ },
+ {
+  "id": "LT-06",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_local"
+  ],
+  "fails": [
+   "lt_04_the_answer_is_capped_at_64_kib"
+  ],
+  "what": "the cap is twice as large",
+  "old": "            left: LOCAL_BODY_MAX_BYTES,\n",
+  "new": "            left: LOCAL_BODY_MAX_BYTES * 2,\n"
+ },
+ {
+  "id": "LT-07",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_local"
+  ],
+  "fails": [
+   "lt_04_the_answer_is_capped_at_64_kib"
+  ],
+  "what": "a too large answer is cut instead of refused",
+  "old": "                _ => Err(std::io::Error::new(\n                    std::io::ErrorKind::InvalidData,\n                    \"the answer is larger than the limit\",\n                )),\n",
+  "new": "                _ => Ok(0),\n"
+ },
+ {
+  "id": "LT-08",
+  "design": null,
+  "file": "src/http.rs",
+  "tests": [
+   "group_local"
+  ],
+  "fails": [
+   "lt_01_a_get_to_the_literal_loopback_address_works_and_carries_the_bearer"
+  ],
+  "what": "the bearer is not sent by the local transport",
+  "edits": [
+   [
+    "impl Transport for LocalTransport {\n    fn get(&self, request: &Request<'_>) -> Result<Response, FetchError> {\n        if !local_url_ok(request.url) {\n            return Err(FetchError::BadUrl);\n        }\n        let mut call = self.agent.get(request.url);\n        if let Some(token) = request.bearer {\n            call = call.header(\"Authorization\", format!(\"Bearer {token}\"));\n        }\n",
+    "impl Transport for LocalTransport {\n    fn get(&self, request: &Request<'_>) -> Result<Response, FetchError> {\n        if !local_url_ok(request.url) {\n            return Err(FetchError::BadUrl);\n        }\n        let call = self.agent.get(request.url);\n"
+   ]
+  ]
+ }
+]

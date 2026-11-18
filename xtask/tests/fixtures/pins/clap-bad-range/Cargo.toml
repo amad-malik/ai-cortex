@@ -1,0 +1,4 @@
+[workspace.dependencies]
+serde_ignored = "=0.1.14"
+ureq = "=3.5.1"
+clap = "^4.6"

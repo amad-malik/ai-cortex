@@ -1,0 +1,131 @@
+{
+ "target": "scripts/ci.sh",
+ "command": [
+  "sh",
+  "{copy}",
+  "--selftest-gates"
+ ],
+ "kill_marker": "GATE LOGIC WRONG",
+ "mutants": [
+  {
+   "id": "NM-1",
+   "what": "a run that ran nothing counts (N30)",
+   "old": "[ \"$passed\" -gt 0 ] 2>/dev/null ||",
+   "new": "[ \"$passed\" -ge 0 ] 2>/dev/null ||"
+  },
+  {
+   "id": "NM-2",
+   "what": "the hash lines are matched anywhere in a line (N31)",
+   "old": "grep -qxF \"proof-under-test $pair\" \"$1\"",
+   "new": "grep -qF \"proof-under-test $pair\" \"$1\""
+  },
+  {
+   "id": "NM-3",
+   "what": "the run's own exit line is not read",
+   "old": "grep -qxF '# exit: 0' \"$1\" ||",
+   "new": "true ||"
+  },
+  {
+   "id": "NM-4",
+   "what": "the transcripts are taken in name order, not by time (N32)",
+   "old": "ls -t \"$1\"/roles-proof-run*.txt",
+   "new": "ls \"$1\"/roles-proof-run*.txt"
+  },
+  {
+   "id": "NM-5",
+   "what": "a deliberate RED run is not skipped",
+   "old": "| grep -v -- '-RED\\.txt$' | head -1",
+   "new": "| head -1"
+  },
+  {
+   "id": "NM-6",
+   "what": "the OLDEST transcript is taken",
+   "old": "ls -t \"$1\"/roles-proof-run*.txt",
+   "new": "ls -tr \"$1\"/roles-proof-run*.txt"
+  },
+  {
+   "id": "NM-7",
+   "what": "a failing result line is read as a pass",
+   "old": "case $res in *\", 0 failed\"*) ;; *) echo \"last live run FAILED ($res)\"; return 0 ;; esac",
+   "new": "case $res in *\"failed\"*) ;; *) echo \"last live run FAILED ($res)\"; return 0 ;; esac"
+  },
+  {
+   "id": "NM-8",
+   "what": "no transcript is not reported",
+   "old": "[ -f \"$1\" ] || { echo \"no live result recorded\"; return 0; }",
+   "new": "[ -f \"$1\" ] || { echo \"last live run matches the current scripts (none)\"; return 0; }"
+  },
+  {
+   "id": "NM-9",
+   "what": "two exit lines are accepted (N34)",
+   "old": "  [ \"$exits\" -le 1 ] || { echo \"last live run FAILED ($res; more than one exit line)\"; return 0; }",
+   "new": ":"
+  },
+  {
+   "id": "NM-10",
+   "what": "three exit lines are the limit (N34)",
+   "old": "[ \"$exits\" -le 1 ]",
+   "new": "[ \"$exits\" -le 2 ]"
+  },
+  {
+   "id": "NM-11",
+   "what": "only the exact spelling '# exit: ' is counted (N34)",
+   "old": "grep -ciE '^[[:space:]]*#[[:space:]]*exit[[:space:]]*:' \"$1\"",
+   "new": "grep -c '^# exit: ' \"$1\""
+  },
+  {
+   "id": "NM-12",
+   "what": "exit lines are matched case-sensitively (hale N-1)",
+   "old": "grep -ciE '^[[:space:]]*#",
+   "new": "grep -cE '^[[:space:]]*#"
+  },
+  {
+   "id": "NM-13",
+   "what": "a space before the colon is not tolerated (hale N-1)",
+   "old": "'^[[:space:]]*#[[:space:]]*exit[[:space:]]*:'",
+   "new": "'^[[:space:]]*#[[:space:]]*exit:'"
+  },
+  {
+   "id": "NM-14",
+   "what": "exit 77 is a skip without any NOT_RUN reason line (cox A2)",
+   "old": "if [ \"$rc\" -eq 77 ] && [ -n \"$reason\" ]; then",
+   "new": "if [ \"$rc\" -eq 77 ]; then"
+  },
+  {
+   "id": "NM-15",
+   "what": "the NOT_RUN line may be anywhere in the output, not only the last line (cox A2)",
+   "old": "reason=$(tail -n 1 \"$out\" | sed -n",
+   "new": "reason=$(grep '^NOT_RUN: ' \"$out\" | tail -n 1 | sed -n"
+  },
+  {
+   "id": "NM-16",
+   "what": "the NOT_RUN line makes a skip whatever the exit code (cox A2)",
+   "old": "if [ \"$rc\" -eq 77 ] && [ -n \"$reason\" ]; then",
+   "new": "if [ -n \"$reason\" ]; then"
+  },
+  {
+   "id": "NM-17",
+   "what": "a reason of whitespace only is accepted (cox A2; sam's tab note)",
+   "old": "s/^NOT_RUN: \\(.*[^[:space:]].*\\)$/\\1/p",
+   "new": "s/^NOT_RUN: \\(.*\\)$/\\1/p"
+  },
+  {
+   "id": "NM-18",
+   "what": "a NOT_RUN gate is recorded but not counted (strict could not fail it)",
+   "old": "      skip \"$name\" \"$reason\"",
+   "new": "      record \"$name\" NOT_RUN \"$reason\""
+  },
+  {
+   "id": "NM-19",
+   "what": "the exit code of the gate command is not kept",
+   "old": "    rc=$?\n    # cox W1-106 (A2)",
+   "new": "    rc=0\n    # cox W1-106 (A2)"
+  },
+  {
+   "id": "NM-20",
+   "what": "a tab is not whitespace: a reason of tabs only is accepted (sam's A2 note)",
+   "old": "s/^NOT_RUN: \\(.*[^[:space:]].*\\)$/\\1/p",
+   "new": "s/^NOT_RUN: \\(.*[^ ].*\\)$/\\1/p"
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+# stack.env corpus: what the ENGINE says about each file (cortex-upgrade parse_stack_env, read through the engine's own read: at most 8193 bytes, UTF-8).
+# engine: wave1/cortex-upgrade 4ae6c4de82831815a6f1895ea5a743d964787014 (git archive), crates/cortex-upgrade/src/stack_env.rs sha256 039758183a64627a3914ec571708e3a46ad0cec85bf48f590fedbad137aec263
+# produced by a throwaway test (tests/corpus_probe.rs, not committed) on that archive, 2026-11-07T18:35:21Z; scripts/mk-stack-env-corpus.py writes the files
+# IT-93b holds that install.sh differs from the engine on these three files, and how (nbsp-only-line and nel-only-line: the engine calls them blank, install.sh does not; invalid-utf8-comment: the engine refuses the file, install.sh skips a comment unread).
+# 8 Nov (hue), the last three lines: the engine's verdict from hale's engine-probe (the same unchanged stack_env.rs): a version core of 10^19 and of u64::MAX is VALID (checked u64, semver 1.0.28); install.sh refuses every 20-digit core (valid_semver: at most 19 digits). A written, fail-closed limit (vera PRE6D-C1, hale N-1); u64::MAX+1 is refused by both (bad-version-core-u64-overflow in the main corpus). The third: a NUL byte inside a COMMENT (the engine skips a comment unread and accepts; install.sh refuses any file with a NUL byte: hale's whole-file test, one stricter line, fail closed)
+invalid-utf8-comment.env REFUSE  # read: stream did not contain valid UTF-8
+nbsp-only-line.env ACCEPT
+nel-only-line.env ACCEPT
+core-1e19-valid-in-engine.env ACCEPT
+core-u64-max-valid-in-engine.env ACCEPT
+nul-in-comment-valid-in-engine.env ACCEPT

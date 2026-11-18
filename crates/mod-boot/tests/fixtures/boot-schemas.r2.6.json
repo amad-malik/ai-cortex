@@ -1,0 +1,300 @@
+{
+  "source": "mvp/wave1-pins-20261106-S3r26/S3/cortex-v2-skeleton.openapi.r2.6-a31fa244.json",
+  "source_sha256": "a31fa244c72782640ac22efd20a683174bac08503a6b7fd1c1a5d4cec7633b12",
+  "copied": "components.schemas: Boot, Whoami, Orientation, SectionPointer, BootHandoff, BootSection (byte-for-byte values; keys as in the source)",
+  "schemas": {
+    "Boot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity",
+        "orientation",
+        "rules",
+        "claimed",
+        "pending",
+        "budget",
+        "used",
+        "sections"
+      ],
+      "properties": {
+        "identity": {
+          "$ref": "#/components/schemas/Whoami"
+        },
+        "orientation": {
+          "oneOf": [
+            {
+              "$ref": "#/components/schemas/Orientation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "null when never written or its current revision is invalidated (tate M1)"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/SectionPointer"
+          }
+        },
+        "claimed": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/BootHandoff"
+          }
+        },
+        "pending": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/BootHandoff"
+          }
+        },
+        "budget": {
+          "type": "integer"
+        },
+        "used": {
+          "type": "integer"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/BootSection"
+          }
+        }
+      },
+      "description": "Per-section accounting (tate M5c). Sections the server cannot fill say capability_unavailable."
+    },
+    "Whoami": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "installation",
+        "project",
+        "worker",
+        "kind",
+        "role",
+        "token_id",
+        "expires_at"
+      ],
+      "properties": {
+        "installation": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "project": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "worker": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9-]{0,31}$",
+          "maxLength": 32,
+          "x-max-bytes": 32,
+          "x-label": "name"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "worker",
+            "service"
+          ]
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "project_lead",
+            "team_lead",
+            "member"
+          ]
+        },
+        "team": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid"
+        },
+        "job_roles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,31}$",
+            "maxLength": 32,
+            "x-max-bytes": 32,
+            "x-label": "job_role"
+          }
+        },
+        "token_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "renew_due": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Orientation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_id",
+        "revision",
+        "author",
+        "created_at",
+        "body",
+        "cut",
+        "reading_path"
+      ],
+      "properties": {
+        "record_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "author": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "body": {
+          "type": "string"
+        },
+        "cut": {
+          "type": "boolean",
+          "description": "the body was shortened to fit the budget (about body only)"
+        },
+        "reading_path": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "x-max-bytes": 256,
+            "pattern": "^/[^\\x00-\\x1f\\x7f]*$"
+          },
+          "description": "the record's fields.reading_path, in order (cox W1-20, tate): 5 to 10 entries, each at most 256 bytes and starting with /. In JSON the WHOLE list is always present and no entry is shortened; the Markdown rendering follows S2 7.2 (at the floor, the first three entries and \"n more\", the count in sections[].omitted); the budget counts the rendered Markdown"
+        }
+      }
+    },
+    "SectionPointer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section",
+        "record_id",
+        "revision",
+        "sha256"
+      ],
+      "properties": {
+        "section": {
+          "type": "string"
+        },
+        "record_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source_path": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "from the revision's fields.source_path, so a worker can check what it read (tate M5a)"
+        }
+      }
+    },
+    "BootHandoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "state",
+        "priority",
+        "created_by",
+        "created_at",
+        "summary",
+        "summary_cut"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "integer"
+        },
+        "created_by": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "summary_cut": {
+          "type": "boolean"
+        }
+      },
+      "description": "A briefing line, not the packet: cortex handoff show <id> gives the packet (tate M5b)."
+    },
+    "BootSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "status",
+        "used",
+        "omitted"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "none",
+            "capability_unavailable"
+          ]
+        },
+        "used": {
+          "type": "integer"
+        },
+        "omitted": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

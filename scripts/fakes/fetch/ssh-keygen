@@ -1,0 +1,27 @@
+#!/bin/sh
+# Synthetic ssh-keygen for call-order and failure cells: logs its arguments (a URL is never logged) and answers in the shape of the real tool.
+set -eu
+printf 'ssh-keygen' >> "$FAKE_LOG"
+for fetch_arg do
+    case $fetch_arg in *://*) printf ' [url]' >> "$FAKE_LOG" ;; *) printf ' %s' "$fetch_arg" >> "$FAKE_LOG" ;; esac
+done
+printf '\n' >> "$FAKE_LOG"
+fetch_mode=${FAKE_SSH_KEYGEN_MODE:-ok}
+case " $* " in
+    *' -Y verify '*)
+        case $fetch_mode in fail|fail-verify|absent) exit 1 ;; ok) ;; *) exit 2 ;; esac
+        fetch_principal=
+        while [ "$#" -gt 0 ]; do
+            if [ "$1" = -I ]; then fetch_principal=${2-}; fi
+            shift
+        done
+        if [ "${FAKE_VERIFY_OUTPUT+x}" = x ]; then
+            printf '%s\n' "$FAKE_VERIFY_OUTPUT"
+        else
+            printf 'Good "cortex-release" signature for %s with ED25519 key %s\n' "${FAKE_VERIFY_PRINCIPAL:-$fetch_principal}" "${FAKE_GOOD_FINGERPRINT:-${FAKE_FINGERPRINT:-SHA256:synthetic}}"
+        fi ;;
+    *' -l -f '*)
+        case $fetch_mode in fail|absent) exit 1 ;; ok|fail-verify) ;; *) exit 2 ;; esac
+        printf '256 %s cell (ED25519)\n' "${FAKE_FINGERPRINT:-SHA256:synthetic}" ;;
+    *) exit 2 ;;
+esac

@@ -1,0 +1,83 @@
+#!/bin/sh
+# launchd-run: what OnFailure= and ExecStartPost= did on Linux, for a macOS launch agent (M-1c; bob; cox f60b3c86, kai c9dc7843)
+#
+#   launchd-run --unit <name>.service --home <abs dir> [--clear-on-success] -- <command> [args...]
+#
+# Runs the command and waits for it. launchd has no OnFailure= and no ExecStartPost=, so this wrapper does their two jobs and nothing else:
+#   * the command fails (a non-zero status, or killed by a signal): ask cortex-dump-alert to raise the backup alarm, with the SAME values systemd
+#     hands it from a failed unit (MONITOR_UNIT, MONITOR_SERVICE_RESULT, MONITOR_EXIT_CODE, MONITOR_EXIT_STATUS), so the alert tool is unchanged;
+#   * the command passes and --clear-on-success was given (the freshness check): ask cortex-dump-alert to clear the alarm, but only a marker the
+#     backup wrote (that rule is the alert tool's own).
+# The wrapper exits with the command's own status. It never prints the command line or the environment (a secret in either must not reach a log),
+# and the alert tool only ever writes fixed words and digits.
+#
+# Exit codes: the command's own; 2 bad usage (the command is not run).
+# ENVIRONMENT HYGIENE (hale M1C-H3): an exported shell function would replace a command of this script (an exported [ turns every [ ] || die into a pass).
+# Run it with sh, as the first line says: run as bash (not in POSIX mode) an exported unset or set would defeat the block below.
+# Every function the environment brings is unset FIRST: bash exports one as BASH_FUNC_<name>%% (the form of every bash since the Shellshock fix, Apple's 3.2.57 included;
+# a bash older than that exports <name>=() {, which this block does not undo: ASK-A-MAC, and no such bash is on a supported Mac)
+unset -f unset command env sed 2> /dev/null || :
+# the listing must WORK: if env or sed failed, every exported function would stay in place and the script would go on as if none existed, so it refuses (sam M1C-SAM08, the same family)
+_fe=$(command env) || { command printf '%s: problem: cannot list the environment to remove the exported shell functions (env failed); fix: run it with a PATH that has a working env and sed\n' launchd-run >&2; exit 2; }
+_fnames=$(command printf '%s\n' "$_fe" | command sed -n -e 's/^BASH_FUNC_\(.*\)%%=.*/\1/p') || { command printf '%s: problem: cannot list the environment to remove the exported shell functions (sed failed); fix: run it with a PATH that has a working env and sed\n' launchd-run >&2; exit 2; }
+set -f
+for _fn in $_fnames; do
+  unset -f "$_fn" 2> /dev/null || :
+done
+set +f
+unset _fn _fe _fnames
+set -eu
+LC_ALL=C
+export LC_ALL
+
+me=launchd-run
+
+usage_die() { # usage_die <problem> <fix>
+  printf '%s: problem: %s; fix: %s\n' "$me" "$1" "$2" >&2
+  exit 2
+}
+
+unit="" home="" clear=0 seen_dd=0
+while [ $# -gt 0 ]; do
+  case $1 in
+    --unit) [ $# -ge 2 ] || usage_die "--unit needs a value" "give the unit name, for example cortex-dump.service"; unit=$2; shift 2 ;;
+    --home) [ $# -ge 2 ] || usage_die "--home needs a value" "give the absolute Cortex home directory"; home=$2; shift 2 ;;
+    --clear-on-success) clear=1; shift ;;
+    --) seen_dd=1; shift; break ;;
+    -h | --help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
+    *) usage_die "an argument this tool does not know (the command must come after --)" "run: launchd-run --unit <name>.service --home <abs dir> -- <command> [args]" ;;
+  esac
+done
+[ "$seen_dd" -eq 1 ] || usage_die "no -- before the command" "put -- between the options and the command"
+[ -n "$unit" ] || usage_die "--unit is required" "give the unit name, for example cortex-dump.service"
+printf '%s\n' "$unit" | grep -Eq '^[A-Za-z0-9@:_.-]{1,100}\.service$' ||
+  usage_die "the unit name is not a plain name ending in .service" "use letters, digits and @ : _ . - only, for example cortex-dump.service"
+[ -n "$home" ] || usage_die "--home is required" "give the absolute Cortex home directory"
+case $home in
+  /*) ;;
+  *) usage_die "--home is not an absolute path" "give the absolute Cortex home directory" ;;
+esac
+home=${home%/}
+[ $# -gt 0 ] || usage_die "no command after --" "put the command and its arguments after --"
+
+rc=0
+"$@" || rc=$?
+
+alert=$home/bin/cortex-dump-alert
+if [ "$rc" -eq 0 ]; then
+  # ExecStartPost=-: the leading minus means a failure here is ignored
+  if [ "$clear" -eq 1 ]; then "$alert" --home "$home" --clear || true; fi
+  exit 0
+fi
+
+if [ "$rc" -gt 128 ] && [ "$rc" -le 192 ]; then
+  result=signal
+  code=killed
+else
+  result=exit-code
+  code=exited
+fi
+printf '%s: %s failed with status %s; raising the backup alarm\n' "$me" "$unit" "$rc" >&2
+MONITOR_UNIT=$unit MONITOR_SERVICE_RESULT=$result MONITOR_EXIT_CODE=$code MONITOR_EXIT_STATUS=$rc "$alert" --home "$home" ||
+  printf '%s: problem: the alert tool could not raise the alarm; fix: check that %s exists and can be run\n' "$me" "$alert" >&2
+exit "$rc"

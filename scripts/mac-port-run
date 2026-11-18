@@ -1,0 +1,138 @@
+#!/bin/sh
+# mac-port-run: run a fixture script in three bash shapes, the nearest this VM has to a Mac's bash 3.2 (M-1a TOOLING; bob)
+#
+#   mac-port-run <program> [args ...]
+#
+# LIMIT (kai, row efcb10fe), verbatim: catches the known 3.2 differences; NOT the real /bin/bash of a Mac, Apple's 3.2.57 with its own patches; proves nothing about what is not listed
+#
+# <program> must be a script in scripts/mac-port-fixtures/, beside this tool. The runner runs ONLY its own fixtures (cox, row b911a172, condition 2):
+# it never runs deploy/install.sh, deploy/db-roles.sh or any other file, whatever it is given; a path anywhere else is refused with exit 2.
+# The three shapes: `posix` (bash --posix: the nearest to a Mac's /bin/sh, bash 3.2 in POSIX mode), `compat32` (BASH_COMPAT=32) and `posix+compat32`
+# (both). Each shape is exported to the program as MAC_PORT_SHAPE, and reaches a child `sh` too: a private directory with a shim `sh` is put first in
+# PATH for the run and removed at the end (by its exact name). The environment of every bash it starts is CLEAN (env -i, with PATH, HOME, TMPDIR and LC_ALL=C only): the caller's
+# BASH_ENV and ENV startup files, BASHOPTS, GLOBIGNORE, CDPATH and exported functions do not reach a shape (sam M1A-SAM-01). BASH_COMPAT=32 is bash 5.x told to act like 3.2 where its manual documents a switch; it
+# does NOT remove bash 4+ features, so the shapes narrow the difference and do not close it.
+# The program's output (standard output and standard error) is printed under a `== shape <name> ==` line, then `mac-port-run: shape <name>: ok` or
+# `FAILED (exit <n>)`; every shape runs even if one fails.
+# Exit codes: 0 every shape passed; 1 at least one shape failed; 2 a refusal (usage, a program that is not one of the fixtures).
+# Nothing real is called: no launchctl, no systemd tool, no installer file.
+# ENVIRONMENT HYGIENE (hale MP-1): an exported shell function would replace a command of this runner (an exported env would build the "clean room" itself, an exported [ would let a link out of the fixtures directory). Run it with sh, as the first line says:
+# run as bash (not in POSIX mode) an exported unset or set would defeat the block below. Every function the environment brings is unset FIRST: bash exports one as
+# BASH_FUNC_<name>%% (the form of every bash since the Shellshock fix, Apple's 3.2.57 included; a bash older than that exports <name>=() {, which this block does not undo:
+# ASK-A-MAC, and no such bash is on a supported Mac). The listing must WORK: if env or sed failed, every exported function would stay in place, so it refuses.
+unset -f unset command env sed 2> /dev/null || :
+# a PATH with an empty or a relative element would let a command be found in the working directory, and the block below looks env and sed up through the PATH: so this comes
+# FIRST (hale MP-2, M2-1), with case and command printf only (nothing is looked up). ":$PATH:" makes an empty element "::", which this pattern also matches (a colon followed by
+# anything but a slash), so one pattern covers both.
+case ":$PATH:" in
+  *:[!/]*) command printf '%s: problem: PATH has an empty or a relative element, so a command could be found in the working directory; fix: run it with a PATH of absolute directories only (no empty element, no . and no ~)\n' mac-port-run >&2; exit 2 ;;
+esac
+_pass=1
+while :; do
+  _fe=$(command env) || { command printf '%s: problem: cannot list the environment to remove the exported shell functions (env failed); fix: run it with a PATH that has a working env and sed\n' mac-port-run >&2; exit 2; }
+  _fnames=$(command printf '%s\n' "$_fe" | command sed -n -e 's/^BASH_FUNC_\(.*\)%%=.*/\1/p') || { command printf '%s: problem: cannot list the environment to remove the exported shell functions (sed failed); fix: run it with a PATH that has a working env and sed\n' mac-port-run >&2; exit 2; }
+  case $_pass in 2) break ;; esac
+  set -f
+  for _fn in $_fnames; do
+    unset -f "$_fn" 2> /dev/null || :
+  done
+  set +f
+  _pass=2
+done
+# the second listing is what is LEFT: an entry this shell could not import (bash --posix refuses a function named [) cannot be unset, stays in the environment, and every child
+# shell would import it (sam M1A-FU-SAM01): refused. (case, not [, in this block: a [ that was imported must not run before it is removed)
+case $_fnames in
+  '') ;;
+  *)
+    set -f
+    command printf '%s: problem: the environment holds exported shell functions that this shell cannot remove (%s), and a child shell would import them; fix: unset them in the calling shell (unset -f <name>) or start it with sh\n' mac-port-run "$(command printf '%s ' $_fnames)" >&2
+    set +f
+    exit 2
+    ;;
+esac
+unset _fn _fe _fnames _pass
+set -eu
+LC_ALL=C
+export LC_ALL
+
+LIMIT="catches the known 3.2 differences; NOT the real /bin/bash of a Mac, Apple's 3.2.57 with its own patches; proves nothing about what is not listed"
+me=mac-port-run
+
+die() { # die <exit code> <problem> <fix>
+  printf '%s: problem: %s; fix: %s\n' "$me" "$2" "$3" >&2
+  exit "$1"
+}
+
+case ${1:-} in
+  -h | --help)
+    awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"
+    exit 0
+    ;;
+  '') printf '%s: usage: %s <program in scripts/mac-port-fixtures> [args ...]\n' "$me" "$me" >&2; exit 2 ;;
+esac
+
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
+fxdir=$(CDPATH= cd -- "$here/mac-port-fixtures" 2> /dev/null && pwd -P) || die 2 "the fixtures directory $here/mac-port-fixtures does not exist" "run the tool from a complete checkout"
+prog=$1
+shift
+[ -e "$prog" ] || die 2 "the program $prog does not exist" "give one of the scripts in $fxdir"
+[ -f "$prog" ] || die 2 "$prog is not a regular file" "give one of the scripts in $fxdir"
+[ ! -L "$prog" ] || die 2 "$prog is a symbolic link, and this tool never follows one out of its fixtures" "give the script itself, in $fxdir"
+progdir=$(CDPATH= cd -- "$(dirname -- "$prog")" && pwd -P)
+if [ "$progdir" != "$fxdir" ]; then
+  die 2 "$prog is not one of this tool's own fixtures: the runner runs only its own fixtures, never an installer or any other file" "put the script in $fxdir through a reviewed change, or run it yourself"
+fi
+prog=$progdir/$(basename -- "$prog")
+
+bash=$(command -v bash) || die 2 "bash was not found" "install bash"
+# every bash this tool starts gets a CLEAN-ROOM environment (env -i): the caller's BASH_ENV and ENV (a file a non-interactive bash runs first), BASHOPTS,
+# SHELLOPTS, POSIXLY_CORRECT, BASH_COMPAT, GLOBIGNORE, CDPATH and exported functions (BASH_FUNC_...) never reach a shape, the shim or the version query
+bashver=$(env -i PATH="$PATH" "$bash" -c 'printf %s "${BASH_VERSION%%[!0-9.]*}"')
+
+printf '%s\n' "$LIMIT"
+printf 'factual: BASH_COMPAT=32 is bash %s acting like 3.2 where its manual documents a switch; it does not remove bash 4+ features\n' "$bashver"
+
+shim=$(mktemp -d "${TMPDIR:-/tmp}/mac-port-run.XXXXXX") || die 2 "cannot make a temporary directory" "check that the temporary directory is writable"
+cleanup() { # only the shim this run made, by its exact names
+  rm -f -- "$shim/sh"
+  rmdir -- "$shim" 2> /dev/null || true
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+cat > "$shim/sh" <<'SHIM'
+#!/bin/sh
+exec "$MAC_PORT_BASH" ${MAC_PORT_BASH_FLAGS:-} "$@"
+SHIM
+chmod 0755 "$shim/sh"
+
+total=0
+failed=0
+run_shape() { # run_shape <name> <bash flags> <BASH_COMPAT value or empty>
+  _name=$1
+  _flags=$2
+  _compat=$3
+  shift 3
+  total=$((total + 1))
+  printf '== shape %s ==\n' "$_name"
+  _rc=0
+  if [ -n "$_compat" ]; then
+    env -i PATH="$shim:$PATH" HOME="${HOME:-/}" TMPDIR="${TMPDIR:-/tmp}" LC_ALL=C BASH_COMPAT="$_compat" MAC_PORT_SHAPE="$_name" MAC_PORT_BASH="$bash" MAC_PORT_BASH_FLAGS="$_flags" \
+      "$bash" $_flags "$prog" "$@" 2>&1 || _rc=$?
+  else
+    env -i PATH="$shim:$PATH" HOME="${HOME:-/}" TMPDIR="${TMPDIR:-/tmp}" LC_ALL=C MAC_PORT_SHAPE="$_name" MAC_PORT_BASH="$bash" MAC_PORT_BASH_FLAGS="$_flags" \
+      "$bash" $_flags "$prog" "$@" 2>&1 || _rc=$?
+  fi
+  if [ "$_rc" -eq 0 ]; then
+    printf '%s: shape %s: ok\n' "$me" "$_name"
+  else
+    printf '%s: shape %s: FAILED (exit %s)\n' "$me" "$_name" "$_rc"
+    failed=$((failed + 1))
+  fi
+}
+
+run_shape posix --posix "" "$@"
+run_shape compat32 "" 32 "$@"
+run_shape posix+compat32 --posix 32 "$@"
+printf '%s: %s shape(s) run, %s failed\n' "$me" "$total" "$failed"
+[ "$failed" -eq 0 ]

@@ -1,0 +1,357 @@
+[
+ {
+  "id": "PM-01",
+  "design": null,
+  "file": "src/manifest.rs",
+  "old": "if body.len() > MANIFEST_MAX_BYTES {",
+  "new": "if body.len() >= MANIFEST_MAX_BYTES {",
+  "fails": [
+   "up_02_size_cap_is_checked_first_and_at_exactly_one_mib"
+  ],
+  "what": "size cap off by one"
+ },
+ {
+  "id": "PM-02",
+  "design": null,
+  "file": "src/manifest.rs",
+  "old": "if body.len() > MANIFEST_MAX_BYTES {",
+  "new": "if false {",
+  "fails": [
+   "up_02_size_cap_is_checked_first_and_at_exactly_one_mib"
+  ],
+  "what": "size cap removed"
+ },
+ {
+  "id": "PM-03",
+  "design": null,
+  "file": "src/manifest.rs",
+  "old": "top.get(\"schema\").and_then(Value::as_u64) != Some(1)",
+  "new": "top.get(\"schema\").and_then(Value::as_u64).is_none()",
+  "fails": [
+   "up_02_schema_must_be_the_number_1"
+  ],
+  "what": "any numeric schema accepted"
+ },
+ {
+  "id": "M-05",
+  "design": "M-05",
+  "file": "src/manifest.rs",
+  "old": "entries.push(Entry::Usable(Box::new(release_from(index, raw, version)?)));",
+  "new": "match release_from(index, raw, version) {\n            Ok(r) => entries.push(Entry::Usable(Box::new(r))),\n            Err(_) => continue,\n        }",
+  "fails": [
+   "up_02_a_bad_manifest_is_never_partly_used"
+  ],
+  "what": "a release that fails validation is dropped and the rest used"
+ },
+ {
+  "id": "PM-04",
+  "design": null,
+  "file": "src/manifest.rs",
+  "old": "if hex.len() != 64 {",
+  "new": "if hex.len() < 2 {",
+  "fails": [
+   "up_02_every_asset_needs_a_valid_sha256_digest"
+  ],
+  "what": "digest length not checked"
+ },
+ {
+  "id": "PM-05",
+  "design": null,
+  "file": "src/manifest.rs",
+  "old": "b'a'..=b'f' => Some(c - b'a' + 10),",
+  "new": "b'a'..=b'f' => Some(c - b'a' + 10),\n            b'A'..=b'F' => Some(c - b'A' + 10),",
+  "fails": [
+   "up_02_every_asset_needs_a_valid_sha256_digest"
+  ],
+  "what": "uppercase hex accepted"
+ },
+ {
+  "id": "PM-06",
+  "design": null,
+  "file": "src/manifest.rs",
+  "old": "v.as_str()?.strip_prefix(\"sha256:\")?",
+  "new": "v.as_str()?.strip_prefix(\"sha256:\").unwrap_or(v.as_str()?)",
+  "fails": [
+   "up_02_every_asset_needs_a_valid_sha256_digest"
+  ],
+  "what": "the sha256: prefix is optional"
+ },
+ {
+  "id": "PM-07",
+  "design": null,
+  "file": "src/manifest.rs",
+  "old": "if c.modules.is_empty() {",
+  "new": "if false {",
+  "fails": [
+   "up_24_an_empty_list_and_a_non_string_entry_are_refused"
+  ],
+  "what": "empty module list accepted"
+ },
+ {
+  "id": "M-09",
+  "design": "M-09",
+  "file": "src/manifest.rs",
+  "old": "let id = m.as_str().and_then(|s| ModuleId::parse(s).ok());",
+  "new": "let id = m.as_str().and_then(|s| ModuleId::parse(s).ok().or_else(|| ModuleId::parse(\"x\").ok()));",
+  "fails": [
+   "up_24_a_bad_module_id_refuses_the_manifest_and_names_its_position"
+  ],
+  "what": "a bad module id is accepted (replaced)"
+ },
+ {
+  "id": "PM-08",
+  "design": null,
+  "file": "src/manifest.rs",
+  "old": "_ => return Err(ManifestError::MigrationClass { release: index }),",
+  "new": "_ => MigrationClass::Expand,",
+  "fails": [
+   "up_02_migration_class_is_expand_or_contract_only"
+  ],
+  "what": "an unknown migration class counts as expand"
+ },
+ {
+  "id": "PM-09",
+  "design": null,
+  "file": "src/manifest.rs",
+  "old": "#[serde(deny_unknown_fields)]\nstruct RawCortex {",
+  "new": "struct RawCortex {",
+  "fails": [
+   "up_02_the_cortex_object_is_strict_and_versions_are_unique"
+  ],
+  "what": "unknown keys in `cortex` accepted"
+ },
+ {
+  "id": "PM-10",
+  "design": null,
+  "file": "src/manifest.rs",
+  "old": "if !seen.insert(version.clone()) {",
+  "new": "if false && !seen.insert(version.clone()) {",
+  "fails": [
+   "up_02_the_cortex_object_is_strict_and_versions_are_unique"
+  ],
+  "what": "the same version twice accepted"
+ },
+ {
+  "id": "PM-11",
+  "design": null,
+  "file": "src/version.rs",
+  "old": "if s.len() > VERSION_MAX_LEN {",
+  "new": "if false {",
+  "fails": [
+   "up_20_the_length_cap_is_exactly_64"
+  ],
+  "what": "version length cap removed"
+ },
+ {
+  "id": "PM-12",
+  "design": null,
+  "file": "src/version.rs",
+  "old": "if s.len() > VERSION_MAX_LEN {",
+  "new": "if s.len() >= VERSION_MAX_LEN {",
+  "fails": [
+   "up_20_the_length_cap_is_exactly_64"
+  ],
+  "what": "version length cap off by one"
+ },
+ {
+  "id": "PM-14",
+  "design": null,
+  "file": "src/version.rs",
+  "old": "if !v.build.is_empty() {",
+  "new": "if false {",
+  "fails": [
+   "up_20_a_hostile_version_is_refused_and_never_echoed_raw"
+  ],
+  "what": "build metadata accepted"
+ },
+ {
+  "id": "M-07",
+  "design": "M-07",
+  "file": "src/version.rs",
+  "old": "let v = Version::parse(s).map_err(|_| refuse())?;",
+  "new": "let v = Version::parse(&s.split('.').map(|p| { let t = p.trim_start_matches('0'); if t.is_empty() { \"0\" } else { t } }).collect::<Vec<_>>().join(\".\")).map_err(|_| refuse())?;",
+  "fails": [
+   "up_14_a_label_or_a_short_version_is_skipped_with_a_reason",
+   "up_14_asking_for_a_label_with_to_is_refused"
+  ],
+  "what": "leading zeros are stripped, so the label 0.2.001 reads as 0.2.1"
+ },
+ {
+  "id": "M-06",
+  "design": "M-06",
+  "file": "src/choose.rs",
+  "old": "Ordering::Less => return Err(ChooseError::Downgrade),",
+  "new": "Ordering::Less => usable\n                .find(|r| order(&r.version, to) == Ordering::Equal)\n                .ok_or(ChooseError::NotInManifest)?,",
+  "fails": [
+   "up_13_a_downgrade_is_refused_without_rollback"
+  ],
+  "what": "a downgrade is allowed with --to"
+ },
+ {
+  "id": "PM-21",
+  "design": null,
+  "file": "src/choose.rs",
+  "old": "Ordering::Equal => return Ok(Decision::UpToDate),",
+  "new": "Ordering::Equal => return Err(ChooseError::NotInManifest),",
+  "fails": [
+   "up_13_a_downgrade_is_refused_without_rollback"
+  ],
+  "what": "--to the installed version is an error"
+ },
+ {
+  "id": "PM-20",
+  "design": null,
+  "file": "src/choose.rs",
+  "old": ".filter(|r| order(&r.version, &installed.version) == Ordering::Greater)",
+  "new": ".filter(|r| order(&r.version, &installed.version) != Ordering::Less)",
+  "fails": [
+   "up_01_newer_same_and_lower_releases"
+  ],
+  "what": "the installed version counts as newer than itself"
+ },
+ {
+  "id": "PM-19",
+  "design": null,
+  "file": "src/choose.rs",
+  "old": ".max_by(|a, b| order(&a.version, &b.version));",
+  "new": ".min_by(|a, b| order(&a.version, &b.version));",
+  "fails": [
+   "up_01_the_newest_is_picked_by_semver_precedence"
+  ],
+  "what": "the lowest newer release is picked, not the newest"
+ },
+ {
+  "id": "PM-16",
+  "design": null,
+  "file": "src/choose.rs",
+  "old": "&& order(&installed.version, min) == Ordering::Less",
+  "new": "&& order(&installed.version, min) != Ordering::Greater",
+  "fails": [
+   "up_13_below_min_upgrade_from_is_refused_and_the_boundary_is_allowed"
+  ],
+  "what": "min_upgrade_from boundary off by one"
+ },
+ {
+  "id": "PM-17",
+  "design": null,
+  "file": "src/choose.rs",
+  "old": "if let Some(min) = &release.cortex.min_upgrade_from",
+  "new": "if let Some(min) = &None::<Version>",
+  "fails": [
+   "up_13_below_min_upgrade_from_is_refused_and_the_boundary_is_allowed",
+   "up_13_newest_does_not_fall_back_to_an_older_compatible_release"
+  ],
+  "what": "min_upgrade_from ignored"
+ },
+ {
+  "id": "PM-18",
+  "design": null,
+  "file": "src/choose.rs",
+  "old": "if release.cortex.db_image != installed.db_image {",
+  "new": "if false {",
+  "fails": [
+   "up_13_a_different_db_image_is_refused"
+  ],
+  "what": "db_image not compared"
+ },
+ {
+  "id": "PM-23",
+  "design": null,
+  "file": "src/text.rs",
+  "old": "out.extend(c.escape_debug());",
+  "new": "out.push(c);",
+  "fails": [
+   "up_20_a_hostile_version_is_refused_and_never_echoed_raw",
+   "up_20_a_hostile_manifest_version_is_skipped_not_used"
+  ],
+  "what": "control characters are not escaped in messages"
+ },
+ {
+  "id": "PM-24",
+  "design": null,
+  "file": "src/text.rs",
+  "old": "for c in s.chars().take(40) {",
+  "new": "for c in s.chars() {",
+  "fails": [
+   "up_20_a_hostile_version_is_refused_and_never_echoed_raw"
+  ],
+  "what": "the whole outside value is echoed"
+ },
+ {
+  "id": "PM-25",
+  "design": null,
+  "file": "src/version.rs",
+  "fails": [
+   "up_20_a_version_that_ends_in_dot_part_is_refused"
+  ],
+  "what": "a version ending in .part is accepted",
+  "old": "if s.ends_with(\".part\") {",
+  "new": "if false {"
+ },
+ {
+  "id": "PM-26",
+  "design": null,
+  "file": "src/manifest.rs",
+  "fails": [
+   "up_02_the_roles_script_digest_is_read_per_release_and_is_exactly_what_the_release_names"
+  ],
+  "what": "the roles script digest is not read from the manifest",
+  "old": "            roles_script_digest,\n",
+  "new": "            roles_script_digest: Digest([0; 32]),\n"
+ },
+ {
+  "id": "PM-27",
+  "design": null,
+  "file": "src/manifest.rs",
+  "fails": [
+   "up_02_the_roles_script_digest_is_required_and_strict"
+  ],
+  "what": "a missing or bad roles script digest is accepted",
+  "old": "parse_digest(&c.roles_script_digest)\n        .ok_or(ManifestError::RolesScriptDigest { release: index })?;",
+  "new": "parse_digest(&c.roles_script_digest).unwrap_or(Digest([0; 32]));"
+ },
+ {
+  "id": "PM-28",
+  "design": null,
+  "file": "src/manifest.rs",
+  "fails": [
+   "up_02_the_roles_script_digest_is_required_and_strict"
+  ],
+  "what": "the refusal names release 0 whatever the release",
+  "old": "ManifestError::RolesScriptDigest { release: index }",
+  "new": "ManifestError::RolesScriptDigest { release: 0 }"
+ },
+ {
+  "id": "PM-29",
+  "design": null,
+  "file": "src/manifest.rs",
+  "fails": [
+   "up_02_the_roles_script_digest_is_required_and_strict"
+  ],
+  "what": "the refusal reports the asset digest rule",
+  "old": "ManifestError::RolesScriptDigest { .. } => Rule::RolesScriptDigest,",
+  "new": "ManifestError::RolesScriptDigest { .. } => Rule::Digest,"
+ },
+ {
+  "id": "PM-30",
+  "design": null,
+  "file": "src/manifest.rs",
+  "fails": [
+   "up_02_the_roles_script_digest_is_required_and_strict"
+  ],
+  "what": "the message does not name the key",
+  "old": "manifest refused (roles_script_digest): release",
+  "new": "manifest refused (digest): release"
+ },
+ {
+  "id": "PM-31",
+  "design": null,
+  "file": "src/manifest.rs",
+  "fails": [
+   "up_02_the_roles_script_digest_is_required_and_strict"
+  ],
+  "what": "the rule has the asset digest's name",
+  "old": "Rule::RolesScriptDigest => \"roles_script_digest\",",
+  "new": "Rule::RolesScriptDigest => \"digest\","
+ }
+]

@@ -1,0 +1,12 @@
+# The alarm of the backup (piece 12; bob). Started by OnFailure= of cortex-dump.service and cortex-dump-status.service.
+# 0.2.001 (cox W1-42): a journal line, the marker file @CORTEX_HOME@/ALARM, and `backup: stale` in GET /v2/health. WHO IS PAGED is not decided
+# here (cox's open question to kai); this unit rings no one.
+# systemd passes MONITOR_UNIT, MONITOR_SERVICE_RESULT, MONITOR_EXIT_CODE and MONITOR_EXIT_STATUS of the failed unit; the script validates them.
+# A TEMPLATE like cortex-dump.service. It has no OnFailure= of its own: an alarm that fails must not start itself again.
+[Unit]
+Description=Cortex backup alarm (journal line and ALARM marker)
+
+[Service]
+Type=oneshot
+ExecStart=@CORTEX_HOME@/bin/cortex-dump-alert --home @CORTEX_HOME@
+SyslogIdentifier=cortex-dump-alert

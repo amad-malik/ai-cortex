@@ -1,0 +1,7 @@
+error[E0615]: attempted to take value of method `project` on type `Ctx`
+ --> tests/ui/d4b_assign_project_fail.rs:7:7
+  |
+7 |     c.project = ProjectId::new(&SystemClock);
+  |       ^^^^^^^ method, not a field
+  |
+  = help: methods are immutable and cannot be assigned to

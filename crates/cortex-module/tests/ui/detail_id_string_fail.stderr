@@ -1,0 +1,21 @@
+error[E0277]: the trait bound `DetailRef: From<&str>` is not satisfied
+ --> tests/ui/detail_id_string_fail.rs:6:46
+  |
+6 |     let _ = AuditDetails::new().id("worker", "ctx2_not_an_id");
+  |                                 --           ^^^^^^^^^^^^^^^^ the trait `From<&str>` is not implemented for `DetailRef`
+  |                                 |
+  |                                 required by a bound introduced by this call
+  |
+  = help: `DetailRef` implements trait `From<T>`:
+            From<cortex_types::ids::HandoffId>
+            From<cortex_types::ids::ProjectId>
+            From<cortex_types::ids::RecordId>
+            From<cortex_types::ids::TeamId>
+            From<cortex_types::ids::TokenId>
+            From<cortex_types::ids::WorkerId>
+  = note: required for `&str` to implement `Into<DetailRef>`
+note: required by a bound in `AuditDetails::id`
+ --> src/ports.rs
+  |
+  |     pub fn id(self, key: &'static str, v: impl Into<DetailRef>) -> Result<Self, PortError> {
+  |                                                ^^^^^^^^^^^^^^^ required by this bound in `AuditDetails::id`

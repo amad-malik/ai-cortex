@@ -1,0 +1,7 @@
+[package]
+name = "a"
+version = "0.1.0"
+[dependencies]
+serde_ignored = "0.1.14"
+[dev-dependencies]
+serde_ignored = { workspace = true }

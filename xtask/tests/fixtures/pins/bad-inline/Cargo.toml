@@ -1,0 +1,2 @@
+[workspace.dependencies]
+serde_ignored = { version = "0.1", features = ["x"] }

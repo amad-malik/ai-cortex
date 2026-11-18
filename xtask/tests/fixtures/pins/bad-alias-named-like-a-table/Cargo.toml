@@ -1,0 +1,3 @@
+[dependencies.dependencies]
+package = "serde_ignored"
+version = "0.1"

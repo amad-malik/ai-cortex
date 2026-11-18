@@ -1,0 +1,5 @@
+{"target": "scripts/shell-mutants-fixtures/target.sh", "command": ["sh", "{copy}", "--selftest"], "kill_marker": "GATE LOGIC WRONG",
+ "mutants": [
+  {"id": "FX-1", "what": "a logic fault the self-test reports", "old": "-gt 5", "new": "-gt 50"},
+  {"id": "FX-4", "what": "the other branch", "old": "echo small", "new": "echo tiny"}
+ ]}

@@ -1,0 +1,1306 @@
+[
+ {
+  "id": "IMM-001",
+  "file": "install-mac.sh",
+  "what": "the GNU tool check is not run by --check",
+  "old": "  gnu_seams_arm\n  exit 0",
+  "new": "  exit 0",
+  "fails": [
+   "IT-M10"
+  ]
+ },
+ {
+  "id": "IMM-002",
+  "file": "install-mac.sh",
+  "what": "a tool that does not say GNU is accepted (a BSD tool behind a GNU-flag seam)",
+  "old": "case $gs_v in *GNU*) ;; *) stop",
+  "new": "case $gs_v in *) ;; *) stop",
+  "fails": [
+   "IT-M10"
+  ]
+ },
+ {
+  "id": "IMM-003",
+  "file": "install-mac.sh",
+  "what": "a missing GNU tool is not refused",
+  "old": "gnu_find_tool \"$gs_t\" || stop \"$EX_PREREQ\" gnu_tool_missing \"$gs_t\" \"the GNU tool $gs_t is not in $MAC_GNU_DIRS\"",
+  "new": "gnu_find_tool \"$gs_t\" || continue",
+  "fails": [
+   "IT-M10"
+  ]
+ },
+ {
+  "id": "IMM-004",
+  "file": "install-mac.sh",
+  "what": "the environment can name the GNU directories",
+  "old": "MAC_GNU_DIRS='/opt/homebrew/bin /usr/local/bin'",
+  "new": "MAC_GNU_DIRS=${MAC_GNU_DIRS:-'/opt/homebrew/bin /usr/local/bin'}",
+  "fails": [
+   "IT-M10"
+  ]
+ },
+ {
+  "id": "IMM-005",
+  "file": "install-mac.sh",
+  "what": "a tool is looked up on PATH too (never PATH)",
+  "old": "  for gt_d in $MAC_GNU_DIRS; do",
+  "new": "  for gt_d in $MAC_GNU_DIRS $(printf '%s' \"$PATH\" | tr ':' ' '); do",
+  "fails": [
+   "IT-M10"
+  ]
+ },
+ {
+  "id": "IMM-006",
+  "file": "install-mac.sh",
+  "what": "the tar seam takes TAR_OPTIONS from the environment",
+  "old": "rel_tool_tar() { [ -z \"${TAR_OPTIONS+x}\" ] || return 1; \"$mg_tar\" \"$@\"; }",
+  "new": "rel_tool_tar() { \"$mg_tar\" \"$@\"; }",
+  "fails": [
+   "IT-M10f"
+  ]
+ },
+ {
+  "id": "IMM-007",
+  "file": "install-mac.sh",
+  "what": "the find seam runs the stat tool",
+  "old": "rel_tool_find() { \"$mg_find\" \"$@\"; }",
+  "new": "rel_tool_find() { \"$mg_stat\" \"$@\"; }",
+  "fails": [
+   "IT-M10f"
+  ]
+ },
+ {
+  "id": "IMM-008",
+  "file": "install-mac.sh",
+  "what": "the sha256sum seam is found on PATH",
+  "old": "rel_tool_sha256sum() { \"$mg_sha\" \"$@\"; }",
+  "new": "rel_tool_sha256sum() { sha256sum \"$@\"; }",
+  "fails": [
+   "IT-M10f"
+  ]
+ },
+ {
+  "id": "IMM-009",
+  "file": "install-mac.sh",
+  "what": "the seams are not armed before the finished check and the fetch",
+  "old": "if command -v rel_fetch >/dev/null 2>&1; then gnu_seams_arm; fi",
+  "new": ":",
+  "fails": [
+   "IT-M10"
+  ]
+ },
+ {
+  "id": "IMM-010",
+  "file": "install-mac.sh",
+  "what": "the mv seam runs the ln tool",
+  "old": "rel_tool_mv() { \"$mg_mv\" \"$@\"; }",
+  "new": "rel_tool_mv() { \"$mg_ln\" \"$@\"; }",
+  "fails": [
+   "IT-M10f"
+  ]
+ },
+ {
+  "id": "IMM-011",
+  "file": "install-mac.sh",
+  "what": "the stat seam runs the mv tool",
+  "old": "rel_tool_stat() { \"$mg_stat\" \"$@\"; }",
+  "new": "rel_tool_stat() { \"$mg_mv\" \"$@\"; }",
+  "fails": [
+   "IT-M10f"
+  ]
+ },
+ {
+  "id": "IMM-020",
+  "file": "install-prereq.sh",
+  "what": "Docker Desktop not running is not refused",
+  "old": "|| stop \"$EX_PREREQ\" docker_down \"\" \"Docker Desktop is not running\"",
+  "new": "|| pl_info=\"\"",
+  "fails": [
+   "IT-M01"
+  ]
+ },
+ {
+  "id": "IMM-021",
+  "file": "install-prereq.sh",
+  "what": "docker compose version 1 is accepted",
+  "old": "if [ \"$pl_maj\" -lt \"$MAC_COMPOSE_FLOOR_MAJOR\" ]; then pl_below=1",
+  "new": "if [ \"$pl_maj\" -gt \"$MAC_COMPOSE_FLOOR_MAJOR\" ]; then pl_below=1",
+  "fails": [
+   "IT-M01",
+   "IT-M01c"
+  ]
+ },
+ {
+  "id": "IMM-022",
+  "file": "install-prereq.sh",
+  "what": "the memory floor is not enforced",
+  "old": "[ \"$pl_mib\" -ge \"$MAC_MEM_FLOOR_MIB\" ] ||",
+  "new": "[ \"$pl_mib\" -ge 0 ] ||",
+  "fails": [
+   "IT-M01"
+  ]
+ },
+ {
+  "id": "IMM-023",
+  "file": "install-prereq.sh",
+  "what": "a home outside the shared folders is accepted",
+  "old": "case $home_dir in /Users/*|/Volumes/*|/private/*|/tmp/*|/var/folders/*) ;; *) stop",
+  "new": "case $home_dir in *) ;; *) stop",
+  "fails": [
+   "IT-M03"
+  ]
+ },
+ {
+  "id": "IMM-024",
+  "file": "install-prereq.sh",
+  "what": "the home refusal has the prerequisite exit code",
+  "old": "stop \"$EX_MACHINE\" home_not_shared",
+  "new": "stop \"$EX_PREREQ\" home_not_shared",
+  "fails": [
+   "IT-M03"
+  ]
+ },
+ {
+  "id": "IMM-025",
+  "file": "install-prereq.sh",
+  "what": "no docker command is not refused as a missing install",
+  "old": "[ -n \"$DOCKER_BIN\" ] || stop \"$EX_PREREQ\" docker_missing \"\" \"Docker Desktop is not installed\"",
+  "new": ":",
+  "fails": [
+   "IT-M01"
+  ]
+ },
+ {
+  "id": "IMM-026",
+  "file": "install-prereq.sh",
+  "what": "a compose that cannot be run is not refused",
+  "old": "|| stop \"$EX_PREREQ\" compose_missing \"\" \"docker compose is not available\"",
+  "new": "|| pl_cv=\"Docker Compose version v2.29.1\"",
+  "fails": [
+   "IT-M01"
+  ]
+ },
+ {
+  "id": "IMM-027",
+  "file": "install-prereq.sh",
+  "what": "an unreadable memory line is not refused",
+  "old": "case $pl_mib in \"\"|-*|*[!0123456789]*) stop",
+  "new": "case $pl_mib in \"\"|-*|*[!0123456789]*) pl_mib=99999; : stop",
+  "fails": [
+   "IT-M01"
+  ]
+ },
+ {
+  "id": "IMM-030",
+  "file": "install-mac.sh",
+  "what": "compose is called with the override first",
+  "old": "-f \"$rel_dir/compose.yml\" -f \"$rel_dir/docker/compose.docker.yml\" \"$@\"",
+  "new": "-f \"$rel_dir/docker/compose.docker.yml\" -f \"$rel_dir/compose.yml\" \"$@\"",
+  "fails": [
+   "IT-M05"
+  ]
+ },
+ {
+  "id": "IMM-031",
+  "file": "install-mac.sh",
+  "what": "compose is called without the Docker override",
+  "old": "-f \"$rel_dir/compose.yml\" -f \"$rel_dir/docker/compose.docker.yml\" \"$@\"",
+  "new": "-f \"$rel_dir/compose.yml\" \"$@\"",
+  "fails": [
+   "IT-M05"
+  ]
+ },
+ {
+  "id": "IMM-032",
+  "file": "install-mac.sh",
+  "what": "the rendering gate never runs the lint (the flag is dropped even where python3 is usable)",
+  "old": "\"$rel_dir/docker/compose.docker.yml\" $render_lint >/dev/null",
+  "new": "\"$rel_dir/docker/compose.docker.yml\" >/dev/null",
+  "fails": [
+   "IT-M05"
+  ]
+ },
+ {
+  "id": "IMM-033",
+  "file": "install-mac.sh",
+  "what": "a failing rendering gate does not stop the install",
+  "old": "$render_lint >/dev/null || stop \"$EX_START\" render_failed \"\" \"the Docker Desktop configuration failed its own check (see the output above); nothing was started\"",
+  "new": "$render_lint >/dev/null || :",
+  "fails": [
+   "IT-M05"
+  ]
+ },
+ {
+  "id": "IMM-034",
+  "file": "install-mac.sh",
+  "what": "the rendering gate runs twice",
+  "old": "compose_run up -d db || stop",
+  "new": "\"$here/../scripts/docker-compose-render\" --base \"$rel_dir/compose.yml\" --override \"$rel_dir/docker/compose.docker.yml\" --lint >/dev/null; compose_run up -d db || stop",
+  "fails": [
+   "IT-M05"
+  ]
+ },
+ {
+  "id": "IMM-035",
+  "file": "install-mac.sh",
+  "what": "the image is built on a Mac",
+  "old": "up_ok=1\n",
+  "new": "up_ok=1; compose_run build server || :\n",
+  "fails": [
+   "IT-M06"
+  ]
+ },
+ {
+  "id": "IMM-036",
+  "file": "install-mac.sh",
+  "what": "the stack.env images are not exported to compose",
+  "old": "export CORTEX_VERSION CORTEX_SERVER_IMAGE CORTEX_DB_IMAGE",
+  "new": "export CORTEX_VERSION CORTEX_DB_IMAGE",
+  "fails": [
+   "IT-M06"
+  ]
+ },
+ {
+  "id": "IMM-037",
+  "file": "install-mac.sh",
+  "what": "CORTEX_SECRETS_DIR is not exported to compose",
+  "old": "CORTEX_SECRETS_DIR=$secrets_dir; export CORTEX_SECRETS_DIR",
+  "new": "CORTEX_SECRETS_DIR=$secrets_dir",
+  "fails": [
+   "IT-M06"
+  ]
+ },
+ {
+  "id": "IMM-040",
+  "file": "install-mac.sh",
+  "what": "the secrets directory is made 0755",
+  "old": "{ mkdir \"$secrets_dir\" && chmod 0700 \"$secrets_dir\"; }",
+  "new": "{ mkdir \"$secrets_dir\" && chmod 0755 \"$secrets_dir\"; }",
+  "fails": [
+   "IT-M04"
+  ]
+ },
+ {
+  "id": "IMM-041",
+  "file": "install-mac.sh",
+  "what": "a second run replaces a secret",
+  "old": "  if [ -e \"$ms_f\" ] || [ -L \"$ms_f\" ]; then",
+  "new": "  if false; then",
+  "fails": [
+   "IT-M04"
+  ]
+ },
+ {
+  "id": "IMM-042",
+  "file": "install-mac.sh",
+  "what": "a secret is 32 hex characters",
+  "old": "head -c 32 /dev/urandom",
+  "new": "head -c 16 /dev/urandom",
+  "fails": [
+   "IT-M04"
+  ]
+ },
+ {
+  "id": "IMM-043",
+  "file": "install-mac.sh",
+  "what": "the secret files have another mode than ruled",
+  "old": "SECRET_FILE_MODE=444",
+  "new": "SECRET_FILE_MODE=644",
+  "fails": [
+   "IT-M04"
+  ]
+ },
+ {
+  "id": "IMM-044",
+  "file": "install-mac.sh",
+  "what": "a secret is printed",
+  "old": "{ printf '%s' \"$val\" > \"$ms_f.new\"",
+  "new": "{ printf '%s\\n' \"$val\"; printf '%s' \"$val\" > \"$ms_f.new\"",
+  "fails": [
+   "IT-M04"
+  ]
+ },
+ {
+  "id": "IMM-045",
+  "file": "install-mac.sh",
+  "what": "an existing secret is not checked for hex characters",
+  "old": "case $ms_v in \"\"|*[!0123456789abcdef]*) ms_v=\"\"; stop",
+  "new": "case $ms_v in \"\") ms_v=\"\"; stop",
+  "fails": [
+   "IT-M04"
+  ]
+ },
+ {
+  "id": "IMM-050",
+  "file": "install-mac.sh",
+  "what": "a failing removal of the token copy is silent",
+  "old": "|| warn \"the temporary copy of the token in the server container could not be removed (it lasts only as long as the container)\"",
+  "new": "|| :",
+  "fails": [
+   "IT-M07"
+  ]
+ },
+ {
+  "id": "IMM-051",
+  "file": "install-mac.sh",
+  "what": "the token file is made mode 644",
+  "old": "chmod 600 \"$part\" ||",
+  "new": "chmod 644 \"$part\" ||",
+  "fails": [
+   "IT-M15"
+  ]
+ },
+ {
+  "id": "IMM-052",
+  "file": "install-mac.sh",
+  "what": "a reissue may create a project (no --require-existing)",
+  "old": "--token-file \"$token_in_container\" --require-existing",
+  "new": "--token-file \"$token_in_container\"",
+  "fails": [
+   "IT-M15"
+  ]
+ },
+ {
+  "id": "IMM-053",
+  "file": "install-mac.sh",
+  "what": "the pre-clean removes another path than the token copy",
+  "old": "docker exec cv2-s5-server rm -f \"$token_in_container\" >/dev/null 2>&1 || true",
+  "new": "docker exec cv2-s5-server rm -f /run/cortex/other.token >/dev/null 2>&1 || true",
+  "fails": [
+   "IT-M07"
+  ]
+ },
+ {
+  "id": "IMM-060",
+  "file": "install-mac.sh",
+  "what": "a launchd refusal does not end the install (u2 by default)",
+  "old": "|| stop \"$EX_BACKUP\" launchd_failed \"\" \"the launchd backup agents could not be installed (see the message above)\"",
+  "new": "|| :",
+  "fails": [
+   "IT-M08"
+  ]
+ },
+ {
+  "id": "IMM-061",
+  "file": "install-mac.sh",
+  "what": "the u2 flag can be turned OFF from the environment (without_backups=0 reaches the launchd step)",
+  "old": "reissue=0 without_backups=1   # u2 BY DEFAULT",
+  "new": "reissue=0 without_backups=${without_backups:-1}   # u2 BY DEFAULT",
+  "fails": [
+   "IT-M08b"
+  ]
+ },
+ {
+  "id": "IMM-062",
+  "file": "install-mac.sh",
+  "what": "the launchd tool gets the wrong home",
+  "old": "install --home \"$home_dir\" --db-container cv2-s5-db",
+  "new": "install --home \"$HOME\" --db-container cv2-s5-db",
+  "fails": [
+   "IT-M08"
+  ]
+ },
+ {
+  "id": "IMM-063",
+  "file": "install-mac.sh",
+  "what": "the u2 warning is missing",
+  "old": "  warn \"the backups are NOT scheduled: no automatic backup exists on the Mac in this release (the backup tools are not available for macOS yet), so the launchd step was skipped; back your data up yourself\"",
+  "new": "  :",
+  "fails": [
+   "IT-M08b"
+  ]
+ },
+ {
+  "id": "IMM-064",
+  "file": "install-mac.sh",
+  "what": "the closing lines of a u2 run do not say so",
+  "old": "[ \"$without_backups\" -eq 0 ] || echo \"install: the backups are NOT scheduled: no automatic backup exists on the Mac in this release; back your data up yourself\"",
+  "new": ":",
+  "fails": [
+   "IT-M08b"
+  ]
+ },
+ {
+  "id": "IMM-065",
+  "file": "install-mac.sh",
+  "what": "the flag does not skip the launchd tool",
+  "old": "if [ \"$without_backups\" -eq 1 ]; then",
+  "new": "if false; then",
+  "fails": [
+   "IT-M08b"
+  ]
+ },
+ {
+  "id": "IMM-066",
+  "file": "install-mac.sh",
+  "what": "launchd-run is not installed into the home",
+  "old": "if [ \"$without_backups\" -eq 0 ]; then\n  lr_src=",
+  "new": "if false; then\n  lr_src=",
+  "fails": [
+   "IT-M08"
+  ]
+ },
+ {
+  "id": "IMM-070",
+  "file": "install-mac.sh",
+  "what": "an unknown option has another exit code",
+  "old": "*) die \"unknown argument: $1 (try --help)\" ;;",
+  "new": "*) fail 9 \"unknown argument: $1 (try --help)\" ;;",
+  "fails": [
+   "IT-M09"
+  ]
+ },
+ {
+  "id": "IMM-071",
+  "file": "install-mac.sh",
+  "what": "missing --project or --lead has another exit code",
+  "old": "die \"--project and --lead are required (try --help)\"",
+  "new": "fail 9 \"--project and --lead are required (try --help)\"",
+  "fails": [
+   "IT-M09"
+  ]
+ },
+ {
+  "id": "IMM-072",
+  "file": "install-mac.sh",
+  "what": "a relative --home has another exit code",
+  "old": "die \"--home must be an absolute path\"",
+  "new": "fail 9 \"--home must be an absolute path\"",
+  "fails": [
+   "IT-M11"
+  ]
+ },
+ {
+  "id": "IMM-075",
+  "file": "install-mac.sh",
+  "what": "a home that is a link is followed",
+  "old": "[ ! -L \"$home_dir\" ] || stop \"$EX_MACHINE\" home_not_real \"$home_dir\" \"$home_dir is a symbolic link; it must be a real directory\"",
+  "new": ":",
+  "fails": [
+   "IT-M03b"
+  ]
+ },
+ {
+  "id": "IMM-076",
+  "file": "install-mac.sh",
+  "what": "a home that belongs to someone else is accepted",
+  "old": "[ ! -d \"$home_dir\" ] || [ -O \"$home_dir\" ] || stop",
+  "new": "[ ! -d \"$home_dir\" ] || true || stop",
+  "fails": [
+   "IT-M03b"
+  ]
+ },
+ {
+  "id": "IMM-080",
+  "file": "install-mac.sh",
+  "what": "the helper directory is not removed on every exit",
+  "old": "    case ${shim_made##*/} in .cortex-install-shim.????????) { [ -d \"$shim_made\" ] && [ ! -L \"$shim_made\" ]; } && rm -rf -- \"$shim_made\" || : ;; esac",
+  "new": "    :",
+  "fails": [
+   "IT-M06b"
+  ]
+ },
+ {
+  "id": "IMM-081",
+  "file": "install-mac.sh",
+  "what": "the roles script runs without the podman helper",
+  "old": "PATH=\"$shim_made:$SAFE_PATH\" sh \"$rel_dir/db-roles.sh\"",
+  "new": "sh \"$rel_dir/db-roles.sh\"",
+  "fails": [
+   "IT-M06b"
+  ]
+ },
+ {
+  "id": "IMM-082",
+  "file": "install-mac.sh",
+  "what": "a database with trust rules is accepted",
+  "old": "[ \"$trust_rules\" -eq 0 ] || stop \"$EX_START\" db_trust",
+  "new": "[ \"$trust_rules\" -ge 0 ] || stop \"$EX_START\" db_trust",
+  "fails": [
+   "IT-M14"
+  ]
+ },
+ {
+  "id": "IMM-083",
+  "file": "install-mac.sh",
+  "what": "an install is never finished",
+  "old": "  inf_uid=$(id -u) || return 1",
+  "new": "  return 1",
+  "fails": [
+   "IT-M13"
+  ]
+ },
+ {
+  "id": "IMM-084",
+  "file": "install-mac.sh",
+  "what": "the finished check ignores the launchd status",
+  "old": "    \"$here/../scripts/launchd-backup\" status >/dev/null 2>&1 || return 1",
+  "new": "    :",
+  "fails": [
+   "IT-M13"
+  ]
+ },
+ {
+  "id": "IMM-085",
+  "file": "install-mac.sh",
+  "what": "the finished check reads r-- as 5 (mode_of)",
+  "old": "r--) mo_d=4",
+  "new": "r--) mo_d=5",
+  "fails": [
+   "IT-M13"
+  ]
+ },
+ {
+  "id": "IMM-086",
+  "file": "install-mac.sh",
+  "what": "the finished check accepts any secret mode",
+  "old": "[ \"$(mode_of \"$inf_f\")\" = \"$SECRET_FILE_MODE\" ]; } || return 1",
+  "new": "true; } || return 1",
+  "fails": [
+   "IT-M13"
+  ]
+ },
+ {
+  "id": "IMM-090",
+  "file": "install-mac.sh",
+  "what": "a world-writable GNU tool, link target or directory is accepted",
+  "old": "case ${gtu_m#??} in 2|3|6|7) stop",
+  "new": "case ${gtu_m#??} in 2|3|6|7) : stop",
+  "fails": [
+   "IT-M10g"
+  ]
+ },
+ {
+  "id": "IMM-091",
+  "file": "install-mac.sh",
+  "what": "the owner of a GNU tool is not looked at",
+  "old": "{ [ \"$gtu_u\" = 0 ] || [ \"$gtu_u\" = \"$gtu_me\" ]; } || stop",
+  "new": "{ true; } || stop",
+  "fails": [
+   "IT-M10g"
+  ]
+ },
+ {
+  "id": "IMM-092",
+  "file": "install-mac.sh",
+  "what": "a GNU tool owned by root is refused",
+  "old": "{ [ \"$gtu_u\" = 0 ] || [ \"$gtu_u\" = \"$gtu_me\" ]; } || stop",
+  "new": "{ [ \"$gtu_u\" = \"$gtu_me\" ]; } || stop",
+  "fails": [
+   "IT-M10g"
+  ]
+ },
+ {
+  "id": "IMM-093",
+  "file": "install-mac.sh",
+  "what": "a GROUP-writable GNU tool is refused (Homebrew normal state)",
+  "old": "case ${gtu_m#??} in 2|3|6|7) stop \"$EX_PREREQ\" gnu_tool_unsafe \"$gtu_t: $gtu_p is writable by everyone\"",
+  "new": "case $gtu_m in ?[2367]?|??[2367]) stop \"$EX_PREREQ\" gnu_tool_unsafe \"$gtu_t: $gtu_p is writable by everyone\"",
+  "fails": [
+   "IT-M10g"
+  ]
+ },
+ {
+  "id": "IMM-094",
+  "file": "install-mac.sh",
+  "what": "a symbolic link is not resolved to its real file",
+  "old": "  gtu_real=$(gnu_resolve \"$gtu_f\") ||",
+  "new": "  gtu_real=$(printf '%s\\n' \"$gtu_f\") ||",
+  "fails": [
+   "IT-M10g"
+  ]
+ },
+ {
+  "id": "IMM-095",
+  "file": "install-mac.sh",
+  "what": "the physical directory of the real file is not looked at",
+  "old": "for gtu_p in \"${gtu_f%/*}\" \"$gtu_real\" \"$gtu_rd\"; do",
+  "new": "for gtu_p in \"${gtu_f%/*}\" \"$gtu_real\"; do",
+  "fails": [
+   "IT-M10g"
+  ]
+ },
+ {
+  "id": "IMM-096",
+  "file": "install-mac.sh",
+  "what": "the configured directory (the link directory) is not looked at",
+  "old": "for gtu_p in \"${gtu_f%/*}\" \"$gtu_real\" \"$gtu_rd\"; do",
+  "new": "for gtu_p in \"$gtu_real\" \"$gtu_rd\"; do",
+  "fails": [
+   "IT-M10g"
+  ]
+ },
+ {
+  "id": "IMM-097",
+  "file": "install-mac.sh",
+  "what": "a path that cannot be inspected is accepted",
+  "old": "gtu_s=$(\"$MAC_STAT\" -f '%u %Lp' -- \"$gtu_p\" 2>/dev/null) || stop \"$EX_PREREQ\" gnu_tool_unsafe \"$gtu_t: $gtu_p could not be inspected\" \"the GNU tool $gtu_t is not trusted\"",
+  "new": "gtu_s=$(\"$MAC_STAT\" -f '%u %Lp' -- \"$gtu_p\" 2>/dev/null) || gtu_s=\"0 755\"",
+  "fails": [
+   "IT-M10g"
+  ]
+ },
+ {
+  "id": "IMM-098",
+  "file": "install-mac.sh",
+  "what": "a GNU tool is RUN (--version) before it is judged",
+  "old": "    gnu_trust_ok \"$gs_t\" \"$gt_path\"\n    gs_v=$(\"$gt_path\" --version 2>/dev/null | sed -n 1p) || gs_v=\"\"",
+  "new": "    gs_v=$(\"$gt_path\" --version 2>/dev/null | sed -n 1p) || gs_v=\"\"\n    gnu_trust_ok \"$gs_t\" \"$gt_path\"",
+  "fails": [
+   "IT-M10g"
+  ]
+ },
+ {
+  "id": "IMM-099",
+  "file": "install-mac.sh",
+  "what": "the environment can name the stat tool",
+  "old": "MAC_STAT='/usr/bin/stat'",
+  "new": "MAC_STAT=${MAC_STAT:-'/usr/bin/stat'}",
+  "fails": [
+   "IT-M10g"
+  ]
+ },
+ {
+  "id": "IMM-100",
+  "file": "install-mac.sh",
+  "what": "the include is absent and a release install does not refuse early",
+  "old": "{ [ \"$release_given\" -eq 1 ] || [ \"$from_given\" -eq 1 ] || [ \"$base_given\" -eq 1 ]; } && ! command -v rel_fetch",
+  "new": "{ false; } && ! command -v rel_fetch",
+  "fails": [
+   "IT-M16"
+  ]
+ },
+ {
+  "id": "IMM-101",
+  "file": "install-mac.sh",
+  "what": "only --release counts (--from and --base-url fall through without a fetch file)",
+  "old": "|| [ \"$from_given\" -eq 1 ] || [ \"$base_given\" -eq 1 ]; } && ! command -v rel_fetch",
+  "new": "; } && ! command -v rel_fetch",
+  "fails": [
+   "IT-M16"
+  ]
+ },
+ {
+  "id": "IMM-102",
+  "file": "install-mac.sh",
+  "what": "the refusal has the fetch exit code, not the trust one",
+  "old": "stop \"$EX_TRUST\" trust_missing \"\" \"a release was asked for",
+  "new": "stop \"$EX_FETCH\" trust_missing \"\" \"a release was asked for",
+  "fails": [
+   "IT-M16"
+  ]
+ },
+ {
+  "id": "IMM-103",
+  "file": "install-mac.sh",
+  "what": "the roles step does not make the platform role",
+  "old": "$modules $roles_platform || stop \"$EX_START\" roles_failed",
+  "new": "$modules || stop \"$EX_START\" roles_failed",
+  "fails": [
+   "IT-M06b"
+  ]
+ },
+ {
+  "id": "IMM-104",
+  "file": "install-mac.sh",
+  "what": "the platform role is made under another name",
+  "old": "roles_platform=platform\n# shellcheck disable=SC2086",
+  "new": "roles_platform=platforms\n# shellcheck disable=SC2086",
+  "fails": [
+   "IT-M06b"
+  ]
+ },
+ {
+  "id": "IMM-105",
+  "file": "install-mac.sh",
+  "what": "a finished install calls say_done without the install log value",
+  "old": "\"$home_dir/$lead.token\" \"${CORTEX_LOG:-none}\" || :",
+  "new": "\"$home_dir/$lead.token\" || :",
+  "fails": [
+   "IT-M17"
+  ]
+ },
+ {
+  "id": "IMM-106",
+  "file": "install-mac.sh",
+  "what": "the end of an install calls say_done without the install log value",
+  "old": "\"$token\" \"${CORTEX_LOG:-none}\" || :",
+  "new": "\"$token\" || :",
+  "fails": [
+   "IT-M17"
+  ]
+ },
+ {
+  "id": "IMM-107",
+  "file": "install-mac.sh",
+  "what": "the end of an install gives an EMPTY install log value when CORTEX_LOG is not set",
+  "old": "\"$token\" \"${CORTEX_LOG:-none}\" || :",
+  "new": "\"$token\" \"${CORTEX_LOG:-}\" || :",
+  "fails": [
+   "IT-M17"
+  ]
+ },
+ {
+  "id": "IMM-108",
+  "file": "install-mac.sh",
+  "what": "a finished install gives an EMPTY install log value when CORTEX_LOG is not set",
+  "old": "\"$home_dir/$lead.token\" \"${CORTEX_LOG:-none}\" || :",
+  "new": "\"$home_dir/$lead.token\" \"${CORTEX_LOG:-}\" || :",
+  "fails": [
+   "IT-M17"
+  ]
+ },
+ {
+  "id": "IMM-109",
+  "file": "install-mac.sh",
+  "what": "the end of an install ignores CORTEX_LOG (always none)",
+  "old": "\"$token\" \"${CORTEX_LOG:-none}\" || :",
+  "new": "\"$token\" none || :",
+  "fails": [
+   "IT-M17"
+  ]
+ },
+ {
+  "id": "IMM-110",
+  "file": "install-mac.sh",
+  "what": "a finished install ignores CORTEX_LOG (always none)",
+  "old": "\"$home_dir/$lead.token\" \"${CORTEX_LOG:-none}\" || :",
+  "new": "\"$home_dir/$lead.token\" none || :",
+  "fails": [
+   "IT-M17"
+  ]
+ },
+ {
+  "id": "IMM-111",
+  "file": "install-mac.sh",
+  "what": "the --project refusal names the lead option",
+  "old": "stop \"$EX_USAGE\" bad_name project ",
+  "new": "stop \"$EX_USAGE\" bad_name lead ",
+  "fails": [
+   "IT-M19"
+  ]
+ },
+ {
+  "id": "IMM-112",
+  "file": "install-mac.sh",
+  "what": "the --lead refusal names the project option",
+  "old": "stop \"$EX_USAGE\" bad_name lead ",
+  "new": "stop \"$EX_USAGE\" bad_name project ",
+  "fails": [
+   "IT-M19"
+  ]
+ },
+ {
+  "id": "IMM-113",
+  "file": "install-mac.sh",
+  "what": "the name cause does not say the rule in words",
+  "old": "it must start with a small letter, then only small letters, digits and hyphens, 32 characters at most\"; m_fix=",
+  "new": "it must be a valid name\"; m_fix=",
+  "fails": [
+   "IT-M19"
+  ]
+ },
+ {
+  "id": "IMM-114",
+  "file": "install-mac.sh",
+  "what": "the last line of the --project refusal is the bare pattern again",
+  "old": "stop \"$EX_USAGE\" bad_name project \"--project must start with a small letter, then only small letters, digits and hyphens, 32 characters at most; use such a name\"",
+  "new": "stop \"$EX_USAGE\" bad_name project \"--project must match [a-z][a-z0-9-]{0,31}\"",
+  "fails": [
+   "IT-M19"
+  ]
+ },
+ {
+  "id": "IMM-115",
+  "file": "install-mac.sh",
+  "what": "the label home_not_real of the Mac table is home_unsafe again (the id of another lane's table)",
+  "old": "    home_not_real) m_cause=",
+  "new": "    home_unsafe) m_cause=",
+  "fails": [
+   "IT-M21"
+  ]
+ },
+ {
+  "id": "IMM-116",
+  "file": "install-mac.sh",
+  "what": "the label anchor_unusable of the Mac table is trust_key again (the id of another lane's table)",
+  "old": "    anchor_unusable) m_cause=",
+  "new": "    trust_key) m_cause=",
+  "fails": [
+   "IT-M21"
+  ]
+ },
+ {
+  "id": "IMM-117",
+  "file": "install-mac.sh",
+  "what": "the label docker_not_found of the Mac table is docker_missing again (the id of the prerequisite table)",
+  "old": "    docker_not_found) m_cause=",
+  "new": "    docker_missing) m_cause=",
+  "fails": [
+   "IT-M21"
+  ]
+ },
+ {
+  "id": "IMM-118",
+  "file": "install-mac.sh",
+  "what": "the token_failed cause claims nothing was written again",
+  "old": "; no sign-in file was written\"; m_fix=\"read docker logs cv2-s5-server",
+  "new": "; nothing was written\"; m_fix=\"read docker logs cv2-s5-server",
+  "fails": [
+   "IT-M20"
+  ]
+ },
+ {
+  "id": "IMM-119",
+  "file": "install-mac.sh",
+  "what": "the unreadable-rules line is the old bare sentence",
+  "old": "die \"could not read the database's access rules: check docker logs cv2-s5-db, then run this installer again (that is safe); this refusal did not touch the database's rules, data or volume, and what the installer has made so far stays in place\"",
+  "new": "die \"could not read the effective pg_hba rules from the database\"",
+  "fails": [
+   "IT-M20"
+  ]
+ },
+ {
+  "id": "IMM-120",
+  "file": "install-mac.sh",
+  "what": "the not-a-number line claims nothing was changed again",
+  "old": "(got: $(printf '%.20s' \"$trust_rules\")): check docker logs cv2-s5-db, then run this installer again (that is safe); this refusal did not touch the database's rules, data or volume, and what the installer has made so far stays in place\" ;; esac",
+  "new": "(got: $(printf '%.20s' \"$trust_rules\")); nothing was changed\" ;; esac",
+  "fails": [
+   "IT-M20"
+  ]
+ },
+ {
+  "id": "IMM-121",
+  "file": "install-mac.sh",
+  "what": "the trusting-database line claims nothing was changed or deleted again",
+  "old": "(it was created before the auth flags); this refusal did not touch the database's rules, data or volume, and what the installer has made so far stays in place. See",
+  "new": "(it was created before the auth flags); nothing was changed or deleted. See",
+  "fails": [
+   "IT-M20"
+  ]
+ },
+ {
+  "id": "IMM-122",
+  "file": "install-mac.sh",
+  "what": "the db_trust catalogue text claims the installer never changes or deletes a database again",
+  "old": "m_fix=\"this refusal changed nothing in the database and the installer deletes no volume: read S5-PEER-AUTH-MAP.md for the explicit step, then run this installer again (that is safe)\" ;;",
+  "new": "m_fix=\"this installer never changes or deletes a database: read S5-PEER-AUTH-MAP.md for the explicit step\" ;;",
+  "fails": [
+   "IT-M20"
+  ]
+ },
+ {
+  "id": "IMM-123",
+  "file": "install-mac.sh",
+  "what": "SSL_CERT_FILE is not unset",
+  "old": "OPENSSL_ENGINES SSL_CERT_FILE SSL_CERT_DIR GCONV_PATH",
+  "new": "OPENSSL_ENGINES SSL_CERT_DIR GCONV_PATH",
+  "fails": [
+   "IT-M23",
+   "IT-M24"
+  ]
+ },
+ {
+  "id": "IMM-124",
+  "file": "install-mac.sh",
+  "what": "SSL_CERT_DIR is not unset",
+  "old": "SSL_CERT_FILE SSL_CERT_DIR GCONV_PATH",
+  "new": "SSL_CERT_FILE GCONV_PATH",
+  "fails": [
+   "IT-M23",
+   "IT-M24"
+  ]
+ },
+ {
+  "id": "IMM-125",
+  "file": "install-mac.sh",
+  "what": "CURL_CA_BUNDLE is not unset",
+  "old": "GCONV_PATH CURL_CA_BUNDLE SSLKEYLOGFILE",
+  "new": "GCONV_PATH SSLKEYLOGFILE",
+  "fails": [
+   "IT-M24"
+  ]
+ },
+ {
+  "id": "IMM-126",
+  "file": "install-mac.sh",
+  "what": "SSLKEYLOGFILE is not unset",
+  "old": "CURL_CA_BUNDLE SSLKEYLOGFILE CURL_SSL_BACKEND",
+  "new": "CURL_CA_BUNDLE CURL_SSL_BACKEND",
+  "fails": [
+   "IT-M24"
+  ]
+ },
+ {
+  "id": "IMM-127",
+  "file": "install-mac.sh",
+  "what": "CURL_SSL_BACKEND is not unset",
+  "old": "SSLKEYLOGFILE CURL_SSL_BACKEND QLOGDIR",
+  "new": "SSLKEYLOGFILE QLOGDIR",
+  "fails": [
+   "IT-M24"
+  ]
+ },
+ {
+  "id": "IMM-128",
+  "file": "install-mac.sh",
+  "what": "QLOGDIR is not unset",
+  "old": "CURL_SSL_BACKEND QLOGDIR DOCKER_HOST",
+  "new": "CURL_SSL_BACKEND DOCKER_HOST",
+  "fails": [
+   "IT-M24"
+  ]
+ },
+ {
+  "id": "IMM-129",
+  "file": "install-mac.sh",
+  "what": "a proxy name is moved into the list of the whole run (every later step loses it)",
+  "old": "CURL_SSL_BACKEND QLOGDIR DOCKER_HOST",
+  "new": "CURL_SSL_BACKEND QLOGDIR http_proxy DOCKER_HOST",
+  "fails": [
+   "IT-M24"
+  ]
+ },
+ {
+  "id": "IMM-130",
+  "file": "install-mac.sh",
+  "what": "rel_fetch_noproxy does not take the proxy names out",
+  "old": "  unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY no_proxy NO_PROXY\n",
+  "new": "  :\n",
+  "fails": [
+   "IT-M24"
+  ]
+ },
+ {
+  "id": "IMM-131",
+  "file": "install-mac.sh",
+  "what": "rel_fetch_noproxy does not put the caller's names back",
+  "old": "  for rfn_n in $rfn_set; do eval \"$rfn_n=\\$rfn_v_$rfn_n; export $rfn_n\"; done\n",
+  "new": "  :\n",
+  "fails": [
+   "IT-M24"
+  ]
+ },
+ {
+  "id": "IMM-132",
+  "file": "install-mac.sh",
+  "what": "rel_fetch_noproxy loses the status of rel_fetch",
+  "old": "  return \"$rfn_rc\"\n",
+  "new": "  return 0\n",
+  "fails": [
+   "IT-M24"
+  ]
+ },
+ {
+  "id": "IMM-133",
+  "file": "install-mac.sh",
+  "what": "a name the caller set to the EMPTY string is treated as not set (and comes back unset)",
+  "old": "\\\"\\${$rfn_n+x}\\\" = x ]",
+  "new": "\\\"\\${$rfn_n:+x}\\\" = x ]",
+  "fails": [
+   "IT-M24"
+  ]
+ },
+ {
+  "id": "IMM-134",
+  "file": "install-mac.sh",
+  "what": "the release download is called bare, with the caller's proxy names",
+  "old": "run_step \"$EX_FETCH\" \"$EX_FETCH\" rel_fetch_noproxy \"$CORTEX_RELEASE\"",
+  "new": "run_step \"$EX_FETCH\" \"$EX_FETCH\" rel_fetch \"$CORTEX_RELEASE\"",
+  "fails": [
+   "IT-M24"
+  ]
+ },
+ {
+  "id": "IMM-135",
+  "file": "install-mac.sh",
+  "what": "a name without a slash maps to / instead of the current directory",
+  "old": "  *) here_dir=. ;;",
+  "new": "  *) here_dir=/ ;;",
+  "fails": [
+   "IT-M22"
+  ]
+ },
+ {
+  "id": "IMM-136",
+  "file": "install-mac.sh",
+  "what": "a root-level script maps to the current directory instead of /",
+  "old": "[ -n \"$here_dir\" ] || here_dir=/ ;;",
+  "new": "[ -n \"$here_dir\" ] || here_dir=. ;;",
+  "fails": [
+   "IT-M22"
+  ]
+ },
+ {
+  "id": "IMM-137",
+  "file": "install-mac.sh",
+  "what": "the trailing slashes of the own directory are not stripped",
+  "old": "       while case $here_dir in ?*/) true ;; *) false ;; esac; do here_dir=${here_dir%/}; done\n",
+  "new": "       :\n",
+  "fails": [
+   "IT-M22"
+  ]
+ },
+ {
+  "id": "IMM-138",
+  "file": "install-mac.sh",
+  "what": "the own directory is learned with dirname again",
+  "old": "here=$(CDPATH= cd -- \"$here_dir\" && pwd)",
+  "new": "here=$(CDPATH= cd -- \"$(dirname -- \"$0\")\" && pwd)",
+  "fails": [
+   "IT-M23"
+  ]
+ },
+ {
+  "id": "IMM-139",
+  "file": "install-mac.sh",
+  "what": "u2 is no longer the default: the launchd step runs unless --without-backups is given",
+  "old": "reissue=0 without_backups=1   # u2 BY DEFAULT",
+  "new": "reissue=0 without_backups=0   # u2 BY DEFAULT",
+  "fails": [
+   "IT-M08b"
+  ]
+ },
+ {
+  "id": "IMM-140",
+  "file": "install-mac.sh",
+  "what": "--with-backups is ignored (the launchd step can never be turned on)",
+  "old": "    --with-backups) without_backups=0; shift ;;",
+  "new": "    --with-backups) shift ;;",
+  "fails": [
+   "IT-M08",
+   "IT-M08b"
+  ]
+ },
+ {
+  "id": "IMM-141",
+  "file": "install-mac.sh",
+  "what": "a release without backup scripts is refused even when the backups are not scheduled",
+  "old": "if [ \"$reissue\" -eq 0 ] && [ \"$without_backups\" -eq 0 ]; then\n  for f in $backup_scripts;",
+  "new": "if [ \"$reissue\" -eq 0 ]; then\n  for f in $backup_scripts;",
+  "fails": [
+   "IT-M08b"
+  ]
+ },
+ {
+  "id": "IMM-142",
+  "file": "install-mac.sh",
+  "what": "the backup scripts are copied without looking (a missing one is fatal in u2)",
+  "old": "  [ \"$without_backups\" -eq 0 ] || [ -f \"$scripts_src/$f\" ] || continue\n  cp \"$scripts_src/$f\" \"$home_dir/bin/$f.new\"",
+  "new": "  cp \"$scripts_src/$f\" \"$home_dir/bin/$f.new\"",
+  "fails": [
+   "IT-M08b"
+  ]
+ },
+ {
+  "id": "IMM-143",
+  "file": "install-mac.sh",
+  "what": "the render tool is looked up only beside the installer (a downloaded install.sh has no scripts/ there)",
+  "old": "render_tool=\"$rel_dir/bin/docker-compose-render\"; [ -f \"$render_tool\" ] || render_tool=\"$here/../scripts/docker-compose-render\"",
+  "new": "render_tool=\"$here/../scripts/docker-compose-render\"",
+  "fails": [
+   "IT-M25"
+  ]
+ },
+ {
+  "id": "IMM-144",
+  "file": "install-mac.sh",
+  "what": "the lint is asked for even where no usable python3 exists",
+  "old": "if py_usable; then render_lint=--lint; else",
+  "new": "if true; then render_lint=--lint; else",
+  "fails": [
+   "IT-M05"
+  ]
+ },
+ {
+  "id": "IMM-145",
+  "file": "install-mac.sh",
+  "what": "python3 is judged usable even when it is the Command Line Tools stub",
+  "old": "if [ \"$pu_p\" = /usr/bin/python3 ] && [ \"$(uname -s)\" = Darwin ] && ! xcode-select -p >/dev/null 2>&1; then return 1; fi",
+  "new": "if false; then return 1; fi",
+  "fails": [
+   "IT-M26"
+  ]
+ },
+ {
+  "id": "IMM-146",
+  "file": "install-fetch.sh",
+  "what": "the Mac fetch copy unpacks the Linux archive name (cortex-V-x86_64-linux.tar.gz)",
+  "old": "    ru_tar=cortex-$ru_ver-macos.tar.gz",
+  "new": "    ru_tar=cortex-$ru_ver-x86_64-linux.tar.gz",
+  "fails": [
+   "IT-M25"
+  ]
+ },
+ {
+  "id": "IMM-147",
+  "file": "install-fetch.sh",
+  "what": "the Mac fetch copy loads the Linux image name (cortex-server-V-x86_64.oci.tar)",
+  "old": "    rl_image=cortex-server-$rl_ver-aarch64.oci.tar",
+  "new": "    rl_image=cortex-server-$rl_ver-x86_64.oci.tar",
+  "fails": [
+   "IT-M25"
+  ]
+ },
+ {
+  "id": "IMM-148",
+  "file": "install-fetch.sh",
+  "what": "the loaded image is checked with Podman's 'image exists' (Docker has none)",
+  "old": "rel_tool_podman image inspect \"$rl_ref\"",
+  "new": "rel_tool_podman image exists \"$rl_ref\"",
+  "fails": [
+   "IT-M25"
+  ]
+ },
+ {
+  "id": "IMM-149",
+  "file": "install-fetch.sh",
+  "what": "install.meta may say member list 2 (the Linux list) instead of the Mac's 3",
+  "old": "            MEMBER_LIST) [ \"$rt_val\" = 3 ] ||",
+  "new": "            MEMBER_LIST) [ \"$rt_val\" = 2 ] ||",
+  "fails": [
+   "IT-M25"
+  ]
+ },
+ {
+  "id": "IMM-150",
+  "file": "install-fetch.sh",
+  "what": "the render tool of the release is not an executable member (mode 0644 instead of 0755)",
+  "old": "        db-roles.sh|bin/docker-compose-render|bin/docker-compose-lint) printf '%s\\n' '- rwxr-xr-x' ;;",
+  "new": "        db-roles.sh|bin/docker-compose-lint) printf '%s\\n' '- rwxr-xr-x' ;;",
+  "fails": [
+   "IT-M25"
+  ]
+ },
+ {
+  "id": "IMM-151",
+  "file": "install-mac.sh",
+  "what": "python3 is not judged before the release check (the stub's dialog and a late refusal)",
+  "old": "  py_usable || stop \"$EX_PREREQ\" python_missing \"\"",
+  "new": "  py_usable || :; : \"\"",
+  "fails": [
+   "IT-M28"
+  ]
+ },
+ {
+  "id": "IMM-152",
+  "file": "install-prereq.sh",
+  "what": "the PATCH of docker compose is not compared (2.24.0 to 2.24.3 pass: mike MAC-MIKE-01)",
+  "old": "&& [ \"$pl_pat\" -lt \"$MAC_COMPOSE_FLOOR_PATCH\" ]; then pl_below=1",
+  "new": "&& [ \"$pl_pat\" -lt 0 ]; then pl_below=1",
+  "fails": [
+   "IT-M01c"
+  ]
+ },
+ {
+  "id": "IMM-153",
+  "file": "install-prereq.sh",
+  "what": "the patch boundary is off by one (2.24.4 itself is refused)",
+  "old": "[ \"$pl_pat\" -lt \"$MAC_COMPOSE_FLOOR_PATCH\" ]",
+  "new": "[ \"$pl_pat\" -le \"$MAC_COMPOSE_FLOOR_PATCH\" ]",
+  "fails": [
+   "IT-M01c"
+  ]
+ },
+ {
+  "id": "IMM-154",
+  "file": "install-prereq.sh",
+  "what": "the Compose floor patch is 3 (2.24.3 passes)",
+  "old": "MAC_COMPOSE_FLOOR_PATCH=4; }",
+  "new": "MAC_COMPOSE_FLOOR_PATCH=3; }",
+  "fails": [
+   "IT-M01c"
+  ]
+ },
+ {
+  "id": "IMM-155",
+  "file": "install-prereq.sh",
+  "what": "a major above the floor is judged by its minor (3.0.0 is refused)",
+  "old": "elif [ \"$pl_maj\" -eq \"$MAC_COMPOSE_FLOOR_MAJOR\" ]; then",
+  "new": "elif [ \"$pl_maj\" -ge \"$MAC_COMPOSE_FLOOR_MAJOR\" ]; then",
+  "fails": [
+   "IT-M01c"
+  ]
+ },
+ {
+  "id": "IMM-156",
+  "file": "install-prereq.sh",
+  "what": "a minor above the floor is judged by its patch (2.25.0 is refused)",
+  "old": "elif [ \"$pl_min\" -eq \"$MAC_COMPOSE_FLOOR_MINOR\" ] && [ \"$pl_pat\"",
+  "new": "elif [ \"$pl_min\" -ge \"$MAC_COMPOSE_FLOOR_MINOR\" ] && [ \"$pl_pat\"",
+  "fails": [
+   "IT-M01c"
+  ]
+ },
+ {
+  "id": "IMM-157",
+  "file": "install-prereq.sh",
+  "what": "a missing patch (2.24) counts as high, not as 0 (it passes)",
+  "old": "*.*) pl_pat=${pl_rest#*.}; pl_pat=${pl_pat%%.*} ;; *) pl_pat=0 ;; esac",
+  "new": "*.*) pl_pat=${pl_rest#*.}; pl_pat=${pl_pat%%.*} ;; *) pl_pat=99 ;; esac",
+  "fails": [
+   "IT-M01c"
+  ]
+ },
+ {
+  "id": "IMM-158",
+  "file": "install-prereq.sh",
+  "what": "an empty or unreadable patch (2.24.) counts as high, not as 0 (it passes)",
+  "old": "case $pl_pat in \"\"|*[!0123456789]*) pl_pat=0 ;; esac",
+  "new": "case $pl_pat in \"\"|*[!0123456789]*) pl_pat=99 ;; esac",
+  "fails": [
+   "IT-M01c"
+  ]
+ },
+ {
+  "id": "IMM-159",
+  "file": "install-prereq.sh",
+  "what": "the refusal says 2.24, not 2.24.4 (the cause does not name the floor)",
+  "old": "older than version $MAC_COMPOSE_FLOOR_MAJOR.$MAC_COMPOSE_FLOOR_MINOR.$MAC_COMPOSE_FLOOR_PATCH${2:+ (found $2)}\"",
+  "new": "older than version $MAC_COMPOSE_FLOOR_MAJOR.$MAC_COMPOSE_FLOOR_MINOR${2:+ (found $2)}\"",
+  "fails": [
+   "IT-M01c"
+  ]
+ },
+ {
+  "id": "IMM-212",
+  "file": "install-prereq.sh",
+  "what": "a pre-release or build suffix (-rc1, +dev) is accepted as the plain version",
+  "old": "    *) stop \"$EX_PREREQ\" compose_form \"$pl_cv\" \"the docker compose version has a suffix this installer does not recognise\" ;;\n  esac",
+  "new": "    *) : ;;\n  esac",
+  "fails": [
+   "IT-M01c"
+  ]
+ },
+ {
+  "id": "IMM-213",
+  "file": "install-prereq.sh",
+  "what": "-desktop. with no number or a non-number is accepted",
+  "old": "case ${pl_suf#-desktop.} in \"\"|*[!0123456789]*) stop \"$EX_PREREQ\" compose_form",
+  "new": "case ${pl_suf#-desktop.} in \"\"|*[!0123456789]*) : compose_form",
+  "fails": [
+   "IT-M01c"
+  ]
+ },
+ {
+  "id": "IMM-214",
+  "file": "install-prereq.sh",
+  "what": "the suffix is never looked at (it is taken as empty)",
+  "old": "  pl_suf=${pl_raw#\"$pl_cvn\"}",
+  "new": "  pl_suf=\"\"",
+  "fails": [
+   "IT-M01c"
+  ]
+ },
+ {
+  "id": "IMM-215",
+  "file": "install-prereq.sh",
+  "what": "Docker Desktop's own -desktop.N form is refused",
+  "old": "    -desktop.*) case ${pl_suf#-desktop.} in",
+  "new": "    -desktop.*) stop \"$EX_PREREQ\" compose_form \"$pl_cv\" \"x\"; case ${pl_suf#-desktop.} in",
+  "fails": [
+   "IT-M01c"
+  ]
+ }
+]

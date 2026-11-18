@@ -1,0 +1,2100 @@
+[
+ {
+  "id": "RP-01",
+  "design": "R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_01_every_child_gets_only_the_four_fixed_names_and_compose_three_more_from_its_constructor"
+  ],
+  "what": "a proxy variable is copied into every child",
+  "old": "const COPIED: [&str; 3] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\"];",
+  "new": "const COPIED: [&str; 4] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\", \"HTTPS_PROXY\"];"
+ },
+ {
+  "id": "RP-02",
+  "design": "R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_01_every_child_gets_only_the_four_fixed_names_and_compose_three_more_from_its_constructor",
+   "re_02_no_wrapper_leaks_a_token_into_a_vector_an_environment_or_a_return_value"
+  ],
+  "what": "the release token is copied into every child",
+  "old": "const COPIED: [&str; 3] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\"];",
+  "new": "const COPIED: [&str; 4] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\", \"CORTEX_RELEASE_TOKEN\"];"
+ },
+ {
+  "id": "RP-03",
+  "design": "R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_01_every_child_gets_only_the_four_fixed_names_and_compose_three_more_from_its_constructor"
+  ],
+  "what": "a compose variable is copied into every child",
+  "old": "const COPIED: [&str; 3] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\"];",
+  "new": "const COPIED: [&str; 4] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\", \"COMPOSE_PROJECT_NAME\"];"
+ },
+ {
+  "id": "RP-04",
+  "design": "R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_01_every_child_gets_only_the_four_fixed_names_and_compose_three_more_from_its_constructor"
+  ],
+  "what": "DOCKER_HOST is copied into every child",
+  "old": "const COPIED: [&str; 3] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\"];",
+  "new": "const COPIED: [&str; 4] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\", \"DOCKER_HOST\"];"
+ },
+ {
+  "id": "RP-05",
+  "design": "R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_01_every_child_gets_only_the_four_fixed_names_and_compose_three_more_from_its_constructor"
+  ],
+  "what": "XDG_RUNTIME_DIR is not copied",
+  "old": "[&str; 3] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\"]",
+  "new": "[&str; 2] = [\"PATH\", \"HOME\"]"
+ },
+ {
+  "id": "RP-06",
+  "design": "R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_01_every_child_gets_only_the_four_fixed_names_and_compose_three_more_from_its_constructor"
+  ],
+  "what": "HOME is not copied",
+  "old": "[&str; 3] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\"]",
+  "new": "[&str; 2] = [\"PATH\", \"XDG_RUNTIME_DIR\"]"
+ },
+ {
+  "id": "RP-07",
+  "design": "R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_01_every_child_gets_only_the_four_fixed_names_and_compose_three_more_from_its_constructor"
+  ],
+  "what": "LANG is not C",
+  "old": "OsString::from(\"LANG\"), OsString::from(\"C\")",
+  "new": "OsString::from(\"LANG\"), OsString::from(\"C.UTF-8\")"
+ },
+ {
+  "id": "RP-08",
+  "design": "R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_01_every_child_gets_only_the_four_fixed_names_and_compose_three_more_from_its_constructor"
+  ],
+  "what": "LANG is not set",
+  "old": "    env.push((OsString::from(\"LANG\"), OsString::from(\"C\")));\n",
+  "new": ""
+ },
+ {
+  "id": "RP-10",
+  "design": "R2",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_01_every_child_gets_only_the_four_fixed_names_and_compose_three_more_from_its_constructor"
+  ],
+  "what": "the parent's whole environment reaches the child",
+  "old": "        .env_clear()\n",
+  "new": ""
+ },
+ {
+  "id": "RP-11",
+  "design": "R1",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_04_a_child_gets_dev_null_as_its_input_not_the_parents"
+  ],
+  "what": "the child reads the parent's input",
+  "old": "        .stdin(Stdio::null())",
+  "new": "        .stdin(Stdio::inherit())"
+ },
+ {
+  "id": "RP-12",
+  "design": "R2",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_limits"
+  ],
+  "fails": [
+   "rl_05_the_child_starts_in_the_root_directory_with_no_input"
+  ],
+  "what": "the child starts in the parent's working directory",
+  "old": "        .current_dir(spec.cwd)\n",
+  "new": ""
+ },
+ {
+  "id": "RP-13",
+  "design": "R6",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_limits"
+  ],
+  "fails": [
+   "rl_01_every_call_ends_at_its_deadline_and_only_the_childs_own_pid_is_ended"
+  ],
+  "what": "a child past its deadline is not ended",
+  "old": "    let _ = kill(&mut child);\n    let reap_until",
+  "new": "    let _ = child.id();\n    let reap_until"
+ },
+ {
+  "id": "RP-14",
+  "design": "R6",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_limits"
+  ],
+  "fails": [
+   "rl_01_every_call_ends_at_its_deadline_and_only_the_childs_own_pid_is_ended"
+  ],
+  "what": "a child past its deadline is ended and not waited for (a zombie remains)",
+  "old": "fn stop_direct_child_with<F>(mut child: Child, kill: F)\nwhere\n    F: FnOnce(&mut Child) -> std::io::Result<()>,\n{\n    let _ = kill(&mut child);\n    let reap_until = Instant::now() + Duration::from_millis(100);\n    loop {\n        match child.try_wait() {\n            Ok(Some(_)) => return,\n            Ok(None) if Instant::now() < reap_until => std::thread::sleep(Duration::from_millis(1)),\n            _ => break,\n        }\n    }\n    let _ = std::thread::Builder::new().spawn(move || {\n        let _ = child.wait();\n    });\n}",
+  "new": "fn stop_direct_child_with<F>(mut child: Child, kill: F)\nwhere\n    F: FnOnce(&mut Child) -> std::io::Result<()>,\n{\n    let _ = kill(&mut child);\n}"
+ },
+ {
+  "id": "RP-15",
+  "design": "R6",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_limits"
+  ],
+  "fails": [
+   "rl_01_every_call_ends_at_its_deadline_and_only_the_childs_own_pid_is_ended"
+  ],
+  "what": "the deadline is three seconds late",
+  "old": "        if Instant::now() >= end {",
+  "new": "        if Instant::now() >= end + Duration::from_secs(3) {"
+ },
+ {
+  "id": "RP-16",
+  "design": "R6",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_limits"
+  ],
+  "fails": [
+   "rl_01_every_call_ends_at_its_deadline_and_only_the_childs_own_pid_is_ended"
+  ],
+  "what": "the deadline is early",
+  "old": "        if Instant::now() >= end {",
+  "new": "        if Instant::now() >= end - Duration::from_millis(300) {"
+ },
+ {
+  "id": "RP-17",
+  "design": "R7",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_limits"
+  ],
+  "fails": [
+   "rl_02_output_is_read_at_most_1_mib_per_stream_and_a_chatty_child_does_not_block"
+  ],
+  "what": "two MiB are kept per stream",
+  "old": "const CAP: usize = 1 << 20;",
+  "new": "const CAP: usize = 1 << 21;"
+ },
+ {
+  "id": "RP-18",
+  "design": "R7",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_limits"
+  ],
+  "fails": [
+   "rl_02_output_is_read_at_most_1_mib_per_stream_and_a_chatty_child_does_not_block"
+  ],
+  "what": "half a MiB is kept per stream",
+  "old": "const CAP: usize = 1 << 20;",
+  "new": "const CAP: usize = 1 << 19;"
+ },
+ {
+  "id": "RP-19",
+  "design": "R7",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_limits"
+  ],
+  "fails": [
+   "rl_02_output_is_read_at_most_1_mib_per_stream_and_a_chatty_child_does_not_block"
+  ],
+  "what": "stderr is never read, so a chatty child blocks",
+  "old": "    let err = Capture::start(child.stderr.take());",
+  "new": "    let err = Capture::start(None::<std::process::ChildStderr>);"
+ },
+ {
+  "id": "RP-20",
+  "design": "R1",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_01_load_image_runs_load_then_image_inspect_and_parses_the_digest"
+  ],
+  "what": "stdout is thrown away",
+  "old": "        .stdout(Stdio::piped())",
+  "new": "        .stdout(Stdio::null())"
+ },
+ {
+  "id": "RP-21",
+  "design": "R8",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_limits",
+   "real_dumper"
+  ],
+  "fails": [
+   "rl_04_the_runner_reports_codes_signals_and_programs_that_cannot_start",
+   "rd_04_a_tool_ended_by_a_signal_is_failed"
+  ],
+  "what": "a child ended by a signal has an exit code",
+  "old": "        code: status.code(),",
+  "new": "        code: Some(status.code().unwrap_or(0)),"
+ },
+ {
+  "id": "RP-22",
+  "design": "R8",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_17_a_program_that_cannot_start_is_failed_with_a_fixed_line_that_holds_no_path"
+  ],
+  "what": "a program that cannot start is a timeout",
+  "old": "        .map_err(|_| RunError::NotStarted)?;",
+  "new": "        .map_err(|_| RunError::TimedOut)?;"
+ },
+ {
+  "id": "RP-23",
+  "design": "R7",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_10_a_stdout_of_more_than_1_mib_has_no_reliable_last_line"
+  ],
+  "what": "the cut of a stream is not reported",
+  "old": "                                    if take < n {\n                                        g.1 = true;\n                                    }",
+  "new": ""
+ },
+ {
+  "id": "RP-30",
+  "design": "R4",
+  "file": "src/real/name.rs",
+  "tests": [
+   "real_name"
+  ],
+  "fails": [
+   "rn_05_other_keys_at_column_zero_that_merely_start_with_name_are_not_the_project"
+  ],
+  "what": "any key that starts with name is a name line",
+  "old": "filter(|l| l.starts_with(\"name:\"))",
+  "new": "filter(|l| l.starts_with(\"name\"))"
+ },
+ {
+  "id": "RP-31",
+  "design": "R4",
+  "file": "src/real/name.rs",
+  "tests": [
+   "real_name"
+  ],
+  "fails": [
+   "rn_02_a_name_line_that_is_not_exactly_right_is_refused"
+  ],
+  "what": "a project name of 33 characters is accepted",
+  "old": "        && b.len() <= 32\n",
+  "new": "        && b.len() <= 33\n"
+ },
+ {
+  "id": "RP-32",
+  "design": "R4",
+  "file": "src/real/name.rs",
+  "tests": [
+   "real_name"
+  ],
+  "fails": [
+   "rn_01_the_name_is_the_project_and_the_service"
+  ],
+  "what": "a project name of 32 characters is refused",
+  "old": "        && b.len() <= 32\n",
+  "new": "        && b.len() <= 31\n"
+ },
+ {
+  "id": "RP-33",
+  "design": "R4",
+  "file": "src/real/name.rs",
+  "tests": [
+   "real_name"
+  ],
+  "fails": [
+   "rn_02_a_name_line_that_is_not_exactly_right_is_refused"
+  ],
+  "what": "a project name may start with a digit",
+  "old": "        && b[0].is_ascii_lowercase()\n",
+  "new": "        && b[0].is_ascii_alphanumeric()\n"
+ },
+ {
+  "id": "RP-34",
+  "design": "R4",
+  "file": "src/real/name.rs",
+  "tests": [
+   "real_name"
+  ],
+  "fails": [
+   "rn_02_a_name_line_that_is_not_exactly_right_is_refused"
+  ],
+  "what": "upper-case letters are allowed after the first",
+  "old": "        && b.iter()\n            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || *c == b'-')",
+  "new": "        && b.iter()\n            .all(|c| c.is_ascii_alphabetic() || c.is_ascii_digit() || *c == b'-')"
+ },
+ {
+  "id": "RP-35",
+  "design": "R4",
+  "file": "src/real/name.rs",
+  "tests": [
+   "real_name"
+  ],
+  "fails": [
+   "rn_02_a_name_line_that_is_not_exactly_right_is_refused"
+  ],
+  "what": "an underscore is allowed",
+  "old": "|| *c == b'-')",
+  "new": "|| *c == b'-' || *c == b'_')"
+ },
+ {
+  "id": "RP-36",
+  "design": "R4",
+  "file": "src/real/name.rs",
+  "tests": [
+   "real_name"
+  ],
+  "fails": [
+   "rn_02_a_name_line_that_is_not_exactly_right_is_refused"
+  ],
+  "what": "two name lines are accepted",
+  "old": "    if name_lines.next().is_some() {\n        return Err(NoProjectName);\n    }\n",
+  "new": ""
+ },
+ {
+  "id": "RP-37",
+  "design": "R4",
+  "file": "src/real/name.rs",
+  "tests": [
+   "real_name"
+  ],
+  "fails": [
+   "rn_03_a_missing_or_huge_or_unreadable_compose_is_refused"
+  ],
+  "what": "a compose file of four MiB is read",
+  "old": "const MAX: u64 = 1 << 20;",
+  "new": "const MAX: u64 = 1 << 22;"
+ },
+ {
+  "id": "RP-38",
+  "design": "R4",
+  "file": "src/real/name.rs",
+  "tests": [
+   "real_name"
+  ],
+  "fails": [
+   "rn_03_a_missing_or_huge_or_unreadable_compose_is_refused"
+  ],
+  "what": "a compose file of exactly 1 MiB is refused",
+  "old": "    if buf.len() as u64 > MAX {",
+  "new": "    if buf.len() as u64 >= MAX {"
+ },
+ {
+  "id": "RP-39",
+  "design": "R4",
+  "file": "src/real/name.rs",
+  "tests": [
+   "real_name"
+  ],
+  "fails": [
+   "rn_02_a_name_line_that_is_not_exactly_right_is_refused"
+  ],
+  "what": "spaces after the colon are optional",
+  "old": "line.strip_prefix(\"name: \")",
+  "new": "line.strip_prefix(\"name:\").map(str::trim_start)"
+ },
+ {
+  "id": "RP-40",
+  "design": "R3",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_02_the_reference_comes_from_exactly_one_loaded_image_line_that_is_the_last_line"
+  ],
+  "what": "an image reference of 257 characters is accepted",
+  "old": "        && b.len() <= 256\n",
+  "new": "        && b.len() <= 257\n"
+ },
+ {
+  "id": "RP-41",
+  "design": "R3",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_02_the_reference_comes_from_exactly_one_loaded_image_line_that_is_the_last_line"
+  ],
+  "what": "a semicolon is allowed in an image reference",
+  "old": "b\"._:/@-\"",
+  "new": "b\"._:/@-;\""
+ },
+ {
+  "id": "RP-42",
+  "design": "R3",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_02_the_reference_comes_from_exactly_one_loaded_image_line_that_is_the_last_line"
+  ],
+  "what": "an image reference may start with a hyphen",
+  "old": "        && b[0].is_ascii_alphanumeric()\n",
+  "new": ""
+ },
+ {
+  "id": "RP-43",
+  "design": "R3",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_02_the_reference_comes_from_exactly_one_loaded_image_line_that_is_the_last_line"
+  ],
+  "what": "more than one loaded image is accepted",
+  "old": "    if loaded.next().is_some() || lines.last() != Some(line) {",
+  "new": "    if lines.last() != Some(line) {"
+ },
+ {
+  "id": "RP-44",
+  "design": "R3",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_02_the_reference_comes_from_exactly_one_loaded_image_line_that_is_the_last_line"
+  ],
+  "what": "the loaded line need not be the last",
+  "old": "    if loaded.next().is_some() || lines.last() != Some(line) {",
+  "new": "    if loaded.next().is_some() {"
+ },
+ {
+  "id": "RP-45",
+  "design": "R3",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_01_load_image_runs_load_then_image_inspect_and_parses_the_digest"
+  ],
+  "what": "a digest has 65 hex digits",
+  "old": "    if hex.len() != 64 {",
+  "new": "    if hex.len() != 65 {"
+ },
+ {
+  "id": "RP-46",
+  "design": "R3",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_03_a_digest_is_sha256_and_64_lowercase_hex_digits_or_the_image_has_none"
+  ],
+  "what": "upper-case hex digits are accepted",
+  "old": "            b'a'..=b'f' => Some(c - b'a' + 10),",
+  "new": "            b'a'..=b'f' => Some(c - b'a' + 10),\n            b'A'..=b'F' => Some(c - b'A' + 10),"
+ },
+ {
+  "id": "RP-47",
+  "design": "R3",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_06_compose_up_with_no_service_starts_nothing"
+  ],
+  "what": "compose up with no service is started",
+  "old": "        if services.is_empty() {\n            return Err(failed(\"no service to start\"));\n        }\n",
+  "new": ""
+ },
+ {
+  "id": "RP-48",
+  "design": "R1",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_05_compose_up_runs_podman_compose_with_the_release_files_and_the_services_in_order"
+  ],
+  "what": "the services are in reverse order",
+  "old": "args.extend(services.iter().map(|s| os(s.name())));",
+  "new": "args.extend(services.iter().rev().map(|s| os(s.name())));"
+ },
+ {
+  "id": "RP-49",
+  "design": "R1",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_05_compose_up_runs_podman_compose_with_the_release_files_and_the_services_in_order"
+  ],
+  "what": "compose up runs attached",
+  "old": "            os(\"up\"),\n            os(\"-d\"),\n",
+  "new": "            os(\"up\"),\n"
+ },
+ {
+  "id": "RP-50",
+  "design": "R1",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_05_compose_up_runs_podman_compose_with_the_release_files_and_the_services_in_order"
+  ],
+  "what": "the env file is the compose file",
+  "old": "            os(\"--env-file\"),\n            release_dir.join(\"stack.env\").into_os_string(),",
+  "new": "            os(\"--env-file\"),\n            release_dir.join(\"compose.yml\").into_os_string(),"
+ },
+ {
+  "id": "RP-51",
+  "design": "R4",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_11_a_release_without_a_valid_project_name_fails_before_anything_is_started"
+  ],
+  "what": "compose up does not check the project name",
+  "old": "        container_name(release_dir, Service::Db).map_err(|_| no_project())?;\n",
+  "new": ""
+ },
+ {
+  "id": "RP-52",
+  "design": "R4",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_09_a_reading_that_is_not_four_fields_with_the_exact_name_is_failed"
+  ],
+  "what": "an answer for another container is accepted",
+  "old": "        if name != ctr {",
+  "new": "        if false {"
+ },
+ {
+  "id": "RP-53",
+  "design": "R4",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_10_a_container_that_does_not_exist_is_missing_only_for_exit_125_and_that_exact_message"
+  ],
+  "what": "any failure with the missing message is Missing",
+  "old": "            if o.code == Some(125)\n                && !o.stderr_cut\n                && last_line",
+  "new": "            if !o.stderr_cut\n                && last_line"
+ },
+ {
+  "id": "RP-54",
+  "design": "R4",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_10_a_container_that_does_not_exist_is_missing_only_for_exit_125_and_that_exact_message"
+  ],
+  "what": "exit 125 alone is Missing",
+  "old": "&& last_line(&o.stderr).as_deref() == Some(missing.as_str())",
+  "new": "&& true"
+ },
+ {
+  "id": "RP-55",
+  "design": "R3",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_08_a_container_reading_becomes_a_service_state"
+  ],
+  "what": "healthy and unhealthy are swapped",
+  "old": "(\"running\", \"healthy\") => ServiceState::Healthy,\n            (\"running\", \"unhealthy\") => ServiceState::Unhealthy,",
+  "new": "(\"running\", \"healthy\") => ServiceState::Unhealthy,\n            (\"running\", \"unhealthy\") => ServiceState::Healthy,"
+ },
+ {
+  "id": "RP-56",
+  "design": "R3",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_08_a_container_reading_becomes_a_service_state"
+  ],
+  "what": "an exited container always has code 0",
+  "old": "(\"exited\", _) => ServiceState::Exited(code),",
+  "new": "(\"exited\", _) => ServiceState::Exited(0),"
+ },
+ {
+  "id": "RP-57",
+  "design": "R3",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_08_a_container_reading_becomes_a_service_state"
+  ],
+  "what": "a container without a health check is healthy",
+  "old": "(\"running\", \"\") => ServiceState::Running,",
+  "new": "(\"running\", \"\") => ServiceState::Healthy,"
+ },
+ {
+  "id": "RP-59",
+  "design": "R1",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_14_the_script_must_be_a_regular_executable_file_and_nothing_is_started_otherwise"
+  ],
+  "what": "a link to the script is followed",
+  "old": "std::fs::symlink_metadata(&script)",
+  "new": "std::fs::metadata(&script)"
+ },
+ {
+  "id": "RP-60",
+  "design": "R1",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_14_the_script_must_be_a_regular_executable_file_and_nothing_is_started_otherwise"
+  ],
+  "what": "a directory with the owner bit is a script",
+  "old": "m.file_type().is_file() && m.permissions().mode() & 0o100 != 0",
+  "new": "m.permissions().mode() & 0o100 != 0"
+ },
+ {
+  "id": "RP-61",
+  "design": "R1",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_12_run_roles_runs_the_script_by_its_absolute_path_with_one_argument_per_module"
+  ],
+  "what": "the module ids are not passed",
+  "old": "        args.extend(modules.iter().map(|m| os(m.as_str())));\n",
+  "new": ""
+ },
+ {
+  "id": "RP-62",
+  "design": "R1",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_14_the_script_must_be_a_regular_executable_file_and_nothing_is_started_otherwise"
+  ],
+  "what": "a script without the owner's execute bit is started",
+  "old": "m.file_type().is_file() && m.permissions().mode() & 0o100 != 0",
+  "new": "m.file_type().is_file()"
+ },
+ {
+  "id": "RP-70",
+  "design": "R1",
+  "file": "src/real/psql.rs",
+  "tests": [
+   "real_psql"
+  ],
+  "fails": [
+   "rp_01_the_count_is_asked_with_exactly_this_vector_and_the_answer_is_the_trimmed_stdout"
+  ],
+  "what": "psql is not given -i",
+  "old": "            \"exec\",\n            \"-i\",\n",
+  "new": "            \"exec\",\n"
+ },
+ {
+  "id": "RP-71",
+  "design": "R1",
+  "file": "src/real/psql.rs",
+  "tests": [
+   "real_psql"
+  ],
+  "fails": [
+   "rp_01_the_count_is_asked_with_exactly_this_vector_and_the_answer_is_the_trimmed_stdout"
+  ],
+  "what": "psql runs as root",
+  "old": "            \"postgres\",\n            ctr.as_str(),",
+  "new": "            \"root\",\n            ctr.as_str(),"
+ },
+ {
+  "id": "RP-72",
+  "design": "R3",
+  "file": "src/real/psql.rs",
+  "tests": [
+   "real_psql"
+  ],
+  "fails": [
+   "rp_01_the_count_is_asked_with_exactly_this_vector_and_the_answer_is_the_trimmed_stdout"
+  ],
+  "what": "the query counts md5 rules",
+  "old": "auth_method = 'trust'",
+  "new": "auth_method = 'md5'"
+ },
+ {
+  "id": "RP-73",
+  "design": "R7",
+  "file": "src/real/psql.rs",
+  "tests": [
+   "real_psql"
+  ],
+  "fails": [
+   "rp_02_an_answer_over_64_bytes_is_no_answer_and_is_never_shortened"
+  ],
+  "what": "65 bytes of the answer are kept",
+  "old": "const ANSWER_MAX: usize = 64;",
+  "new": "const ANSWER_MAX: usize = 65;"
+ },
+ {
+  "id": "RP-74",
+  "design": "R7",
+  "file": "src/real/psql.rs",
+  "tests": [
+   "real_psql"
+  ],
+  "fails": [
+   "rp_02_an_answer_over_64_bytes_is_no_answer_and_is_never_shortened"
+  ],
+  "what": "63 bytes of the answer are kept",
+  "old": "const ANSWER_MAX: usize = 64;",
+  "new": "const ANSWER_MAX: usize = 63;"
+ },
+ {
+  "id": "RP-75",
+  "design": "R8",
+  "file": "src/real/psql.rs",
+  "tests": [
+   "real_psql"
+  ],
+  "fails": [
+   "rp_03_anything_but_exit_zero_is_no_answer"
+  ],
+  "what": "a failing psql still answers",
+  "old": "        if o.code != Some(0) {\n            return Err(NoAnswer);\n        }\n",
+  "new": ""
+ },
+ {
+  "id": "RP-76",
+  "design": "R4",
+  "file": "src/real/psql.rs",
+  "tests": [
+   "real_psql"
+  ],
+  "fails": [
+   "rp_01_the_count_is_asked_with_exactly_this_vector_and_the_answer_is_the_trimmed_stdout"
+  ],
+  "what": "psql asks the server container",
+  "old": "container_name(&self.current_release_dir, Service::Db)",
+  "new": "container_name(&self.current_release_dir, Service::Server)"
+ },
+ {
+  "id": "RP-77",
+  "design": "R6",
+  "file": "src/real/psql.rs",
+  "tests": [
+   "real_psql"
+  ],
+  "fails": [
+   "rp_07_the_production_deadline_is_30_seconds"
+  ],
+  "what": "the production deadline is not 30 s",
+  "old": "Duration::from_secs(30),\n            current_release_dir,",
+  "new": "Duration::from_secs(3000),\n            current_release_dir,"
+ },
+ {
+  "id": "RP-80",
+  "design": "R7",
+  "file": "src/real/dumper.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_03_the_last_stdout_line_is_none_when_there_is_none_or_it_is_over_4096_bytes"
+  ],
+  "what": "a stdout line of 4097 bytes is reported",
+  "old": "const STDOUT_LINE_MAX: usize = 4096;",
+  "new": "const STDOUT_LINE_MAX: usize = 4097;"
+ },
+ {
+  "id": "RP-81",
+  "design": "R7",
+  "file": "src/real/dumper.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_03_the_last_stdout_line_is_none_when_there_is_none_or_it_is_over_4096_bytes"
+  ],
+  "what": "a stdout line of 4096 bytes is dropped",
+  "old": "const STDOUT_LINE_MAX: usize = 4096;",
+  "new": "const STDOUT_LINE_MAX: usize = 4095;"
+ },
+ {
+  "id": "RP-82",
+  "design": "R6",
+  "file": "src/real/dumper.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_08_a_tool_that_outlives_the_timeout_plus_the_grace_is_timed_out"
+  ],
+  "what": "the outer deadline has no grace",
+  "old": "timeout + self.grace",
+  "new": "timeout"
+ },
+ {
+  "id": "RP-83",
+  "design": "R1",
+  "file": "src/real/dumper.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_01_the_tool_is_started_by_its_absolute_path_with_exactly_this_vector"
+  ],
+  "what": "the output directory is dump",
+  "old": "self.home.join(\"dumps\").into_os_string()",
+  "new": "self.home.join(\"dump\").into_os_string()"
+ },
+ {
+  "id": "RP-84",
+  "design": "R4",
+  "file": "src/real/dumper.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_01_the_tool_is_started_by_its_absolute_path_with_exactly_this_vector"
+  ],
+  "what": "the dump targets the server container",
+  "old": "container_name(&self.current_release_dir, Service::Db)",
+  "new": "container_name(&self.current_release_dir, Service::Server)"
+ },
+ {
+  "id": "RP-85",
+  "design": "R1",
+  "file": "src/real/dumper.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_01_the_tool_is_started_by_its_absolute_path_with_exactly_this_vector"
+  ],
+  "what": "the tool is given milliseconds",
+  "old": "timeout.as_secs().to_string()",
+  "new": "timeout.as_millis().to_string()"
+ },
+ {
+  "id": "RP-86",
+  "design": "R1",
+  "file": "src/real/dumper.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_05_a_tool_that_is_not_a_regular_executable_file_is_not_installed_and_is_never_started"
+  ],
+  "what": "a missing or unsafe tool is started",
+  "old": "        if !installed {\n            return Err(failed(\"the dump tool is not installed\"));\n        }\n",
+  "new": ""
+ },
+ {
+  "id": "RP-87",
+  "design": "R7",
+  "file": "src/real/dumper.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_10_a_stdout_of_more_than_1_mib_has_no_reliable_last_line"
+  ],
+  "what": "a cut stdout still gives a last line",
+  "old": "        let last_stdout_line = if o.stdout_cut {\n            None\n        } else {\n            last_line(&o.stdout).filter(|l| l.len() <= STDOUT_LINE_MAX)\n        };",
+  "new": "        let last_stdout_line = last_line(&o.stdout).filter(|l| l.len() <= STDOUT_LINE_MAX);"
+ },
+ {
+  "id": "RP-88",
+  "design": "R1",
+  "file": "src/real/dumper.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_07_a_relative_home_is_refused"
+  ],
+  "what": "a relative home is accepted",
+  "old": "        if !self.home.is_absolute() {\n            return Err(failed(\"the home directory is not an absolute path\"));\n        }\n",
+  "new": ""
+ },
+ {
+  "id": "RP-89",
+  "design": "R1",
+  "file": "src/real/dumper.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_05_a_tool_that_is_not_a_regular_executable_file_is_not_installed_and_is_never_started"
+  ],
+  "what": "a link to the tool is followed",
+  "old": "std::fs::symlink_metadata(&tool)",
+  "new": "std::fs::metadata(&tool)"
+ },
+ {
+  "id": "RP-90",
+  "design": "R8",
+  "file": "src/real/dumper.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_04_a_tool_ended_by_a_signal_is_failed"
+  ],
+  "what": "a tool ended by a signal is a success",
+  "old": "            return Err(stderr_failure(&o));\n        };\n        let last_stdout_line",
+  "new": "            return Ok(DumpResult { exit: 0, last_stdout_line: None, last_stderr_line: OneLine::last_line_of(&o.stderr) });\n        };\n        let last_stdout_line"
+ },
+ {
+  "id": "RP-91",
+  "design": "R3",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_05_compose_up_runs_podman_compose_with_the_release_files_and_the_services_in_order"
+  ],
+  "what": "compose up gets --all",
+  "old": "            os(\"up\"),\n            os(\"-d\"),\n",
+  "new": "            os(\"up\"),\n            os(\"-d\"),\n            os(\"--all\"),\n"
+ },
+ {
+  "id": "RP-58",
+  "design": "R1",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_16_a_relative_release_directory_is_refused"
+  ],
+  "what": "a relative release directory is accepted by run_roles",
+  "old": "        if !release_dir.is_absolute() {\n            return Err(failed(\"the release directory is not an absolute path\"));\n        }\n        let script",
+  "new": "        let script"
+ },
+ {
+  "id": "RP-92",
+  "design": "amended R2",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_18_only_compose_runs_in_the_release_directory_every_other_child_runs_in_the_root"
+  ],
+  "what": "compose runs in the root directory",
+  "old": "                cwd: release_dir,",
+  "new": "                cwd: Path::new(\"/\"),"
+ },
+ {
+  "id": "RP-93",
+  "design": "amended R2",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers",
+   "real_env"
+  ],
+  "fails": [
+   "rc_19_the_compose_child_gets_the_three_variables_from_the_constructor_and_no_other_child_does",
+   "re_01_every_child_gets_only_the_four_fixed_names_and_compose_three_more_from_its_constructor"
+  ],
+  "what": "compose gets no variables",
+  "old": "                extra_env: &vars,",
+  "new": "                extra_env: &[],"
+ },
+ {
+  "id": "RP-94",
+  "design": "amended R2",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_22_a_bad_home_or_port_is_failed_before_any_child_starts"
+  ],
+  "what": "bad compose variables are dropped, not refused",
+  "old": "            .vars()\n            .map_err(|_| failed(\"the compose variables are not valid\"))?;",
+  "new": "            .vars()\n            .unwrap_or_default();"
+ },
+ {
+  "id": "RP-95",
+  "design": "amended R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_22_a_bad_home_or_port_is_failed_before_any_child_starts"
+  ],
+  "what": "port 0 is accepted",
+  "old": " || self.port == 0",
+  "new": ""
+ },
+ {
+  "id": "RP-96",
+  "design": "amended R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_22_a_bad_home_or_port_is_failed_before_any_child_starts"
+  ],
+  "what": "a relative home is accepted",
+  "old": "!self.home.is_absolute()\n            || ",
+  "new": ""
+ },
+ {
+  "id": "RP-97",
+  "design": "amended R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_22_a_bad_home_or_port_is_failed_before_any_child_starts"
+  ],
+  "what": "a newline in the home is accepted",
+  "old": "matches!(b, 0 | b'\\n' | b'\\r')",
+  "new": "matches!(b, 0 | b'\\r')"
+ },
+ {
+  "id": "RP-98",
+  "design": "amended R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_22_a_bad_home_or_port_is_failed_before_any_child_starts"
+  ],
+  "what": "a NUL in the home is accepted",
+  "old": "matches!(b, 0 | b'\\n' | b'\\r')",
+  "new": "matches!(b, b'\\n' | b'\\r')"
+ },
+ {
+  "id": "RP-99",
+  "design": "amended R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_22_a_bad_home_or_port_is_failed_before_any_child_starts"
+  ],
+  "what": "a carriage return in the home is accepted",
+  "old": "matches!(b, 0 | b'\\n' | b'\\r')",
+  "new": "matches!(b, 0 | b'\\n')"
+ },
+ {
+  "id": "RP-100",
+  "design": "amended R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_19_the_compose_child_gets_the_three_variables_from_the_constructor_and_no_other_child_does"
+  ],
+  "what": "CORTEX_PORT is the port plus one",
+  "old": "OsString::from(self.port.to_string())",
+  "new": "OsString::from(self.port.wrapping_add(1).to_string())"
+ },
+ {
+  "id": "RP-101",
+  "design": "amended R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_19_the_compose_child_gets_the_three_variables_from_the_constructor_and_no_other_child_does"
+  ],
+  "what": "CORTEX_CONFIG names another file",
+  "old": "self.home.join(\"cortex.toml\")",
+  "new": "self.home.join(\"config.toml\")"
+ },
+ {
+  "id": "RP-102",
+  "design": "amended R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_19_the_compose_child_gets_the_three_variables_from_the_constructor_and_no_other_child_does"
+  ],
+  "what": "CORTEX_DUMP_STATUS names another file",
+  "old": "self.home.join(\"dump-status\")",
+  "new": "self.home.join(\"dump_status\")"
+ },
+ {
+  "id": "RP-103",
+  "design": "R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_05_an_extra_variable_never_replaces_a_fixed_name",
+   "re_06_the_fixed_names_are_reserved_even_when_the_parent_lacks_them"
+  ],
+  "what": "an extra variable replaces a fixed one",
+  "old": "        if !RESERVED\n            .iter()\n            .any(|name| k.as_os_str() == OsStr::new(name))\n        {",
+  "new": "        if true {"
+ },
+ {
+  "id": "RP-104",
+  "design": "R1",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_20_run_roles_with_no_module_ids_runs_nothing"
+  ],
+  "what": "the roles script is started without a module id",
+  "old": "        if modules.is_empty() {",
+  "new": "        if false {"
+ },
+ {
+  "id": "RP-105",
+  "design": "R1",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_21_a_relative_release_directory_is_refused_by_compose_up_too"
+  ],
+  "what": "compose up accepts a relative release directory",
+  "old": "        if !release_dir.is_absolute() {\n            return Err(failed(\"the release directory is not an absolute path\"));\n        }\n        // R4: the release",
+  "new": "        // R4: the release"
+ },
+ {
+  "id": "RP-106",
+  "design": "amended R2",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_18_only_compose_runs_in_the_release_directory_every_other_child_runs_in_the_root"
+  ],
+  "what": "run_spec ignores the working directory",
+  "old": "        .current_dir(spec.cwd)",
+  "new": "        .current_dir(\"/\")"
+ },
+ {
+  "id": "RP-107",
+  "design": "amended R2",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_19_the_compose_child_gets_the_three_variables_from_the_constructor_and_no_other_child_does"
+  ],
+  "what": "run_spec ignores the extra variables",
+  "old": ".envs(child_env(spec.extra_env))",
+  "new": ".envs(child_env(&[]))"
+ },
+ {
+  "id": "RP-108",
+  "design": "amended R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_19_the_compose_child_gets_the_three_variables_from_the_constructor_and_no_other_child_does"
+  ],
+  "what": "only the first two extra variables are passed",
+  "old": "    env.push((OsString::from(\"LANG\"), OsString::from(\"C\")));\n    for (k, v) in extra {",
+  "new": "    env.push((OsString::from(\"LANG\"), OsString::from(\"C\")));\n    for (k, v) in extra.iter().take(2) {"
+ },
+ {
+  "id": "RP-109",
+  "design": "rework R7",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_limits",
+   "real_containers",
+   "real_psql"
+  ],
+  "fails": [
+   "rl_06_an_outcome_says_when_the_kept_bytes_are_not_all_the_child_wrote",
+   "rc_23_a_load_whose_output_is_cut_or_open_is_refused_not_read_as_one_image",
+   "rc_24_a_digest_whose_output_is_cut_or_open_is_no_digest",
+   "rc_25_a_reading_whose_output_is_cut_or_open_is_failed"
+  ],
+  "what": "a stream still open at the grace is not reported as cut",
+  "old": "(g.0.clone(), g.1 || open)",
+  "new": "(g.0.clone(), g.1)"
+ },
+ {
+  "id": "RP-110",
+  "design": "rework R7",
+  "file": "src/real/run.rs",
+  "tests": [
+   "real_limits"
+  ],
+  "fails": [
+   "rl_06_an_outcome_says_when_the_kept_bytes_are_not_all_the_child_wrote"
+  ],
+  "what": "the second stream gets a fresh second of grace",
+  "old": "    let (stderr, stderr_cut) = err.finish(end);",
+  "new": "    let (stderr, stderr_cut) = err.finish(Instant::now() + READERS_GRACE);"
+ },
+ {
+  "id": "RP-111",
+  "design": "rework R7",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_23_a_load_whose_output_is_cut_or_open_is_refused_not_read_as_one_image"
+  ],
+  "what": "load_image reads a cut load output as a whole one",
+  "old": "        // One image means ALL the output says one image: a first MiB that does is not enough when the child said more.\n        if o.stdout_cut {\n            return Err(failed(INCOMPLETE));\n        }\n",
+  "new": ""
+ },
+ {
+  "id": "RP-112",
+  "design": "rework R7",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_24_a_digest_whose_output_is_cut_or_open_is_no_digest"
+  ],
+  "what": "load_image reads a cut digest output as a whole one",
+  "old": "        if o.stdout_cut {\n            return Err(failed(\"the loaded image has no digest\"));\n        }\n",
+  "new": ""
+ },
+ {
+  "id": "RP-113",
+  "design": "rework R7",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_25_a_reading_whose_output_is_cut_or_open_is_failed"
+  ],
+  "what": "state reads a cut reading as a whole one",
+  "old": "        if o.stdout_cut {\n            return Err(failed(INCOMPLETE));\n        }\n        let line =",
+  "new": "        let line ="
+ },
+ {
+  "id": "RP-114",
+  "design": "rework R7",
+  "file": "src/real/psql.rs",
+  "tests": [
+   "real_psql"
+  ],
+  "fails": [
+   "rp_09_an_answer_that_is_not_all_there_is_is_no_answer"
+  ],
+  "what": "psql reads a cut answer as a whole one",
+  "old": "        if o.stdout_cut {\n            return Err(NoAnswer);\n        }\n",
+  "new": ""
+ },
+ {
+  "id": "RP-115",
+  "design": "rework R7",
+  "file": "src/real/psql.rs",
+  "tests": [
+   "real_psql",
+   "real_limits"
+  ],
+  "fails": [
+   "rp_02_an_answer_over_64_bytes_is_no_answer_and_is_never_shortened",
+   "rp_08_a_poisoned_tail_is_no_answer_and_a_valid_zero_is_still_zero"
+  ],
+  "what": "an answer over 64 bytes is shortened, not refused",
+  "old": "        if trimmed.len() > ANSWER_MAX {\n            return Err(NoAnswer);\n        }\n        Ok(trimmed.to_string())",
+  "new": "        Ok(trimmed[..trimmed.len().min(ANSWER_MAX)].to_string())"
+ },
+ {
+  "id": "RP-116",
+  "design": "rework R7",
+  "file": "src/real/psql.rs",
+  "tests": [
+   "real_psql"
+  ],
+  "fails": [
+   "rp_02_an_answer_over_64_bytes_is_no_answer_and_is_never_shortened",
+   "rp_08_a_poisoned_tail_is_no_answer_and_a_valid_zero_is_still_zero"
+  ],
+  "what": "an answer of exactly 64 bytes is refused",
+  "old": "if trimmed.len() > ANSWER_MAX {",
+  "new": "if trimmed.len() >= ANSWER_MAX {"
+ },
+ {
+  "id": "RP-117",
+  "design": "rework R7",
+  "file": "src/real/psql.rs",
+  "tests": [
+   "real_psql"
+  ],
+  "fails": [
+   "rp_02_an_answer_over_64_bytes_is_no_answer_and_is_never_shortened"
+  ],
+  "what": "an answer of 65 bytes is accepted",
+  "old": "if trimmed.len() > ANSWER_MAX {",
+  "new": "if trimmed.len() > ANSWER_MAX + 1 {"
+ },
+ {
+  "id": "RP-118",
+  "design": "rework R4",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_26_the_roles_script_runs_only_for_the_project_it_targets"
+  ],
+  "what": "run_roles runs for any project",
+  "old": "        if project != ROLES_PROJECT {\n            return Err(failed(\n                \"the release is not of the project the roles script targets\",\n            ));\n        }\n",
+  "new": "        let _ = project;\n"
+ },
+ {
+  "id": "RP-119",
+  "design": "rework R4",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_26_the_roles_script_runs_only_for_the_project_it_targets"
+  ],
+  "what": "run_roles runs for a project that merely starts with cv2-s5",
+  "old": "if project != ROLES_PROJECT {",
+  "new": "if !project.starts_with(ROLES_PROJECT) {"
+ },
+ {
+  "id": "RP-120",
+  "design": "rework R4",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_26_the_roles_script_runs_only_for_the_project_it_targets"
+  ],
+  "what": "run_roles runs for a project that is a prefix of cv2-s5",
+  "old": "if project != ROLES_PROJECT {",
+  "new": "if !ROLES_PROJECT.starts_with(project.as_str()) {"
+ },
+ {
+  "id": "RP-121",
+  "design": "rework R4",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_26_the_roles_script_runs_only_for_the_project_it_targets"
+  ],
+  "what": "the project the roles script reaches is another one",
+  "old": "const ROLES_PROJECT: &str = \"cv2-s5\";",
+  "new": "const ROLES_PROJECT: &str = \"cv2-s6\";"
+ },
+ {
+  "id": "RP-122",
+  "design": "rework R6",
+  "file": "src/real/name.rs",
+  "tests": [
+   "real_name",
+   "real_limits"
+  ],
+  "fails": [
+   "rn_06_a_compose_that_is_a_fifo_with_no_writer_is_refused_at_once",
+   "rl_07_a_compose_that_is_a_fifo_with_no_writer_is_a_prompt_refusal_and_nothing_is_started"
+  ],
+  "what": "compose.yml is opened blocking",
+  "old": "        .custom_flags(O_NONBLOCK)\n",
+  "new": ""
+ },
+ {
+  "id": "RP-123",
+  "design": "rework R6",
+  "file": "src/real/name.rs",
+  "tests": [
+   "real_name"
+  ],
+  "fails": [
+   "rn_06_a_compose_that_is_a_fifo_with_no_writer_is_refused_at_once"
+  ],
+  "what": "a FIFO that holds a name is read as a compose file",
+  "old": "    if !file.metadata().map(|m| m.is_file()).unwrap_or(false) {",
+  "new": "    if false {"
+ },
+ {
+  "id": "RP-124",
+  "design": "rework R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_06_the_fixed_names_are_reserved_even_when_the_parent_lacks_them"
+  ],
+  "what": "an extra may supply a fixed name the parent lacks",
+  "old": "        if !RESERVED\n            .iter()\n            .any(|name| k.as_os_str() == OsStr::new(name))\n        {",
+  "new": "        if !env.iter().any(|(have, _)| have == k) {"
+ },
+ {
+  "id": "RP-125",
+  "design": "rework R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_05_an_extra_variable_never_replaces_a_fixed_name",
+   "re_06_the_fixed_names_are_reserved_even_when_the_parent_lacks_them"
+  ],
+  "what": "LANG is not reserved",
+  "old": "const RESERVED: [&str; 4] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\", \"LANG\"];",
+  "new": "const RESERVED: [&str; 3] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\"];"
+ },
+ {
+  "id": "RP-126",
+  "design": "rework R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_06_the_fixed_names_are_reserved_even_when_the_parent_lacks_them"
+  ],
+  "what": "XDG_RUNTIME_DIR is not reserved",
+  "old": "const RESERVED: [&str; 4] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\", \"LANG\"];",
+  "new": "const RESERVED: [&str; 3] = [\"PATH\", \"HOME\", \"LANG\"];"
+ },
+ {
+  "id": "RP-127",
+  "design": "rework R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_06_the_fixed_names_are_reserved_even_when_the_parent_lacks_them"
+  ],
+  "what": "HOME is not reserved",
+  "old": "const RESERVED: [&str; 4] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\", \"LANG\"];",
+  "new": "const RESERVED: [&str; 3] = [\"PATH\", \"XDG_RUNTIME_DIR\", \"LANG\"];"
+ },
+ {
+  "id": "RP-128",
+  "design": "rework R2",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_env"
+  ],
+  "fails": [
+   "re_06_the_fixed_names_are_reserved_even_when_the_parent_lacks_them"
+  ],
+  "what": "PATH is not reserved",
+  "old": "const RESERVED: [&str; 4] = [\"PATH\", \"HOME\", \"XDG_RUNTIME_DIR\", \"LANG\"];",
+  "new": "const RESERVED: [&str; 3] = [\"HOME\", \"XDG_RUNTIME_DIR\", \"LANG\"];"
+ },
+ {
+  "id": "RP-129",
+  "design": "rework R3",
+  "file": "tests/real_fakes.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_27_module_ids_that_spell_a_forbidden_word_are_data_and_are_passed_as_they_are",
+   "rc_28_the_allow_list_helper_refuses_commands_and_globs_and_accepts_data"
+  ],
+  "what": "the helper blankets the module ids again (forbidden words in value positions)",
+  "old": "        let value = values.contains(&i);",
+  "new": "        let value = false;"
+ },
+ {
+  "id": "RP-130",
+  "design": "rework R3",
+  "file": "tests/real_fakes.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_28_the_allow_list_helper_refuses_commands_and_globs_and_accepts_data"
+  ],
+  "what": "the helper accepts a glob character in an archive path",
+  "old": ".all(|b| b.is_ascii_alphanumeric() || b\"._/-+\".contains(&b))",
+  "new": ".all(|b| b.is_ascii_alphanumeric() || b\"._/-+*\".contains(&b))"
+ },
+ {
+  "id": "RP-131",
+  "design": "rework R3",
+  "file": "tests/real_fakes.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_28_the_allow_list_helper_refuses_commands_and_globs_and_accepts_data"
+  ],
+  "what": "the helper accepts a space in an archive path",
+  "old": ".all(|b| b.is_ascii_alphanumeric() || b\"._/-+\".contains(&b))",
+  "new": ".all(|b| b.is_ascii_alphanumeric() || b\"._/-+ \".contains(&b))"
+ },
+ {
+  "id": "RP-132",
+  "design": "rework R3",
+  "file": "tests/real_fakes.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_28_the_allow_list_helper_refuses_commands_and_globs_and_accepts_data"
+  ],
+  "what": "the helper accepts a roles vector with no module id",
+  "old": "                            && !ids.is_empty()\n",
+  "new": ""
+ },
+ {
+  "id": "RP-133",
+  "design": "rework R3",
+  "file": "tests/real_fakes.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_28_the_allow_list_helper_refuses_commands_and_globs_and_accepts_data"
+  ],
+  "what": "the helper accepts a relative archive path",
+  "old": "    p.starts_with('/')\n        && p.bytes()",
+  "new": "    p.bytes()"
+ },
+ {
+  "id": "RP-134",
+  "design": "rework --deadline",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_12_run_roles_runs_the_script_by_its_absolute_path_with_one_argument_per_module",
+   "rc_29_the_deadline_is_the_wall_clock_at_the_launch_plus_the_timeout"
+  ],
+  "what": "the --deadline flag and E are not passed",
+  "old": "vec![os(\"--deadline\"), os(&deadline.to_string())]",
+  "new": "vec![]"
+ },
+ {
+  "id": "RP-135",
+  "design": "rework --deadline",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_12_run_roles_runs_the_script_by_its_absolute_path_with_one_argument_per_module",
+   "rc_29_the_deadline_is_the_wall_clock_at_the_launch_plus_the_timeout"
+  ],
+  "what": "E comes before the flag",
+  "old": "vec![os(\"--deadline\"), os(&deadline.to_string())]",
+  "new": "vec![os(&deadline.to_string()), os(\"--deadline\")]"
+ },
+ {
+  "id": "RP-136",
+  "design": "rework --deadline",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_12_run_roles_runs_the_script_by_its_absolute_path_with_one_argument_per_module",
+   "rc_29_the_deadline_is_the_wall_clock_at_the_launch_plus_the_timeout"
+  ],
+  "what": "the flag is spelled with one dash",
+  "old": "os(\"--deadline\")",
+  "new": "os(\"-deadline\")"
+ },
+ {
+  "id": "RP-137",
+  "design": "rework --deadline",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_12_run_roles_runs_the_script_by_its_absolute_path_with_one_argument_per_module",
+   "rc_29_the_deadline_is_the_wall_clock_at_the_launch_plus_the_timeout"
+  ],
+  "what": "the deadline ignores the timeout",
+  "old": "roles_deadline(now, timeout).ok_or_else(out_of_range)?",
+  "new": "roles_deadline(now, Duration::ZERO).ok_or_else(out_of_range)?"
+ },
+ {
+  "id": "RP-138",
+  "design": "rework --deadline",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_12_run_roles_runs_the_script_by_its_absolute_path_with_one_argument_per_module",
+   "rc_29_the_deadline_is_the_wall_clock_at_the_launch_plus_the_timeout"
+  ],
+  "what": "the deadline ignores the clock",
+  "old": "roles_deadline(now, timeout).ok_or_else(out_of_range)?",
+  "new": "roles_deadline(0, timeout).ok_or_else(out_of_range)?"
+ },
+ {
+  "id": "RP-139",
+  "design": "rework --deadline",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_30_a_deadline_the_script_cannot_take_is_failed_before_anything_starts"
+  ],
+  "what": "an out-of-range deadline is replaced by 0, not refused",
+  "old": "roles_deadline(now, timeout).ok_or_else(out_of_range)?",
+  "new": "roles_deadline(now, timeout).unwrap_or(0)"
+ },
+ {
+  "id": "RP-140",
+  "design": "rework --deadline",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_31_the_roles_deadline_is_whole_seconds_now_plus_timeout_and_at_most_11_digits",
+   "rc_12_run_roles_runs_the_script_by_its_absolute_path_with_one_argument_per_module"
+  ],
+  "what": "the deadline is one second late",
+  "old": ".checked_add(timeout.as_secs())",
+  "new": ".checked_add(timeout.as_secs() + 1)"
+ },
+ {
+  "id": "RP-141",
+  "design": "rework --deadline",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_31_the_roles_deadline_is_whole_seconds_now_plus_timeout_and_at_most_11_digits",
+   "rc_12_run_roles_runs_the_script_by_its_absolute_path_with_one_argument_per_module"
+  ],
+  "what": "the timeout is counted in milliseconds",
+  "old": ".checked_add(timeout.as_secs())",
+  "new": ".checked_add(timeout.as_millis() as u64)"
+ },
+ {
+  "id": "RP-142",
+  "design": "rework --deadline",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_31_the_roles_deadline_is_whole_seconds_now_plus_timeout_and_at_most_11_digits"
+  ],
+  "what": "the largest deadline is refused (< instead of <=)",
+  "old": ".filter(|e| (1..=MAX_ROLES_DEADLINE).contains(e))",
+  "new": ".filter(|e| (1..MAX_ROLES_DEADLINE).contains(e))"
+ },
+ {
+  "id": "RP-143",
+  "design": "rework --deadline",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_31_the_roles_deadline_is_whole_seconds_now_plus_timeout_and_at_most_11_digits"
+  ],
+  "what": "the cap has 12 digits",
+  "old": "pub const MAX_ROLES_DEADLINE: u64 = 99_999_999_999;",
+  "new": "pub const MAX_ROLES_DEADLINE: u64 = 999_999_999_999;"
+ },
+ {
+  "id": "RP-144",
+  "design": "rework --deadline",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_31_the_roles_deadline_is_whole_seconds_now_plus_timeout_and_at_most_11_digits",
+   "rc_30_a_deadline_the_script_cannot_take_is_failed_before_anything_starts"
+  ],
+  "what": "an overflow wraps instead of being refused",
+  "old": "now_secs\n        .checked_add(timeout.as_secs())\n        .filter(|e| (1..=MAX_ROLES_DEADLINE).contains(e))",
+  "new": "Some(now_secs.wrapping_add(timeout.as_secs())).filter(|e| (1..=MAX_ROLES_DEADLINE).contains(e))"
+ },
+ {
+  "id": "RP-145",
+  "design": "W1-55 delta",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_31_the_roles_deadline_is_whole_seconds_now_plus_timeout_and_at_most_11_digits"
+  ],
+  "what": "E = 0 is accepted",
+  "old": ".filter(|e| (1..=MAX_ROLES_DEADLINE).contains(e))",
+  "new": ".filter(|e| (0..=MAX_ROLES_DEADLINE).contains(e))"
+ },
+ {
+  "id": "RP-146",
+  "design": "W1-55 delta",
+  "file": "src/real/env.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_31_the_roles_deadline_is_whole_seconds_now_plus_timeout_and_at_most_11_digits"
+  ],
+  "what": "the cap is dropped (an E over 11 digits is taken)",
+  "old": ".filter(|e| (1..=MAX_ROLES_DEADLINE).contains(e))",
+  "new": ".filter(|e| (1..=u64::MAX).contains(e))"
+ },
+ {
+  "id": "RP-147",
+  "design": "W1-55 delta",
+  "file": "tests/real_fakes.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_28_the_allow_list_helper_refuses_commands_and_globs_and_accepts_data"
+  ],
+  "what": "the helper takes a leading zero in E",
+  "old": "                            && !e.starts_with('0')\n",
+  "new": ""
+ },
+ {
+  "id": "RP-148",
+  "design": "W1-55 delta",
+  "file": "tests/real_fakes.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_28_the_allow_list_helper_refuses_commands_and_globs_and_accepts_data"
+  ],
+  "what": "the helper takes an E of 12 digits",
+  "old": "                            && e.len() <= 11\n",
+  "new": "                            && e.len() <= 12\n"
+ },
+ {
+  "id": "RP-149",
+  "design": "W1-55 delta",
+  "file": "tests/real_fakes.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_28_the_allow_list_helper_refuses_commands_and_globs_and_accepts_data"
+  ],
+  "what": "the helper takes a non-digit in E",
+  "old": "                            && e.bytes().all(|b| b.is_ascii_digit())\n",
+  "new": ""
+ },
+ {
+  "id": "RP-L3a",
+  "design": "follow-up L3/L4",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_32_missing_is_read_only_from_a_stderr_that_is_all_there"
+  ],
+  "what": "Missing is read from a cut stderr",
+  "old": "                && !o.stderr_cut\n",
+  "new": ""
+ },
+ {
+  "id": "RP-L3b",
+  "design": "follow-up L3/L4",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_32_missing_is_read_only_from_a_stderr_that_is_all_there"
+  ],
+  "what": "Missing checks the wrong stream for completeness",
+  "old": "                && !o.stderr_cut\n",
+  "new": "                && !o.stdout_cut\n"
+ },
+ {
+  "id": "RP-L4a",
+  "design": "follow-up L3/L4",
+  "file": "tests/real_fakes.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_11_the_allow_list_helper_holds_the_dump_label_to_its_whole_shape"
+  ],
+  "what": "the helper takes a label of any length",
+  "old": "    l.len() <= 144\n",
+  "new": "    true\n"
+ },
+ {
+  "id": "RP-L4b",
+  "design": "follow-up L3/L4",
+  "file": "tests/real_fakes.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_11_the_allow_list_helper_holds_the_dump_label_to_its_whole_shape"
+  ],
+  "what": "the helper takes a semicolon in a label",
+  "old": "b\".+-\".contains(&b)",
+  "new": "b\".+-;\".contains(&b)"
+ },
+ {
+  "id": "RP-L4c",
+  "design": "follow-up L3/L4",
+  "file": "tests/real_fakes.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_11_the_allow_list_helper_holds_the_dump_label_to_its_whole_shape"
+  ],
+  "what": "the helper takes an empty version on either side of -to-",
+  "old": "            !from.is_empty() && !to.is_empty()\n",
+  "new": "            true\n"
+ },
+ {
+  "id": "RP-150",
+  "design": "W1-56/57",
+  "file": "src/real/run.rs",
+  "tests": [
+   "__lib__"
+  ],
+  "fails": [
+   "real::run::tests::lost_wait_after_one_second_is_fenced_and_reported_as_timeout"
+  ],
+  "what": "a lost wait returns before the fence",
+  "old": "                fence_until(end);\n",
+  "new": ""
+ },
+ {
+  "id": "RP-151",
+  "design": "W1-56/57",
+  "file": "src/real/run.rs",
+  "tests": [
+   "__lib__"
+  ],
+  "fails": [
+   "real::run::tests::lost_wait_after_one_second_is_fenced_and_reported_as_timeout"
+  ],
+  "what": "a lost child is reported as a settled failure",
+  "old": "        RunError::Lost => PortError::TimedOut,",
+  "new": "        RunError::Lost => failed(\"lost\"),"
+ },
+ {
+  "id": "RP-152",
+  "design": "W1-56/57",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_33_signalled_roles_parent_with_live_descendant_is_unknown_until_deadline"
+  ],
+  "what": "a signalled parent returns before its deadline",
+  "old": "std::thread::sleep(timeout.saturating_sub(started.elapsed()));",
+  "new": "std::thread::sleep(Duration::ZERO);"
+ },
+ {
+  "id": "RP-153",
+  "design": "W1-56/57",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_37_settled_refusal_table_is_exactly_empty"
+  ],
+  "what": "a settled refusal is added without a new ruling",
+  "old": "pub const ROLES_SETTLED_REFUSALS: &[(i32, &str, &str)] = &[];",
+  "new": "pub const ROLES_SETTLED_REFUSALS: &[(i32, &str, &str)] = &[(2, \"usage\", \"untrusted\")];"
+ },
+ {
+  "id": "RP-154",
+  "design": "W1-56/57",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_38_success_with_cut_output_is_unknown_until_the_deadline"
+  ],
+  "what": "truncated output is accepted as success",
+  "old": "o.code == Some(0) && !o.stdout_cut && !o.stderr_cut",
+  "new": "o.code == Some(0)"
+ },
+ {
+  "id": "RP-155",
+  "design": "W1-56/57",
+  "file": "src/real/containers.rs",
+  "tests": [
+   "real_containers"
+  ],
+  "fails": [
+   "rc_39_forged_usage_line_with_live_descendant_is_unknown"
+  ],
+  "what": "a started nonzero script is accepted despite its live descendant",
+  "old": "if o.code == Some(0) && !o.stdout_cut && !o.stderr_cut {",
+  "new": "if o.code.is_some() && !o.stdout_cut && !o.stderr_cut {"
+ },
+ {
+  "id": "RP-156",
+  "design": "W1-56/57",
+  "file": "src/real/run.rs",
+  "tests": [
+   "__lib__"
+  ],
+  "fails": [
+   "real::run::tests::lost_wait_after_one_second_is_fenced_and_reported_as_timeout"
+  ],
+  "what": "the remaining deadline is compared against an early cutoff",
+  "old": "        if remaining.is_zero() {",
+  "new": "        if remaining <= Duration::from_millis(1500) {"
+ },
+ {
+  "id": "RP-157",
+  "design": "W1-56/57",
+  "file": "src/real/run.rs",
+  "tests": [
+   "__lib__"
+  ],
+  "fails": [
+   "real::run::tests::unconfirmed_kill_is_fenced_and_the_direct_child_is_reaped"
+  ],
+  "what": "an unconfirmed child is dropped instead of reaped",
+  "old": "        let _ = child.wait();",
+  "new": "        drop(child);"
+ },
+ {
+  "id": "RP-L4d",
+  "design": "W1-56/57",
+  "file": "tests/real_fakes.rs",
+  "tests": [
+   "real_dumper"
+  ],
+  "fails": [
+   "rd_11_the_allow_list_helper_holds_the_dump_label_to_its_whole_shape"
+  ],
+  "what": "the label helper permits underscore",
+  "old": "b\".+-\".contains(&b)",
+  "new": "b\"._+-\".contains(&b)"
+ },
+ {
+  "id": "RP-158",
+  "design": "W1-56/64",
+  "file": "src/real/run.rs",
+  "tests": [
+   "__lib__"
+  ],
+  "fails": [
+   "real::run::tests::stream_read_error_marks_output_incomplete"
+  ],
+  "what": "a stream read error is mistaken for complete output",
+  "old": "                            Err(_) => {\n                                if let Ok(mut g) = b.lock() {\n                                    g.1 = true;\n                                }\n                                break;\n                            }\n",
+  "new": "                            Err(_) => break,\n"
+ }
+]

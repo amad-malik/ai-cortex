@@ -1,0 +1,4046 @@
+[
+ {
+  "id": "EM-01",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_01_arguments"
+  ],
+  "what": "0 seconds is accepted",
+  "old": "(1..=3600).contains(&n)",
+  "new": "(0..=3600).contains(&n)"
+ },
+ {
+  "id": "EM-02",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_01_arguments"
+  ],
+  "what": "a flag may be given twice",
+  "old": "            if std::mem::replace(seen, true) {",
+  "new": "            if false && std::mem::replace(seen, true) {"
+ },
+ {
+  "id": "EM-03",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_01_arguments"
+  ],
+  "what": "--rollback and --to may go together",
+  "old": "    if out.mode == Mode::Rollback && out.to.is_some() {",
+  "new": "    if false {"
+ },
+ {
+  "id": "EM-04",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_01_arguments"
+  ],
+  "what": "a bad --to version becomes 0.0.0",
+  "old": "parse_version(v).map_err(|e| format!(\"--to: {e}\"))?",
+  "new": "parse_version(v).unwrap_or(Version::new(0, 0, 0))"
+ },
+ {
+  "id": "EM-05",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "local::st_02_a_401_is_a_code_of_the_closed_list_or_none_and_the_body_is_never_kept"
+  ],
+  "what": "a code outside the closed list is printed",
+  "old": "CLOSED_CODES.iter().find(|k| **k == c).copied()",
+  "new": "CLOSED_CODES.iter().find(|k| c.starts_with(**k)).copied()"
+ },
+ {
+  "id": "EM-06",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "local::st_02_a_401_is_a_code_of_the_closed_list_or_none_and_the_body_is_never_kept"
+  ],
+  "what": "worker_retired is not in the closed list",
+  "old": "    \"worker_retired\",\n",
+  "new": "    \"zzz_not_a_code\",\n"
+ },
+ {
+  "id": "EM-07",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_07_the_operator_token_file_must_be_there_and_sane"
+  ],
+  "what": "a token file of any size is read",
+  "old": "    if text.len() > 4096 {",
+  "new": "    if false {"
+ },
+ {
+  "id": "EM-08",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_07_the_operator_token_file_must_be_there_and_sane"
+  ],
+  "what": "an empty token file is accepted",
+  "old": "    if token.is_empty() {",
+  "new": "    if false {"
+ },
+ {
+  "id": "EM-09",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_07_the_operator_token_file_must_be_there_and_sane"
+  ],
+  "what": "white space stays in the token",
+  "old": "    let token = text.trim();",
+  "new": "    let token = text.as_str();"
+ },
+ {
+  "id": "EM-10",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_05_the_database_check_comes_first_and_accepts_only_a_zero"
+  ],
+  "what": "an empty database answer counts as zero",
+  "old": "        if count.is_empty() || count.len() > 9 ||",
+  "new": "        if count.len() > 9 ||"
+ },
+ {
+  "id": "EM-11",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_05_the_database_check_comes_first_and_accepts_only_a_zero"
+  ],
+  "what": "a very long number is read",
+  "old": "|| count.len() > 9 ||",
+  "new": "||"
+ },
+ {
+  "id": "EM-12",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_05_the_database_check_comes_first_and_accepts_only_a_zero"
+  ],
+  "what": "a non-zero count is accepted",
+  "old": "        if count.bytes().any(|b| b != b'0') {",
+  "new": "        if false {"
+ },
+ {
+  "id": "EM-13",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_06_the_pre_flight_comes_before_the_manifest_and_prints_only_a_closed_list"
+  ],
+  "what": "the pre-flight answer is ignored",
+  "old": "        let token = read_token(&self.env.operator_token_file).map_err(refuse)?;\n        match self.stack.whoami(&token) {",
+  "new": "        let token = read_token(&self.env.operator_token_file).map_err(refuse)?;\n        let _ = self.stack.whoami(&token);\n        match Whoami::Ok {"
+ },
+ {
+  "id": "EM-14",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_05_the_database_check_comes_first_and_accepts_only_a_zero"
+  ],
+  "what": "the pre-flight runs before the database check",
+  "old": "        let raw = self.psql.trust_rule_count().unwrap_or_default();",
+  "new": "        let _ = self.stack.whoami(&Secret::new(\"x\"));\n        let raw = self.psql.trust_rule_count().unwrap_or_default();"
+ },
+ {
+  "id": "EM-15",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_02_check_says_newer_same_or_lower_and_writes_nothing"
+  ],
+  "what": "--check answers 11 for a newer release",
+  "old": "pub const EXIT_NEWER: u8 = 10;",
+  "new": "pub const EXIT_NEWER: u8 = 11;"
+ },
+ {
+  "id": "EM-16",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_02_check_says_newer_same_or_lower_and_writes_nothing"
+  ],
+  "what": "nothing to do exits 10",
+  "old": "                code: EXIT_DONE,\n                lines: vec![format!(\"up to date ({v})\")],",
+  "new": "                code: EXIT_NEWER,\n                lines: vec![format!(\"up to date ({v})\")],"
+ },
+ {
+  "id": "EM-17",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "local::st_03_anything_else_is_unanswered_with_a_status_or_a_word"
+  ],
+  "what": "any 2xx is an answer",
+  "old": "            200 => Whoami::Ok,",
+  "new": "            200..=299 => Whoami::Ok,"
+ },
+ {
+  "id": "EM-18",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "local::st_03_anything_else_is_unanswered_with_a_status_or_a_word"
+  ],
+  "what": "a timeout is reported as no answer",
+  "old": "            Err(FetchError::Timeout) => return Whoami::Unanswered(\"timeout\".into()),",
+  "new": "            Err(FetchError::Timeout) => return Whoami::Unanswered(\"no answer\".into()),"
+ },
+ {
+  "id": "EB-01",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_01_a_good_release_is_downloaded_unpacked_and_verified_and_nothing_is_installed"
+  ],
+  "what": "the release archive is looked up under another architecture",
+  "old": "cortex-{to}-x86_64-linux.tar.gz",
+  "new": "cortex-{to}-aarch64-linux.tar.gz"
+ },
+ {
+  "id": "EB-02",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_01_a_good_release_is_downloaded_unpacked_and_verified_and_nothing_is_installed"
+  ],
+  "what": "the image archive is taken to be the release archive",
+  "old": ".find(|a| a.name == release.cortex.server_image.asset)",
+  "new": ".find(|a| a.name == tar_name)"
+ },
+ {
+  "id": "EB-03",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_04_leftovers_of_an_earlier_run_are_removed_by_exact_path_and_a_link_in_their_place_is_refused"
+  ],
+  "what": "a removed leftover is not reported",
+  "old": "lines.push(format!(\"removed a leftover {what} of an earlier run\"));",
+  "new": "let _ = &lines;"
+ },
+ {
+  "id": "EB-04",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_04_leftovers_of_an_earlier_run_are_removed_by_exact_path_and_a_link_in_their_place_is_refused"
+  ],
+  "what": "a link in place of a directory is refused with another sentence",
+  "old": "the {what} path exists and is not a directory; remove it by hand",
+  "new": "the {what} path exists; remove it by hand"
+ },
+ {
+  "id": "EB-05",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_13_staging_works_under_a_umask_that_strips_the_owners_bits"
+  ],
+  "what": "the downloads root is not made exactly 0700",
+  "old": "create_private_dir_exact(&root)",
+  "new": "crate::unpack::create_private_dir(&root)"
+ },
+ {
+  "id": "EB-06",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_01_a_good_release_is_downloaded_unpacked_and_verified_and_nothing_is_installed"
+  ],
+  "what": "the image archive is fetched before the release archive",
+  "old": "[(tar_asset, &tar_path), (img_asset, &img_path)]",
+  "new": "[(img_asset, &img_path), (tar_asset, &tar_path)]"
+ },
+ {
+  "id": "EB-07",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_01_a_good_release_is_downloaded_unpacked_and_verified_and_nothing_is_installed"
+  ],
+  "what": "the image archive is checked against the release archive's digest",
+  "old": "&asset.url, &asset.digest, path",
+  "new": "&asset.url, &tar_asset.digest, path"
+ },
+ {
+  "id": "EB-08",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_01_a_good_release_is_downloaded_unpacked_and_verified_and_nothing_is_installed"
+  ],
+  "what": "a matching roles script is refused",
+  "old": "if roles != release.cortex.roles_script_digest.0 {",
+  "new": "if roles == release.cortex.roles_script_digest.0 {"
+ },
+ {
+  "id": "EB-09",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_08_the_roles_script_must_be_the_one_the_manifest_names"
+  ],
+  "what": "the roles script is not checked",
+  "old": "if roles != release.cortex.roles_script_digest.0 {",
+  "new": "if false && roles != release.cortex.roles_script_digest.0 {"
+ },
+ {
+  "id": "EB-10",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_09_the_staged_stack_env_must_be_valid_and_agree_with_the_manifest"
+  ],
+  "what": "the staged stack.env's version is not compared",
+  "old": "if candidate_env.version != to {",
+  "new": "if false {"
+ },
+ {
+  "id": "EB-11",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_09_the_staged_stack_env_must_be_valid_and_agree_with_the_manifest"
+  ],
+  "what": "the staged stack.env's server image is not compared",
+  "old": "if candidate_env.server_image.0 != release.cortex.server_image.image_ref {",
+  "new": "if false {"
+ },
+ {
+  "id": "EB-12",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_09_the_staged_stack_env_must_be_valid_and_agree_with_the_manifest"
+  ],
+  "what": "the staged stack.env's database image is not compared",
+  "old": "if candidate_env.db_image.0 != release.cortex.db_image {",
+  "new": "if false {"
+ },
+ {
+  "id": "EB-13",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_10_the_db_service_must_not_change_and_a_shape_it_cannot_read_is_a_refusal_on_either_side"
+  ],
+  "what": "the db service of the running release is compared with itself",
+  "old": "            (&candidate_compose, &candidate_env),",
+  "new": "            (&current_compose, &candidate_env),"
+ },
+ {
+  "id": "EB-14",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_10_the_db_service_must_not_change_and_a_shape_it_cannot_read_is_a_refusal_on_either_side"
+  ],
+  "what": "the two sides of the comparison are swapped",
+  "old": "            (&current_compose, &current_env),\n            (&candidate_compose, &candidate_env),",
+  "new": "            (&candidate_compose, &candidate_env),\n            (&current_compose, &current_env),"
+ },
+ {
+  "id": "EB-15",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_01_a_good_release_is_downloaded_unpacked_and_verified_and_nothing_is_installed"
+  ],
+  "what": "the plan shows the archive's digest as the roles script's",
+  "old": "digest_text(&release.cortex.roles_script_digest)",
+  "new": "digest_text(&tar_asset.digest)"
+ },
+ {
+  "id": "EB-16",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_01_a_good_release_is_downloaded_unpacked_and_verified_and_nothing_is_installed"
+  ],
+  "what": "the plan says another thing about the database service",
+  "old": "lines.push(\"database service unchanged\".to_string());",
+  "new": "lines.push(\"database service checked\".to_string());"
+ },
+ {
+  "id": "EB-17",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_01_a_good_release_is_downloaded_unpacked_and_verified_and_nothing_is_installed"
+  ],
+  "what": "the modules are listed with another separator",
+  "old": "modules.join(\",\")",
+  "new": "modules.join(\";\")"
+ },
+ {
+  "id": "EB-18",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_05_a_bad_digest_on_either_archive_leaves_nothing_and_the_second_is_not_fetched_after_the_first_fails",
+   "prepare::pr_07_a_hostile_or_incomplete_archive_is_refused_and_everything_is_removed"
+  ],
+  "what": "a failed stage leaves what it created",
+  "old": "            armed: true,",
+  "new": "            armed: false,"
+ },
+ {
+  "id": "EB-19",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_01_a_good_release_is_downloaded_unpacked_and_verified_and_nothing_is_installed"
+  ],
+  "what": "a good stage removes what it staged",
+  "old": "        cleanup.armed = false;\n        Ok(Prepared {",
+  "new": "        Ok(Prepared {"
+ },
+ {
+  "id": "EB-20",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_01_a_good_release_is_downloaded_unpacked_and_verified_and_nothing_is_installed"
+  ],
+  "what": "a failed stage or a discard leaves the download directory",
+  "old": "    remove_real_dir(downloads);\n    if let Some(root) = downloads.parent() {",
+  "new": "    if let Some(root) = downloads.parent() {"
+ },
+ {
+  "id": "EB-21",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_01_a_good_release_is_downloaded_unpacked_and_verified_and_nothing_is_installed"
+  ],
+  "what": "the downloads directory itself is left",
+  "old": "    if let Some(root) = downloads.parent() {\n        let _ = std::fs::remove_dir(root);\n    }",
+  "new": ""
+ },
+ {
+  "id": "EB-22",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_01_a_good_release_is_downloaded_unpacked_and_verified_and_nothing_is_installed"
+  ],
+  "what": "a discard leaves the staging directory",
+  "old": "    remove_real_dir(staging);\n",
+  "new": ""
+ },
+ {
+  "id": "EB-23",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_02_a_lock_that_is_held_stops_an_upgrade_before_anything_is_asked_but_not_a_check",
+   "prepare::pr_03_an_interrupted_rollback_is_finished_first_and_an_unusable_intent_stops_everything"
+  ],
+  "what": "an upgrade takes no lock and finishes no rollback",
+  "old": "let _lock = if args.mode != Mode::Check {",
+  "new": "let _lock = if false {"
+ },
+ {
+  "id": "EB-24",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_02_a_lock_that_is_held_stops_an_upgrade_before_anything_is_asked_but_not_a_check"
+  ],
+  "what": "a check takes the lock too",
+  "old": "let _lock = if args.mode != Mode::Check {",
+  "new": "let _lock = if true {"
+ },
+ {
+  "id": "EB-25",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_02_a_lock_that_is_held_stops_an_upgrade_before_anything_is_asked_but_not_a_check"
+  ],
+  "what": "a busy lock gives another sentence",
+  "old": "                Err(e) => return refuse(e.to_string()),\n            };\n            let mut completed = false;",
+  "new": "                Err(_) => return refuse(\"busy\"),\n            };\n            let mut completed = false;"
+ },
+ {
+  "id": "EB-26",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_03_an_interrupted_rollback_is_finished_first_and_an_unusable_intent_stops_everything"
+  ],
+  "what": "a finished rollback is not reported",
+  "old": "completed an interrupted rollback ({} to {})",
+  "new": "finished a rollback ({} to {})"
+ },
+ {
+  "id": "EB-27",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_03_an_interrupted_rollback_is_finished_first_and_an_unusable_intent_stops_everything"
+  ],
+  "what": "an unusable rollback intent is ignored",
+  "old": "match home.recover() {",
+  "new": "match home.recover().or_else(|_| Ok::<_, crate::layout::LayoutError>(None)) {"
+ },
+ {
+  "id": "EB-28",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_01_a_good_release_is_downloaded_unpacked_and_verified_and_nothing_is_installed"
+  ],
+  "what": "the plan names the versions the wrong way round",
+  "old": "format!(\"upgrade {from} -> {to}\")",
+  "new": "format!(\"upgrade {to} -> {from}\")"
+ },
+ {
+  "id": "EB-29",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_02_the_installed_dump_tool_is_required_before_anything_is_asked_and_a_check_does_not_need_it"
+  ],
+  "what": "the dump tool is never required",
+  "old": "        if args.mode == Mode::Upgrade {\n            let tool",
+  "new": "        if false {\n            let tool"
+ },
+ {
+  "id": "EB-30",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_02_the_installed_dump_tool_is_required_before_anything_is_asked_and_a_check_does_not_need_it"
+  ],
+  "what": "a check needs the dump tool too",
+  "old": "        if args.mode == Mode::Upgrade {\n            let tool",
+  "new": "        if args.mode != Mode::Rollback {\n            let tool"
+ },
+ {
+  "id": "EB-31",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_02_the_installed_dump_tool_is_required_before_anything_is_asked_and_a_check_does_not_need_it"
+  ],
+  "what": "the dump tool need not be executable",
+  "old": "m.file_type().is_file() && m.permissions().mode() & 0o111 != 0",
+  "new": "m.file_type().is_file()"
+ },
+ {
+  "id": "EB-32",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_02_the_installed_dump_tool_is_required_before_anything_is_asked_and_a_check_does_not_need_it"
+  ],
+  "what": "a link or a directory is taken for the dump tool",
+  "old": "m.file_type().is_file() && m.permissions().mode() & 0o111 != 0",
+  "new": "!m.file_type().is_dir() && m.permissions().mode() & 0o111 != 0"
+ },
+ {
+  "id": "EB-33",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_01_after_staging_the_dump_is_taken_verified_and_then_the_image_is_loaded"
+  ],
+  "what": "the dump gets another timeout",
+  "old": "            .dump(&label, Duration::from_secs(1800))",
+  "new": "            .dump(&label, Duration::from_secs(900))"
+ },
+ {
+  "id": "EB-34",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_03_every_exit_of_the_dump_tool_but_0_is_a_refusal_with_its_one_line_and_nothing_else_happens"
+  ],
+  "what": "exit 1 is reported as a refusal by the tool",
+  "old": "1 => \"failed\".to_string(),",
+  "new": "1 => \"was refused\".to_string(),"
+ },
+ {
+  "id": "EB-35",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_03_every_exit_of_the_dump_tool_but_0_is_a_refusal_with_its_one_line_and_nothing_else_happens"
+  ],
+  "what": "exit 3 is reported as a timeout",
+  "old": "3 => \"did not start, another dump is running\".to_string(),",
+  "new": "3 => \"timed out\".to_string(),"
+ },
+ {
+  "id": "EB-36",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_03_every_exit_of_the_dump_tool_but_0_is_a_refusal_with_its_one_line_and_nothing_else_happens"
+  ],
+  "what": "exit 4 is reported as a failure",
+  "old": "4 => \"timed out\".to_string(),",
+  "new": "4 => \"failed\".to_string(),"
+ },
+ {
+  "id": "EB-37",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_03_every_exit_of_the_dump_tool_but_0_is_a_refusal_with_its_one_line_and_nothing_else_happens"
+  ],
+  "what": "a negative status is taken for success",
+  "old": "if result.exit != 0 {",
+  "new": "if result.exit > 0 {"
+ },
+ {
+  "id": "EB-38",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_03_every_exit_of_the_dump_tool_but_0_is_a_refusal_with_its_one_line_and_nothing_else_happens"
+  ],
+  "what": "the tool's one line is left out of the message",
+  "old": "                \"the pre-upgrade dump {why}: {}\",\n                result.last_stderr_line",
+  "new": "                \"the pre-upgrade dump {why}: {}\",\n                \"\""
+ },
+ {
+  "id": "EB-39",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_04_a_port_error_from_the_dump_is_a_refusal_too"
+  ],
+  "what": "a timed-out port call says something else",
+  "old": "PortError::TimedOut => refuse(\"the pre-upgrade dump timed out\"),",
+  "new": "PortError::TimedOut => refuse(\"the pre-upgrade dump took long\"),"
+ },
+ {
+  "id": "EB-40",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_04_a_port_error_from_the_dump_is_a_refusal_too"
+  ],
+  "what": "a failed port call says something else",
+  "old": "refuse(format!(\"the pre-upgrade dump could not be run: {line}\"))",
+  "new": "refuse(format!(\"the pre-upgrade dump broke: {line}\"))"
+ },
+ {
+  "id": "EB-41",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_05_the_set_path_must_be_a_fresh_directory_directly_under_the_labelled_area"
+  ],
+  "what": "no path is read as success",
+  "old": "            return Err(not_usable(\"the tool named no path\"));",
+  "new": "            return Ok(self.env.home.join(\"dumps\"));"
+ },
+ {
+  "id": "EB-42",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_05_the_set_path_must_be_a_fresh_directory_directly_under_the_labelled_area"
+  ],
+  "what": "a relative path is let through",
+  "old": "if line.is_empty() || !path.is_absolute() {",
+  "new": "if line.is_empty() {"
+ },
+ {
+  "id": "EB-43",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_05_the_set_path_must_be_a_fresh_directory_directly_under_the_labelled_area"
+  ],
+  "what": "a set anywhere is accepted",
+  "old": "if set.parent() != Some(area.as_path()) {",
+  "new": "if false {"
+ },
+ {
+  "id": "EB-44",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_05_the_set_path_must_be_a_fresh_directory_directly_under_the_labelled_area"
+  ],
+  "what": "a file is accepted as a set",
+  "old": "        if !meta.is_dir() {",
+  "new": "        if false {"
+ },
+ {
+  "id": "EB-45",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_05_the_set_path_must_be_a_fresh_directory_directly_under_the_labelled_area"
+  ],
+  "what": "a set that existed before the call is accepted",
+  "old": "if set.file_name().is_some_and(|n| before.contains(n)) {",
+  "new": "if false {"
+ },
+ {
+  "id": "EB-46",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_05_the_set_path_must_be_a_fresh_directory_directly_under_the_labelled_area"
+  ],
+  "what": "the labelled area is not listed before the call",
+  "old": "                Ok(entries) => entries\n                    .map(|e| e.map(|e| e.file_name()))\n                    .collect::<Result<_, _>>()\n                    .map_err(not_listed)?,",
+  "new": "                Ok(_) => Default::default(),"
+ },
+ {
+  "id": "EB-47",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_06_the_set_is_checked_against_its_own_sha256sums_again"
+  ],
+  "what": "the checksums are not checked",
+  "old": "        if !set_checksums_hold(&set) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "EB-48",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_06_the_set_is_checked_against_its_own_sha256sums_again"
+  ],
+  "what": "an empty SHA256SUMS holds",
+  "old": "    seen > 0\n",
+  "new": "    true\n"
+ },
+ {
+  "id": "EB-49",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_06_the_set_is_checked_against_its_own_sha256sums_again"
+  ],
+  "what": "a listed link is accepted",
+  "old": "        if !regular || got_hex != hex {",
+  "new": "        if got_hex != hex {"
+ },
+ {
+  "id": "EB-50",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_06_the_set_is_checked_against_its_own_sha256sums_again"
+  ],
+  "what": "a hidden name is accepted",
+  "old": "            && !name.starts_with('.')\n",
+  "new": ""
+ },
+ {
+  "id": "EB-51",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_06_the_set_is_checked_against_its_own_sha256sums_again"
+  ],
+  "what": "a name may be empty or long",
+  "old": "(1..=128).contains(&name.len())",
+  "new": "(0..=1280).contains(&name.len())"
+ },
+ {
+  "id": "EB-52",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_06_the_set_is_checked_against_its_own_sha256sums_again"
+  ],
+  "what": "a wrong hash is accepted",
+  "old": "got_hex != hex",
+  "new": "false"
+ },
+ {
+  "id": "EB-53",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_01_after_staging_the_dump_is_taken_verified_and_then_the_image_is_loaded"
+  ],
+  "what": "the image archive is another file",
+  "old": "let archive = p.downloads.join(\"server-image.oci.tar\");",
+  "new": "let archive = p.downloads.join(\"release.tar.gz\");"
+ },
+ {
+  "id": "EB-54",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_07_the_loaded_image_must_be_the_one_the_manifest_names"
+  ],
+  "what": "a different loaded image is accepted",
+  "old": "if image_digest(&p.release.cortex.server_image.image_ref) != Some(got) {",
+  "new": "if false {"
+ },
+ {
+  "id": "EB-55",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_01_after_staging_the_dump_is_taken_verified_and_then_the_image_is_loaded"
+  ],
+  "what": "a matching loaded image is refused",
+  "old": "if image_digest(&p.release.cortex.server_image.image_ref) != Some(got) {",
+  "new": "if image_digest(&p.release.cortex.server_image.image_ref) == Some(got) {"
+ },
+ {
+  "id": "EB-56",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_01_after_staging_the_dump_is_taken_verified_and_then_the_image_is_loaded"
+  ],
+  "what": "the image digest is read from another prefix",
+  "old": "rsplit_once(\"@sha256:\")",
+  "new": "rsplit_once(\"@sha512:\")"
+ },
+ {
+  "id": "EB-57",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_07_the_loaded_image_must_be_the_one_the_manifest_names"
+  ],
+  "what": "a failed load says something else",
+  "old": "refuse(format!(\"the server image could not be loaded: {line}\"))",
+  "new": "refuse(format!(\"the server image failed: {line}\"))"
+ },
+ {
+  "id": "EB-58",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_01_after_staging_the_dump_is_taken_verified_and_then_the_image_is_loaded"
+  ],
+  "what": "the dump set line is changed",
+  "old": "all.push(\"pre-upgrade dump set verified\".to_string());",
+  "new": "all.push(\"dump ok\".to_string());"
+ },
+ {
+  "id": "EB-59",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_07_the_loaded_image_must_be_the_one_the_manifest_names"
+  ],
+  "what": "the staging is not removed after a failed dump or load",
+  "old": "            all.extend(o.lines);\n            all.extend(p.discard());\n            Outcome {",
+  "new": "            all.extend(o.lines);\n            let _ = p;\n            Outcome {"
+ },
+ {
+  "id": "EB-60",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_11_the_staged_release_gets_the_verified_manifest_copy_and_a_checksum_list"
+  ],
+  "what": "the manifest copy is not the fetched manifest",
+  "old": "write_plain(&staging.join(\"manifest.json\"), manifest)",
+  "new": "write_plain(&staging.join(\"manifest.json\"), b\"{}\")"
+ },
+ {
+  "id": "EB-61",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_11_the_staged_release_gets_the_verified_manifest_copy_and_a_checksum_list"
+  ],
+  "what": "the checksum list is in reverse order",
+  "old": "        names.sort();\n",
+  "new": "        names.sort();\n        names.reverse();\n"
+ },
+ {
+  "id": "EB-62",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_11_the_staged_release_gets_the_verified_manifest_copy_and_a_checksum_list"
+  ],
+  "what": "the checksum list uses one space",
+  "old": "\"{}  {name}\\n\",\n                cortex_types::Sha256(hash).to_hex()",
+  "new": "\"{} {name}\\n\",\n                cortex_types::Sha256(hash).to_hex()"
+ },
+ {
+  "id": "EB-63",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_01_a_good_upgrade_switches_the_links_keeps_the_old_release_and_writes_one_record"
+  ],
+  "what": "the record misses its first steps",
+  "old": "        for _ in 0..5 {",
+  "new": "        for _ in 0..4 {"
+ },
+ {
+  "id": "EB-64",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_01_a_good_upgrade_switches_the_links_keeps_the_old_release_and_writes_one_record",
+   "prepare::go_02_nothing_of_the_install_changes_before_the_dump_and_the_load_and_the_order_after_is_fixed",
+   "prepare::go_04_after_a_good_upgrade_only_current_and_previous_are_kept_and_no_dump_set_is_touched"
+  ],
+  "what": "the switch is never made",
+  "old": "home.commit_with(&to, &mut |step| hooks.commit_step.is_none_or(|f| f(step)))",
+  "new": "Ok::<(), crate::layout::LayoutError>(())"
+ },
+ {
+  "id": "EB-65",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_01_a_good_upgrade_switches_the_links_keeps_the_old_release_and_writes_one_record"
+  ],
+  "what": "the downloads are left after a good upgrade",
+  "old": "        all.extend(p.discard());\n        mark(&mut steps, true);\n        // R-5: the backup scripts",
+  "new": "        mark(&mut steps, true);\n        // R-5: the backup scripts"
+ },
+ {
+  "id": "EB-66",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_01_a_good_upgrade_switches_the_links_keeps_the_old_release_and_writes_one_record",
+   "prepare::go_02_nothing_of_the_install_changes_before_the_dump_and_the_load_and_the_order_after_is_fixed",
+   "prepare::go_03_every_wait_is_a_poll_with_the_given_interval_and_stops_when_the_answer_is_good",
+   "prepare::go_04_after_a_good_upgrade_only_current_and_previous_are_kept_and_no_dump_set_is_touched",
+   "prepare::go_05_a_second_run_after_a_good_upgrade_has_nothing_to_do_and_writes_nothing"
+  ],
+  "what": "the database is never healthy",
+  "old": "match state(Service::Db) {\n                Ok(ServiceState::Healthy) => Wait::Done,",
+  "new": "match state(Service::Db) {\n                Ok(ServiceState::Healthy) => Wait::Pending,"
+ },
+ {
+  "id": "EB-67",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_02_nothing_of_the_install_changes_before_the_dump_and_the_load_and_the_order_after_is_fixed"
+  ],
+  "what": "the role step gets no modules",
+  "old": ".run_roles(dir, &release.cortex.modules, timeout)",
+  "new": ".run_roles(dir, &[], timeout)"
+ },
+ {
+  "id": "EB-68",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_02_nothing_of_the_install_changes_before_the_dump_and_the_load_and_the_order_after_is_fixed",
+   "prepare::go_03_every_wait_is_a_poll_with_the_given_interval_and_stops_when_the_answer_is_good"
+  ],
+  "what": "the role step gets the health timeout",
+  "old": "match roles(args.roles_timeout) {",
+  "new": "match roles(args.health_timeout) {"
+ },
+ {
+  "id": "EB-69",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_02_nothing_of_the_install_changes_before_the_dump_and_the_load_and_the_order_after_is_fixed"
+  ],
+  "what": "only the server is started after the roles",
+  "old": ".compose_up(dir, &[Service::Migrate, Service::Server])",
+  "new": ".compose_up(dir, &[Service::Server])"
+ },
+ {
+  "id": "EB-70",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_03_every_wait_is_a_poll_with_the_given_interval_and_stops_when_the_answer_is_good"
+  ],
+  "what": "the interval is ignored",
+  "old": "self.pace.sleep(interval.min(timeout - spent));",
+  "new": "self.pace.sleep(Duration::from_secs(1).min(timeout - spent));"
+ },
+ {
+  "id": "EB-71",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_01_a_good_upgrade_switches_the_links_keeps_the_old_release_and_writes_one_record",
+   "prepare::go_02_nothing_of_the_install_changes_before_the_dump_and_the_load_and_the_order_after_is_fixed",
+   "prepare::go_03_every_wait_is_a_poll_with_the_given_interval_and_stops_when_the_answer_is_good",
+   "prepare::go_04_after_a_good_upgrade_only_current_and_previous_are_kept_and_no_dump_set_is_touched",
+   "prepare::go_05_a_second_run_after_a_good_upgrade_has_nothing_to_do_and_writes_nothing"
+  ],
+  "what": "the server is never ready",
+  "old": "                Ready::Yes => Wait::Done,",
+  "new": "                Ready::Yes => Wait::Pending,"
+ },
+ {
+  "id": "EB-72",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_02_nothing_of_the_install_changes_before_the_dump_and_the_load_and_the_order_after_is_fixed"
+  ],
+  "what": "the authenticated read is not made",
+  "old": "        match self.stack.whoami(&token) {\n            Whoami::Ok => Ok(()),",
+  "new": "        match Whoami::Ok {\n            Whoami::Ok => Ok(()),"
+ },
+ {
+  "id": "EB-73",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_01_a_good_upgrade_switches_the_links_keeps_the_old_release_and_writes_one_record"
+  ],
+  "what": "a good upgrade is recorded as failed",
+  "old": "            result: RecordResult::Done,",
+  "new": "            result: RecordResult::RollbackFailed,"
+ },
+ {
+  "id": "EB-74",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_01_a_good_upgrade_switches_the_links_keeps_the_old_release_and_writes_one_record"
+  ],
+  "what": "the record has no dump set path",
+  "old": "            dump_set: Some(set.display().to_string()),\n            members: info,",
+  "new": "            dump_set: None,\n            members: info,"
+ },
+ {
+  "id": "EB-75",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_01_a_good_upgrade_switches_the_links_keeps_the_old_release_and_writes_one_record",
+   "prepare::go_05_a_second_run_after_a_good_upgrade_has_nothing_to_do_and_writes_nothing"
+  ],
+  "what": "no record is written",
+  "old": "            members: info,\n        };\n        if let Err(e) = home.write_record(self.clock, &record) {",
+  "new": "            members: info,\n        };\n        if let Err(e) = Ok::<std::path::PathBuf, LayoutError>(std::path::PathBuf::new()) {"
+ },
+ {
+  "id": "EB-76",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_04_after_a_good_upgrade_only_current_and_previous_are_kept_and_no_dump_set_is_touched"
+  ],
+  "what": "older releases are not pruned",
+  "old": "        match home.prune() {",
+  "new": "        match Ok::<Vec<Version>, crate::layout::LayoutError>(Vec::new()) {"
+ },
+ {
+  "id": "EB-77",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_04_after_a_good_upgrade_only_current_and_previous_are_kept_and_no_dump_set_is_touched"
+  ],
+  "what": "the removal is not reported",
+  "old": "all.push(format!(\"removed older releases: {}\", names.join(\", \")));",
+  "new": "let _ = names;"
+ },
+ {
+  "id": "EB-78",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_01_a_good_upgrade_switches_the_links_keeps_the_old_release_and_writes_one_record"
+  ],
+  "what": "the closing line is changed",
+  "old": "            format!(\"upgraded {from} -> {to}\")\n",
+  "new": "            format!(\"done {from} {to}\")\n"
+ },
+ {
+  "id": "EB-79",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_01_a_good_upgrade_switches_the_links_keeps_the_old_release_and_writes_one_record"
+  ],
+  "what": "a good upgrade exits 2",
+  "old": "            format!(\"upgraded {from} -> {to}\")\n        });\n        Outcome {\n            code: EXIT_DONE,",
+  "new": "            format!(\"upgraded {from} -> {to}\")\n        });\n        Outcome {\n            code: EXIT_REFUSED,"
+ },
+ {
+  "id": "EB-80",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_09_a_second_rollback_a_contract_release_a_held_lock_and_a_fresh_install_are_refused_before_any_port_call"
+  ],
+  "what": "a rollback takes no lock",
+  "old": "let _lock = if args.mode != Mode::Check {",
+  "new": "let _lock = if args.mode == Mode::Upgrade {"
+ },
+ {
+  "id": "EB-81",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_08_rollback_after_a_good_upgrade_flips_back_starts_the_old_server_and_forgets_previous"
+  ],
+  "what": "--rollback is not recognised",
+  "old": "        if args.mode == Mode::Rollback {\n            return self.rollback_mode(args, &home, resumed, lines, hooks);",
+  "new": "        if false {\n            return self.rollback_mode(args, &home, resumed, lines, hooks);"
+ },
+ {
+  "id": "EB-82",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_01_a_failed_compose_after_the_switch_is_rolled_back_to_the_old_release_exit_3",
+   "prepare::rb_09_a_second_rollback_a_contract_release_a_held_lock_and_a_fresh_install_are_refused_before_any_port_call"
+  ],
+  "what": "previous is kept after a rollback",
+  "old": "        match home.finish_rollback() {",
+  "new": "        match Ok::<(), LayoutError>(()) {"
+ },
+ {
+  "id": "EB-83",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_01_a_failed_compose_after_the_switch_is_rolled_back_to_the_old_release_exit_3"
+  ],
+  "what": "the old release is started with migrate too",
+  "old": ".compose_up(&dir, &[Service::Server])",
+  "new": ".compose_up(&dir, &[Service::Migrate, Service::Server])"
+ },
+ {
+  "id": "EB-84",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_06_when_the_old_release_fails_its_checks_too_it_is_exit_4_with_the_set_and_the_fixed_text"
+  ],
+  "what": "the old release is not checked",
+  "old": "        self.wait_healthy(args, &dir, Service::Server, \"server\")?;\n        self.check(args)\n    }",
+  "new": "        self.wait_healthy(args, &dir, Service::Server, \"server\")?;\n        Ok(())\n    }"
+ },
+ {
+  "id": "EB-85",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_11_an_old_server_that_does_not_get_healthy_makes_the_rollback_fail_at_the_timeout"
+  ],
+  "what": "the old server is not waited for",
+  "old": "        self.wait_healthy(args, &dir, Service::Server, \"server\")?;\n        self.check(args)\n    }",
+  "new": "        self.check(args)\n    }"
+ },
+ {
+  "id": "EB-86",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_11_an_old_server_that_does_not_get_healthy_makes_the_rollback_fail_at_the_timeout"
+  ],
+  "what": "a container wait uses the role timeout",
+  "old": "self.wait(args.health_interval, args.health_timeout, probe)",
+  "new": "self.wait(args.health_interval, args.roles_timeout, probe)"
+ },
+ {
+  "id": "EB-87",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_01_a_failed_compose_after_the_switch_is_rolled_back_to_the_old_release_exit_3"
+  ],
+  "what": "a rolled back upgrade exits 2",
+  "old": "(RecordResult::RolledBack, EXIT_ROLLED_BACK)",
+  "new": "(RecordResult::RolledBack, EXIT_REFUSED)"
+ },
+ {
+  "id": "EB-88",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_01_a_failed_compose_after_the_switch_is_rolled_back_to_the_old_release_exit_3"
+  ],
+  "what": "a rolled back upgrade is recorded as done",
+  "old": "(RecordResult::RolledBack, EXIT_ROLLED_BACK)",
+  "new": "(RecordResult::Done, EXIT_ROLLED_BACK)"
+ },
+ {
+  "id": "EB-89",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_06_when_the_old_release_fails_its_checks_too_it_is_exit_4_with_the_set_and_the_fixed_text",
+   "prepare::rb_07_a_contract_release_is_never_rolled_back_by_the_engine_and_says_so"
+  ],
+  "what": "a failed rollback exits 3",
+  "old": "(RecordResult::RollbackFailed, EXIT_ROLLBACK_FAILED)\n            }\n        };\n        let record",
+  "new": "(RecordResult::RollbackFailed, EXIT_ROLLED_BACK)\n            }\n        };\n        let record"
+ },
+ {
+  "id": "EB-90",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_06_when_the_old_release_fails_its_checks_too_it_is_exit_4_with_the_set_and_the_fixed_text",
+   "prepare::rb_07_a_contract_release_is_never_rolled_back_by_the_engine_and_says_so",
+   "prepare::rb_10_a_rollback_whose_checks_fail_is_exit_4_with_the_set_of_the_last_upgrade_and_it_needs_no_dump_tool",
+   "prepare::rb_11_an_old_server_that_does_not_get_healthy_makes_the_rollback_fail_at_the_timeout"
+  ],
+  "what": "kai's sentence is changed",
+  "old": "\"restore ONLY with cortex-restore; a plain pg_restore can make revoked tokens valid again\"",
+  "new": "\"restore with cortex-restore\""
+ },
+ {
+  "id": "EB-91",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_06_when_the_old_release_fails_its_checks_too_it_is_exit_4_with_the_set_and_the_fixed_text"
+  ],
+  "what": "the token sentence is changed",
+  "old": "every token issued before the restore is refused",
+  "new": "tokens may be refused"
+ },
+ {
+  "id": "EB-92",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_06_when_the_old_release_fails_its_checks_too_it_is_exit_4_with_the_set_and_the_fixed_text"
+  ],
+  "what": "the order sentence is changed",
+  "old": "into a NEW empty database",
+  "new": "into the database"
+ },
+ {
+  "id": "EB-93",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_06_when_the_old_release_fails_its_checks_too_it_is_exit_4_with_the_set_and_the_fixed_text"
+  ],
+  "what": "the set is printed twice",
+  "old": "Some(s) => format!(\"the pre-upgrade dump set is {s}\"),",
+  "new": "Some(s) => format!(\"the pre-upgrade dump set is {s} ({s})\"),"
+ },
+ {
+  "id": "EB-94",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_07_a_contract_release_is_never_rolled_back_by_the_engine_and_says_so"
+  ],
+  "what": "a refused rollback says something else",
+  "old": "RollbackError::Refused(r) => all.push(format!(\"the rollback was refused: {r}\")),",
+  "new": "RollbackError::Refused(r) => all.push(format!(\"the rollback was impossible: {r}\")),"
+ },
+ {
+  "id": "EB-95",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_09_a_second_rollback_a_contract_release_a_held_lock_and_a_fresh_install_are_refused_before_any_port_call"
+  ],
+  "what": "a refused --rollback exits 4",
+  "old": "all.push(format!(\"rollback refused: {r}\"));\n                return Outcome {\n                    code: EXIT_REFUSED,",
+  "new": "all.push(format!(\"rollback refused: {r}\"));\n                return Outcome {\n                    code: EXIT_ROLLBACK_FAILED,"
+ },
+ {
+  "id": "EB-96",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_08_rollback_after_a_good_upgrade_flips_back_starts_the_old_server_and_forgets_previous"
+  ],
+  "what": "a good --rollback exits 2",
+  "old": "                (EXIT_DONE, flip, true)",
+  "new": "                (EXIT_REFUSED, flip, true)"
+ },
+ {
+  "id": "EB-97",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_10_a_rollback_whose_checks_fail_is_exit_4_with_the_set_of_the_last_upgrade_and_it_needs_no_dump_tool"
+  ],
+  "what": "a failed --rollback exits 3",
+  "old": "                (EXIT_ROLLBACK_FAILED, flip, false)",
+  "new": "                (EXIT_ROLLED_BACK, flip, false)"
+ },
+ {
+  "id": "EB-98",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_11_the_set_in_the_exit_4_text_belongs_to_the_upgrade_that_is_being_left"
+  ],
+  "what": "the oldest record's dump set is used",
+  "old": "    for file in files.iter().rev() {\n        let Some(text) = read_small(file, 1 << 20) else {\n            continue;\n        };\n        let Ok(value) = serde_json::from_str::<serde_json::Value>(&text) else {",
+  "new": "    for file in files.iter() {\n        let Some(text) = read_small(file, 1 << 20) else {\n            continue;\n        };\n        let Ok(value) = serde_json::from_str::<serde_json::Value>(&text) else {"
+ },
+ {
+  "id": "EB-99",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_01_a_failed_compose_after_the_switch_is_rolled_back_to_the_old_release_exit_3"
+  ],
+  "what": "the failing step is recorded as good",
+  "old": "            mark(&mut steps, false);\n            all.push(format!(\n                \"step {n} ({}) failed: {why}\",",
+  "new": "            mark(&mut steps, true);\n            all.push(format!(\n                \"step {n} ({}) failed: {why}\","
+ },
+ {
+  "id": "EB-100",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_01_a_failed_compose_after_the_switch_is_rolled_back_to_the_old_release_exit_3"
+  ],
+  "what": "a rolled back upgrade does not say where the set is",
+  "old": "                all.push(format!(\"pre-upgrade dump set kept at {set_text}\"));\n                (RecordResult::RolledBack, EXIT_ROLLED_BACK)",
+  "new": "                (RecordResult::RolledBack, EXIT_ROLLED_BACK)"
+ },
+ {
+  "id": "EB-101",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_02_a_database_that_never_gets_healthy_stops_at_the_timeout_and_never_sleeps_past_it"
+  ],
+  "what": "the last sleep is not shortened",
+  "old": "self.pace.sleep(interval.min(timeout - spent));",
+  "new": "self.pace.sleep(interval);"
+ },
+ {
+  "id": "EB-102",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_01_a_failed_compose_after_the_switch_is_rolled_back_to_the_old_release_exit_3"
+  ],
+  "what": "the rolled back line is changed",
+  "old": "\"rolled back: {from} is running again;",
+  "new": "\"back on {from};"
+ },
+ {
+  "id": "EB-103",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_08_rollback_after_a_good_upgrade_flips_back_starts_the_old_server_and_forgets_previous"
+  ],
+  "what": "the --rollback line is changed",
+  "old": "                all.push(format!(\"rolled back {} -> {}\", flip.left, flip.now));",
+  "new": "                all.push(format!(\"back {} {}\", flip.left, flip.now));"
+ },
+ {
+  "id": "EB-104",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rb_08_rollback_after_a_good_upgrade_flips_back_starts_the_old_server_and_forgets_previous",
+   "prepare::rb_10_a_rollback_whose_checks_fail_is_exit_4_with_the_set_of_the_last_upgrade_and_it_needs_no_dump_tool"
+  ],
+  "what": "a --rollback is recorded the other way round",
+  "old": "            result: if ok {\n                RecordResult::RolledBack\n            } else {\n                RecordResult::RollbackFailed\n            },",
+  "new": "            result: if ok {\n                RecordResult::RollbackFailed\n            } else {\n                RecordResult::RolledBack\n            },"
+ },
+ {
+  "id": "EB-105",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_13_staging_works_under_a_umask_that_strips_the_owners_bits"
+  ],
+  "what": "the per-version download directory is not made exactly 0700",
+  "old": "create_private_dir_exact(&downloads)",
+  "new": "crate::unpack::create_private_dir(&downloads)"
+ },
+ {
+  "id": "EB-106",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_12_a_parent_that_is_a_link_is_refused_before_anything_below_it_is_touched"
+  ],
+  "what": "the releases path is not checked first",
+  "old": "if !is_real_dir(&self.env.home.join(\"releases\")) {",
+  "new": "if false {"
+ },
+ {
+  "id": "EB-107",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_12_a_parent_that_is_a_link_is_refused_before_anything_below_it_is_touched"
+  ],
+  "what": "a downloads path that is a link is taken for a directory",
+  "old": "            Ok(m) if m.is_dir() => true,",
+  "new": "            Ok(_) => true,"
+ },
+ {
+  "id": "EB-108",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_14_a_cleanup_that_fails_is_reported_not_swallowed"
+  ],
+  "what": "a failed cleanup is not recorded",
+  "old": "            self.report.borrow_mut().extend(warnings);",
+  "new": "            drop(warnings);"
+ },
+ {
+  "id": "EB-109",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_14_a_cleanup_that_fails_is_reported_not_swallowed"
+  ],
+  "what": "a failed cleanup is not added to the refusal",
+  "old": "            outcome.lines.extend(report.borrow().iter().cloned());",
+  "new": "            let _ = &report;"
+ },
+ {
+  "id": "EB-110",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::pr_14_a_cleanup_that_fails_is_reported_not_swallowed"
+  ],
+  "what": "a path that is still there is not reported",
+  "old": "        if std::fs::symlink_metadata(path).is_ok() {",
+  "new": "        if false {"
+ },
+ {
+  "id": "EB-111",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::dl_07_the_loaded_image_must_be_the_one_the_manifest_names"
+  ],
+  "what": "a refusal after the dump does not say where the set is kept",
+  "old": "            all.push(format!(\"pre-upgrade dump set kept at {}\", set.display()));\n            mark(&mut steps, false);",
+  "new": "            mark(&mut steps, false);"
+ },
+ {
+  "id": "EB-130",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_01_a_dump_area_that_cannot_be_listed_is_a_refusal_before_the_dump_tool_runs"
+  ],
+  "what": "an unreadable dump area is taken as empty",
+  "old": "                Err(e) => return Err(not_listed(e)),",
+  "new": "                Err(_) => Default::default(),"
+ },
+ {
+  "id": "EB-131",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::go_01_a_good_upgrade_switches_the_links_keeps_the_old_release_and_writes_one_record"
+  ],
+  "what": "a missing dump area is an error",
+  "old": "                Err(e) if e.kind() == std::io::ErrorKind::NotFound => Default::default(),",
+  "new": "                Err(e) if false && e.kind() == std::io::ErrorKind::NotFound => Default::default(),"
+ },
+ {
+  "id": "EB-132",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_10_the_migration_has_its_own_bound"
+  ],
+  "what": "the migration is bounded by the health timeout",
+  "old": "        self.wait(args.health_interval, args.migrate_timeout, || {",
+  "new": "        self.wait(args.health_interval, args.health_timeout, || {"
+ },
+ {
+  "id": "EB-133",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_01_arguments",
+   "prepare::rw_10_the_migration_has_its_own_bound"
+  ],
+  "what": "--migrate-timeout is read and dropped",
+  "old": "                out.migrate_timeout = seconds(\"--migrate-timeout\", it.next())?;",
+  "new": "                let _ = seconds(\"--migrate-timeout\", it.next())?;"
+ },
+ {
+  "id": "EB-134",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_03_a_commit_that_fails_before_current_moved_leaves_the_old_release_running_and_proves_it"
+  ],
+  "what": "the old release is not asked after a failed switch",
+  "old": "                    return match self.check(args) {",
+  "new": "                    return match Ok::<(), String>(()) {"
+ },
+ {
+  "id": "EB-135",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_03_a_commit_that_fails_before_current_moved_leaves_the_old_release_running_and_proves_it"
+  ],
+  "what": "a failed switch with the old release running is exit 4",
+  "old": "                                code: EXIT_ROLLED_BACK,",
+  "new": "                                code: EXIT_ROLLBACK_FAILED,"
+ },
+ {
+  "id": "EB-136",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_03_a_commit_that_fails_before_current_moved_leaves_the_old_release_running_and_proves_it"
+  ],
+  "what": "a failed switch is recorded as rolled back",
+  "old": "                                RecordResult::Failed,\n                                steps,",
+  "new": "                                RecordResult::RolledBack,\n                                steps,"
+ },
+ {
+  "id": "EB-137",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_03_a_commit_that_fails_before_current_moved_leaves_the_old_release_running_and_proves_it"
+  ],
+  "what": "a failed switch with a silent old release is recorded as failed",
+  "old": "                                RecordResult::RollbackFailed,\n                                steps,",
+  "new": "                                RecordResult::Failed,\n                                steps,"
+ },
+ {
+  "id": "EB-138",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_04_a_commit_that_fails_with_the_links_unreadable_is_exit_4_with_the_fixed_text_and_a_record",
+   "prepare::rw_05_the_state_of_the_links_after_a_failed_commit_is_classified_from_current_alone"
+  ],
+  "what": "an unknown state of the links is taken as not switched",
+  "old": "        _ => SwitchState::Unknown,",
+  "new": "        _ => SwitchState::NotSwitched,"
+ },
+ {
+  "id": "EB-139",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_05_the_state_of_the_links_after_a_failed_commit_is_classified_from_current_alone"
+  ],
+  "what": "switch_state calls the old release switched",
+  "old": "        Ok(Some(c)) if c == *from => SwitchState::NotSwitched,",
+  "new": "        Ok(Some(c)) if c == *from => SwitchState::Switched,"
+ },
+ {
+  "id": "EB-140",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_02_a_run_that_made_a_dump_set_and_then_failed_leaves_a_record_and_one_that_changed_nothing_leaves_none"
+  ],
+  "what": "a load failure leaves no record",
+  "old": "            all.extend(self.write_attempt(&home, RecordResult::Failed, steps, &from, &to, &set));\n            return stop(&p, all, o);",
+  "new": "            return stop(&p, all, o);"
+ },
+ {
+  "id": "EB-141",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_02_a_run_that_made_a_dump_set_and_then_failed_leaves_a_record_and_one_that_changed_nothing_leaves_none"
+  ],
+  "what": "a load failure marks the load step ok",
+  "old": "            mark(&mut steps, false);\n            all.extend(self.write_attempt(&home, RecordResult::Failed, steps, &from, &to, &set));",
+  "new": "            mark(&mut steps, true);\n            all.extend(self.write_attempt(&home, RecordResult::Failed, steps, &from, &to, &set));"
+ },
+ {
+  "id": "EB-142",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_04_a_commit_that_fails_with_the_links_unreadable_is_exit_4_with_the_fixed_text_and_a_record"
+  ],
+  "what": "a switch with unreadable links leaves no record",
+  "old": "                    all.extend(self.write_attempt(\n                        &home,\n                        RecordResult::RollbackFailed,\n                        steps,\n                        &from,\n                        &to,\n                        &set,\n                    ));\n                    return Outcome {\n                        code: EXIT_ROLLBACK_FAILED,\n                        lines: all,\n                    };\n                }\n            }\n        }",
+  "new": "                    return Outcome {\n                        code: EXIT_ROLLBACK_FAILED,\n                        lines: all,\n                    };\n                }\n            }\n        }"
+ },
+ {
+  "id": "EB-143",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_07_an_interrupted_rollback_is_finished_before_an_upgrade_goes_on"
+  ],
+  "what": "the rest of a finished earlier rollback is not recorded",
+  "old": "                    lines.extend(self.write_rollback_record(&home, &flip, true));\n                    if !warnings.is_empty() {",
+  "new": "                    if !warnings.is_empty() {"
+ },
+ {
+  "id": "EB-144",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_07_an_interrupted_rollback_is_finished_before_an_upgrade_goes_on",
+   "prepare::rw_08_a_rollback_whose_old_server_fails_stays_unfinished_and_a_retry_never_flips_forward"
+  ],
+  "what": "an upgrade does not finish an earlier rollback first",
+  "old": "        if let Some(flip) = resumed {",
+  "new": "        if let Some(flip) = None::<Flip> {"
+ },
+ {
+  "id": "EB-145",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_06_an_interrupted_rollback_is_finished_by_the_retry_and_never_flips_forward"
+  ],
+  "what": "--rollback ignores the rollback an earlier run started",
+  "old": "            return self.rollback_mode(args, &home, resumed, lines, hooks);",
+  "new": "            return self.rollback_mode(args, &home, None, lines, hooks);"
+ },
+ {
+  "id": "EB-146",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_08_a_rollback_whose_old_server_fails_stays_unfinished_and_a_retry_never_flips_forward"
+  ],
+  "what": "--rollback does not say the rollback is unfinished",
+  "old": "                all.push(format!(\"the rollback failed: {why}\"));\n                all.push(UNFINISHED_LINE.to_string());",
+  "new": "                all.push(format!(\"the rollback failed: {why}\"));"
+ },
+ {
+  "id": "EB-147",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_08_a_rollback_whose_old_server_fails_stays_unfinished_and_a_retry_never_flips_forward"
+  ],
+  "what": "an upgrade does not say the rollback is unfinished",
+  "old": "                    lines.push(format!(\"the rollback failed: {why}\"));\n                    lines.push(UNFINISHED_LINE.to_string());",
+  "new": "                    lines.push(format!(\"the rollback failed: {why}\"));"
+ },
+ {
+  "id": "EB-148",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_09_a_marker_that_cannot_be_cleared_is_reported_and_nothing_else_can_switch_until_it_is"
+  ],
+  "what": "a marker that cannot be cleared is not reported",
+  "old": "            Err(e) => warnings.push(format!(\n                \"warning: the rollback is complete but its marker could not be cleared ({e}); it is tried again at the next run, and until it is cleared nothing else can switch\"\n            )),\n",
+  "new": "            Err(_) => {}\n"
+ },
+ {
+  "id": "EB-149",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_09_a_marker_that_cannot_be_cleared_is_reported_and_nothing_else_can_switch_until_it_is"
+  ],
+  "what": "an upgrade goes on over a marker that cannot be cleared",
+  "old": "                    if !warnings.is_empty() {",
+  "new": "                    if false && !warnings.is_empty() {"
+ },
+ {
+  "id": "EB-150",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_11_the_set_in_the_exit_4_text_belongs_to_the_upgrade_that_is_being_left"
+  ],
+  "what": "the set of any record is taken",
+  "old": "        if !names(\"from\", now) || !names(\"to\", left) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "EB-151",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_11_the_set_in_the_exit_4_text_belongs_to_the_upgrade_that_is_being_left"
+  ],
+  "what": "a record that names one end of the upgrade is borrowed",
+  "old": "        if !names(\"from\", now) || !names(\"to\", left) {",
+  "new": "        if !names(\"from\", now) && !names(\"to\", left) {"
+ },
+ {
+  "id": "EB-152",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_08_a_rollback_whose_old_server_fails_stays_unfinished_and_a_retry_never_flips_forward"
+  ],
+  "what": "a failed rest of a rollback in an upgrade is exit 2",
+  "old": "                    return Outcome {\n                        code: EXIT_ROLLBACK_FAILED,\n                        lines,\n                    };",
+  "new": "                    return Outcome {\n                        code: EXIT_REFUSED,\n                        lines,\n                    };"
+ },
+ {
+  "id": "EB-153",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_12_a_marker_that_cannot_be_used_stops_every_mode_that_takes_the_lock_before_anything_is_asked"
+  ],
+  "what": "a marker that cannot be used is ignored",
+  "old": "            match home.unfinished_rollback() {\n                Ok(None) => {}",
+  "new": "            match home\n                .unfinished_rollback()\n                .or_else(|_| Ok::<_, LayoutError>(None))\n            {\n                Ok(None) => {}"
+ },
+ {
+  "id": "EB-154",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_07_an_interrupted_rollback_is_finished_before_an_upgrade_goes_on"
+  ],
+  "what": "an upgrade that finished an earlier rollback does not say so",
+  "old": "                    lines.push(format!(\"rolled back {} -> {}\", flip.left, flip.now));",
+  "new": "                    let _ = &flip;"
+ },
+ {
+  "id": "EB-155",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_13_a_rollback_that_fails_after_it_started_is_exit_4_with_its_state_kept_and_the_retry_finishes_it"
+  ],
+  "what": "a rollback that fails after it started is a refusal",
+  "old": "                RollbackError::Interrupted(e.to_string(), hint.clone())",
+  "new": "                RollbackError::Refused(e.to_string())"
+ },
+ {
+  "id": "EB-156",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_13_a_rollback_that_fails_after_it_started_is_exit_4_with_its_state_kept_and_the_retry_finishes_it"
+  ],
+  "what": "an interrupted rollback in --rollback does not say where the way back is",
+  "old": "                all.extend(interrupted_lines(&why));\n                all.extend(exit4_lines(",
+  "new": "                all.extend(exit4_lines("
+ },
+ {
+  "id": "EB-157",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_13_a_rollback_that_fails_after_it_started_is_exit_4_with_its_state_kept_and_the_retry_finishes_it"
+  ],
+  "what": "an interrupted rollback in --rollback leaves no record",
+  "old": "                if let Some(flip) = hint {\n                    all.extend(self.write_rollback_record(home, &flip, false));\n                }\n                return Outcome {",
+  "new": "                let _ = &hint;\n                return Outcome {"
+ },
+ {
+  "id": "EB-158",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_14_a_rollback_that_fails_after_it_started_inside_a_failed_upgrade_is_exit_4_and_recoverable"
+  ],
+  "what": "an interrupted rollback in an upgrade does not say where the way back is",
+  "old": "                    RollbackError::Interrupted(why, _) => all.extend(interrupted_lines(why)),",
+  "new": "                    RollbackError::Interrupted(..) => {}"
+ },
+ {
+  "id": "EB-159",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_15_an_earlier_rollback_that_cannot_be_completed_by_recover_is_exit_4_and_keeps_its_intent"
+  ],
+  "what": "a recover that stopped half way is a refusal",
+  "old": "                Err(e @ LayoutError::FlipFailed { .. }) => {",
+  "new": "                Err(e @ LayoutError::FlipFailed { .. }) if false => {"
+ },
+ {
+  "id": "EB-160",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_16_a_commit_that_fails_half_way_puts_the_old_previous_back"
+  ],
+  "what": "a commit that fails half way does not put previous back",
+  "old": "                        && let Err(err) = home.restore_previous(was.as_ref())",
+  "new": "                        && let Err(err) = Ok::<(), LayoutError>(())"
+ },
+ {
+  "id": "EB-161",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_16_a_commit_that_fails_half_way_puts_the_old_previous_back"
+  ],
+  "what": "the previous link is read after the commit instead of before",
+  "old": "        let previous_before = home.previous();",
+  "new": "        let previous_before: Result<Option<Version>, LayoutError> = Ok(None);"
+ },
+ {
+  "id": "EB-162",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_17_a_check_over_an_unfinished_rollback_is_refused_and_asks_for_nothing",
+   "prepare::rw_12_a_marker_that_cannot_be_used_stops_every_mode_that_takes_the_lock_before_anything_is_asked"
+  ],
+  "what": "a check answers over an unfinished rollback",
+  "old": "        if args.mode == Mode::Check && home.has_unfinished_rollback() {",
+  "new": "        if false && args.mode == Mode::Check && home.has_unfinished_rollback() {"
+ },
+ {
+  "id": "EB-163",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_01_arguments",
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the roles deadline floor is not enforced",
+  "old": "                if out.roles_timeout < floor {",
+  "new": "                if false && out.roles_timeout < floor {"
+ },
+ {
+  "id": "EB-164",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the roles deadline floor refuses the floor itself",
+  "old": "                if out.roles_timeout < floor {",
+  "new": "                if out.roles_timeout <= floor {"
+ },
+ {
+  "id": "EB-165",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the margin over the script's budget is 5 s",
+  "old": "pub const ROLES_MARGIN: Duration = Duration::from_secs(15);",
+  "new": "pub const ROLES_MARGIN: Duration = Duration::from_secs(5);"
+ },
+ {
+  "id": "EB-166",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the script's budget is 40 s",
+  "old": "pub const ROLES_SCRIPT_BUDGET: Duration = Duration::from_secs(30);",
+  "new": "pub const ROLES_SCRIPT_BUDGET: Duration = Duration::from_secs(40);"
+ },
+ {
+  "id": "EB-167",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_01_arguments",
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the default roles deadline is 40 s",
+  "old": "        roles_timeout: Duration::from_secs(60),",
+  "new": "        roles_timeout: Duration::from_secs(40),"
+ },
+ {
+  "id": "EB-168",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_18_a_previous_that_is_not_a_plain_release_link_is_refused_before_anything_is_made"
+  ],
+  "what": "an invalid previous link is ignored before an upgrade",
+  "old": "            && let Err(e) = home.previous()",
+  "new": "            && let Err(e) = home.previous().or_else(|_| Ok::<_, LayoutError>(None))"
+ },
+ {
+  "id": "EB-169",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_01_a_role_step_that_times_out_once_is_confirmed_by_one_rerun_and_the_upgrade_goes_on",
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "a timed-out role step is not re-run (the re-run is assumed good)",
+  "old": "Err(PortError::TimedOut) => match roles(ROLES_CONFIRM_TIMEOUT) {",
+  "new": "Err(PortError::TimedOut) => match Ok::<(), PortError>(()) {"
+ },
+ {
+  "id": "EB-170",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_01_a_role_step_that_times_out_once_is_confirmed_by_one_rerun_and_the_upgrade_goes_on",
+   "prepare::cf_05_the_rerun_deadline_is_the_floor_whatever_the_operator_asked_for"
+  ],
+  "what": "the re-run uses the operator's deadline, not the floor",
+  "old": "match roles(ROLES_CONFIRM_TIMEOUT) {",
+  "new": "match roles(args.roles_timeout) {"
+ },
+ {
+  "id": "EB-171",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_03_a_refusal_on_the_rerun_is_a_refusal_and_is_rolled_back"
+  ],
+  "what": "a refusal on the re-run is reported as unknown",
+  "old": "                Err(PortError::Failed(line)) => {\n                    return Err(RestartError::Failed(format!(",
+  "new": "                Err(PortError::Failed(line)) => {\n                    return Err(RestartError::RolesUnknown(format!("
+ },
+ {
+  "id": "EB-172",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "two timeouts are an ordinary failure (rolled back)",
+  "old": "return Err(RestartError::RolesUnknown(\n                        \"the role step timed out twice\".to_string(),",
+  "new": "return Err(RestartError::Failed(\n                        \"the role step timed out twice\".to_string(),"
+ },
+ {
+  "id": "EB-173",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "the unknown path rolls back",
+  "old": "return self.stop_roles_unknown(home, all, steps, from, to, set);",
+  "new": "return self.fail_after_switch(args, home, all, steps, from, to, set, hooks);"
+ },
+ {
+  "id": "EB-174",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "the unknown record says failed",
+  "old": "result: RecordResult::RolesUnknown,",
+  "new": "result: RecordResult::Failed,"
+ },
+ {
+  "id": "EB-175",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_01_a_role_step_that_times_out_once_is_confirmed_by_one_rerun_and_the_upgrade_goes_on"
+  ],
+  "what": "the confirmed-after-a-timeout note is changed",
+  "old": "the role step timed out once; a second run confirmed the module roles are applied",
+  "new": "ok"
+ },
+ {
+  "id": "EB-176",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "the unknown message does not say nothing was rolled back",
+  "old": "so they may or may not be applied; nothing was rolled back",
+  "new": "so they may or may not be applied"
+ },
+ {
+  "id": "EB-177",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "the unknown message does not name the way back",
+  "old": "to go back to {from} run cortex upgrade --rollback",
+  "new": "to go back to {from} run cortex upgrade"
+ },
+ {
+  "id": "EB-178",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "the unknown path exits with the rolled-back code",
+  "old": "result: RecordResult::RolesUnknown,\n            steps,\n            dump_set: Some(set_text),\n            members: Vec::new(),\n        };\n        if let Err(e) = home.write_record(self.clock, &record) {\n            all.push(format!(\n                \"warning: the upgrade record could not be written ({e})\"\n            ));\n        }\n        Outcome {\n            code: EXIT_ROLLBACK_FAILED,",
+  "new": "result: RecordResult::RolesUnknown,\n            steps,\n            dump_set: Some(set_text),\n            members: Vec::new(),\n        };\n        if let Err(e) = home.write_record(self.clock, &record) {\n            all.push(format!(\n                \"warning: the upgrade record could not be written ({e})\"\n            ));\n        }\n        Outcome {\n            code: EXIT_ROLLED_BACK,"
+ },
+ {
+  "id": "EB-179",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "the unknown path does not say where the dump set is",
+  "old": "were not started\"\n        ));\n        all.push(format!(\"pre-upgrade dump set kept at {set_text}\"));",
+  "new": "were not started\"\n        ));"
+ },
+ {
+  "id": "EB-180",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "the unknown path writes no record",
+  "old": "result: RecordResult::RolesUnknown,\n            steps,\n            dump_set: Some(set_text),\n            members: Vec::new(),\n        };\n        if let Err(e) = home.write_record(self.clock, &record) {",
+  "new": "result: RecordResult::RolesUnknown,\n            steps,\n            dump_set: Some(set_text),\n            members: Vec::new(),\n        };\n        if let Err(e) = Ok::<(), String>(()) {"
+ },
+ {
+  "id": "EB-181",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_01_a_role_step_that_times_out_once_is_confirmed_by_one_rerun_and_the_upgrade_goes_on"
+  ],
+  "what": "the notes of a good restart are dropped",
+  "old": "                all.extend(notes);",
+  "new": "                drop(notes);"
+ },
+ {
+  "id": "EB-182",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_01_a_role_step_that_times_out_once_is_confirmed_by_one_rerun_and_the_upgrade_goes_on",
+   "prepare::cf_05_the_rerun_deadline_is_the_floor_whatever_the_operator_asked_for",
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the confirmation deadline is 60 s",
+  "old": "pub const ROLES_CONFIRM_TIMEOUT: Duration = Duration::from_secs(45);",
+  "new": "pub const ROLES_CONFIRM_TIMEOUT: Duration = Duration::from_secs(60);"
+ },
+ {
+  "id": "EB-183",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the slack is 3 s",
+  "old": "pub const ROLES_SLACK: Duration = Duration::from_secs(2);",
+  "new": "pub const ROLES_SLACK: Duration = Duration::from_secs(3);"
+ },
+ {
+  "id": "EB-184",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the idle term is 6 s",
+  "old": "pub const ROLES_IDLE: Duration = Duration::from_secs(5);",
+  "new": "pub const ROLES_IDLE: Duration = Duration::from_secs(6);"
+ },
+ {
+  "id": "EB-185",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the commit-latency term is 1 s",
+  "old": "pub const ROLES_COMMIT_LATENCY: Duration = Duration::from_secs(2);",
+  "new": "pub const ROLES_COMMIT_LATENCY: Duration = Duration::from_secs(1);"
+ },
+ {
+  "id": "EB-186",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the slack term is 3 s",
+  "old": "pub const ROLES_SLACK: Duration = Duration::from_secs(2);",
+  "new": "pub const ROLES_SLACK: Duration = Duration::from_secs(3);"
+ },
+ {
+  "id": "EB-187",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the lead forgets the commit latency (the arithmetic error of 7)",
+  "old": "ROLES_IDLE.as_secs() + ROLES_COMMIT_LATENCY.as_secs() + ROLES_SLACK.as_secs(),",
+  "new": "ROLES_IDLE.as_secs() + ROLES_SLACK.as_secs(),"
+ },
+ {
+  "id": "EB-188",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the lead forgets the slack",
+  "old": "ROLES_IDLE.as_secs() + ROLES_COMMIT_LATENCY.as_secs() + ROLES_SLACK.as_secs(),",
+  "new": "ROLES_IDLE.as_secs() + ROLES_COMMIT_LATENCY.as_secs(),"
+ },
+ {
+  "id": "EB-189",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the lead is a literal 7",
+  "old": "ROLES_IDLE.as_secs() + ROLES_COMMIT_LATENCY.as_secs() + ROLES_SLACK.as_secs(),",
+  "new": "7,"
+ },
+ {
+  "id": "EB-190",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the engine's margin over the budget is 14 s (the floor would be 44)",
+  "old": "pub const ROLES_MARGIN: Duration = Duration::from_secs(15);",
+  "new": "pub const ROLES_MARGIN: Duration = Duration::from_secs(14);"
+ },
+ {
+  "id": "EB-191",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_09_the_roles_deadline_exceeds_the_role_scripts_server_side_budget_by_the_margin"
+  ],
+  "what": "the script's budget is 31 s",
+  "old": "pub const ROLES_SCRIPT_BUDGET: Duration = Duration::from_secs(30);",
+  "new": "pub const ROLES_SCRIPT_BUDGET: Duration = Duration::from_secs(31);"
+ },
+ {
+  "id": "EB-192",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_14_the_marker_is_written_before_the_first_step_9_call_and_removed_after_the_record_of_done",
+   "prepare::cf_12_a_process_lost_after_the_flip_leaves_the_marker_and_the_next_run_finishes"
+  ],
+  "what": "the marker is removed right after it is written (the switch and step 9 run without it)",
+  "old": "                home.mark_incomplete(&marker).map_err(|e| e.to_string())?;\n",
+  "new": "                home.mark_incomplete(&marker).map_err(|e| e.to_string())?;\n                home.clear_incomplete().map_err(|e| e.to_string())?;\n"
+ },
+ {
+  "id": "EB-193",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_15_a_marker_that_cannot_be_written_stops_before_the_switch"
+  ],
+  "what": "a marker that cannot be written is ignored",
+  "old": "                home.mark_incomplete(&marker).map_err(|e| e.to_string())?;\n",
+  "new": "                home.mark_incomplete(&marker).ok();\n"
+ },
+ {
+  "id": "EB-194",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_16_an_interrupted_upgrade_whose_manifest_copy_cannot_be_read_is_refused_and_nothing_is_changed"
+  ],
+  "what": "the retry reads the manifest copy of the old release, not the new one",
+  "old": "home.read_release(&inc.to)",
+  "new": "home.read_release(&inc.from)"
+ },
+ {
+  "id": "EB-195",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_07_a_retry_after_the_unknown_outcome_finishes_the_upgrade_it_is_not_up_to_date"
+  ],
+  "what": "a finished retry says 'upgraded', not 'finished the interrupted upgrade'",
+  "old": "            &release,\n            true,\n            (&inc.id, hooks),",
+  "new": "            &release,\n            false,\n            (&inc.id, hooks),"
+ },
+ {
+  "id": "EB-196",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_07_a_retry_after_the_unknown_outcome_finishes_the_upgrade_it_is_not_up_to_date"
+  ],
+  "what": "the retry's record starts at step 7, not 9",
+  "old": "STEP_NAMES[..8]",
+  "new": "STEP_NAMES[..7]"
+ },
+ {
+  "id": "EB-197",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_07_a_retry_after_the_unknown_outcome_finishes_the_upgrade_it_is_not_up_to_date"
+  ],
+  "what": "the retry's first eight steps are recorded as failed",
+  "old": "                ok: true,\n            })\n            .collect();",
+  "new": "                ok: false,\n            })\n            .collect();"
+ },
+ {
+  "id": "EB-198",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_10_check_and_to_refuse_while_an_upgrade_is_unfinished_and_ask_nothing"
+  ],
+  "what": "--check does not refuse while an upgrade is unfinished",
+  "old": "if let (Mode::Check, Ok(Some(inc))) = (&args.mode, home.incomplete()) {",
+  "new": "if let (Mode::Check, Ok(Some(inc))) = (&args.mode, home.incomplete().map(|_| None::<Incomplete>)) {"
+ },
+ {
+  "id": "EB-199",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_10_check_and_to_refuse_while_an_upgrade_is_unfinished_and_ask_nothing"
+  ],
+  "what": "--to does not refuse while an upgrade is unfinished",
+  "old": "if args.to.is_some() {\n                    return Self::unfinished_refusal(&inc);",
+  "new": "if false {\n                    return Self::unfinished_refusal(&inc);"
+ },
+ {
+  "id": "EB-200",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_07_a_retry_after_the_unknown_outcome_finishes_the_upgrade_it_is_not_up_to_date"
+  ],
+  "what": "a plain retry is refused like --to",
+  "old": "if args.to.is_some() {\n                    return Self::unfinished_refusal(&inc);",
+  "new": "if args.to.is_none() {\n                    return Self::unfinished_refusal(&inc);"
+ },
+ {
+  "id": "EB-201",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed"
+  ],
+  "what": "an unreadable marker is not refused up front (the rollback goes through)",
+  "old": "                Err(err) => return Self::unreadable_marker(&err),\n                Ok(Some((stale, true)))",
+  "new": "                Err(_) => {}\n                Ok(Some((stale, true)))"
+ },
+ {
+  "id": "EB-202",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_06_the_unknown_outcome_leaves_a_durable_marker_that_a_fresh_engine_sees"
+  ],
+  "what": "the second unknown outcome does not rewrite the marker's reason",
+  "old": "if let Err(err) = home.mark_incomplete(&marker) {",
+  "new": "if let Err(err) = Ok::<(), LayoutError>(()) {"
+ },
+ {
+  "id": "EB-203",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_14_the_marker_is_written_before_the_first_step_9_call_and_removed_after_the_record_of_done",
+   "prepare::cf_07_a_retry_after_the_unknown_outcome_finishes_the_upgrade_it_is_not_up_to_date"
+  ],
+  "what": "the marker is not removed at the end of a good upgrade",
+  "old": "if let Err(e) = home.clear_incomplete() {",
+  "new": "if let Err(e) = Ok::<(), LayoutError>(()) {"
+ },
+ {
+  "id": "EB-204",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_15_a_marker_that_cannot_be_written_stops_before_the_switch"
+  ],
+  "what": "the marker is written AFTER the switch, not ahead of it",
+  "old": "                home.mark_incomplete(&marker).map_err(|e| e.to_string())?;\n                // the plan of the ten files, durable BEFORE the flip: the marker never stands without the inventory it will be rolled back by\n                // (the release is still in its staging directory until the flip renames it)\n                members::plan(\n                    &MemberLayout {\n                        release_dir: &p.staging,\n                        home: &self.env.home,\n                        unit_dir: &self.env.unit_dir,\n                        db_container: members::DB_CONTAINER,\n                    },\n                    &from.to_string(),\n                    &to.to_string(),\n                    &marker.id,\n                    point,\n                )\n                .map_err(|e| e.to_string())?;\n                if let Some(lose) = hooks.after_marker {\n                    lose();\n                }\n                home.commit_with(&to, &mut |step| hooks.commit_step.is_none_or(|f| f(step)))\n                    .map_err(|e| e.to_string())\n",
+  "new": "                // the plan of the ten files, durable BEFORE the flip: the marker never stands without the inventory it will be rolled back by\n                // (the release is still in its staging directory until the flip renames it)\n                members::plan(\n                    &MemberLayout {\n                        release_dir: &p.staging,\n                        home: &self.env.home,\n                        unit_dir: &self.env.unit_dir,\n                        db_container: members::DB_CONTAINER,\n                    },\n                    &from.to_string(),\n                    &to.to_string(),\n                    &marker.id,\n                    point,\n                )\n                .map_err(|e| e.to_string())?;\n                if let Some(lose) = hooks.after_marker {\n                    lose();\n                }\n                home.commit_with(&to, &mut |step| hooks.commit_step.is_none_or(|f| f(step)))\n                    .map_err(|e| e.to_string())?;\n                home.mark_incomplete(&marker).map_err(|e| e.to_string())\n"
+ },
+ {
+  "id": "EB-205",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_03_a_commit_that_fails_before_current_moved_leaves_the_old_release_running_and_proves_it"
+  ],
+  "what": "a switch that did not happen leaves the marker written ahead of it",
+  "old": "if let Err(err) = home.clear_incomplete() {\n                        all.push(format!(\n                            \"warning: the marker of the upgrade that did not start",
+  "new": "if let Err(err) = Ok::<(), LayoutError>(()) {\n                        all.push(format!(\n                            \"warning: the marker of the upgrade that did not start"
+ },
+ {
+  "id": "EB-206",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_25_a_stale_marker_is_removed_durably_with_one_line_by_a_run_that_changes_things"
+  ],
+  "what": "a stale marker is not removed by a run that holds the lock",
+  "old": "        match home.clear_incomplete() {\n            Ok(()) => lines.push(format!(\n                \"removed the stale marker",
+  "new": "        match Ok::<(), LayoutError>(()) {\n            Ok(()) => lines.push(format!(\n                \"removed the stale marker"
+ },
+ {
+  "id": "EB-207",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_25_a_stale_marker_is_removed_durably_with_one_line_by_a_run_that_changes_things"
+  ],
+  "what": "a check removes a stale marker too",
+  "old": "Ok(Some((stale, true))) if args.mode != Mode::Check => {",
+  "new": "Ok(Some((stale, true))) => {"
+ },
+ {
+  "id": "EB-208",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_08_a_retry_whose_role_step_is_refused_keeps_the_marker_and_rolls_nothing_back",
+   "prepare::cf_23_a_retry_whose_migrations_fail_keeps_the_marker_and_rolls_nothing_back",
+   "prepare::cf_24_a_retry_whose_server_never_answers_keeps_the_marker_and_rolls_nothing_back"
+  ],
+  "what": "a resumed upgrade that failed again is rolled back",
+  "old": "            if resumed {\n                return self.resume_failed(home, all, steps, from, to, set);\n            }\n",
+  "new": ""
+ },
+ {
+  "id": "EB-209",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_08_a_retry_whose_role_step_is_refused_keeps_the_marker_and_rolls_nothing_back"
+  ],
+  "what": "a resumed failure exits 3 (the code that says rolled back)",
+  "old": "            code: EXIT_RESUME_FAILED,",
+  "new": "            code: EXIT_ROLLED_BACK,"
+ },
+ {
+  "id": "EB-210",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_08_a_retry_whose_role_step_is_refused_keeps_the_marker_and_rolls_nothing_back"
+  ],
+  "what": "a resumed failure is recorded as rolled back",
+  "old": "            result: RecordResult::ResumeFailed,",
+  "new": "            result: RecordResult::RolledBack,"
+ },
+ {
+  "id": "EB-211",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_08_a_retry_whose_role_step_is_refused_keeps_the_marker_and_rolls_nothing_back"
+  ],
+  "what": "a resumed failure writes no record",
+  "old": "        if let Err(e) = home.write_record(self.clock, &record) {\n            all.push(format!(\n                \"warning: the upgrade record could not be written ({e})\"\n            ));\n        }\n        Outcome {\n            code: EXIT_RESUME_FAILED,",
+  "new": "        if let Err(e) = Ok::<(), crate::layout::LayoutError>(()) {\n            all.push(format!(\n                \"warning: the upgrade record could not be written ({e})\"\n            ));\n        }\n        Outcome {\n            code: EXIT_RESUME_FAILED,"
+ },
+ {
+  "id": "EB-212",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_27_a_run_lost_after_the_marker_and_before_the_flip_is_stale_and_the_next_run_upgrades"
+  ],
+  "what": "the hook after the marker runs after the flip, not before it",
+  "old": "                if let Some(lose) = hooks.after_marker {\n                    lose();\n                }\n                home.commit_with(&to, &mut |step| hooks.commit_step.is_none_or(|f| f(step)))\n                    .map_err(|e| e.to_string())\n",
+  "new": "                let flipped = home\n                    .commit_with(&to, &mut |step| hooks.commit_step.is_none_or(|f| f(step)))\n                    .map_err(|e| e.to_string());\n                if let Some(lose) = hooks.after_marker {\n                    lose();\n                }\n                flipped\n"
+ },
+ {
+  "id": "EB-213",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_28_a_run_lost_with_previous_set_and_current_not_moved_is_stale_and_not_refused",
+   "prepare::cf_29_a_run_lost_right_after_the_flip_leaves_the_marker_and_the_next_run_finishes"
+  ],
+  "what": "the commit hook is never asked",
+  "old": "hooks.commit_step.is_none_or(|f| f(step))",
+  "new": "true"
+ },
+ {
+  "id": "EB-214",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_08_a_retry_whose_role_step_is_refused_keeps_the_marker_and_rolls_nothing_back"
+  ],
+  "what": "the resume's failure text omits the way back",
+  "old": "fix the cause and run cortex upgrade again to finish it, or run cortex upgrade --rollback to go back to {from}",
+  "new": "fix the cause and run cortex upgrade again to finish it"
+ },
+ {
+  "id": "EB-215",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_30_a_run_lost_after_previous_was_set_gets_the_old_previous_back_with_the_stale_marker",
+   "prepare::cf_31_a_run_lost_after_previous_was_set_removes_a_previous_that_did_not_exist"
+  ],
+  "what": "a stale cleanup never puts the recorded previous link back",
+  "old": "            if let Err(e) = home.restore_previous(recorded.as_ref()) {",
+  "new": "            if let Err(e) = Ok::<(), LayoutError>(()) {"
+ },
+ {
+  "id": "EB-216",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_30_a_run_lost_after_previous_was_set_gets_the_old_previous_back_with_the_stale_marker",
+   "prepare::cf_31_a_run_lost_after_previous_was_set_removes_a_previous_that_did_not_exist"
+  ],
+  "what": "a stale cleanup puts previous on the interrupted release instead of the recorded one",
+  "old": "home.restore_previous(recorded.as_ref())",
+  "new": "home.restore_previous(Some(&stale.from))"
+ },
+ {
+  "id": "EB-217",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_32_a_stale_marker_over_any_other_previous_is_refused_and_nothing_is_changed"
+  ],
+  "what": "a stale marker over any other previous pair is not refused",
+  "old": "            if now.as_ref() != Some(&stale.from) {",
+  "new": "            if false {"
+ },
+ {
+  "id": "EB-218",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed"
+  ],
+  "what": "--rollback goes through an unreadable marker",
+  "old": "        if resumed.is_none() {\n            match home.incomplete_state() {",
+  "new": "        if resumed.is_none() && args.mode != Mode::Rollback {\n            match home.incomplete_state() {"
+ },
+ {
+  "id": "EB-219",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_30_a_run_lost_after_previous_was_set_gets_the_old_previous_back_with_the_stale_marker"
+  ],
+  "what": "the marker never records where previous pointed",
+  "old": "        let prev = match &previous_before {\n            Ok(None) => Ok(PrevLink::Absent),\n            Ok(Some(v)) => Ok(PrevLink::Release(v.clone())),\n            Err(_) => Err(LayoutError::BadLink { link: \"previous\" }),\n        };",
+  "new": "        let prev: Result<PrevLink, LayoutError> = Ok(PrevLink::Absent);"
+ },
+ {
+  "id": "EB-220",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_33_a_previous_that_cannot_be_put_back_refuses_the_run_and_keeps_the_marker"
+  ],
+  "what": "a previous link that cannot be put back does not stop the run",
+  "old": "            if let Err(e) = home.restore_previous(recorded.as_ref()) {",
+  "new": "            if let Err(e) = home.restore_previous(recorded.as_ref()).or_else(|_| Ok::<(), LayoutError>(())) {"
+ },
+ {
+  "id": "EB-221",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_36_the_unknown_roles_marker_keeps_the_previous_release_the_first_marker_recorded"
+  ],
+  "what": "the second marker (unknown roles) forgets the recorded previous link",
+  "old": "                    prev: first.prev,",
+  "new": "                    prev: PrevLink::Absent,"
+ },
+ {
+  "id": "EB-222",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_34_a_run_lost_between_the_restore_and_the_removal_only_removes_the_marker"
+  ],
+  "what": "P == R is treated like the flip's footprint (a restore and its note)",
+  "old": "        if now != recorded {",
+  "new": "        if true {"
+ },
+ {
+  "id": "EB-223",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed"
+  ],
+  "what": "the refusal does not say that removing the marker is the operator's decision",
+  "old": "removing it is your decision after you have checked the links",
+  "new": "check the links"
+ },
+ {
+  "id": "EB-224",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_35_a_genuine_interrupted_rollback_with_a_valid_marker_still_completes"
+  ],
+  "what": "a stale marker is handled even while a rollback is pending",
+  "old": "        if resumed.is_none() {\n            match home.incomplete_state() {",
+  "new": "        if true {\n            match home.incomplete_state() {"
+ },
+ {
+  "id": "EB-229",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_01_a_good_upgrade_installs_the_ten_files_promotes_the_record_and_says_what_to_run",
+   "prepare::rm_03_a_failed_health_check_restores_the_old_files_inside_the_rollback"
+  ],
+  "what": "the reload line is not printed after an install",
+  "old": "        if !units.is_empty() {",
+  "new": "        if false {"
+ },
+ {
+  "id": "EB-230",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_01_a_good_upgrade_installs_the_ten_files_promotes_the_record_and_says_what_to_run"
+  ],
+  "what": "the line about new units is not printed",
+  "old": "        if !fresh.is_empty() {",
+  "new": "        if false {"
+ },
+ {
+  "id": "EB-236",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_07_a_resumed_upgrade_whose_install_fails_goes_nowhere_and_finishes_when_fixed"
+  ],
+  "what": "a failed install on a resume rolls back",
+  "old": "                return self.resume_failed(\n                    home,\n                    all,\n                    steps,\n                    &inc.from,\n                    &inc.to,\n                    Path::new(&inc.set),\n                );",
+  "new": "                return self.fail_after_switch(\n                    args,\n                    home,\n                    all,\n                    steps,\n                    &inc.from,\n                    &inc.to,\n                    Path::new(&inc.set),\n                    hooks,\n                );"
+ },
+ {
+  "id": "EB-237",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_02_files_that_are_already_ours_are_not_touched_and_nothing_is_said"
+  ],
+  "what": "an install that changed nothing still says it installed files",
+  "old": "        if update.entries.is_empty() {\n            return Ok(lines);\n        }",
+  "new": "        if false {\n            return Ok(lines);\n        }"
+ },
+ {
+  "id": "EB-3002",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_35_a_genuine_interrupted_rollback_with_a_valid_marker_still_completes",
+   "prepare::rm_10_a_rollback_of_an_upgrade_that_changed_no_backup_file_says_nothing_about_them"
+  ],
+  "what": "line 1260: an emptiness check never holds",
+  "old": "                Ok(names) if names.is_empty() => {}",
+  "new": "                Ok(names) if names.is_empty() && false => {}"
+ },
+ {
+  "id": "EB-3003",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_03_a_failed_health_check_restores_the_old_files_inside_the_rollback",
+   "prepare::rm_09_a_rollback_of_a_finished_upgrade_restores_from_members_last_bound_to_the_release_left"
+  ],
+  "what": "line 1267: a condition is always false",
+  "old": "                    if names.iter().any(|n| UNIT_FILES.contains(&n.as_str())) {",
+  "new": "                    if false {"
+ },
+ {
+  "id": "EB-3004",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_24_a_rollback_counts_the_entries_it_put_back_and_says_to_reload_only_when_a_unit_was_among_them"
+  ],
+  "what": "line 1267: a condition is always true",
+  "old": "                    if names.iter().any(|n| UNIT_FILES.contains(&n.as_str())) {",
+  "new": "                    if true {"
+ },
+ {
+  "id": "EB-3007",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_02_files_that_are_already_ours_are_not_touched_and_nothing_is_said"
+  ],
+  "what": "line 1905: a condition is always false",
+  "old": "        if update.entries.is_empty() {",
+  "new": "        if false {"
+ },
+ {
+  "id": "EB-3008",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_01_a_good_upgrade_installs_the_ten_files_promotes_the_record_and_says_what_to_run",
+   "prepare::rm_03_a_failed_health_check_restores_the_old_files_inside_the_rollback"
+  ],
+  "what": "line 1905: a condition is always true",
+  "old": "        if update.entries.is_empty() {",
+  "new": "        if true {"
+ },
+ {
+  "id": "EB-3009",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_02_files_that_are_already_ours_are_not_touched_and_nothing_is_said"
+  ],
+  "what": "line 1905: an emptiness check never holds",
+  "old": "        if update.entries.is_empty() {",
+  "new": "        if update.entries.is_empty() && false {"
+ },
+ {
+  "id": "EB-3010",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_24_a_rollback_counts_the_entries_it_put_back_and_says_to_reload_only_when_a_unit_was_among_them"
+  ],
+  "what": "line 1915: an equality is inverted (at column 28)",
+  "old": "            .filter(|e| e.0 == Kind::Unit)",
+  "new": "            .filter(|e| e.0 != Kind::Unit)"
+ },
+ {
+  "id": "EB-3011",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_01_a_good_upgrade_installs_the_ten_files_promotes_the_record_and_says_what_to_run",
+   "prepare::rm_03_a_failed_health_check_restores_the_old_files_inside_the_rollback"
+  ],
+  "what": "line 1917: a condition is always false",
+  "old": "        if !units.is_empty() {",
+  "new": "        if false {"
+ },
+ {
+  "id": "EB-3012",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_24_a_rollback_counts_the_entries_it_put_back_and_says_to_reload_only_when_a_unit_was_among_them"
+  ],
+  "what": "line 1917: a condition is always true",
+  "old": "        if !units.is_empty() {",
+  "new": "        if true {"
+ },
+ {
+  "id": "EB-3013",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_01_a_good_upgrade_installs_the_ten_files_promotes_the_record_and_says_what_to_run",
+   "prepare::rm_03_a_failed_health_check_restores_the_old_files_inside_the_rollback"
+  ],
+  "what": "line 1917: a negation is dropped",
+  "old": "        if !units.is_empty() {",
+  "new": "        if units.is_empty() {"
+ },
+ {
+  "id": "EB-3014",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_01_a_good_upgrade_installs_the_ten_files_promotes_the_record_and_says_what_to_run",
+   "prepare::rm_03_a_failed_health_check_restores_the_old_files_inside_the_rollback"
+  ],
+  "what": "line 1917: an emptiness check never holds",
+  "old": "        if !units.is_empty() {",
+  "new": "        if !units.is_empty() && false {"
+ },
+ {
+  "id": "EB-3015",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_01_a_good_upgrade_installs_the_ten_files_promotes_the_record_and_says_what_to_run"
+  ],
+  "what": "line 1921: a condition is always false",
+  "old": "        if !fresh.is_empty() {",
+  "new": "        if false {"
+ },
+ {
+  "id": "EB-3017",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_01_a_good_upgrade_installs_the_ten_files_promotes_the_record_and_says_what_to_run"
+  ],
+  "what": "line 1921: a negation is dropped",
+  "old": "        if !fresh.is_empty() {",
+  "new": "        if fresh.is_empty() {"
+ },
+ {
+  "id": "EB-3018",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_01_a_good_upgrade_installs_the_ten_files_promotes_the_record_and_says_what_to_run"
+  ],
+  "what": "line 1921: an emptiness check never holds",
+  "old": "        if !fresh.is_empty() {",
+  "new": "        if !fresh.is_empty() && false {"
+ },
+ {
+  "what": "the rollback does not check the inventory before the flip",
+  "old": "        if let Some(h) = &hint {\n            self.members_inventory(home, &h.left)",
+  "new": "        if let Some(h) = None::<Flip> {\n            self.members_inventory(home, &h.left)",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-401",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_13_a_lost_or_unusable_inventory_stops_a_rollback_before_anything_changes_exit_4",
+   "prepare::rm_15_a_rollback_of_a_finished_upgrade_refuses_a_members_last_of_another_release"
+  ]
+ },
+ {
+  "what": "a lost inventory found before the flip is ignored",
+  "old": "                .map_err(RollbackError::Members)?;",
+  "new": "                .map_err(RollbackError::Members)\n                .ok();",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-402",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_13_a_lost_or_unusable_inventory_stops_a_rollback_before_anything_changes_exit_4",
+   "prepare::rm_15_a_rollback_of_a_finished_upgrade_refuses_a_members_last_of_another_release"
+  ]
+ },
+ {
+  "what": "a marker that reads as stale is not the unfinished upgrade's own",
+  "old": "            Ok(Some((inc, _))) => Some((inc.from.to_string(), inc.to.to_string(), inc.id)),\n            Ok(None) => None,",
+  "new": "            Ok(Some((inc, false))) => Some((inc.from.to_string(), inc.to.to_string(), inc.id)),\n            Ok(_) => None,",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-403",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::cf_03_a_refusal_on_the_rerun_is_a_refusal_and_is_rolled_back",
+   "prepare::cf_04_a_refusal_on_the_first_run_is_not_retried"
+  ]
+ },
+ {
+  "what": "the release being left is not given to the inventory",
+  "old": "            Some(&left.to_string()),\n        )\n        .map_err(|e| format!(\"{e}; nothing was changed\"))",
+  "new": "            None,\n        )\n        .map_err(|e| format!(\"{e}; nothing was changed\"))",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-404",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::cf_32_a_stale_marker_over_any_other_previous_is_refused_and_nothing_is_changed",
+   "prepare::rb_08_rollback_after_a_good_upgrade_flips_back_starts_the_old_server_and_forgets_previous"
+  ]
+ },
+ {
+  "what": "the inventory refusal does not say that nothing was changed",
+  "old": "        .map_err(|e| format!(\"{e}; nothing was changed\"))",
+  "new": "        .map_err(|e| e.to_string())",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-405",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_13_a_lost_or_unusable_inventory_stops_a_rollback_before_anything_changes_exit_4"
+  ]
+ },
+ {
+  "what": "the marker's from and to are swapped for the inventory",
+  "old": "                .map(|(f, t, i)| (f.as_str(), t.as_str(), i.as_str())),",
+  "new": "                .map(|(f, t, i)| (t.as_str(), f.as_str(), i.as_str())),",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-406",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::cf_03_a_refusal_on_the_rerun_is_a_refusal_and_is_rolled_back",
+   "prepare::cf_04_a_refusal_on_the_first_run_is_not_retried"
+  ]
+ },
+ {
+  "what": "the restore inside the rollback is skipped",
+  "old": "        if let Some(inv) = &inventory {\n            match members::restore(",
+  "new": "        if let Some(inv) = None::<&members::Inventory> {\n            match members::restore(",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-407",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_03_a_failed_health_check_restores_the_old_files_inside_the_rollback",
+   "prepare::rm_06_a_failed_install_after_the_switch_is_restored_from_the_record_and_rolled_back"
+  ]
+ },
+ {
+  "what": "an empty restore says it put files back",
+  "old": "                Ok(names) if names.is_empty() => {}",
+  "new": "                Ok(names) if false && names.is_empty() => {}",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-408",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::cf_35_a_genuine_interrupted_rollback_with_a_valid_marker_still_completes",
+   "prepare::rm_10_a_rollback_of_an_upgrade_that_changed_no_backup_file_says_nothing_about_them"
+  ]
+ },
+ {
+  "what": "the restore line gives a count that is not the number put back",
+  "old": "                        names.len(),\n                        flip.now",
+  "new": "                        10,\n                        flip.now",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-409",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_24_a_rollback_counts_the_entries_it_put_back_and_says_to_reload_only_when_a_unit_was_among_them"
+  ]
+ },
+ {
+  "what": "the reload line is always said after a restore",
+  "old": "                    if names.iter().any(|n| UNIT_FILES.contains(&n.as_str())) {\n                        warnings.push(",
+  "new": "                    if true {\n                        warnings.push(",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-410",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_24_a_rollback_counts_the_entries_it_put_back_and_says_to_reload_only_when_a_unit_was_among_them"
+  ]
+ },
+ {
+  "what": "the reload line needs every entry to be a unit",
+  "old": "                    if names.iter().any(|n| UNIT_FILES.contains(&n.as_str())) {\n                        warnings.push(",
+  "new": "                    if names.iter().all(|n| UNIT_FILES.contains(&n.as_str())) {\n                        warnings.push(",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-411",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_03_a_failed_health_check_restores_the_old_files_inside_the_rollback",
+   "prepare::rm_09_a_rollback_of_a_finished_upgrade_restores_from_members_last_bound_to_the_release_left"
+  ]
+ },
+ {
+  "what": "the record is not forgotten after the marker was cleared",
+  "old": "                    && let Err(e) = members::forget(&self.env.home, inv)",
+  "new": "                    && let Err(e) = Ok::<(), members::MemberError>(())",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-412",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_03_a_failed_health_check_restores_the_old_files_inside_the_rollback",
+   "prepare::rm_06_a_failed_install_after_the_switch_is_restored_from_the_record_and_rolled_back"
+  ]
+ },
+ {
+  "what": "a lost inventory after the flip is ignored",
+  "old": "            .members_inventory(home, &flip.left)\n            .map_err(|why| RollbackError::Failed(why, flip.clone()))?;",
+  "new": "            .members_inventory(home, &flip.left)\n            .unwrap_or(None);",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-413",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_23_a_rollback_resumed_after_a_failed_restore_stops_when_the_inventory_has_been_lost_meanwhile"
+  ]
+ },
+ {
+  "what": "a restore failure is only a warning",
+  "old": "                Err(e) => {\n                    return Err(RollbackError::Failed(\n                        format!(\n                            \"the backup scripts and units could not be put back ({e}); the marker, the record and every backup are kept: fix the cause and run cortex upgrade --rollback again\"\n                        ),\n                        flip.clone(),\n                    ));\n                }\n",
+  "new": "                Err(e) => warnings.push(format!(\"warning: could not put back ({e})\")),\n",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-414",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_12_a_rollback_that_cannot_put_one_entry_back_is_exit_4_with_everything_kept_and_resumes",
+   "prepare::rm_21_a_restore_that_fails_inside_an_automatic_rollback_is_exit_4_not_3"
+  ]
+ },
+ {
+  "what": "the plan of a switch that did not happen is kept",
+  "old": "                    if let Err(err) = members::discard_plan(&self.env.home, &attempt) {",
+  "new": "                    if let Err(err) = Ok::<bool, members::MemberError>(false) {",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-417",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_26_a_commit_that_stopped_before_the_links_moved_leaves_neither_marker_nor_plan"
+  ]
+ },
+ {
+  "what": "the plan is made with from and to swapped",
+  "old": "                    &from.to_string(),\n                    &to.to_string(),\n                    &marker.id,\n                    point,",
+  "new": "                    &to.to_string(),\n                    &from.to_string(),\n                    &marker.id,\n                    point,",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-418",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::cf_01_a_role_step_that_times_out_once_is_confirmed_by_one_rerun_and_the_upgrade_goes_on",
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ]
+ },
+ {
+  "what": "the plan reads the release from its final directory, which exists only after the flip",
+  "old": "                        release_dir: &p.staging,",
+  "new": "                        release_dir: &home.release_dir(&to),",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-419",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::cf_01_a_role_step_that_times_out_once_is_confirmed_by_one_rerun_and_the_upgrade_goes_on",
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ]
+ },
+ {
+  "what": "a record that was promoted already is installed again",
+  "old": "            Ok(Some(inv)) if inv.source == members::Source::Last => return Ok(Vec::new()),",
+  "new": "            Ok(Some(inv)) if false && inv.source == members::Source::Last => return Ok(Vec::new()),",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-420",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_16_the_promotion_lost_at_any_of_its_steps_is_finished_by_a_resume"
+  ]
+ },
+ {
+  "what": "a lost inventory at the install of a resume is ignored",
+  "old": "            Err(e) => return Err(e.to_string()),\n            Ok(Some(inv)) if inv.source",
+  "new": "            Err(_) => {}\n            Ok(Some(inv)) if inv.source",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-421",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_14_a_resume_whose_inventory_is_lost_goes_nowhere_exit_4"
+  ]
+ },
+ {
+  "what": "an install that changed nothing still reports",
+  "old": "        if update.entries.is_empty() {\n            return Ok(lines);\n        }",
+  "new": "        if false {\n            return Ok(lines);\n        }",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-422",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_02_files_that_are_already_ours_are_not_touched_and_nothing_is_said"
+  ]
+ },
+ {
+  "what": "the units of the install are the scripts",
+  "old": "            .filter(|e| e.0 == Kind::Unit)\n            .collect();",
+  "new": "            .filter(|e| e.0 != Kind::Unit)\n            .collect();",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-423",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_24_a_rollback_counts_the_entries_it_put_back_and_says_to_reload_only_when_a_unit_was_among_them"
+  ]
+ },
+ {
+  "what": "the upgrade record lists no backup file",
+  "old": "            .map(|r| members::info_lines(&r))\n            .unwrap_or_default();",
+  "new": "            .map(|_| Vec::new())\n            .unwrap_or_default();",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-425",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_01_a_good_upgrade_installs_the_ten_files_promotes_the_record_and_says_what_to_run"
+  ]
+ },
+ {
+  "what": "a promotion that fails does not stop the upgrade",
+  "old": "            return self.resume_failed(home, all, steps, from, to, set);\n        }\n        let record = Record {\n            from: from.to_string(),\n            to: to.to_string(),\n            result: RecordResult::Done,",
+  "new": "        }\n        let record = Record {\n            from: from.to_string(),\n            to: to.to_string(),\n            result: RecordResult::Done,",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-426",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_27_a_record_that_cannot_be_promoted_stops_the_upgrade_at_exit_4_with_the_marker_standing"
+  ]
+ },
+ {
+  "what": "a resume installs with from and to swapped",
+  "old": "self.install_members(home, &inc.from, &inc.to, &inc.id, point)",
+  "new": "self.install_members(home, &inc.to, &inc.from, &inc.id, point)",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-429",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::cf_07_a_retry_after_the_unknown_outcome_finishes_the_upgrade_it_is_not_up_to_date",
+   "prepare::cf_08_a_retry_whose_role_step_is_refused_keeps_the_marker_and_rolls_nothing_back"
+  ]
+ },
+ {
+  "what": "the attempt id of the upgrade is empty",
+  "old": "        let attempt = marker.as_ref().map(|m| m.id.clone()).unwrap_or_default();",
+  "new": "        let attempt = marker.as_ref().map(|_| String::new()).unwrap_or_default();",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-430",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::cf_01_a_role_step_that_times_out_once_is_confirmed_by_one_rerun_and_the_upgrade_goes_on",
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ]
+ },
+ {
+  "id": "EB-3016",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_03_a_failed_health_check_restores_the_old_files_inside_the_rollback"
+  ],
+  "what": "line 1921: a condition is always true",
+  "old": "        if !fresh.is_empty() {",
+  "new": "        if true {"
+ },
+ {
+  "what": "the stale marker keeps the plan of its attempt",
+  "old": "        if let Err(e) = members::discard_plan(&self.env.home, &stale.id) {",
+  "new": "        if let Err(e) = Ok::<bool, members::MemberError>(false) {",
+  "tests": [
+   "group_engine"
+  ],
+  "id": "EB-424",
+  "design": null,
+  "file": "src/engine.rs",
+  "fails": [
+   "prepare::rm_28_a_stale_marker_takes_its_plan_with_it_whatever_the_next_command_is"
+  ]
+ },
+ {
+  "id": "PE001",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_29_an_inventory_that_cannot_be_trusted_at_the_start_of_an_upgrade_never_makes_the_sweep_delete_anything"
+  ],
+  "what": "line 1569: a condition is always false",
+  "old": "                if !found.is_empty() {",
+  "new": "                if false {"
+ },
+ {
+  "id": "PE002",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_02_files_that_are_already_ours_are_not_touched_and_nothing_is_said"
+  ],
+  "what": "line 1569: a condition is always true",
+  "old": "                if !found.is_empty() {",
+  "new": "                if true {"
+ },
+ {
+  "id": "PE003",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_02_files_that_are_already_ours_are_not_touched_and_nothing_is_said",
+   "prepare::rm_29_an_inventory_that_cannot_be_trusted_at_the_start_of_an_upgrade_never_makes_the_sweep_delete_anything"
+  ],
+  "what": "line 1569: a negation is dropped",
+  "old": "                if !found.is_empty() {",
+  "new": "                if found.is_empty() {"
+ },
+ {
+  "id": "PE004",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_29_an_inventory_that_cannot_be_trusted_at_the_start_of_an_upgrade_never_makes_the_sweep_delete_anything"
+  ],
+  "what": "line 1569: an emptiness check never holds",
+  "old": "                if !found.is_empty() {",
+  "new": "                if !found.is_empty() && false {"
+ },
+ {
+  "id": "PE005",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_04_a_unit_directory_that_is_not_ours_to_write_is_refused_before_anything_is_written",
+   "prepare::rm_08_a_home_the_units_cannot_carry_is_refused_before_anything_is_written"
+  ],
+  "what": "line 2218: an equality is inverted (at column 21)",
+  "old": "        // dump set and any sweep or member write, so a refusal leaves the home and the unit directory byte for byte as they were\n        if args.mode == Mode::Upgrade",
+  "new": "        // dump set and any sweep or member write, so a refusal leaves the home and the unit directory byte for byte as they were\n        if args.mode != Mode::Upgrade"
+ },
+ {
+  "id": "PE007",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_35_a_genuine_interrupted_rollback_with_a_valid_marker_still_completes",
+   "prepare::pr_03_an_interrupted_rollback_is_finished_first_and_an_unusable_intent_stops_everything"
+  ],
+  "what": "line 2225: an equality is inverted (at column 21)",
+  "old": "        if args.mode == Mode::Check && home.has_unfinished_rollback() {",
+  "new": "        if args.mode != Mode::Check && home.has_unfinished_rollback() {"
+ },
+ {
+  "id": "PE008",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_02_check_says_newer_same_or_lower_and_writes_nothing",
+   "en_03_a_bad_manifest_or_host_is_refused_with_its_rule_and_nothing_else_is_requested"
+  ],
+  "what": "line 2225: an && becomes || (at column 36)",
+  "old": "        if args.mode == Mode::Check && home.has_unfinished_rollback() {",
+  "new": "        if args.mode == Mode::Check || home.has_unfinished_rollback() {"
+ },
+ {
+  "id": "PE009",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_12_a_marker_that_cannot_be_used_stops_every_mode_that_takes_the_lock_before_anything_is_asked",
+   "prepare::rw_17_a_check_over_an_unfinished_rollback_is_refused_and_asks_for_nothing"
+  ],
+  "what": "line 2225: a condition is always false",
+  "old": "        if args.mode == Mode::Check && home.has_unfinished_rollback() {",
+  "new": "        if false {"
+ },
+ {
+  "id": "PE010",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "en_02_check_says_newer_same_or_lower_and_writes_nothing",
+   "en_03_a_bad_manifest_or_host_is_refused_with_its_rule_and_nothing_else_is_requested"
+  ],
+  "what": "line 2225: a condition is always true",
+  "old": "        if args.mode == Mode::Check && home.has_unfinished_rollback() {",
+  "new": "        if true {"
+ },
+ {
+  "id": "PE01",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_04_a_unit_directory_that_is_not_ours_to_write_is_refused_before_anything_is_written",
+   "prepare::rm_08_a_home_the_units_cannot_carry_is_refused_before_anything_is_written"
+  ],
+  "what": "the destination is not checked at the start of an upgrade",
+  "old": "        if args.mode == Mode::Upgrade\n            && let Err(e) = members::check_home(&self.env.home)\n                .and_then(|()| members::check_unit_dir(&self.env.unit_dir))\n        {\n            return refuse(format!(\"{e}; nothing was changed\"));\n        }\n",
+  "new": ""
+ },
+ {
+  "id": "PE02",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_29_an_inventory_that_cannot_be_trusted_at_the_start_of_an_upgrade_never_makes_the_sweep_delete_anything"
+  ],
+  "what": "a skipped sweep says nothing",
+  "old": "                if !found.is_empty() {\n                    let why = match skipped {",
+  "new": "                if false {\n                    let why = match skipped {"
+ },
+ {
+  "id": "PE05",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_25_the_start_of_an_upgrade_sweeps_only_the_backups_a_trusted_record_retired",
+   "prepare::rm_29_an_inventory_that_cannot_be_trusted_at_the_start_of_an_upgrade_never_makes_the_sweep_delete_anything"
+  ],
+  "what": "no sweep at the start of an upgrade",
+  "old": "        all.extend(self.sweep_retired_by(&from.to_string(), &attempt, point));\n",
+  "new": ""
+ },
+ {
+  "id": "PE06",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_20_the_sweep_at_the_end_removes_only_what_the_new_members_last_retired_and_keeps_the_rest",
+   "prepare::rm_22_a_run_lost_in_the_middle_of_the_sweep_has_finished_the_upgrade_and_the_next_upgrade_finishes_the_sweep"
+  ],
+  "what": "no sweep at the end of an upgrade",
+  "old": "        all.extend(self.sweep_retired_by(&to.to_string(), id, point));\n",
+  "new": ""
+ },
+ {
+  "id": "PE07",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_25_the_start_of_an_upgrade_sweeps_only_the_backups_a_trusted_record_retired"
+  ],
+  "what": "the sweep is bound to the wrong release at the start",
+  "old": "all.extend(self.sweep_retired_by(&from.to_string(), &attempt, point));",
+  "new": "all.extend(self.sweep_retired_by(&to.to_string(), &attempt, point));"
+ },
+ {
+  "id": "PE08",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rm_20_the_sweep_at_the_end_removes_only_what_the_new_members_last_retired_and_keeps_the_rest",
+   "prepare::rm_22_a_run_lost_in_the_middle_of_the_sweep_has_finished_the_upgrade_and_the_next_upgrade_finishes_the_sweep"
+  ],
+  "what": "the sweep is bound to the wrong release at the end",
+  "old": "all.extend(self.sweep_retired_by(&to.to_string(), id, point));",
+  "new": "all.extend(self.sweep_retired_by(&from.to_string(), id, point));"
+ }
+]

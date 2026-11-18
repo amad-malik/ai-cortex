@@ -1,0 +1,31 @@
+# The engine's own corpus for check_home (crates/cortex-upgrade/src/members.rs), copied from its test mb_02_the_home_alphabet_is_strict in
+# crates/cortex-upgrade/tests/group_members.rs (sha256 of that file when copied: 2812dcf16dd86e6fbccf09975a885dc17f3523513237c54f1c0e008c33bd33f5; lane cortex-upgrade, 8 Nov 2026).
+# One entry per line: good|bad, a TAB, the path as printf %b reads it (\n, \001 and \\ are escapes, as in the Rust literals; the rest is literal UTF-8). IT-114 runs install.sh's --home check over every line.
+good	/home/a/cortex-v2
+good	/srv/x.y_z-1
+good	/a
+good	/A/B9/c.d
+bad	
+bad	relative/dir
+bad	./x
+bad	/
+bad	/a/
+bad	/a//b
+bad	/a/../b
+bad	/..
+bad	/a/..
+bad	/a b
+bad	/a%b
+bad	/a$b
+bad	/a\\b
+bad	/a'b
+bad	/a"b
+bad	/a|b
+bad	/a&b
+bad	/a\nb
+bad	/a\001b
+bad	/aéb
+bad	/a;b
+bad	/a`b
+bad	/a(b)
+bad	/a*b

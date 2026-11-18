@@ -1,0 +1,21 @@
+scripts/mac-release.sh is scripts/release.sh with exactly these edits (make-mac-release.py; name, number of occurrences of the old text):
+   1  header
+   1  tools comment
+   1  podman lookup 1
+   1  podman lookup 2
+   1  seam list: no CLI seam
+   1  bin members
+   1  variables
+   1  Mac release notes address
+   1  options
+   1  minimum validation replaced by the image and beside arguments
+   1  a real release needs the notices and the licence
+   1  destination checks
+   1  helpers
+   1  the Mac installer files, notices and licence are copied ONCE (before the key check, which reads the join layout)
+   1  the anchor check reads the Mac join layout
+   3  the join reads the Mac layout (three call sites)
+   1  the build section (git sha, CLI build, podman build and save, Linux archive, manifest and verify-dist) replaced by the image import, the binding and the Mac archive, manifest and verify-dist
+   1  end check of the Mac installer files
+   1  the image binding record and the notices and licence are published beside the release
+  117  every 'release: ' message prefix becomes 'mac-release: '

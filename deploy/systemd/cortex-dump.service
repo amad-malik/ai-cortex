@@ -1,0 +1,17 @@
+# Cortex backup by dump (piece 12; bob@helix). INTERIM(ponytail): replaced in 0.2.003 by cortex backup on pgBackRest.
+# A TEMPLATE: install.sh replaces @CORTEX_HOME@ (the install directory; scripts live in @CORTEX_HOME@/bin, sets in @CORTEX_HOME@/dumps)
+# and @DB_CONTAINER@ (the database container) with sed, and installs the five cortex-dump* units as USER units.
+[Unit]
+Description=Cortex backup by dump (pg_dump of the database container)
+Documentation=file:@CORTEX_HOME@/bin/cortex-dump
+# A failed run must never be silent (BK-04): the alert unit writes the journal line and the ALARM marker.
+OnFailure=cortex-dump-alert.service
+
+[Service]
+Type=oneshot
+# peer authentication inside the container: no password, no TCP, nothing secret in this file (BK-12, BK-29)
+ExecStart=@CORTEX_HOME@/bin/cortex-dump --target @DB_CONTAINER@ --out @CORTEX_HOME@/dumps --status-dir @CORTEX_HOME@/dump-status --timeout 1800
+# cortex-dump ends its own pg_dump after 1800 s and its client 30 s later; systemd's limit is above both
+TimeoutStartSec=2100
+Nice=10
+IOSchedulingClass=idle

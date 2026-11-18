@@ -1,0 +1,17 @@
+error[E0423]: cannot initialize a tuple struct which contains private fields
+ --> tests/ui/audit_details_literal_fail.rs:6:19
+  |
+6 |     let _forged = AuditDetails(Vec::new());
+  |                   ^^^^^^^^^^^^
+  |
+  = note: a struct named `AuditDetails` exists in another namespace
+note: constructor is not visible here due to private fields
+ --> src/ports.rs
+  |
+  | pub struct AuditDetails(Vec<(&'static str, DetailValue)>);
+  |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ private field
+help: you might have meant to use the `new` associated function
+  |
+6 -     let _forged = AuditDetails(Vec::new());
+6 +     let _forged = AuditDetails::new();
+  |

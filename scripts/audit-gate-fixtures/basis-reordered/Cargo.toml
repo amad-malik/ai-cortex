@@ -1,0 +1,6 @@
+[workspace]
+members = ["app"]
+resolver = "2"
+
+[workspace.dependencies]
+sqlx = { path = "sqlx", version = "=0.9.0", default-features = false, features = ["uuid", "tls-none", "postgres", "runtime-tokio"] }

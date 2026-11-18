@@ -1,0 +1,12 @@
+# The second check (piece 12; bob@helix): is the last good dump younger than 26 hours, and does its set still verify? (BK-05)
+# A TEMPLATE like cortex-dump.service.
+[Unit]
+Description=Cortex backup freshness check (cortex-dump-status --verify)
+OnFailure=cortex-dump-alert.service
+
+[Service]
+Type=oneshot
+ExecStart=@CORTEX_HOME@/bin/cortex-dump-status --status-dir @CORTEX_HOME@/dump-status --out @CORTEX_HOME@/dumps --max-age-hours 26 --verify
+# a good check clears the backup alarm (the leading - : a failing clear can never fail this unit and ring the alarm again)
+ExecStartPost=-@CORTEX_HOME@/bin/cortex-dump-alert --home @CORTEX_HOME@ --clear
+TimeoutStartSec=120

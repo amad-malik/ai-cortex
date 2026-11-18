@@ -1,0 +1,8 @@
+[package]
+name = "app-b"
+version = "0.0.1"
+edition = "2021"
+publish = false
+
+[dependencies]
+sqlx = { workspace = true, features = ["migrate"] }

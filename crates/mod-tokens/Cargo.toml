@@ -1,0 +1,32 @@
+[package]
+name = "mod-tokens"
+description = "Piece 3, mod-tokens: token format, verification, issue, list, inspect, revoke, whoami (Wave 1)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+async-trait.workspace = true
+axum = { workspace = true, features = ["json", "query"] }
+base64.workspace = true
+cortex-db.workspace = true
+cortex-module.workspace = true
+cortex-types.workspace = true
+getrandom.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+subtle.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+# The real chain for the route layer (a piece may dev-depend on cortex-http: xtask fitness).
+cortex-http = { path = "../cortex-http" }
+cortex-testkit.workspace = true
+tokio.workspace = true
+tower = { version = "=0.5.3", default-features = false, features = ["util"] }
+
+[lints]
+workspace = true

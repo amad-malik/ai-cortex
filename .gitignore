@@ -1,0 +1,5 @@
+# trybuild writes mismatched or missing compile-fail output here; it is never committed.
+/crates/*/wip/
+/target/
+__pycache__/
+*.pyc

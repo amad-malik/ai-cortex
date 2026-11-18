@@ -1,0 +1,6 @@
+{"target": "scripts/shell-mutants-fixtures/target.sh", "command": ["sh", "{copy}", "--selftest"], "kill_marker": "GATE LOGIC WRONG",
+ "mutants": [
+  {"id": "FX-1", "what": "a logic fault the self-test reports", "old": "-gt 5", "new": "-gt 50"},
+  {"id": "FX-2", "what": "a syntax error: the script dies without the marker", "old": "size() { if", "new": "size() {{ if"},
+  {"id": "FX-3", "what": "a fault no check notices", "old": "echo \"fixture self-test ok\"", "new": "echo \"fixture self-test fine\""}
+ ]}

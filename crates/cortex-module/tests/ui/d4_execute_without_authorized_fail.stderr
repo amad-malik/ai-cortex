@@ -1,0 +1,8 @@
+error[E0593]: closure is expected to take 4 arguments, but it takes 3 arguments
+  --> tests/ui/d4_execute_without_authorized_fail.rs:14:33
+   |
+14 |     let _routes = Routes::new().write(
+   |                                 ^^^^^ expected closure that takes 4 arguments
+...
+20 |         |_tx, _ctx, b: Body| Box::pin(async move { Ok(Reply::ok(b.n)) }),
+   |         -------------------- takes 3 arguments

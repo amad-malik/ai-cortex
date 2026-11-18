@@ -1,0 +1,94 @@
+#!/bin/sh
+# docker-compose-render: render the Docker Desktop configuration, and (with --lint) hold the RENDERED result to the base's hardening (M-1b; bob@helix)
+#
+#   docker-compose-render --base <deploy/compose.yml> --override <deploy/docker/compose.docker.yml> [--out <file>] [--lint]
+#
+# It asks Docker ONCE for the merged configuration, `compose -f <base> -f <override> config --format json`, the base first and the override second, so
+# the override is merged over the base by Compose itself. The result goes to --out (mode 600, written whole or not at all) or to standard output. With
+# --lint it is not printed: it goes through scripts/docker-compose-lint in rendered mode, which reads the REAL merge Compose made and fails when anything
+# of the base's hardening was weakened. The compose files read four variables the installer sets, and this script refuses to start without them:
+# CORTEX_SECRETS_DIR (the directory of the three secret files), CORTEX_CONFIG, CORTEX_DUMP_STATUS and CORTEX_SERVER_IMAGE.
+# This script starts nothing: `config` only renders. UNPROVEN until M-6: nothing here has run against a real Docker Desktop.
+#
+# Exit codes: 0 done; 1 Docker could not render, or the lint found something; 2 a refusal (usage, a variable, a file, no docker).
+set -eu
+umask 077
+LC_ALL=C
+export LC_ALL
+
+me=docker-compose-render
+
+die() { # die <exit code> <problem> <fix>
+  printf '%s: problem: %s; fix: %s\n' "$me" "$2" "$3" >&2
+  exit "$1"
+}
+
+base="" over="" out="" dolint=0
+while [ $# -gt 0 ]; do
+  case $1 in
+    --base) [ $# -ge 2 ] || die 2 "--base needs a value" "give deploy/compose.yml"; base=$2; shift 2 ;;
+    --override) [ $# -ge 2 ] || die 2 "--override needs a value" "give deploy/docker/compose.docker.yml"; over=$2; shift 2 ;;
+    --out) [ $# -ge 2 ] || die 2 "--out needs a value" "give a file name"; out=$2; shift 2 ;;
+    --lint) dolint=1; shift ;;
+    -h | --help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
+    *) die 2 "an argument this tool does not know" "run: docker-compose-render --help" ;;
+  esac
+done
+[ -n "$base" ] || die 2 "--base is required" "give deploy/compose.yml"
+[ -n "$over" ] || die 2 "--override is required" "give deploy/docker/compose.docker.yml"
+[ -f "$base" ] || die 2 "the base file $base does not exist" "give the path of deploy/compose.yml"
+[ -f "$over" ] || die 2 "the override file $over does not exist" "give the path of deploy/docker/compose.docker.yml"
+for v in CORTEX_SECRETS_DIR CORTEX_CONFIG CORTEX_DUMP_STATUS CORTEX_SERVER_IMAGE; do
+  eval "val=\${$v:-}"
+  [ -n "$val" ] || die 2 "$v is not set, and the compose files read it" "the installer sets it; for a manual run, export $v first"
+done
+for v in CORTEX_SECRETS_DIR CORTEX_CONFIG CORTEX_DUMP_STATUS; do
+  eval "val=\${$v}"
+  case $val in
+    /*) ;;
+    *) die 2 "$v is not an absolute path" "give an absolute path, starting with /" ;;
+  esac
+done
+# the destination of --out: a plain file name in a directory that exists; never a directory, never a symbolic link (checked before docker is asked anything)
+if [ -n "$out" ]; then
+  case $out in
+    */*) outdir=${out%/*} ;;
+    *) outdir=. ;;
+  esac
+  [ -n "$outdir" ] || outdir=/
+  [ -d "$outdir" ] || die 2 "the directory of --out ($outdir) does not exist" "make the directory first, or give another --out"
+  if [ -L "$out" ]; then die 2 "--out ($out) is a symbolic link, and this tool never follows or replaces a link" "give a plain file name, or remove the link yourself"; fi
+  if [ -d "$out" ]; then die 2 "--out ($out) is a directory" "give a file name inside it, for example $out/rendered.json"; fi
+  if [ -e "$out" ] && [ ! -f "$out" ]; then die 2 "--out ($out) exists and is not a regular file" "give another file name"; fi
+fi
+command -v docker > /dev/null 2>&1 || die 2 "docker was not found" "install Docker Desktop, start it, and run this again"
+
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+tmp=$(mktemp "${TMPDIR:-/tmp}/docker-compose-render.XXXXXX") || die 2 "cannot make a temporary file" "check that the temporary directory is writable"
+out_tmp=""
+cleanup() { # only the files this run made, by their exact names
+  rm -f -- "$tmp"
+  if [ -n "$out_tmp" ]; then rm -f -- "$out_tmp"; fi
+}
+trap cleanup EXIT
+
+if ! docker compose -f "$base" -f "$over" config --format json > "$tmp"; then
+  die 1 "docker could not render the configuration" "run the rendering call by hand (compose -f <base> -f <override> config --format json) to see the reason, and start Docker Desktop if it is not running"
+fi
+
+if [ "$dolint" -eq 1 ]; then
+  if ! python3 -I "$here/docker-compose-lint" --rendered "$tmp" --secrets-dir "$CORTEX_SECRETS_DIR" --server-image "$CORTEX_SERVER_IMAGE"; then
+    die 1 "the rendered configuration failed the lint (the findings are above)" "the override or the base was changed: put back what the findings name"
+  fi
+fi
+
+if [ -n "$out" ]; then
+  # a UNIQUE, private (mode 600) staging file beside the destination, created exclusively by mktemp, published whole with one rename
+  out_tmp=$(mktemp "$out.XXXXXX") || die 1 "cannot create a staging file next to $out" "check that the directory is writable and has free space"
+  if ! cat "$tmp" > "$out_tmp"; then die 1 "cannot write the staging file $out_tmp" "check that the directory has free space"; fi
+  if ! mv -f -- "$out_tmp" "$out"; then die 1 "cannot put the rendering in place as $out" "check the directory and run this again"; fi
+  out_tmp=""
+elif [ "$dolint" -eq 0 ]; then
+  cat "$tmp"
+fi
+exit 0

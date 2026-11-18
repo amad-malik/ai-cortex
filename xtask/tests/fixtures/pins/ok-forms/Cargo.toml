@@ -1,0 +1,7 @@
+[workspace]
+members = ["crates/a"]
+# serde_ignored = "0.1"   (a comment is not a requirement)
+[workspace.dependencies]
+serde_ignored = { version = "=0.1.14", default-features = false } # pinned "0.1" in D94
+serde_ignored_ext = "1"
+my_serde_ignored = "2"

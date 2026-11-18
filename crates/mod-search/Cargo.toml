@@ -1,0 +1,24 @@
+[package]
+name = "mod-search"
+description = "Piece 7: keyword search over the project's records (Postgres full text through the two search views), bounded and project-isolated"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+axum = { workspace = true, features = ["json"] }
+cortex-db.workspace = true
+cortex-module.workspace = true
+cortex-types.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+tokio.workspace = true
+
+[dev-dependencies]
+async-trait.workspace = true
+cortex-testkit.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,8 @@
+# F1-02 fixture: a crate declaring SSPL-1.0. Standalone; never a member of the repository workspace.
+[package]
+name = "fixture-sspl"
+version = "0.1.0"
+edition = "2024"
+license = "SSPL-1.0"
+
+[workspace]

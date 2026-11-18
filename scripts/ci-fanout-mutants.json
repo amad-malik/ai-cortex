@@ -1,0 +1,282 @@
+{
+ "target": "scripts/ci-fanout.sh",
+ "command": [
+  "env",
+  "FANOUT_SH={copy}",
+  "sh",
+  "scripts/ci-fanout-test.sh"
+ ],
+ "kill_marker": "FANOUT CELLS FAILED",
+ "mutants": [
+  {
+   "id": "FM-1",
+   "what": "a SWALLOWED SHARD STATUS: every shard's status is recorded and returned as 0",
+   "old": "    echo \"exit=$rc seconds=$((e - s)) ids=$k\" > \"$stat\"\n    exit \"$rc\"",
+   "new": "    echo \"exit=0 seconds=$((e - s)) ids=$k\" > \"$stat\"\n    exit 0"
+  },
+  {
+   "id": "FM-2",
+   "what": "the status file and wait(1) are not reconciled",
+   "old": "  elif [ \"$rc\" != \"$wrc\" ]; then why=\"the status file says $rc but wait says $wrc\"\n",
+   "new": ""
+  },
+  {
+   "id": "FM-3",
+   "what": "a shard with no status is not a failure",
+   "old": "  if [ -z \"$rc\" ]; then why=\"no status was recorded for this shard\"\n  elif",
+   "new": "  if false; then why=\"no status was recorded for this shard\"\n  elif"
+  },
+  {
+   "id": "FM-4",
+   "what": "the shard timeout is not applied",
+   "old": "timeout -k \"$grace\" \"$tmo\" \"$@\" $ids > \"$log\" 2>&1 &",
+   "new": "\"$@\" $ids > \"$log\" 2>&1 &"
+  },
+  {
+   "id": "FM-5",
+   "what": "the KILL after the grace is dropped (a shard that ignores TERM runs on)",
+   "old": "timeout -k \"$grace\" \"$tmo\" \"$@\" $ids > \"$log\" 2>&1 &",
+   "new": "timeout \"$tmo\" \"$@\" $ids > \"$log\" 2>&1 &"
+  },
+  {
+   "id": "FM-6",
+   "what": "the gate stops at the FIRST failing shard instead of waiting for all",
+   "old": "  wait \"$p\" || wrc=$?\n",
+   "new": "  wait \"$p\" || { stop_shards; exit 1; }\n"
+  },
+  {
+   "id": "FM-7",
+   "what": "a duplicate id in the spec is accepted",
+   "old": "    if i in seen:\n        print(\"ci-fanout: the spec has the id %s twice\" % i, file=sys.stderr)\n        sys.exit(2)\n",
+   "new": ""
+  },
+  {
+   "id": "FM-8",
+   "what": "more shards than ids: EMPTY shards are run (a driver given no ids runs every mutant)",
+   "old": "[ \"$shards\" -le \"$total\" ] || shards=$total      # no empty shard, ever\n",
+   "new": ""
+  },
+  {
+   "id": "FM-9",
+   "what": "the ids are dealt in blocks of four, not round-robin",
+   "old": "s = (NR - 1) % n + 1;",
+   "new": "s = int((NR - 1) / 4) % n + 1;"
+  },
+  {
+   "id": "FM-10",
+   "what": "the ids are not given to the driver (every shard runs every mutant)",
+   "old": "timeout -k \"$grace\" \"$tmo\" \"$@\" $ids > \"$log\" 2>&1 &",
+   "new": "timeout -k \"$grace\" \"$tmo\" \"$@\" > \"$log\" 2>&1 &"
+  },
+  {
+   "id": "FM-11",
+   "what": "the id accounting does not decide the verdict",
+   "old": "if [ \"$bad\" -eq 0 ] && [ \"$nprob\" -eq 0 ]; then",
+   "new": "if [ \"$bad\" -eq 0 ]; then"
+  },
+  {
+   "id": "FM-12",
+   "what": "an id that no shard reported is not noticed",
+   "old": "    if not got:\n        print(\"problem: id %s was not reported by any shard\" % i)\n    elif",
+   "new": "    if False:\n        print(\"problem: id %s was not reported by any shard\" % i)\n    elif"
+  },
+  {
+   "id": "FM-13",
+   "what": "an id reported twice is not noticed",
+   "old": "    elif len(got) > 1:",
+   "new": "    elif len(got) > 99999:"
+  },
+  {
+   "id": "FM-14",
+   "what": "an id reported by the wrong shard is not noticed",
+   "old": "        if s != owner[i]:",
+   "new": "        if False:"
+  },
+  {
+   "id": "FM-15",
+   "what": "a shard killed by a signal is not named as such",
+   "old": "  elif [ \"$rc\" -gt 128 ]; then why=\"killed by signal $((rc - 128))\"\n",
+   "new": ""
+  },
+  {
+   "id": "FM-16",
+   "what": "a timeout (124) is not named as such",
+   "old": "  elif [ \"$rc\" -eq 124 ]; then why=\"timed out after ${tmo}s\"\n",
+   "new": ""
+  },
+  {
+   "id": "FM-17",
+   "what": "CI_FANOUT_SHARDS does not override the command line",
+   "old": "shards=${CI_FANOUT_SHARDS:-$shards_cli}",
+   "new": "shards=$shards_cli"
+  },
+  {
+   "id": "FM-18",
+   "what": "FANOUT_TIMEOUT is not the default timeout",
+   "old": "tmo=${FANOUT_TIMEOUT:-14400}",
+   "new": "tmo=14400"
+  },
+  {
+   "id": "FM-19",
+   "what": "CI_LOG_DIR is ignored for the logs",
+   "old": "log_dir=${CI_LOG_DIR:-target/ci}/fanout",
+   "new": "log_dir=target/ci/fanout"
+  },
+  {
+   "id": "FM-20",
+   "what": "a TERM to the wrapper is ignored (the shards are left behind)",
+   "old": "trap cancel TERM INT HUP\ni=1\nwhile",
+   "new": "trap '' TERM INT HUP\ni=1\nwhile"
+  },
+  {
+   "id": "FM-21",
+   "what": "--plan runs the shards too",
+   "old": "[ \"$plan_only\" -eq 0 ] || exit 0\n",
+   "new": ""
+  },
+  {
+   "id": "FM-22",
+   "what": "a failed gate exits 0",
+   "old": "echo \"ci-fanout: FAIL ($bad of $shards shards failed, $nprob id problems)\"\nexit 1",
+   "new": "echo \"ci-fanout: FAIL ($bad of $shards shards failed, $nprob id problems)\"\nexit 0"
+  },
+  {
+   "id": "FM-23",
+   "what": "the caller's environment does not reach the shards",
+   "old": "timeout -k \"$grace\" \"$tmo\" \"$@\" $ids > \"$log\" 2>&1 &",
+   "new": "env -i PATH=\"$PATH\" timeout -k \"$grace\" \"$tmo\" \"$@\" $ids > \"$log\" 2>&1 &"
+  },
+  {
+   "id": "FM-24",
+   "what": "a TERM to a shard's subshell loses the child's real status",
+   "old": "    while [ \"$rc\" -gt 128 ] && kill -0 \"$cpid\" 2>/dev/null; do rc=0; wait \"$cpid\" || rc=$?; done\n",
+   "new": ""
+  },
+  {
+   "id": "FM-25",
+   "what": "an empty spec is accepted",
+   "old": "if not isinstance(spec, list) or not spec:",
+   "new": "if not isinstance(spec, list):"
+  },
+  {
+   "id": "FM-26",
+   "what": "any text is a plain id (a space, an empty id)",
+   "old": "re.fullmatch(r\"[A-Za-z][A-Za-z0-9._-]*[0-9]\", i)",
+   "new": "re.fullmatch(r\".*\", i)"
+  },
+  {
+   "id": "FM-27",
+   "what": "a count of 0 is accepted",
+   "old": "[ \"$2\" -ge 1 ] || die \"$1 must be at least 1 (got '$2')\"",
+   "new": "true"
+  },
+  {
+   "id": "FM-28",
+   "what": "a missing driver command is accepted",
+   "old": "[ $# -ge 1 ] || die \"the driver command is required after --\"\n",
+   "new": ""
+  },
+  {
+   "id": "FM-29",
+   "what": "the wrapper exports CV2_ADMITTED=1 to every shard (each shard would skip its own admission)",
+   "old": "timeout -k \"$grace\" \"$tmo\" \"$@\" $ids > \"$log\" 2>&1 &",
+   "new": "env CV2_ADMITTED=1 timeout -k \"$grace\" \"$tmo\" \"$@\" $ids > \"$log\" 2>&1 &"
+  },
+  {
+   "id": "FM-30",
+   "what": "the wrapper arms its cancellation handler only after the first shard is launched",
+   "old": "trap cancel TERM INT HUP\ni=1\nwhile [ \"$i\" -le \"$shards\" ]; do\n  ids=$(tr '\\n' ' ' < \"$work/shard-$i.ids\")\n  k=$(wc -l < \"$work/shard-$i.ids\" | tr -d ' ')\n  log=\"$log_dir/$name-shard-$i.log\" stat=\"$log_dir/$name-shard-$i.status\"\n  (\n    s=$(date +%s)\n    rc=0 cpid=\"\" cancelled=0\n    # the shard's own cancellation is armed BEFORE it launches the driver: a TERM before this line finds no child to leak; after it, the handler ends the child (or, if the child's pid is not\n    # recorded yet, remembers the cancellation and the check right after the registration ends it)\n    trap 'cancelled=1; [ -z \"$cpid\" ] || kill -TERM \"$cpid\" 2>/dev/null || true' TERM INT HUP\n    # shellcheck disable=SC2086\n    timeout -k \"$grace\" \"$tmo\" \"$@\" $ids > \"$log\" 2>&1 &\n    test_pause \"${FANOUT_TEST_SHARD_PAUSE:-}\"\n    cpid=$!\n    [ \"$cancelled\" = 0 ] || kill -TERM \"$cpid\" 2>/dev/null || true\n    wait \"$cpid\" || rc=$?\n    # a trapped signal (a TERM that came to this subshell) interrupts wait(1) while the child is still alive, and that result says nothing about the child: wait AGAIN, as often as it takes, until\n    # the child is really gone, and take ITS status (a single retry could itself be interrupted and report the shard finished with its driver alive, FO-SAM-01-R1)\n    while [ \"$rc\" -gt 128 ] && kill -0 \"$cpid\" 2>/dev/null; do rc=0; wait \"$cpid\" || rc=$?; done\n    e=$(date +%s)\n    echo \"exit=$rc seconds=$((e - s)) ids=$k\" > \"$stat\"\n    exit \"$rc\"\n  ) &\n  test_pause \"${FANOUT_TEST_LAUNCH_PAUSE:-}\"\n",
+   "new": "i=1\nwhile [ \"$i\" -le \"$shards\" ]; do\n  ids=$(tr '\\n' ' ' < \"$work/shard-$i.ids\")\n  k=$(wc -l < \"$work/shard-$i.ids\" | tr -d ' ')\n  log=\"$log_dir/$name-shard-$i.log\" stat=\"$log_dir/$name-shard-$i.status\"\n  (\n    s=$(date +%s)\n    rc=0 cpid=\"\" cancelled=0\n    # the shard's own cancellation is armed BEFORE it launches the driver: a TERM before this line finds no child to leak; after it, the handler ends the child (or, if the child's pid is not\n    # recorded yet, remembers the cancellation and the check right after the registration ends it)\n    trap 'cancelled=1; [ -z \"$cpid\" ] || kill -TERM \"$cpid\" 2>/dev/null || true' TERM INT HUP\n    # shellcheck disable=SC2086\n    timeout -k \"$grace\" \"$tmo\" \"$@\" $ids > \"$log\" 2>&1 &\n    test_pause \"${FANOUT_TEST_SHARD_PAUSE:-}\"\n    cpid=$!\n    [ \"$cancelled\" = 0 ] || kill -TERM \"$cpid\" 2>/dev/null || true\n    wait \"$cpid\" || rc=$?\n    # a trapped signal (a TERM that came to this subshell) interrupts wait(1) while the child is still alive, and that result says nothing about the child: wait AGAIN, as often as it takes, until\n    # the child is really gone, and take ITS status (a single retry could itself be interrupted and report the shard finished with its driver alive, FO-SAM-01-R1)\n    while [ \"$rc\" -gt 128 ] && kill -0 \"$cpid\" 2>/dev/null; do rc=0; wait \"$cpid\" || rc=$?; done\n    e=$(date +%s)\n    echo \"exit=$rc seconds=$((e - s)) ids=$k\" > \"$stat\"\n    exit \"$rc\"\n  ) &\n  test_pause \"${FANOUT_TEST_LAUNCH_PAUSE:-}\"\n  trap cancel TERM INT HUP\n"
+  },
+  {
+   "id": "FM-31",
+   "what": "the handler does not end the shard that is being launched (its pid is not registered yet)",
+   "old": "    *) [ -z \"$late\" ] || kill -TERM \"$late\" 2>/dev/null || true ;;\n",
+   "new": "    *) ;;\n"
+  },
+  {
+   "id": "FM-32",
+   "what": "the handler exits without waiting for the shards it ended",
+   "old": "  wait || true\n  exit 143\n}",
+   "new": "  exit 143\n}"
+  },
+  {
+   "id": "FM-33",
+   "what": "the handler does not exit, so the launch loop goes on starting shards after a cancellation",
+   "old": "  wait || true\n  exit 143\n}",
+   "new": "  wait || true\n}"
+  },
+  {
+   "id": "FM-34",
+   "what": "the shard arms its trap only after it launched the driver",
+   "old": "    trap 'cancelled=1; [ -z \"$cpid\" ] || kill -TERM \"$cpid\" 2>/dev/null || true' TERM INT HUP\n    # shellcheck disable=SC2086\n    timeout -k \"$grace\" \"$tmo\" \"$@\" $ids > \"$log\" 2>&1 &\n    test_pause \"${FANOUT_TEST_SHARD_PAUSE:-}\"\n    cpid=$!\n",
+   "new": "    # shellcheck disable=SC2086\n    timeout -k \"$grace\" \"$tmo\" \"$@\" $ids > \"$log\" 2>&1 &\n    test_pause \"${FANOUT_TEST_SHARD_PAUSE:-}\"\n    cpid=$!\n    trap 'cancelled=1; [ -z \"$cpid\" ] || kill -TERM \"$cpid\" 2>/dev/null || true' TERM INT HUP\n"
+  },
+  {
+   "id": "FM-35",
+   "what": "the shard does not check for a cancellation right after it registered the driver's pid",
+   "old": "    [ \"$cancelled\" = 0 ] || kill -TERM \"$cpid\" 2>/dev/null || true\n",
+   "new": ""
+  },
+  {
+   "id": "FM-36",
+   "what": "a result record for an id that is not in the spec is ignored",
+   "old": "        else:\n            extra.setdefault(rid, []).append(s)\n",
+   "new": "        else:\n            pass\n"
+  },
+  {
+   "id": "FM-37",
+   "what": "every line whose first word is an id counts as a result (the first-token rule), commentary included",
+   "old": "        m = record.fullmatch(line)\n        if not m:\n            continue\n        rid = m.group(1)\n",
+   "new": "        parts = line.split()\n        if len(parts) < 2:\n            continue\n        rid = parts[0]\n"
+  },
+  {
+   "id": "FM-38",
+   "what": "the record grammar drops the bracketed description (any line that starts with an id-shaped word is a record)",
+   "old": "record = re.compile(r\"([A-Za-z][A-Za-z0-9._-]*[0-9]) +\\S.*  \\[.*\\]\")",
+   "new": "record = re.compile(r\"([A-Za-z][A-Za-z0-9._-]*[0-9]).*\")"
+  },
+  {
+   "id": "FM-39",
+   "what": "the record grammar is stricter than the drivers' own format (three spaces before the bracket)",
+   "old": "record = re.compile(r\"([A-Za-z][A-Za-z0-9._-]*[0-9]) +\\S.*  \\[.*\\]\")",
+   "new": "record = re.compile(r\"([A-Za-z][A-Za-z0-9._-]*[0-9]) +\\S.*   \\[.*\\]\")"
+  },
+  {
+   "id": "FM-40",
+   "what": "the test pauses are honoured whenever CI_FANOUT_TEST is set to anything",
+   "old": "[ \"${CI_FANOUT_TEST:-}\" = 1 ] || return 0",
+   "new": "[ -n \"${CI_FANOUT_TEST:-}\" ] || return 0"
+  },
+  {
+   "id": "FM-41",
+   "what": "the test pauses are honoured without CI_FANOUT_TEST",
+   "old": "test_pause() { [ \"${CI_FANOUT_TEST:-}\" = 1 ] || return 0; ",
+   "new": "test_pause() { "
+  },
+  {
+   "id": "FM-42",
+   "what": "a spec id need not fit the record id shape (the earlier plain-id check)",
+   "old": "[A-Za-z][A-Za-z0-9._-]*[0-9]\", i)",
+   "new": "[A-Za-z0-9][A-Za-z0-9._-]*\", i)"
+  },
+  {
+   "id": "FM-43",
+   "what": "a record id need not end with a digit (a suite line that starts with ok is a record)",
+   "old": "record = re.compile(r\"([A-Za-z][A-Za-z0-9._-]*[0-9]) +\\S.*  \\[.*\\]\")",
+   "new": "record = re.compile(r\"([A-Za-z][A-Za-z0-9._-]*) +\\S.*  \\[.*\\]\")"
+  },
+  {
+   "id": "FM-44",
+   "what": "cancel signals the shard being launched even when it is already registered (a second TERM for one cancellation)",
+   "old": "  case \" $pids \" in\n    *\" $late \"*) ;;\n    *) [ -z \"$late\" ] || kill -TERM \"$late\" 2>/dev/null || true ;;\n  esac\n",
+   "new": "  [ -z \"$late\" ] || kill -TERM \"$late\" 2>/dev/null || true\n"
+  },
+  {
+   "id": "FM-45",
+   "what": "the shard retries an interrupted wait only once (a second interrupted wait reports the shard finished with its driver alive)",
+   "old": "    while [ \"$rc\" -gt 128 ] && kill -0 \"$cpid\" 2>/dev/null; do rc=0; wait \"$cpid\" || rc=$?; done\n",
+   "new": "    if [ \"$rc\" -gt 128 ] && kill -0 \"$cpid\" 2>/dev/null; then rc=0; wait \"$cpid\" || rc=$?; fi\n"
+  }
+ ]
+}

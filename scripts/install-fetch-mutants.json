@@ -1,0 +1,3992 @@
+[
+ {
+  "id": "FM001",
+  "what": "line 36: a return value is flipped",
+  "old": "    esac\n    return 0\n}\n\n# The tools the trust step needs",
+  "new": "    esac\n    return 9\n}\n\n# The tools the trust step needs",
+  "fails": [
+   "ir11"
+  ]
+ },
+ {
+  "id": "FM002",
+  "what": "line 57: a hygiene statement is deleted",
+  "old": "    PATH=/usr/bin:/usr/sbin",
+  "new": "    :",
+  "fails": [
+   "hy01"
+  ]
+ },
+ {
+  "id": "FM003",
+  "what": "line 58: a hygiene statement is deleted",
+  "old": "    export PATH",
+  "new": "    :",
+  "fails": [
+   "hy01"
+  ]
+ },
+ {
+  "id": "FM005",
+  "what": "line 60: a hygiene statement is deleted",
+  "old": "    LC_ALL=C",
+  "new": "    :",
+  "fails": [
+   "hy01"
+  ]
+ },
+ {
+  "id": "FM006",
+  "what": "line 61: a hygiene statement is deleted",
+  "old": "    export LC_ALL",
+  "new": "    :",
+  "fails": [
+   "hy01"
+  ]
+ },
+ {
+  "id": "FM007",
+  "what": "line 62: a hygiene statement is deleted",
+  "old": "    umask 077",
+  "new": "    :",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM008",
+  "what": "line 62: umask 077 becomes 022",
+  "old": "    umask 077",
+  "new": "    umask 022",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM009",
+  "what": "line 63: a hygiene statement is deleted",
+  "old": "    unset LD_PRELOAD LD_LIBRARY_PATH LD_AUDIT PYTHONPATH PYTHONHOME PYTHONSTARTUP BASH_ENV ENV CDPATH GCONV_PATH OPENSSL_CONF OPENSSL_MODULES OPENSSL_ENGINES 2>/dev/null || :",
+  "new": "    :",
+  "fails": [
+   "hy01"
+  ]
+ },
+ {
+  "id": "FM010",
+  "what": "line 64: a hygiene statement is deleted",
+  "old": "    rel_nl=$(printf '\\nx')",
+  "new": "    :",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM011",
+  "what": "line 65: a hygiene statement is deleted",
+  "old": "    rel_nl=${rel_nl%x}",
+  "new": "    :",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM012",
+  "what": "line 66: a hygiene statement is deleted",
+  "old": "    rel_tab=$(printf '\\tx')",
+  "new": "    :",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM013",
+  "what": "line 67: a hygiene statement is deleted",
+  "old": "    rel_tab=${rel_tab%x}",
+  "new": "    :",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM014",
+  "what": "line 68: a hygiene statement is deleted",
+  "old": "    IFS=\" $rel_tab$rel_nl\"\n    set -f\n}",
+  "new": "    :\n    set -f\n}",
+  "fails": [
+   "tr16"
+  ]
+ },
+ {
+  "id": "FM015",
+  "what": "line 69: a hygiene statement is deleted",
+  "old": "    set -f",
+  "new": "    :",
+  "fails": [
+   "hy01"
+  ]
+ },
+ {
+  "id": "FM016",
+  "what": "line 76: a hygiene statement is deleted",
+  "old": "rel_version_ok() (\n    rel_env_clean",
+  "new": "rel_version_ok() (\n    :",
+  "fails": [
+   "hf01"
+  ]
+ },
+ {
+  "id": "FM017",
+  "what": "line 78: the number 64 in a test becomes 63",
+  "old": "    [ \"${#rv}\" -le 64 ] || return 1",
+  "new": "    [ \"${#rv}\" -le 63 ] || return 1",
+  "fails": [
+   "pr01"
+  ]
+ },
+ {
+  "id": "FM018",
+  "what": "line 78: the number 64 in a test becomes 65",
+  "old": "    [ \"${#rv}\" -le 64 ] || return 1",
+  "new": "    [ \"${#rv}\" -le 65 ] || return 1",
+  "fails": [
+   "pr01"
+  ]
+ },
+ {
+  "id": "FM019",
+  "what": "line 78: -le becomes -gt",
+  "old": "    [ \"${#rv}\" -le 64 ] || return 1",
+  "new": "    [ \"${#rv}\" -gt 64 ] || return 1",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM020",
+  "what": "line 78: a return value is flipped",
+  "old": "    [ \"${#rv}\" -le 64 ] || return 1",
+  "new": "    [ \"${#rv}\" -le 64 ] || return 0",
+  "fails": [
+   "pr01"
+  ]
+ },
+ {
+  "id": "FM021",
+  "what": "line 79: an alphabet class loses its last character (-)",
+  "old": "    case $rv in \"\"|*.part|*[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.-]*) return 1 ;; esac",
+  "new": "    case $rv in \"\"|*.part|*[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.]*) return 1 ;; esac",
+  "fails": [
+   "ir21"
+  ]
+ },
+ {
+  "id": "FM022",
+  "what": "line 82: != becomes = in a test",
+  "old": "    if [ \"$rv_core\" != \"$rv\" ]; then",
+  "new": "    if [ \"$rv_core\" = \"$rv\" ]; then",
+  "fails": [
+   "ir21b"
+  ]
+ },
+ {
+  "id": "FM023",
+  "what": "line 84: -n becomes -z",
+  "old": "        [ -n \"$rv_pre\" ] || return 1",
+  "new": "        [ -z \"$rv_pre\" ] || return 1",
+  "fails": [
+   "ir21"
+  ]
+ },
+ {
+  "id": "FM024",
+  "what": "line 84: a return value is flipped",
+  "old": "        [ -n \"$rv_pre\" ] || return 1",
+  "new": "        [ -n \"$rv_pre\" ] || return 0",
+  "fails": [
+   "ir21b"
+  ]
+ },
+ {
+  "id": "FM025",
+  "what": "line 89: the number 3 in a test becomes 2",
+  "old": "    [ \"$#\" -eq 3 ] || return 1",
+  "new": "    [ \"$#\" -eq 2 ] || return 1",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM026",
+  "what": "line 89: the number 3 in a test becomes 4",
+  "old": "    [ \"$#\" -eq 3 ] || return 1",
+  "new": "    [ \"$#\" -eq 4 ] || return 1",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM027",
+  "what": "line 89: -eq becomes -ne",
+  "old": "    [ \"$#\" -eq 3 ] || return 1",
+  "new": "    [ \"$#\" -ne 3 ] || return 1",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM028",
+  "what": "line 89: a return value is flipped",
+  "old": "    [ \"$#\" -eq 3 ] || return 1",
+  "new": "    [ \"$#\" -eq 3 ] || return 0",
+  "fails": [
+   "ir21b"
+  ]
+ },
+ {
+  "id": "FM029",
+  "what": "line 91: an alphabet class loses its last character (9)",
+  "old": "        case $rv_n in *[!0123456789]*|0?*) return 1 ;; esac",
+  "new": "        case $rv_n in *[!012345678]*|0?*) return 1 ;; esac",
+  "fails": [
+   "ir21"
+  ]
+ },
+ {
+  "id": "FM030",
+  "what": "line 92: the number 19 in a test becomes 18",
+  "old": "        [ \"${#rv_n}\" -le 19 ] || return 1",
+  "new": "        [ \"${#rv_n}\" -le 18 ] || return 1",
+  "fails": [
+   "ir21"
+  ]
+ },
+ {
+  "id": "FM031",
+  "what": "line 92: the number 19 in a test becomes 20",
+  "old": "        [ \"${#rv_n}\" -le 19 ] || return 1",
+  "new": "        [ \"${#rv_n}\" -le 20 ] || return 1",
+  "fails": [
+   "ir21b"
+  ]
+ },
+ {
+  "id": "FM032",
+  "what": "line 92: -le becomes -gt",
+  "old": "        [ \"${#rv_n}\" -le 19 ] || return 1",
+  "new": "        [ \"${#rv_n}\" -gt 19 ] || return 1",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM033",
+  "what": "line 92: a return value is flipped",
+  "old": "        [ \"${#rv_n}\" -le 19 ] || return 1",
+  "new": "        [ \"${#rv_n}\" -le 19 ] || return 0",
+  "fails": [
+   "ir21b"
+  ]
+ },
+ {
+  "id": "FM034",
+  "what": "line 94: -n becomes -z",
+  "old": "    if [ -n \"$rv_pre\" ]; then",
+  "new": "    if [ -z \"$rv_pre\" ]; then",
+  "fails": [
+   "ir21b"
+  ]
+ },
+ {
+  "id": "FM035",
+  "what": "line 98: an alphabet class loses its last character (9)",
+  "old": "            case $rv_n in *[!0123456789]*|0) ;; 0*) return 1 ;; esac",
+  "new": "            case $rv_n in *[!012345678]*|0) ;; 0*) return 1 ;; esac",
+  "fails": [
+   "pr01"
+  ]
+ },
+ {
+  "id": "FM036",
+  "what": "line 101: a return value is flipped",
+  "old": "    fi\n    return 0",
+  "new": "    fi\n    return 9",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM037",
+  "what": "line 107: a hygiene statement is deleted",
+  "old": "rel_image_ok() (\n    rel_env_clean",
+  "new": "rel_image_ok() (\n    :",
+  "fails": [
+   "hf01"
+  ]
+ },
+ {
+  "id": "FM038",
+  "what": "line 109: the number 300 in a test becomes 299",
+  "old": "    { [ -n \"$ri\" ] && [ \"${#ri}\" -le 300 ]; } || return 1",
+  "new": "    { [ -n \"$ri\" ] && [ \"${#ri}\" -le 299 ]; } || return 1",
+  "fails": [
+   "pr02"
+  ]
+ },
+ {
+  "id": "FM039",
+  "what": "line 109: the number 300 in a test becomes 301",
+  "old": "    { [ -n \"$ri\" ] && [ \"${#ri}\" -le 300 ]; } || return 1",
+  "new": "    { [ -n \"$ri\" ] && [ \"${#ri}\" -le 301 ]; } || return 1",
+  "fails": [
+   "pr02"
+  ]
+ },
+ {
+  "id": "FM040",
+  "what": "line 109: -le becomes -gt",
+  "old": "    { [ -n \"$ri\" ] && [ \"${#ri}\" -le 300 ]; } || return 1",
+  "new": "    { [ -n \"$ri\" ] && [ \"${#ri}\" -gt 300 ]; } || return 1",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM041",
+  "what": "line 109: -n becomes -z",
+  "old": "    { [ -n \"$ri\" ] && [ \"${#ri}\" -le 300 ]; } || return 1",
+  "new": "    { [ -z \"$ri\" ] && [ \"${#ri}\" -le 300 ]; } || return 1",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM042",
+  "what": "line 109: a return value is flipped",
+  "old": "    { [ -n \"$ri\" ] && [ \"${#ri}\" -le 300 ]; } || return 1",
+  "new": "    { [ -n \"$ri\" ] && [ \"${#ri}\" -le 300 ]; } || return 0",
+  "fails": [
+   "pr02"
+  ]
+ },
+ {
+  "id": "FM043",
+  "what": "line 110: an alphabet class loses its last character (-)",
+  "old": "    case $ri in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._:/@-]*) return 1 ;; esac",
+  "new": "    case $ri in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._:/@]*) return 1 ;; esac",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM044",
+  "what": "line 114: the number 64 in a test becomes 63",
+  "old": "    { [ -n \"$ri_name\" ] && [ \"${#ri_dig}\" -eq 64 ]; } || return 1",
+  "new": "    { [ -n \"$ri_name\" ] && [ \"${#ri_dig}\" -eq 63 ]; } || return 1",
+  "fails": [
+   "hf01"
+  ]
+ },
+ {
+  "id": "FM045",
+  "what": "line 114: the number 64 in a test becomes 65",
+  "old": "    { [ -n \"$ri_name\" ] && [ \"${#ri_dig}\" -eq 64 ]; } || return 1",
+  "new": "    { [ -n \"$ri_name\" ] && [ \"${#ri_dig}\" -eq 65 ]; } || return 1",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM046",
+  "what": "line 114: -eq becomes -ne",
+  "old": "    { [ -n \"$ri_name\" ] && [ \"${#ri_dig}\" -eq 64 ]; } || return 1",
+  "new": "    { [ -n \"$ri_name\" ] && [ \"${#ri_dig}\" -ne 64 ]; } || return 1",
+  "fails": [
+   "hf01"
+  ]
+ },
+ {
+  "id": "FM047",
+  "what": "line 114: -n becomes -z",
+  "old": "    { [ -n \"$ri_name\" ] && [ \"${#ri_dig}\" -eq 64 ]; } || return 1",
+  "new": "    { [ -z \"$ri_name\" ] && [ \"${#ri_dig}\" -eq 64 ]; } || return 1",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM048",
+  "what": "line 114: a return value is flipped",
+  "old": "    { [ -n \"$ri_name\" ] && [ \"${#ri_dig}\" -eq 64 ]; } || return 1",
+  "new": "    { [ -n \"$ri_name\" ] && [ \"${#ri_dig}\" -eq 64 ]; } || return 0",
+  "fails": [
+   "hf01"
+  ]
+ },
+ {
+  "id": "FM049",
+  "what": "line 116: an alphabet class loses its last character (f)",
+  "old": "    case $ri_dig in *[!0123456789abcdef]*) return 1 ;; esac",
+  "new": "    case $ri_dig in *[!0123456789abcde]*) return 1 ;; esac",
+  "fails": [
+   "pr02"
+  ]
+ },
+ {
+  "id": "FM050",
+  "what": "line 117: a return value is flipped",
+  "old": "    case $ri_dig in *[!0123456789abcdef]*) return 1 ;; esac\n    return 0",
+  "new": "    case $ri_dig in *[!0123456789abcdef]*) return 1 ;; esac\n    return 9",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM051",
+  "what": "line 122: a hygiene statement is deleted",
+  "old": "rel_limit() (\n    rel_env_clean",
+  "new": "rel_limit() (\n    :",
+  "fails": [
+   "hf01"
+  ]
+ },
+ {
+  "id": "FM052",
+  "what": "line 134: a hygiene statement is deleted",
+  "old": "rel_stage_ok() (\n    rel_env_clean",
+  "new": "rel_stage_ok() (\n    :",
+  "fails": [
+   "ze02"
+  ]
+ },
+ {
+  "id": "FM053",
+  "what": "line 137: an alphabet class loses its last character (-)",
+  "old": "    case $rs in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._/@+-]*) return 1 ;; esac",
+  "new": "    case $rs in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._/@+]*) return 1 ;; esac",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM054",
+  "what": "line 141: an alphabet class loses its last character (9)",
+  "old": "    case ${rs_base#.cortex-install-stage.} in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789]*) return 1 ;; esac",
+  "new": "    case ${rs_base#.cortex-install-stage.} in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012345678]*) return 1 ;; esac",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM055",
+  "what": "line 142: a link test is inverted",
+  "old": "    [ ! -L \"$rs\" ] || return 1",
+  "new": "    [ -L \"$rs\" ] || return 1",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM056",
+  "what": "line 142: a return value is flipped",
+  "old": "    [ ! -L \"$rs\" ] || return 1",
+  "new": "    [ ! -L \"$rs\" ] || return 0",
+  "fails": [
+   "ir14"
+  ]
+ },
+ {
+  "id": "FM057",
+  "what": "line 143: a return value is flipped",
+  "old": "    [ -d \"$rs\" ] || return 1",
+  "new": "    [ -d \"$rs\" ] || return 0",
+  "fails": [
+   "ir14"
+  ]
+ },
+ {
+  "id": "FM058",
+  "what": "line 144: a return value is flipped",
+  "old": "    rs_me=$(rel_tool_uid) || return 1",
+  "new": "    rs_me=$(rel_tool_uid) || return 0",
+  "fails": [
+   "zf01"
+  ]
+ },
+ {
+  "id": "FM059",
+  "what": "line 145: a return value is flipped",
+  "old": "    rs_info=$(rel_tool_stat -c '%u %a' -- \"$rs\") || return 1",
+  "new": "    rs_info=$(rel_tool_stat -c '%u %a' -- \"$rs\") || return 0",
+  "fails": [
+   "zf01"
+  ]
+ },
+ {
+  "id": "FM061",
+  "what": "line 146: = becomes != in a test",
+  "old": "    [ \"$rs_info\" = \"$rs_me 700\" ] || return 1",
+  "new": "    [ \"$rs_info\" != \"$rs_me 700\" ] || return 1",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM062",
+  "what": "line 146: a return value is flipped",
+  "old": "    [ \"$rs_info\" = \"$rs_me 700\" ] || return 1",
+  "new": "    [ \"$rs_info\" = \"$rs_me 700\" ] || return 0",
+  "fails": [
+   "ir14"
+  ]
+ },
+ {
+  "id": "FM063",
+  "what": "line 147: a return value is flipped",
+  "old": "    [ \"$rs_info\" = \"$rs_me 700\" ] || return 1\n    return 0",
+  "new": "    [ \"$rs_info\" = \"$rs_me 700\" ] || return 1\n    return 9",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM064",
+  "what": "line 160: a hygiene statement is deleted",
+  "old": "rel_fetch() (\n    rel_env_clean",
+  "new": "rel_fetch() (\n    :",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM065",
+  "what": "line 163: the failure handler is removed (a failure is ignored)",
+  "old": "    rel_version_ok \"$rel_version\" || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    rel_version_ok \"$rel_version\"",
+  "fails": [
+   "ir21b"
+  ]
+ },
+ {
+  "id": "FM066",
+  "what": "line 163: the default of EX_FETCH becomes 4",
+  "old": "    rel_version_ok \"$rel_version\" || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    rel_version_ok \"$rel_version\" || { fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "ir21"
+  ]
+ },
+ {
+  "id": "FM067",
+  "what": "line 163: the message fetch_download becomes fetch_location",
+  "old": "    rel_version_ok \"$rel_version\" || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    rel_version_ok \"$rel_version\" || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir21"
+  ]
+ },
+ {
+  "id": "FM068",
+  "what": "line 164: the failure handler is removed (a failure is ignored)",
+  "old": "    rel_stage_ok \"$rel_stage\" || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    rel_stage_ok \"$rel_stage\"",
+  "fails": [
+   "ir14"
+  ]
+ },
+ {
+  "id": "FM069",
+  "what": "line 164: the default of EX_FETCH becomes 4",
+  "old": "    rel_stage_ok \"$rel_stage\" || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    rel_stage_ok \"$rel_stage\" || { fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "ir14"
+  ]
+ },
+ {
+  "id": "FM070",
+  "what": "line 164: the message fetch_download becomes fetch_location",
+  "old": "    rel_stage_ok \"$rel_stage\" || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    rel_stage_ok \"$rel_stage\" || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir14"
+  ]
+ },
+ {
+  "id": "FM071",
+  "what": "line 165: the failure handler is removed (a failure is ignored)",
+  "old": "    rel_entries=$(rel_tool_find \"$rel_stage\" -mindepth 1 -maxdepth 1 -printf x) || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    rel_entries=$(rel_tool_find \"$rel_stage\" -mindepth 1 -maxdepth 1 -printf x)",
+  "fails": [
+   "zf01"
+  ]
+ },
+ {
+  "id": "FM072",
+  "what": "line 165: the default of EX_FETCH becomes 4",
+  "old": "    rel_entries=$(rel_tool_find \"$rel_stage\" -mindepth 1 -maxdepth 1 -printf x) || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    rel_entries=$(rel_tool_find \"$rel_stage\" -mindepth 1 -maxdepth 1 -printf x) || { fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM073",
+  "what": "line 165: the message fetch_download becomes fetch_location",
+  "old": "    rel_entries=$(rel_tool_find \"$rel_stage\" -mindepth 1 -maxdepth 1 -printf x) || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    rel_entries=$(rel_tool_find \"$rel_stage\" -mindepth 1 -maxdepth 1 -printf x) || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "zf01"
+  ]
+ },
+ {
+  "id": "FM074",
+  "what": "line 166: the failure handler is removed (a failure is ignored)",
+  "old": "    [ -z \"$rel_entries\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    [ -z \"$rel_entries\" ]",
+  "fails": [
+   "ir14"
+  ]
+ },
+ {
+  "id": "FM075",
+  "what": "line 166: the refusing condition is always true",
+  "old": "    [ -z \"$rel_entries\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    true || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir14"
+  ]
+ },
+ {
+  "id": "FM076",
+  "what": "line 166: -z becomes -n",
+  "old": "    [ -z \"$rel_entries\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    [ -n \"$rel_entries\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM077",
+  "what": "line 166: the default of EX_FETCH becomes 4",
+  "old": "    [ -z \"$rel_entries\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    [ -z \"$rel_entries\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "ir14"
+  ]
+ },
+ {
+  "id": "FM078",
+  "what": "line 166: the message fetch_download becomes fetch_location",
+  "old": "    [ -z \"$rel_entries\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "    [ -z \"$rel_entries\" ] || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir14"
+  ]
+ },
+ {
+  "id": "FM079",
+  "what": "line 167: -n becomes -z",
+  "old": "    [ -z \"$rel_entries\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }\n    if [ -n \"${CORTEX_FROM:-}\" ]; then",
+  "new": "    [ -z \"$rel_entries\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }\n    if [ -z \"${CORTEX_FROM:-}\" ]; then",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM080",
+  "what": "line 168: a refusing if never refuses",
+  "old": "        if [ -L \"$CORTEX_FROM\" ] || [ ! -d \"$CORTEX_FROM\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "        if false; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir19"
+  ]
+ },
+ {
+  "id": "FM081",
+  "what": "line 168: a link test is inverted",
+  "old": "        if [ -L \"$CORTEX_FROM\" ] || [ ! -d \"$CORTEX_FROM\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "        if [ ! -L \"$CORTEX_FROM\" ] || [ ! -d \"$CORTEX_FROM\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM082",
+  "what": "line 168: the default of EX_FETCH becomes 4",
+  "old": "        if [ -L \"$CORTEX_FROM\" ] || [ ! -d \"$CORTEX_FROM\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "        if [ -L \"$CORTEX_FROM\" ] || [ ! -d \"$CORTEX_FROM\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; fi",
+  "fails": [
+   "ir19"
+  ]
+ },
+ {
+  "id": "FM083",
+  "what": "line 168: the message fetch_download becomes fetch_location",
+  "old": "        if [ -L \"$CORTEX_FROM\" ] || [ ! -d \"$CORTEX_FROM\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "        if [ -L \"$CORTEX_FROM\" ] || [ ! -d \"$CORTEX_FROM\" ]; then fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir19"
+  ]
+ },
+ {
+  "id": "FM084",
+  "what": "line 171: the failure handler is removed (a failure is ignored)",
+  "old": "        [ -n \"$rel_base\" ] || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ -n \"$rel_base\" ]",
+  "fails": [
+   "ir18"
+  ]
+ },
+ {
+  "id": "FM085",
+  "what": "line 171: the refusing condition is always true",
+  "old": "        [ -n \"$rel_base\" ] || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "new": "        true || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir18"
+  ]
+ },
+ {
+  "id": "FM086",
+  "what": "line 171: -n becomes -z",
+  "old": "        [ -n \"$rel_base\" ] || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ -z \"$rel_base\" ] || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir15"
+  ]
+ },
+ {
+  "id": "FM087",
+  "what": "line 171: the default of EX_FETCH becomes 4",
+  "old": "        [ -n \"$rel_base\" ] || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ -n \"$rel_base\" ] || { fetch_msg fetch_location; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "ir18"
+  ]
+ },
+ {
+  "id": "FM088",
+  "what": "line 171: the message fetch_location becomes fetch_download",
+  "old": "        [ -n \"$rel_base\" ] || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ -n \"$rel_base\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir18"
+  ]
+ },
+ {
+  "id": "FM089",
+  "what": "line 172: the failure handler is removed (a failure is ignored)",
+  "old": "        [ \"${#rel_base}\" -le 2048 ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"${#rel_base}\" -le 2048 ]",
+  "fails": [
+   "ir17"
+  ]
+ },
+ {
+  "id": "FM090",
+  "what": "line 172: the refusing condition is always true",
+  "old": "        [ \"${#rel_base}\" -le 2048 ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        true || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir17"
+  ]
+ },
+ {
+  "id": "FM091",
+  "what": "line 172: the number 2048 in a test becomes 2047",
+  "old": "        [ \"${#rel_base}\" -le 2048 ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"${#rel_base}\" -le 2047 ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir30"
+  ]
+ },
+ {
+  "id": "FM092",
+  "what": "line 172: the number 2048 in a test becomes 2049",
+  "old": "        [ \"${#rel_base}\" -le 2048 ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"${#rel_base}\" -le 2049 ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir30"
+  ]
+ },
+ {
+  "id": "FM093",
+  "what": "line 172: -le becomes -gt",
+  "old": "        [ \"${#rel_base}\" -le 2048 ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"${#rel_base}\" -gt 2048 ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir15"
+  ]
+ },
+ {
+  "id": "FM094",
+  "what": "line 172: the default of EX_FETCH becomes 4",
+  "old": "        [ \"${#rel_base}\" -le 2048 ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"${#rel_base}\" -le 2048 ] || { fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "ir30"
+  ]
+ },
+ {
+  "id": "FM095",
+  "what": "line 172: the message fetch_download becomes fetch_location",
+  "old": "        [ \"${#rel_base}\" -le 2048 ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"${#rel_base}\" -le 2048 ] || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir17"
+  ]
+ },
+ {
+  "id": "FM096",
+  "what": "line 173: a refusing case line is deleted",
+  "old": "        case $rel_base in https://*) ;; *) fetch_msg fetch_download; return \"${EX_FETCH:-5}\" ;; esac",
+  "new": "        :",
+  "fails": [
+   "ir17"
+  ]
+ },
+ {
+  "id": "FM097",
+  "what": "line 173: the default of EX_FETCH becomes 4",
+  "old": "        case $rel_base in https://*) ;; *) fetch_msg fetch_download; return \"${EX_FETCH:-5}\" ;; esac",
+  "new": "        case $rel_base in https://*) ;; *) fetch_msg fetch_download; return \"${EX_FETCH:-4}\" ;; esac",
+  "fails": [
+   "ir17"
+  ]
+ },
+ {
+  "id": "FM098",
+  "what": "line 173: the message fetch_download becomes fetch_location",
+  "old": "        case $rel_base in https://*) ;; *) fetch_msg fetch_download; return \"${EX_FETCH:-5}\" ;; esac",
+  "new": "        case $rel_base in https://*) ;; *) fetch_msg fetch_location; return \"${EX_FETCH:-5}\" ;; esac",
+  "fails": [
+   "ir17"
+  ]
+ },
+ {
+  "id": "FM099",
+  "what": "line 174: a refusing case line is deleted",
+  "old": "        case $rel_base in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._~:/-]*|*..*) fetch_msg fetch_download; return \"${EX_FETCH:-5}\" ;; esac",
+  "new": "        :",
+  "fails": [
+   "ir17"
+  ]
+ },
+ {
+  "id": "FM100",
+  "what": "line 174: the default of EX_FETCH becomes 4",
+  "old": "        case $rel_base in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._~:/-]*|*..*) fetch_msg fetch_download; return \"${EX_FETCH:-5}\" ;; esac",
+  "new": "        case $rel_base in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._~:/-]*|*..*) fetch_msg fetch_download; return \"${EX_FETCH:-4}\" ;; esac",
+  "fails": [
+   "ir30"
+  ]
+ },
+ {
+  "id": "FM101",
+  "what": "line 174: the message fetch_download becomes fetch_location",
+  "old": "        case $rel_base in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._~:/-]*|*..*) fetch_msg fetch_download; return \"${EX_FETCH:-5}\" ;; esac",
+  "new": "        case $rel_base in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._~:/-]*|*..*) fetch_msg fetch_location; return \"${EX_FETCH:-5}\" ;; esac",
+  "fails": [
+   "ir17"
+  ]
+ },
+ {
+  "id": "FM102",
+  "what": "line 175: a hygiene statement is deleted",
+  "old": "        rel_host=${rel_base#https://}",
+  "new": "        :",
+  "fails": [
+   "ir15"
+  ]
+ },
+ {
+  "id": "FM103",
+  "what": "line 176: a hygiene statement is deleted",
+  "old": "        rel_host=${rel_host%%/*}",
+  "new": "        :",
+  "fails": [
+   "ir17"
+  ]
+ },
+ {
+  "id": "FM104",
+  "what": "line 177: the failure handler is removed (a failure is ignored)",
+  "old": "        [ -n \"$rel_host\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ -n \"$rel_host\" ]",
+  "fails": [
+   "ir17"
+  ]
+ },
+ {
+  "id": "FM105",
+  "what": "line 177: the refusing condition is always true",
+  "old": "        [ -n \"$rel_host\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        true || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir17"
+  ]
+ },
+ {
+  "id": "FM106",
+  "what": "line 177: -n becomes -z",
+  "old": "        [ -n \"$rel_host\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ -z \"$rel_host\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir15"
+  ]
+ },
+ {
+  "id": "FM107",
+  "what": "line 177: the default of EX_FETCH becomes 4",
+  "old": "        [ -n \"$rel_host\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ -n \"$rel_host\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "ir17"
+  ]
+ },
+ {
+  "id": "FM108",
+  "what": "line 177: the message fetch_download becomes fetch_location",
+  "old": "        [ -n \"$rel_host\" ] || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ -n \"$rel_host\" ] || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir17"
+  ]
+ },
+ {
+  "id": "FM109",
+  "what": "line 178: a hygiene statement is deleted",
+  "old": "        rel_base=${rel_base%/}",
+  "new": "        :",
+  "fails": [
+   "ir29"
+  ]
+ },
+ {
+  "id": "FM110",
+  "what": "line 180: a hygiene statement is deleted",
+  "old": "    rel_keep=0",
+  "new": "    :",
+  "fails": [
+   "ir13"
+  ]
+ },
+ {
+  "id": "FM111",
+  "what": "line 181: = becomes != in a test",
+  "old": "    trap '[ \"$rel_keep\" = 1 ] || rel_unstage \"$rel_stage\" \"$rel_version\"' 0",
+  "new": "    trap '[ \"$rel_keep\" != 1 ] || rel_unstage \"$rel_stage\" \"$rel_version\"' 0",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM112",
+  "what": "line 181: a hygiene statement is deleted",
+  "old": "    trap '[ \"$rel_keep\" = 1 ] || rel_unstage \"$rel_stage\" \"$rel_version\"' 0",
+  "new": "    :",
+  "fails": [
+   "ir13"
+  ]
+ },
+ {
+  "id": "FM113",
+  "what": "line 184: -n becomes -z",
+  "old": "        if [ -n \"${CORTEX_FROM:-}\" ]; then",
+  "new": "        if [ -z \"${CORTEX_FROM:-}\" ]; then",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM114",
+  "what": "line 186: a refusing if never refuses",
+  "old": "            if [ -L \"$rel_src\" ] || [ ! -f \"$rel_src\" ] || [ ! -r \"$rel_src\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "            if false; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir13"
+  ]
+ },
+ {
+  "id": "FM115",
+  "what": "line 186: a link test is inverted",
+  "old": "            if [ -L \"$rel_src\" ] || [ ! -f \"$rel_src\" ] || [ ! -r \"$rel_src\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "            if [ ! -L \"$rel_src\" ] || [ ! -f \"$rel_src\" ] || [ ! -r \"$rel_src\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM116",
+  "what": "line 186: a file test is inverted",
+  "old": "            if [ -L \"$rel_src\" ] || [ ! -f \"$rel_src\" ] || [ ! -r \"$rel_src\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "            if [ -L \"$rel_src\" ] || [ -f \"$rel_src\" ] || [ ! -r \"$rel_src\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM117",
+  "what": "line 186: the default of EX_FETCH becomes 4",
+  "old": "            if [ -L \"$rel_src\" ] || [ ! -f \"$rel_src\" ] || [ ! -r \"$rel_src\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "            if [ -L \"$rel_src\" ] || [ ! -f \"$rel_src\" ] || [ ! -r \"$rel_src\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; fi",
+  "fails": [
+   "ir26"
+  ]
+ },
+ {
+  "id": "FM118",
+  "what": "line 186: the message fetch_download becomes fetch_location",
+  "old": "            if [ -L \"$rel_src\" ] || [ ! -f \"$rel_src\" ] || [ ! -r \"$rel_src\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "            if [ -L \"$rel_src\" ] || [ ! -f \"$rel_src\" ] || [ ! -r \"$rel_src\" ]; then fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir13"
+  ]
+ },
+ {
+  "id": "FM119",
+  "what": "line 187: the failure handler is removed (a failure is ignored)",
+  "old": "            rel_size=$(rel_tool_wc -c < \"$rel_src\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "            rel_size=$(rel_tool_wc -c < \"$rel_src\")",
+  "fails": [
+   "zf01"
+  ]
+ },
+ {
+  "id": "FM120",
+  "what": "line 187: the default of EX_FETCH becomes 4",
+  "old": "            rel_size=$(rel_tool_wc -c < \"$rel_src\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "            rel_size=$(rel_tool_wc -c < \"$rel_src\") || { fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM121",
+  "what": "line 187: the message fetch_download becomes fetch_location",
+  "old": "            rel_size=$(rel_tool_wc -c < \"$rel_src\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "            rel_size=$(rel_tool_wc -c < \"$rel_src\") || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "zf01"
+  ]
+ },
+ {
+  "id": "FM122",
+  "what": "line 188: a refusing if never refuses",
+  "old": "            if [ \"$rel_size\" -gt \"$rel_limit_bytes\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "            if false; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir20b"
+  ]
+ },
+ {
+  "id": "FM123",
+  "what": "line 188: -gt becomes -le",
+  "old": "            if [ \"$rel_size\" -gt \"$rel_limit_bytes\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "            if [ \"$rel_size\" -le \"$rel_limit_bytes\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM124",
+  "what": "line 188: the default of EX_FETCH becomes 4",
+  "old": "            if [ \"$rel_size\" -gt \"$rel_limit_bytes\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "            if [ \"$rel_size\" -gt \"$rel_limit_bytes\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; fi",
+  "fails": [
+   "ir20"
+  ]
+ },
+ {
+  "id": "FM125",
+  "what": "line 188: the message fetch_download becomes fetch_location",
+  "old": "            if [ \"$rel_size\" -gt \"$rel_limit_bytes\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "            if [ \"$rel_size\" -gt \"$rel_limit_bytes\" ]; then fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir20"
+  ]
+ },
+ {
+  "id": "FM126",
+  "what": "line 189: the failure handler is removed (a failure is ignored)",
+  "old": "            rel_tool_cp -- \"$rel_src\" \"$rel_stage/$rel_name\" || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "            rel_tool_cp -- \"$rel_src\" \"$rel_stage/$rel_name\"",
+  "fails": [
+   "zf01"
+  ]
+ },
+ {
+  "id": "FM127",
+  "what": "line 189: the default of EX_FETCH becomes 4",
+  "old": "            rel_tool_cp -- \"$rel_src\" \"$rel_stage/$rel_name\" || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "            rel_tool_cp -- \"$rel_src\" \"$rel_stage/$rel_name\" || { fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM128",
+  "what": "line 189: the message fetch_download becomes fetch_location",
+  "old": "            rel_tool_cp -- \"$rel_src\" \"$rel_stage/$rel_name\" || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "            rel_tool_cp -- \"$rel_src\" \"$rel_stage/$rel_name\" || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "zf01"
+  ]
+ },
+ {
+  "id": "FM129",
+  "what": "line 192: the failure handler is removed (a failure is ignored)",
+  "old": "            ( ulimit -f \"$rel_blocks\"; rel_tool_curl -q --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --max-redirs 3 --speed-limit 1000000 --speed-time 30 --max-time 7200 --max-filesize \"$rel_limit_bytes\" --output \"$rel_stage/$rel_name\" \"$rel_base/$rel_name\" ) 2>/dev/null || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "            ( ulimit -f \"$rel_blocks\"; rel_tool_curl -q --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --max-redirs 3 --speed-limit 1000000 --speed-time 30 --max-time 7200 --max-filesize \"$rel_limit_bytes\" --output \"$rel_stage/$rel_name\" \"$rel_base/$rel_name\" ) 2>/dev/null",
+  "fails": [
+   "ir28"
+  ]
+ },
+ {
+  "id": "FM130",
+  "what": "line 192: the default of EX_FETCH becomes 4",
+  "old": "            ( ulimit -f \"$rel_blocks\"; rel_tool_curl -q --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --max-redirs 3 --speed-limit 1000000 --speed-time 30 --max-time 7200 --max-filesize \"$rel_limit_bytes\" --output \"$rel_stage/$rel_name\" \"$rel_base/$rel_name\" ) 2>/dev/null || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "            ( ulimit -f \"$rel_blocks\"; rel_tool_curl -q --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --max-redirs 3 --speed-limit 1000000 --speed-time 30 --max-time 7200 --max-filesize \"$rel_limit_bytes\" --output \"$rel_stage/$rel_name\" \"$rel_base/$rel_name\" ) 2>/dev/null || { fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "ir28"
+  ]
+ },
+ {
+  "id": "FM131",
+  "what": "line 192: the message fetch_download becomes fetch_location",
+  "old": "            ( ulimit -f \"$rel_blocks\"; rel_tool_curl -q --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --max-redirs 3 --speed-limit 1000000 --speed-time 30 --max-time 7200 --max-filesize \"$rel_limit_bytes\" --output \"$rel_stage/$rel_name\" \"$rel_base/$rel_name\" ) 2>/dev/null || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "            ( ulimit -f \"$rel_blocks\"; rel_tool_curl -q --fail --silent --show-error --location --proto '=https' --proto-redir '=https' --max-redirs 3 --speed-limit 1000000 --speed-time 30 --max-time 7200 --max-filesize \"$rel_limit_bytes\" --output \"$rel_stage/$rel_name\" \"$rel_base/$rel_name\" ) 2>/dev/null || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "ir16"
+  ]
+ },
+ {
+  "id": "FM132",
+  "what": "line 194: a refusing if never refuses",
+  "old": "        if [ -L \"$rel_stage/$rel_name\" ] || [ ! -f \"$rel_stage/$rel_name\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "        if false; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir28"
+  ]
+ },
+ {
+  "id": "FM133",
+  "what": "line 194: a link test is inverted",
+  "old": "        if [ -L \"$rel_stage/$rel_name\" ] || [ ! -f \"$rel_stage/$rel_name\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "        if [ ! -L \"$rel_stage/$rel_name\" ] || [ ! -f \"$rel_stage/$rel_name\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM134",
+  "what": "line 194: a file test is inverted",
+  "old": "        if [ -L \"$rel_stage/$rel_name\" ] || [ ! -f \"$rel_stage/$rel_name\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "        if [ -L \"$rel_stage/$rel_name\" ] || [ -f \"$rel_stage/$rel_name\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM135",
+  "what": "line 194: the default of EX_FETCH becomes 4",
+  "old": "        if [ -L \"$rel_stage/$rel_name\" ] || [ ! -f \"$rel_stage/$rel_name\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "        if [ -L \"$rel_stage/$rel_name\" ] || [ ! -f \"$rel_stage/$rel_name\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; fi",
+  "fails": [
+   "ir28"
+  ]
+ },
+ {
+  "id": "FM136",
+  "what": "line 194: the message fetch_download becomes fetch_location",
+  "old": "        if [ -L \"$rel_stage/$rel_name\" ] || [ ! -f \"$rel_stage/$rel_name\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "        if [ -L \"$rel_stage/$rel_name\" ] || [ ! -f \"$rel_stage/$rel_name\" ]; then fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir28"
+  ]
+ },
+ {
+  "id": "FM137",
+  "what": "line 195: the failure handler is removed (a failure is ignored)",
+  "old": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\")",
+  "fails": [
+   "zf01"
+  ]
+ },
+ {
+  "id": "FM138",
+  "what": "line 195: the default of EX_FETCH becomes 4",
+  "old": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\") || { fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM139",
+  "what": "line 195: the message fetch_download becomes fetch_location",
+  "old": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }",
+  "new": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\") || { fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "zf01"
+  ]
+ },
+ {
+  "id": "FM140",
+  "what": "line 196: a refusing if never refuses",
+  "old": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }\n        if [ \"$rel_size\" -gt \"$rel_limit_bytes\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }\n        if false; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir28"
+  ]
+ },
+ {
+  "id": "FM141",
+  "what": "line 196: -gt becomes -le",
+  "old": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }\n        if [ \"$rel_size\" -gt \"$rel_limit_bytes\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }\n        if [ \"$rel_size\" -le \"$rel_limit_bytes\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM142",
+  "what": "line 196: the default of EX_FETCH becomes 4",
+  "old": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }\n        if [ \"$rel_size\" -gt \"$rel_limit_bytes\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }\n        if [ \"$rel_size\" -gt \"$rel_limit_bytes\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-4}\"; fi",
+  "fails": [
+   "ir28"
+  ]
+ },
+ {
+  "id": "FM143",
+  "what": "line 196: the message fetch_download becomes fetch_location",
+  "old": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }\n        if [ \"$rel_size\" -gt \"$rel_limit_bytes\" ]; then fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; fi",
+  "new": "        rel_size=$(rel_tool_wc -c < \"$rel_stage/$rel_name\") || { fetch_msg fetch_download; return \"${EX_FETCH:-5}\"; }\n        if [ \"$rel_size\" -gt \"$rel_limit_bytes\" ]; then fetch_msg fetch_location; return \"${EX_FETCH:-5}\"; fi",
+  "fails": [
+   "ir28"
+  ]
+ },
+ {
+  "id": "FM144",
+  "what": "line 198: a hygiene statement is deleted",
+  "old": "    rel_keep=1",
+  "new": "    :",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM145",
+  "what": "line 199: a return value is flipped",
+  "old": "    rel_keep=1\n    return 0",
+  "new": "    rel_keep=1\n    return 9",
+  "fails": [
+   "ir12"
+  ]
+ },
+ {
+  "id": "FM146",
+  "what": "line 205: a hygiene statement is deleted",
+  "old": "rel_no_nul() (\n    rel_env_clean",
+  "new": "rel_no_nul() (\n    :",
+  "fails": [
+   "ze02"
+  ]
+ },
+ {
+  "id": "FM147",
+  "what": "line 206: a return value is flipped",
+  "old": "    rn_size=$(rel_tool_wc -c < \"$1\") || return 1",
+  "new": "    rn_size=$(rel_tool_wc -c < \"$1\") || return 0",
+  "fails": [
+   "pr04"
+  ]
+ },
+ {
+  "id": "FM148",
+  "what": "line 207: a return value is flipped",
+  "old": "    { rn_text=$(rel_tool_cat -- \"$1\"; rn_rc=$?; printf x; exit \"$rn_rc\"); } 2>/dev/null || return 1",
+  "new": "    { rn_text=$(rel_tool_cat -- \"$1\"; rn_rc=$?; printf x; exit \"$rn_rc\"); } 2>/dev/null || return 0",
+  "fails": [
+   "zf01"
+  ]
+ },
+ {
+  "id": "FM150",
+  "what": "line 208: -eq becomes -ne",
+  "old": "    [ \"${#rn_text}\" -eq \"$((rn_size + 1))\" ]",
+  "new": "    [ \"${#rn_text}\" -ne \"$((rn_size + 1))\" ]",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM151",
+  "what": "line 222: a hygiene statement is deleted",
+  "old": "rel_trust_run() (\n    rel_env_clean",
+  "new": "rel_trust_run() (\n    :",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM152",
+  "what": "line 228: the failure handler is removed (a failure is ignored)",
+  "old": "    rel_version_ok \"$rt_ver\" || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_version_ok \"$rt_ver\"",
+  "fails": [
+   "tr12"
+  ]
+ },
+ {
+  "id": "FM153",
+  "what": "line 228: the default of EX_TRUST becomes 5",
+  "old": "    rel_version_ok \"$rt_ver\" || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_version_ok \"$rt_ver\" || { fetch_msg trust_stage; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr12"
+  ]
+ },
+ {
+  "id": "FM154",
+  "what": "line 228: the message trust_stage becomes trust_key",
+  "old": "    rel_version_ok \"$rt_ver\" || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_version_ok \"$rt_ver\" || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr12"
+  ]
+ },
+ {
+  "id": "FM155",
+  "what": "line 229: the failure handler is removed (a failure is ignored)",
+  "old": "    rel_stage_ok \"$rt_stage\" || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_stage_ok \"$rt_stage\"",
+  "fails": [
+   "tr10"
+  ]
+ },
+ {
+  "id": "FM156",
+  "what": "line 229: the default of EX_TRUST becomes 5",
+  "old": "    rel_stage_ok \"$rt_stage\" || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_stage_ok \"$rt_stage\" || { fetch_msg trust_stage; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr10"
+  ]
+ },
+ {
+  "id": "FM157",
+  "what": "line 229: the message trust_stage becomes trust_key",
+  "old": "    rel_stage_ok \"$rt_stage\" || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_stage_ok \"$rt_stage\" || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr10"
+  ]
+ },
+ {
+  "id": "FM158",
+  "what": "line 234: the failure handler is removed (a failure is ignored)",
+  "old": "    rt_entries=$(rel_tool_find \"$rt_stage\" -mindepth 1 -maxdepth 1 -printf x) || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_entries=$(rel_tool_find \"$rt_stage\" -mindepth 1 -maxdepth 1 -printf x)",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM159",
+  "what": "line 234: the default of EX_TRUST becomes 5",
+  "old": "    rt_entries=$(rel_tool_find \"$rt_stage\" -mindepth 1 -maxdepth 1 -printf x) || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_entries=$(rel_tool_find \"$rt_stage\" -mindepth 1 -maxdepth 1 -printf x) || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM160",
+  "what": "line 234: the message trust_checksum becomes trust_stage",
+  "old": "    rt_entries=$(rel_tool_find \"$rt_stage\" -mindepth 1 -maxdepth 1 -printf x) || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_entries=$(rel_tool_find \"$rt_stage\" -mindepth 1 -maxdepth 1 -printf x) || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "zf02"
+  ]
+ },
+ {
+  "id": "FM161",
+  "what": "line 235: the failure handler is removed (a failure is ignored)",
+  "old": "    [ \"${#rt_entries}\" -eq 7 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#rt_entries}\" -eq 7 ]",
+  "fails": [
+   "tr09"
+  ]
+ },
+ {
+  "id": "FM162",
+  "what": "line 235: the refusing condition is always true",
+  "old": "    [ \"${#rt_entries}\" -eq 7 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    true || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr09"
+  ]
+ },
+ {
+  "id": "FM163",
+  "what": "line 235: the number 7 in a test becomes 6",
+  "old": "    [ \"${#rt_entries}\" -eq 7 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#rt_entries}\" -eq 6 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM164",
+  "what": "line 235: the number 7 in a test becomes 8",
+  "old": "    [ \"${#rt_entries}\" -eq 7 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#rt_entries}\" -eq 8 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM165",
+  "what": "line 235: -eq becomes -ne",
+  "old": "    [ \"${#rt_entries}\" -eq 7 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#rt_entries}\" -ne 7 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM166",
+  "what": "line 235: the default of EX_TRUST becomes 5",
+  "old": "    [ \"${#rt_entries}\" -eq 7 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#rt_entries}\" -eq 7 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr09"
+  ]
+ },
+ {
+  "id": "FM167",
+  "what": "line 235: the message trust_checksum becomes trust_stage",
+  "old": "    [ \"${#rt_entries}\" -eq 7 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#rt_entries}\" -eq 7 ] || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr09"
+  ]
+ },
+ {
+  "id": "FM168",
+  "what": "line 238: a refusing if never refuses",
+  "old": "        if [ -L \"$rt_p\" ] || [ ! -f \"$rt_p\" ] || [ ! -r \"$rt_p\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "new": "        if false; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "fails": [
+   "tr09"
+  ]
+ },
+ {
+  "id": "FM169",
+  "what": "line 238: a link test is inverted",
+  "old": "        if [ -L \"$rt_p\" ] || [ ! -f \"$rt_p\" ] || [ ! -r \"$rt_p\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "new": "        if [ ! -L \"$rt_p\" ] || [ ! -f \"$rt_p\" ] || [ ! -r \"$rt_p\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM170",
+  "what": "line 238: a file test is inverted",
+  "old": "        if [ -L \"$rt_p\" ] || [ ! -f \"$rt_p\" ] || [ ! -r \"$rt_p\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "new": "        if [ -L \"$rt_p\" ] || [ -f \"$rt_p\" ] || [ ! -r \"$rt_p\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM171",
+  "what": "line 238: the default of EX_TRUST becomes 5",
+  "old": "        if [ -L \"$rt_p\" ] || [ ! -f \"$rt_p\" ] || [ ! -r \"$rt_p\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "new": "        if [ -L \"$rt_p\" ] || [ ! -f \"$rt_p\" ] || [ ! -r \"$rt_p\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; fi",
+  "fails": [
+   "tr09"
+  ]
+ },
+ {
+  "id": "FM172",
+  "what": "line 238: the message trust_checksum becomes trust_stage",
+  "old": "        if [ -L \"$rt_p\" ] || [ ! -f \"$rt_p\" ] || [ ! -r \"$rt_p\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "new": "        if [ -L \"$rt_p\" ] || [ ! -f \"$rt_p\" ] || [ ! -r \"$rt_p\" ]; then fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; fi",
+  "fails": [
+   "tr09"
+  ]
+ },
+ {
+  "id": "FM173",
+  "what": "line 239: the failure handler is removed (a failure is ignored)",
+  "old": "        rt_links=$(rel_tool_stat -c '%h' -- \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        rt_links=$(rel_tool_stat -c '%h' -- \"$rt_p\")",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM174",
+  "what": "line 239: the default of EX_TRUST becomes 5",
+  "old": "        rt_links=$(rel_tool_stat -c '%h' -- \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        rt_links=$(rel_tool_stat -c '%h' -- \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM175",
+  "what": "line 239: the message trust_checksum becomes trust_stage",
+  "old": "        rt_links=$(rel_tool_stat -c '%h' -- \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        rt_links=$(rel_tool_stat -c '%h' -- \"$rt_p\") || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "zf02"
+  ]
+ },
+ {
+  "id": "FM177",
+  "what": "line 240: the failure handler is removed (a failure is ignored)",
+  "old": "        [ \"$rt_links\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_links\" = 1 ]",
+  "fails": [
+   "tr09"
+  ]
+ },
+ {
+  "id": "FM178",
+  "what": "line 240: the refusing condition is always true",
+  "old": "        [ \"$rt_links\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        true || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr09"
+  ]
+ },
+ {
+  "id": "FM179",
+  "what": "line 240: = becomes != in a test",
+  "old": "        [ \"$rt_links\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_links\" != 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM180",
+  "what": "line 240: the default of EX_TRUST becomes 5",
+  "old": "        [ \"$rt_links\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_links\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr09"
+  ]
+ },
+ {
+  "id": "FM181",
+  "what": "line 240: the message trust_checksum becomes trust_stage",
+  "old": "        [ \"$rt_links\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_links\" = 1 ] || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr09"
+  ]
+ },
+ {
+  "id": "FM182",
+  "what": "line 241: the failure handler is removed (a failure is ignored)",
+  "old": "        [ \"$rt_links\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }\n        rt_size=$(rel_tool_wc -c < \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_links\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }\n        rt_size=$(rel_tool_wc -c < \"$rt_p\")",
+  "fails": [
+   "zf01"
+  ]
+ },
+ {
+  "id": "FM183",
+  "what": "line 241: the default of EX_TRUST becomes 5",
+  "old": "        [ \"$rt_links\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }\n        rt_size=$(rel_tool_wc -c < \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_links\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }\n        rt_size=$(rel_tool_wc -c < \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM184",
+  "what": "line 241: the message trust_checksum becomes trust_stage",
+  "old": "        [ \"$rt_links\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }\n        rt_size=$(rel_tool_wc -c < \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_links\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }\n        rt_size=$(rel_tool_wc -c < \"$rt_p\") || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "zf02"
+  ]
+ },
+ {
+  "id": "FM185",
+  "what": "line 243: a refusing if never refuses",
+  "old": "        if [ \"$rt_size\" -gt \"$rt_max\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "new": "        if false; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "fails": [
+   "tr23"
+  ]
+ },
+ {
+  "id": "FM186",
+  "what": "line 243: -gt becomes -le",
+  "old": "        if [ \"$rt_size\" -gt \"$rt_max\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "new": "        if [ \"$rt_size\" -le \"$rt_max\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM187",
+  "what": "line 243: the default of EX_TRUST becomes 5",
+  "old": "        if [ \"$rt_size\" -gt \"$rt_max\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "new": "        if [ \"$rt_size\" -gt \"$rt_max\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; fi",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM188",
+  "what": "line 243: the message trust_checksum becomes trust_stage",
+  "old": "        if [ \"$rt_size\" -gt \"$rt_max\" ]; then fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; fi",
+  "new": "        if [ \"$rt_size\" -gt \"$rt_max\" ]; then fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; fi",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM189",
+  "what": "line 245: the failure handler is removed (a failure is ignored)",
+  "old": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 64 ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 64 ]; }",
+  "fails": [
+   "pr06"
+  ]
+ },
+ {
+  "id": "FM190",
+  "what": "line 245: the refusing condition is always true",
+  "old": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 64 ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    true || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr06"
+  ]
+ },
+ {
+  "id": "FM191",
+  "what": "line 245: the number 64 in a test becomes 63",
+  "old": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 64 ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 63 ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr06"
+  ]
+ },
+ {
+  "id": "FM192",
+  "what": "line 245: the number 64 in a test becomes 65",
+  "old": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 64 ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 65 ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr06"
+  ]
+ },
+ {
+  "id": "FM193",
+  "what": "line 245: -le becomes -gt",
+  "old": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 64 ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -gt 64 ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM194",
+  "what": "line 245: -n becomes -z",
+  "old": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 64 ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { [ -z \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 64 ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM195",
+  "what": "line 245: the default of EX_TRUST becomes 5",
+  "old": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 64 ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 64 ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr04"
+  ]
+ },
+ {
+  "id": "FM196",
+  "what": "line 245: the message trust_key becomes trust_signature",
+  "old": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 64 ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { [ -n \"$rt_principal\" ] && [ \"${#rt_principal}\" -le 64 ]; } || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr06"
+  ]
+ },
+ {
+  "id": "FM197",
+  "what": "line 246: a refusing case line is deleted",
+  "old": "    case $rt_principal in -*|*[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._@-]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    :",
+  "fails": [
+   "pr06"
+  ]
+ },
+ {
+  "id": "FM198",
+  "what": "line 246: the default of EX_TRUST becomes 5",
+  "old": "    case $rt_principal in -*|*[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._@-]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_principal in -*|*[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._@-]*) fetch_msg trust_key; return \"${EX_TRUST:-5}\" ;; esac",
+  "fails": [
+   "tr04"
+  ]
+ },
+ {
+  "id": "FM199",
+  "what": "line 246: the message trust_key becomes trust_signature",
+  "old": "    case $rt_principal in -*|*[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._@-]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_principal in -*|*[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._@-]*) fetch_msg trust_signature; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "pr06"
+  ]
+ },
+ {
+  "id": "FM200",
+  "what": "line 246: an alphabet class loses its last character (-)",
+  "old": "    case $rt_principal in -*|*[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._@-]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_principal in -*|*[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._@]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM201",
+  "what": "line 247: a refusing case line is deleted",
+  "old": "    case $rt_fpr in SHA256:*) ;; *) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    :",
+  "fails": [
+   "pr08"
+  ]
+ },
+ {
+  "id": "FM202",
+  "what": "line 247: the default of EX_TRUST becomes 5",
+  "old": "    case $rt_fpr in SHA256:*) ;; *) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_fpr in SHA256:*) ;; *) fetch_msg trust_key; return \"${EX_TRUST:-5}\" ;; esac",
+  "fails": [
+   "tr02"
+  ]
+ },
+ {
+  "id": "FM203",
+  "what": "line 247: the message trust_key becomes trust_signature",
+  "old": "    case $rt_fpr in SHA256:*) ;; *) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_fpr in SHA256:*) ;; *) fetch_msg trust_signature; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "tr02"
+  ]
+ },
+ {
+  "id": "FM204",
+  "what": "line 249: the failure handler is removed (a failure is ignored)",
+  "old": "    [ \"${#rt_fpr_b}\" -eq 43 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#rt_fpr_b}\" -eq 43 ]",
+  "fails": [
+   "pr08"
+  ]
+ },
+ {
+  "id": "FM205",
+  "what": "line 249: the refusing condition is always true",
+  "old": "    [ \"${#rt_fpr_b}\" -eq 43 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    true || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr08"
+  ]
+ },
+ {
+  "id": "FM206",
+  "what": "line 249: the number 43 in a test becomes 42",
+  "old": "    [ \"${#rt_fpr_b}\" -eq 43 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#rt_fpr_b}\" -eq 42 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM207",
+  "what": "line 249: the number 43 in a test becomes 44",
+  "old": "    [ \"${#rt_fpr_b}\" -eq 43 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#rt_fpr_b}\" -eq 44 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM208",
+  "what": "line 249: -eq becomes -ne",
+  "old": "    [ \"${#rt_fpr_b}\" -eq 43 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#rt_fpr_b}\" -ne 43 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM209",
+  "what": "line 249: the default of EX_TRUST becomes 5",
+  "old": "    [ \"${#rt_fpr_b}\" -eq 43 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#rt_fpr_b}\" -eq 43 ] || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr02"
+  ]
+ },
+ {
+  "id": "FM210",
+  "what": "line 249: the message trust_key becomes trust_signature",
+  "old": "    [ \"${#rt_fpr_b}\" -eq 43 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#rt_fpr_b}\" -eq 43 ] || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr02"
+  ]
+ },
+ {
+  "id": "FM211",
+  "what": "line 250: a refusing case line is deleted",
+  "old": "    case $rt_fpr_b in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    :",
+  "fails": [
+   "pr08"
+  ]
+ },
+ {
+  "id": "FM212",
+  "what": "line 250: the default of EX_TRUST becomes 5",
+  "old": "    case $rt_fpr_b in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_fpr_b in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/]*) fetch_msg trust_key; return \"${EX_TRUST:-5}\" ;; esac",
+  "fails": [
+   "pr08"
+  ]
+ },
+ {
+  "id": "FM213",
+  "what": "line 250: the message trust_key becomes trust_signature",
+  "old": "    case $rt_fpr_b in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_fpr_b in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/]*) fetch_msg trust_signature; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "pr08"
+  ]
+ },
+ {
+  "id": "FM214",
+  "what": "line 250: an alphabet class loses its last character (/)",
+  "old": "    case $rt_fpr_b in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_fpr_b in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM215",
+  "what": "line 251: a refusing case line is deleted",
+  "old": "    case $rt_keyfile in /*) ;; *) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    :",
+  "fails": [
+   "tr04"
+  ]
+ },
+ {
+  "id": "FM216",
+  "what": "line 251: the default of EX_TRUST becomes 5",
+  "old": "    case $rt_keyfile in /*) ;; *) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_keyfile in /*) ;; *) fetch_msg trust_key; return \"${EX_TRUST:-5}\" ;; esac",
+  "fails": [
+   "tr04"
+  ]
+ },
+ {
+  "id": "FM217",
+  "what": "line 251: the message trust_key becomes trust_signature",
+  "old": "    case $rt_keyfile in /*) ;; *) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_keyfile in /*) ;; *) fetch_msg trust_signature; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "tr04"
+  ]
+ },
+ {
+  "id": "FM218",
+  "what": "line 252: a refusing if never refuses",
+  "old": "    if [ -L \"$rt_keyfile\" ] || [ ! -f \"$rt_keyfile\" ]; then fetch_msg trust_key; return \"${EX_TRUST:-4}\"; fi",
+  "new": "    if false; then fetch_msg trust_key; return \"${EX_TRUST:-4}\"; fi",
+  "fails": [
+   "tr04"
+  ]
+ },
+ {
+  "id": "FM219",
+  "what": "line 252: a link test is inverted",
+  "old": "    if [ -L \"$rt_keyfile\" ] || [ ! -f \"$rt_keyfile\" ]; then fetch_msg trust_key; return \"${EX_TRUST:-4}\"; fi",
+  "new": "    if [ ! -L \"$rt_keyfile\" ] || [ ! -f \"$rt_keyfile\" ]; then fetch_msg trust_key; return \"${EX_TRUST:-4}\"; fi",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM220",
+  "what": "line 252: a file test is inverted",
+  "old": "    if [ -L \"$rt_keyfile\" ] || [ ! -f \"$rt_keyfile\" ]; then fetch_msg trust_key; return \"${EX_TRUST:-4}\"; fi",
+  "new": "    if [ -L \"$rt_keyfile\" ] || [ -f \"$rt_keyfile\" ]; then fetch_msg trust_key; return \"${EX_TRUST:-4}\"; fi",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM221",
+  "what": "line 252: the default of EX_TRUST becomes 5",
+  "old": "    if [ -L \"$rt_keyfile\" ] || [ ! -f \"$rt_keyfile\" ]; then fetch_msg trust_key; return \"${EX_TRUST:-4}\"; fi",
+  "new": "    if [ -L \"$rt_keyfile\" ] || [ ! -f \"$rt_keyfile\" ]; then fetch_msg trust_key; return \"${EX_TRUST:-5}\"; fi",
+  "fails": [
+   "tr04"
+  ]
+ },
+ {
+  "id": "FM222",
+  "what": "line 252: the message trust_key becomes trust_signature",
+  "old": "    if [ -L \"$rt_keyfile\" ] || [ ! -f \"$rt_keyfile\" ]; then fetch_msg trust_key; return \"${EX_TRUST:-4}\"; fi",
+  "new": "    if [ -L \"$rt_keyfile\" ] || [ ! -f \"$rt_keyfile\" ]; then fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; fi",
+  "fails": [
+   "tr04"
+  ]
+ },
+ {
+  "id": "FM223",
+  "what": "line 253: the failure handler is removed (a failure is ignored)",
+  "old": "    rt_ksize=$(rel_tool_wc -c < \"$rt_keyfile\") || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_ksize=$(rel_tool_wc -c < \"$rt_keyfile\")",
+  "fails": [
+   "zf01"
+  ]
+ },
+ {
+  "id": "FM224",
+  "what": "line 253: the default of EX_TRUST becomes 5",
+  "old": "    rt_ksize=$(rel_tool_wc -c < \"$rt_keyfile\") || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_ksize=$(rel_tool_wc -c < \"$rt_keyfile\") || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM225",
+  "what": "line 253: the message trust_key becomes trust_signature",
+  "old": "    rt_ksize=$(rel_tool_wc -c < \"$rt_keyfile\") || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_ksize=$(rel_tool_wc -c < \"$rt_keyfile\") || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "zf02"
+  ]
+ },
+ {
+  "id": "FM226",
+  "what": "line 254: the failure handler is removed (a failure is ignored)",
+  "old": "    [ \"$rt_ksize\" -le 1024 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_ksize\" -le 1024 ]",
+  "fails": [
+   "pr05"
+  ]
+ },
+ {
+  "id": "FM227",
+  "what": "line 254: the refusing condition is always true",
+  "old": "    [ \"$rt_ksize\" -le 1024 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    true || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr05"
+  ]
+ },
+ {
+  "id": "FM228",
+  "what": "line 254: the number 1024 in a test becomes 1023",
+  "old": "    [ \"$rt_ksize\" -le 1024 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_ksize\" -le 1023 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr05"
+  ]
+ },
+ {
+  "id": "FM229",
+  "what": "line 254: the number 1024 in a test becomes 1025",
+  "old": "    [ \"$rt_ksize\" -le 1024 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_ksize\" -le 1025 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr05"
+  ]
+ },
+ {
+  "id": "FM230",
+  "what": "line 254: -le becomes -gt",
+  "old": "    [ \"$rt_ksize\" -le 1024 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_ksize\" -gt 1024 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM231",
+  "what": "line 254: the default of EX_TRUST becomes 5",
+  "old": "    [ \"$rt_ksize\" -le 1024 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_ksize\" -le 1024 ] || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr03"
+  ]
+ },
+ {
+  "id": "FM232",
+  "what": "line 254: the message trust_key becomes trust_signature",
+  "old": "    [ \"$rt_ksize\" -le 1024 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_ksize\" -le 1024 ] || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr05"
+  ]
+ },
+ {
+  "id": "FM233",
+  "what": "line 255: the failure handler is removed (a failure is ignored)",
+  "old": "    rel_no_nul \"$rt_keyfile\" || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_no_nul \"$rt_keyfile\"",
+  "fails": [
+   "tr25"
+  ]
+ },
+ {
+  "id": "FM234",
+  "what": "line 255: the default of EX_TRUST becomes 5",
+  "old": "    rel_no_nul \"$rt_keyfile\" || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_no_nul \"$rt_keyfile\" || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr25"
+  ]
+ },
+ {
+  "id": "FM235",
+  "what": "line 255: the message trust_key becomes trust_signature",
+  "old": "    rel_no_nul \"$rt_keyfile\" || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_no_nul \"$rt_keyfile\" || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr25"
+  ]
+ },
+ {
+  "id": "FM236",
+  "what": "line 256: the failure handler is removed (a failure is ignored)",
+  "old": "    rt_ktext=$(rel_tool_cat -- \"$rt_keyfile\") || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_ktext=$(rel_tool_cat -- \"$rt_keyfile\")",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM237",
+  "what": "line 256: the default of EX_TRUST becomes 5",
+  "old": "    rt_ktext=$(rel_tool_cat -- \"$rt_keyfile\") || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_ktext=$(rel_tool_cat -- \"$rt_keyfile\") || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM238",
+  "what": "line 256: the message trust_key becomes trust_signature",
+  "old": "    rt_ktext=$(rel_tool_cat -- \"$rt_keyfile\") || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_ktext=$(rel_tool_cat -- \"$rt_keyfile\") || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "zf02"
+  ]
+ },
+ {
+  "id": "FM240",
+  "what": "line 258: the failure handler is removed (a failure is ignored)",
+  "old": "    [ \"$#\" -eq 3 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$#\" -eq 3 ]",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM241",
+  "what": "line 258: the refusing condition is always true",
+  "old": "    [ \"$#\" -eq 3 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    true || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM242",
+  "what": "line 258: the number 3 in a test becomes 2",
+  "old": "    [ \"$#\" -eq 3 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$#\" -eq 2 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM243",
+  "what": "line 258: the number 3 in a test becomes 4",
+  "old": "    [ \"$#\" -eq 3 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$#\" -eq 4 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM244",
+  "what": "line 258: -eq becomes -ne",
+  "old": "    [ \"$#\" -eq 3 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$#\" -ne 3 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM245",
+  "what": "line 258: the default of EX_TRUST becomes 5",
+  "old": "    [ \"$#\" -eq 3 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$#\" -eq 3 ] || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr03"
+  ]
+ },
+ {
+  "id": "FM246",
+  "what": "line 258: the message trust_key becomes trust_signature",
+  "old": "    [ \"$#\" -eq 3 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$#\" -eq 3 ] || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM247",
+  "what": "line 259: the failure handler is removed (a failure is ignored)",
+  "old": "    [ \"$rt_ktext\" = \"$1 $2 $3\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_ktext\" = \"$1 $2 $3\" ]",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM248",
+  "what": "line 259: the refusing condition is always true",
+  "old": "    [ \"$rt_ktext\" = \"$1 $2 $3\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    true || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM249",
+  "what": "line 259: = becomes != in a test",
+  "old": "    [ \"$rt_ktext\" = \"$1 $2 $3\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_ktext\" != \"$1 $2 $3\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM250",
+  "what": "line 259: the default of EX_TRUST becomes 5",
+  "old": "    [ \"$rt_ktext\" = \"$1 $2 $3\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_ktext\" = \"$1 $2 $3\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr03"
+  ]
+ },
+ {
+  "id": "FM251",
+  "what": "line 259: the message trust_key becomes trust_signature",
+  "old": "    [ \"$rt_ktext\" = \"$1 $2 $3\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_ktext\" = \"$1 $2 $3\" ] || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM252",
+  "what": "line 260: the failure handler is removed (a failure is ignored)",
+  "old": "    [ \"$1\" = \"$rt_principal\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$1\" = \"$rt_principal\" ]",
+  "fails": [
+   "tr03"
+  ]
+ },
+ {
+  "id": "FM253",
+  "what": "line 260: the refusing condition is always true",
+  "old": "    [ \"$1\" = \"$rt_principal\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    true || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr03"
+  ]
+ },
+ {
+  "id": "FM254",
+  "what": "line 260: = becomes != in a test",
+  "old": "    [ \"$1\" = \"$rt_principal\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$1\" != \"$rt_principal\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM255",
+  "what": "line 260: the default of EX_TRUST becomes 5",
+  "old": "    [ \"$1\" = \"$rt_principal\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$1\" = \"$rt_principal\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr03"
+  ]
+ },
+ {
+  "id": "FM256",
+  "what": "line 260: the message trust_key becomes trust_signature",
+  "old": "    [ \"$1\" = \"$rt_principal\" ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$1\" = \"$rt_principal\" ] || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr03"
+  ]
+ },
+ {
+  "id": "FM257",
+  "what": "line 261: the failure handler is removed (a failure is ignored)",
+  "old": "    [ \"$2\" = ssh-ed25519 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$2\" = ssh-ed25519 ]",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM258",
+  "what": "line 261: the refusing condition is always true",
+  "old": "    [ \"$2\" = ssh-ed25519 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    true || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM259",
+  "what": "line 261: = becomes != in a test",
+  "old": "    [ \"$2\" = ssh-ed25519 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$2\" != ssh-ed25519 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM260",
+  "what": "line 261: the default of EX_TRUST becomes 5",
+  "old": "    [ \"$2\" = ssh-ed25519 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$2\" = ssh-ed25519 ] || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr03"
+  ]
+ },
+ {
+  "id": "FM261",
+  "what": "line 261: the message trust_key becomes trust_signature",
+  "old": "    [ \"$2\" = ssh-ed25519 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$2\" = ssh-ed25519 ] || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM262",
+  "what": "line 262: the failure handler is removed (a failure is ignored)",
+  "old": "    [ \"${#3}\" -eq 68 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#3}\" -eq 68 ]",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM263",
+  "what": "line 262: the refusing condition is always true",
+  "old": "    [ \"${#3}\" -eq 68 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    true || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM264",
+  "what": "line 262: the number 68 in a test becomes 67",
+  "old": "    [ \"${#3}\" -eq 68 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#3}\" -eq 67 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM265",
+  "what": "line 262: the number 68 in a test becomes 69",
+  "old": "    [ \"${#3}\" -eq 68 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#3}\" -eq 69 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM266",
+  "what": "line 262: -eq becomes -ne",
+  "old": "    [ \"${#3}\" -eq 68 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#3}\" -ne 68 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM267",
+  "what": "line 262: the default of EX_TRUST becomes 5",
+  "old": "    [ \"${#3}\" -eq 68 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#3}\" -eq 68 ] || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr03"
+  ]
+ },
+ {
+  "id": "FM268",
+  "what": "line 262: the message trust_key becomes trust_signature",
+  "old": "    [ \"${#3}\" -eq 68 ] || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"${#3}\" -eq 68 ] || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM269",
+  "what": "line 263: a refusing case line is deleted",
+  "old": "    case $3 in AAAAC3NzaC1lZDI1NTE5AAAAI*) ;; *) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    :",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM270",
+  "what": "line 263: the default of EX_TRUST becomes 5",
+  "old": "    case $3 in AAAAC3NzaC1lZDI1NTE5AAAAI*) ;; *) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $3 in AAAAC3NzaC1lZDI1NTE5AAAAI*) ;; *) fetch_msg trust_key; return \"${EX_TRUST:-5}\" ;; esac",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM271",
+  "what": "line 263: the message trust_key becomes trust_signature",
+  "old": "    case $3 in AAAAC3NzaC1lZDI1NTE5AAAAI*) ;; *) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $3 in AAAAC3NzaC1lZDI1NTE5AAAAI*) ;; *) fetch_msg trust_signature; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM272",
+  "what": "line 264: a refusing case line is deleted",
+  "old": "    case $3 in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    :",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM273",
+  "what": "line 264: the default of EX_TRUST becomes 5",
+  "old": "    case $3 in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $3 in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/]*) fetch_msg trust_key; return \"${EX_TRUST:-5}\" ;; esac",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM274",
+  "what": "line 264: the message trust_key becomes trust_signature",
+  "old": "    case $3 in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $3 in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/]*) fetch_msg trust_signature; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "pr07"
+  ]
+ },
+ {
+  "id": "FM275",
+  "what": "line 264: an alphabet class loses its last character (/)",
+  "old": "    case $3 in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $3 in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+]*) fetch_msg trust_key; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM276",
+  "what": "line 267: the failure handler is removed (a failure is ignored)",
+  "old": "    rel_tool_mkdir -- \"$rt_work\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_tool_mkdir -- \"$rt_work\"",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM277",
+  "what": "line 267: the default of EX_TRUST becomes 5",
+  "old": "    rel_tool_mkdir -- \"$rt_work\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_tool_mkdir -- \"$rt_work\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM278",
+  "what": "line 267: the message trust_checksum becomes trust_stage",
+  "old": "    rel_tool_mkdir -- \"$rt_work\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_tool_mkdir -- \"$rt_work\" || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "zf02"
+  ]
+ },
+ {
+  "id": "FM279",
+  "what": "line 268: a hygiene statement is deleted",
+  "old": "    trap 'rel_trust_clean \"$rt_stage\"' 0",
+  "new": "    :",
+  "fails": [
+   "tr01"
+  ]
+ },
+ {
+  "id": "FM280",
+  "what": "line 269: the failure handler is removed (a failure is ignored)",
+  "old": "    { printf 'ssh-ed25519 %s\\n' \"$rt_keyb64\" > \"$rt_work/key.pub\"; } 2>/dev/null || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { printf 'ssh-ed25519 %s\\n' \"$rt_keyb64\" > \"$rt_work/key.pub\"; } 2>/dev/null",
+  "fails": [
+   "pr10"
+  ]
+ },
+ {
+  "id": "FM281",
+  "what": "line 269: the default of EX_TRUST becomes 5",
+  "old": "    { printf 'ssh-ed25519 %s\\n' \"$rt_keyb64\" > \"$rt_work/key.pub\"; } 2>/dev/null || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { printf 'ssh-ed25519 %s\\n' \"$rt_keyb64\" > \"$rt_work/key.pub\"; } 2>/dev/null || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "pr10"
+  ]
+ },
+ {
+  "id": "FM282",
+  "what": "line 269: the message trust_key becomes trust_signature",
+  "old": "    { printf 'ssh-ed25519 %s\\n' \"$rt_keyb64\" > \"$rt_work/key.pub\"; } 2>/dev/null || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { printf 'ssh-ed25519 %s\\n' \"$rt_keyb64\" > \"$rt_work/key.pub\"; } 2>/dev/null || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr10"
+  ]
+ },
+ {
+  "id": "FM283",
+  "what": "line 270: the failure handler is removed (a failure is ignored)",
+  "old": "    { printf '%s ssh-ed25519 %s\\n' \"$rt_principal\" \"$rt_keyb64\" > \"$rt_work/signers\"; } 2>/dev/null || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { printf '%s ssh-ed25519 %s\\n' \"$rt_principal\" \"$rt_keyb64\" > \"$rt_work/signers\"; } 2>/dev/null",
+  "fails": [
+   "pr10"
+  ]
+ },
+ {
+  "id": "FM284",
+  "what": "line 270: the default of EX_TRUST becomes 5",
+  "old": "    { printf '%s ssh-ed25519 %s\\n' \"$rt_principal\" \"$rt_keyb64\" > \"$rt_work/signers\"; } 2>/dev/null || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { printf '%s ssh-ed25519 %s\\n' \"$rt_principal\" \"$rt_keyb64\" > \"$rt_work/signers\"; } 2>/dev/null || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "pr10"
+  ]
+ },
+ {
+  "id": "FM285",
+  "what": "line 270: the message trust_key becomes trust_signature",
+  "old": "    { printf '%s ssh-ed25519 %s\\n' \"$rt_principal\" \"$rt_keyb64\" > \"$rt_work/signers\"; } 2>/dev/null || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { printf '%s ssh-ed25519 %s\\n' \"$rt_principal\" \"$rt_keyb64\" > \"$rt_work/signers\"; } 2>/dev/null || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr10"
+  ]
+ },
+ {
+  "id": "FM286",
+  "what": "line 271: the failure handler is removed (a failure is ignored)",
+  "old": "    rt_lf=$(rel_tool_keygen -l -f \"$rt_work/key.pub\") || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_lf=$(rel_tool_keygen -l -f \"$rt_work/key.pub\")",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM287",
+  "what": "line 271: the default of EX_TRUST becomes 5",
+  "old": "    rt_lf=$(rel_tool_keygen -l -f \"$rt_work/key.pub\") || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_lf=$(rel_tool_keygen -l -f \"$rt_work/key.pub\") || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr13"
+  ]
+ },
+ {
+  "id": "FM288",
+  "what": "line 271: the message trust_key becomes trust_signature",
+  "old": "    rt_lf=$(rel_tool_keygen -l -f \"$rt_work/key.pub\") || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_lf=$(rel_tool_keygen -l -f \"$rt_work/key.pub\") || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr14"
+  ]
+ },
+ {
+  "id": "FM289",
+  "what": "line 273: the failure handler is removed (a failure is ignored)",
+  "old": "    { [ \"${1-}\" = 256 ] && [ \"${2-}\" = \"$rt_fpr\" ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { [ \"${1-}\" = 256 ] && [ \"${2-}\" = \"$rt_fpr\" ]; }",
+  "fails": [
+   "tr02"
+  ]
+ },
+ {
+  "id": "FM290",
+  "what": "line 273: the refusing condition is always true",
+  "old": "    { [ \"${1-}\" = 256 ] && [ \"${2-}\" = \"$rt_fpr\" ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    true || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr02"
+  ]
+ },
+ {
+  "id": "FM291",
+  "what": "line 273: the default of EX_TRUST becomes 5",
+  "old": "    { [ \"${1-}\" = 256 ] && [ \"${2-}\" = \"$rt_fpr\" ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { [ \"${1-}\" = 256 ] && [ \"${2-}\" = \"$rt_fpr\" ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr02"
+  ]
+ },
+ {
+  "id": "FM292",
+  "what": "line 273: the message trust_key becomes trust_signature",
+  "old": "    { [ \"${1-}\" = 256 ] && [ \"${2-}\" = \"$rt_fpr\" ]; } || { fetch_msg trust_key; return \"${EX_TRUST:-4}\"; }",
+  "new": "    { [ \"${1-}\" = 256 ] && [ \"${2-}\" = \"$rt_fpr\" ]; } || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr02"
+  ]
+ },
+ {
+  "id": "FM293",
+  "what": "line 274: the failure handler is removed (a failure is ignored)",
+  "old": "    rel_no_nul \"$rt_stage/SHA256SUMS\" || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_no_nul \"$rt_stage/SHA256SUMS\"",
+  "fails": [
+   "tr25"
+  ]
+ },
+ {
+  "id": "FM294",
+  "what": "line 274: the default of EX_TRUST becomes 5",
+  "old": "    rel_no_nul \"$rt_stage/SHA256SUMS\" || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_no_nul \"$rt_stage/SHA256SUMS\" || { fetch_msg trust_signature; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr25"
+  ]
+ },
+ {
+  "id": "FM295",
+  "what": "line 274: the message trust_signature becomes trust_checksum",
+  "old": "    rel_no_nul \"$rt_stage/SHA256SUMS\" || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_no_nul \"$rt_stage/SHA256SUMS\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr25"
+  ]
+ },
+ {
+  "id": "FM296",
+  "what": "line 275: the failure handler is removed (a failure is ignored)",
+  "old": "    rt_sums=$(rel_tool_cat -- \"$rt_stage/SHA256SUMS\"; rt_rc=$?; printf x; exit \"$rt_rc\") || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_sums=$(rel_tool_cat -- \"$rt_stage/SHA256SUMS\"; rt_rc=$?; printf x; exit \"$rt_rc\")",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM297",
+  "what": "line 275: the default of EX_TRUST becomes 5",
+  "old": "    rt_sums=$(rel_tool_cat -- \"$rt_stage/SHA256SUMS\"; rt_rc=$?; printf x; exit \"$rt_rc\") || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_sums=$(rel_tool_cat -- \"$rt_stage/SHA256SUMS\"; rt_rc=$?; printf x; exit \"$rt_rc\") || { fetch_msg trust_signature; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM298",
+  "what": "line 275: the message trust_signature becomes trust_checksum",
+  "old": "    rt_sums=$(rel_tool_cat -- \"$rt_stage/SHA256SUMS\"; rt_rc=$?; printf x; exit \"$rt_rc\") || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_sums=$(rel_tool_cat -- \"$rt_stage/SHA256SUMS\"; rt_rc=$?; printf x; exit \"$rt_rc\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "zf02"
+  ]
+ },
+ {
+  "id": "FM300",
+  "what": "line 276: a hygiene statement is deleted",
+  "old": "    rt_sums=${rt_sums%x}",
+  "new": "    :",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM301",
+  "what": "line 277: the failure handler is removed (a failure is ignored)",
+  "old": "    rt_verdict=$(printf '%s' \"$rt_sums\" | rel_tool_keygen -Y verify -f \"$rt_work/signers\" -I \"$rt_principal\" -n cortex-release -s \"$rt_stage/SHA256SUMS.sig\" 2>&1) || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_verdict=$(printf '%s' \"$rt_sums\" | rel_tool_keygen -Y verify -f \"$rt_work/signers\" -I \"$rt_principal\" -n cortex-release -s \"$rt_stage/SHA256SUMS.sig\" 2>&1)",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM302",
+  "what": "line 277: the default of EX_TRUST becomes 5",
+  "old": "    rt_verdict=$(printf '%s' \"$rt_sums\" | rel_tool_keygen -Y verify -f \"$rt_work/signers\" -I \"$rt_principal\" -n cortex-release -s \"$rt_stage/SHA256SUMS.sig\" 2>&1) || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_verdict=$(printf '%s' \"$rt_sums\" | rel_tool_keygen -Y verify -f \"$rt_work/signers\" -I \"$rt_principal\" -n cortex-release -s \"$rt_stage/SHA256SUMS.sig\" 2>&1) || { fetch_msg trust_signature; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr24"
+  ]
+ },
+ {
+  "id": "FM303",
+  "what": "line 277: the message trust_signature becomes trust_checksum",
+  "old": "    rt_verdict=$(printf '%s' \"$rt_sums\" | rel_tool_keygen -Y verify -f \"$rt_work/signers\" -I \"$rt_principal\" -n cortex-release -s \"$rt_stage/SHA256SUMS.sig\" 2>&1) || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_verdict=$(printf '%s' \"$rt_sums\" | rel_tool_keygen -Y verify -f \"$rt_work/signers\" -I \"$rt_principal\" -n cortex-release -s \"$rt_stage/SHA256SUMS.sig\" 2>&1) || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr05"
+  ]
+ },
+ {
+  "id": "FM304",
+  "what": "line 277: stderr is no longer merged into the verdict",
+  "old": "    rt_verdict=$(printf '%s' \"$rt_sums\" | rel_tool_keygen -Y verify -f \"$rt_work/signers\" -I \"$rt_principal\" -n cortex-release -s \"$rt_stage/SHA256SUMS.sig\" 2>&1) || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rt_verdict=$(printf '%s' \"$rt_sums\" | rel_tool_keygen -Y verify -f \"$rt_work/signers\" -I \"$rt_principal\" -n cortex-release -s \"$rt_stage/SHA256SUMS.sig\") || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr05"
+  ]
+ },
+ {
+  "id": "FM305",
+  "what": "line 279: the failure handler is removed (a failure is ignored)",
+  "old": "    [ \"$rt_first\" = \"Good \\\"cortex-release\\\" signature for $rt_principal with ED25519 key $rt_fpr\" ] || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_first\" = \"Good \\\"cortex-release\\\" signature for $rt_principal with ED25519 key $rt_fpr\" ]",
+  "fails": [
+   "tr14"
+  ]
+ },
+ {
+  "id": "FM306",
+  "what": "line 279: the refusing condition is always true",
+  "old": "    [ \"$rt_first\" = \"Good \\\"cortex-release\\\" signature for $rt_principal with ED25519 key $rt_fpr\" ] || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    true || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr14"
+  ]
+ },
+ {
+  "id": "FM307",
+  "what": "line 279: = becomes != in a test",
+  "old": "    [ \"$rt_first\" = \"Good \\\"cortex-release\\\" signature for $rt_principal with ED25519 key $rt_fpr\" ] || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_first\" != \"Good \\\"cortex-release\\\" signature for $rt_principal with ED25519 key $rt_fpr\" ] || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM308",
+  "what": "line 279: the default of EX_TRUST becomes 5",
+  "old": "    [ \"$rt_first\" = \"Good \\\"cortex-release\\\" signature for $rt_principal with ED25519 key $rt_fpr\" ] || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_first\" = \"Good \\\"cortex-release\\\" signature for $rt_principal with ED25519 key $rt_fpr\" ] || { fetch_msg trust_signature; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr14"
+  ]
+ },
+ {
+  "id": "FM309",
+  "what": "line 279: the message trust_signature becomes trust_checksum",
+  "old": "    [ \"$rt_first\" = \"Good \\\"cortex-release\\\" signature for $rt_principal with ED25519 key $rt_fpr\" ] || { fetch_msg trust_signature; return \"${EX_TRUST:-4}\"; }",
+  "new": "    [ \"$rt_first\" = \"Good \\\"cortex-release\\\" signature for $rt_principal with ED25519 key $rt_fpr\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr14"
+  ]
+ },
+ {
+  "id": "FM311",
+  "what": "line 280: the default of EX_TRUST becomes 5",
+  "old": "    case $rt_sums in *\"$rel_nl\") ;; *) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_sums in *\"$rel_nl\") ;; *) fetch_msg trust_checksum; return \"${EX_TRUST:-5}\" ;; esac",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM312",
+  "what": "line 280: the message trust_checksum becomes trust_stage",
+  "old": "    case $rt_sums in *\"$rel_nl\") ;; *) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_sums in *\"$rel_nl\") ;; *) fetch_msg trust_stage; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM315",
+  "what": "line 285: -n becomes -z",
+  "old": "    for rt_f in $rt_listed; do\n        [ -n \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    for rt_f in $rt_listed; do\n        [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM316",
+  "what": "line 285: the default of EX_TRUST becomes 5",
+  "old": "    for rt_f in $rt_listed; do\n        [ -n \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    for rt_f in $rt_listed; do\n        [ -n \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM317",
+  "what": "line 285: the message trust_checksum becomes trust_stage",
+  "old": "    for rt_f in $rt_listed; do\n        [ -n \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    for rt_f in $rt_listed; do\n        [ -n \"$rt_rest\" ] || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM318",
+  "what": "line 289: the failure handler is removed (a failure is ignored)",
+  "old": "        [ \"${#rt_want}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"${#rt_want}\" -eq 64 ]",
+  "fails": [
+   "pr12"
+  ]
+ },
+ {
+  "id": "FM319",
+  "what": "line 289: the refusing condition is always true",
+  "old": "        [ \"${#rt_want}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        true || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr12"
+  ]
+ },
+ {
+  "id": "FM320",
+  "what": "line 289: the number 64 in a test becomes 63",
+  "old": "        [ \"${#rt_want}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"${#rt_want}\" -eq 63 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM321",
+  "what": "line 289: the number 64 in a test becomes 65",
+  "old": "        [ \"${#rt_want}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"${#rt_want}\" -eq 65 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM322",
+  "what": "line 289: -eq becomes -ne",
+  "old": "        [ \"${#rt_want}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"${#rt_want}\" -ne 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM323",
+  "what": "line 289: the default of EX_TRUST becomes 5",
+  "old": "        [ \"${#rt_want}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"${#rt_want}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM324",
+  "what": "line 289: the message trust_checksum becomes trust_stage",
+  "old": "        [ \"${#rt_want}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"${#rt_want}\" -eq 64 ] || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM325",
+  "what": "line 290: a refusing case line is deleted",
+  "old": "        case $rt_want in *[!0123456789abcdef]*) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "        :",
+  "fails": [
+   "pr12"
+  ]
+ },
+ {
+  "id": "FM326",
+  "what": "line 290: the default of EX_TRUST becomes 5",
+  "old": "        case $rt_want in *[!0123456789abcdef]*) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "        case $rt_want in *[!0123456789abcdef]*) fetch_msg trust_checksum; return \"${EX_TRUST:-5}\" ;; esac",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM327",
+  "what": "line 290: the message trust_checksum becomes trust_stage",
+  "old": "        case $rt_want in *[!0123456789abcdef]*) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "        case $rt_want in *[!0123456789abcdef]*) fetch_msg trust_stage; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM328",
+  "what": "line 290: an alphabet class loses its last character (f)",
+  "old": "        case $rt_want in *[!0123456789abcdef]*) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "        case $rt_want in *[!0123456789abcde]*) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM329",
+  "what": "line 291: the failure handler is removed (a failure is ignored)",
+  "old": "        [ \"$rt_line\" = \"$rt_want  $rt_f\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_line\" = \"$rt_want  $rt_f\" ]",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM330",
+  "what": "line 291: the refusing condition is always true",
+  "old": "        [ \"$rt_line\" = \"$rt_want  $rt_f\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        true || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM331",
+  "what": "line 291: = becomes != in a test",
+  "old": "        [ \"$rt_line\" = \"$rt_want  $rt_f\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_line\" != \"$rt_want  $rt_f\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM332",
+  "what": "line 291: the default of EX_TRUST becomes 5",
+  "old": "        [ \"$rt_line\" = \"$rt_want  $rt_f\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_line\" = \"$rt_want  $rt_f\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM333",
+  "what": "line 291: the message trust_checksum becomes trust_stage",
+  "old": "        [ \"$rt_line\" = \"$rt_want  $rt_f\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_line\" = \"$rt_want  $rt_f\" ] || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM334",
+  "what": "line 293: = becomes != in a test",
+  "old": "        if [ \"$rt_f\" = install.meta ]; then",
+  "new": "        if [ \"$rt_f\" != install.meta ]; then",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM335",
+  "what": "line 294: the failure handler is removed (a failure is ignored)",
+  "old": "            rel_no_nul \"$rt_p\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rel_no_nul \"$rt_p\"",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM336",
+  "what": "line 294: the default of EX_TRUST becomes 5",
+  "old": "            rel_no_nul \"$rt_p\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rel_no_nul \"$rt_p\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr25"
+  ]
+ },
+ {
+  "id": "FM337",
+  "what": "line 294: the message trust_checksum becomes trust_stage",
+  "old": "            rel_no_nul \"$rt_p\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rel_no_nul \"$rt_p\" || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM338",
+  "what": "line 295: the failure handler is removed (a failure is ignored)",
+  "old": "            rt_meta=$(rel_tool_cat -- \"$rt_p\"; rt_rc=$?; printf x; exit \"$rt_rc\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rt_meta=$(rel_tool_cat -- \"$rt_p\"; rt_rc=$?; printf x; exit \"$rt_rc\")",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM339",
+  "what": "line 295: the default of EX_TRUST becomes 5",
+  "old": "            rt_meta=$(rel_tool_cat -- \"$rt_p\"; rt_rc=$?; printf x; exit \"$rt_rc\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rt_meta=$(rel_tool_cat -- \"$rt_p\"; rt_rc=$?; printf x; exit \"$rt_rc\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM340",
+  "what": "line 295: the message trust_checksum becomes trust_stage",
+  "old": "            rt_meta=$(rel_tool_cat -- \"$rt_p\"; rt_rc=$?; printf x; exit \"$rt_rc\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rt_meta=$(rel_tool_cat -- \"$rt_p\"; rt_rc=$?; printf x; exit \"$rt_rc\") || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "zf02"
+  ]
+ },
+ {
+  "id": "FM342",
+  "what": "line 296: a hygiene statement is deleted",
+  "old": "            rt_meta=${rt_meta%x}",
+  "new": "            :",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM343",
+  "what": "line 297: the failure handler is removed (a failure is ignored)",
+  "old": "            rt_got=$(printf '%s' \"$rt_meta\" | rel_tool_sha256sum) || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rt_got=$(printf '%s' \"$rt_meta\" | rel_tool_sha256sum)",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM344",
+  "what": "line 297: the default of EX_TRUST becomes 5",
+  "old": "            rt_got=$(printf '%s' \"$rt_meta\" | rel_tool_sha256sum) || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rt_got=$(printf '%s' \"$rt_meta\" | rel_tool_sha256sum) || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM345",
+  "what": "line 297: the message trust_checksum becomes trust_stage",
+  "old": "            rt_got=$(printf '%s' \"$rt_meta\" | rel_tool_sha256sum) || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rt_got=$(printf '%s' \"$rt_meta\" | rel_tool_sha256sum) || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "zf02"
+  ]
+ },
+ {
+  "id": "FM346",
+  "what": "line 300: the failure handler is removed (a failure is ignored)",
+  "old": "            rt_got=$(rel_tool_sha256sum -- \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rt_got=$(rel_tool_sha256sum -- \"$rt_p\")",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM347",
+  "what": "line 300: the default of EX_TRUST becomes 5",
+  "old": "            rt_got=$(rel_tool_sha256sum -- \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rt_got=$(rel_tool_sha256sum -- \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr14"
+  ]
+ },
+ {
+  "id": "FM348",
+  "what": "line 300: the message trust_checksum becomes trust_stage",
+  "old": "            rt_got=$(rel_tool_sha256sum -- \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rt_got=$(rel_tool_sha256sum -- \"$rt_p\") || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr14"
+  ]
+ },
+ {
+  "id": "FM350",
+  "what": "line 301: the failure handler is removed (a failure is ignored)",
+  "old": "            rt_size=$(rel_tool_wc -c < \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rt_size=$(rel_tool_wc -c < \"$rt_p\")",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM351",
+  "what": "line 301: the default of EX_TRUST becomes 5",
+  "old": "            rt_size=$(rel_tool_wc -c < \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rt_size=$(rel_tool_wc -c < \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsNoEx"
+  ]
+ },
+ {
+  "id": "FM352",
+  "what": "line 301: the message trust_checksum becomes trust_stage",
+  "old": "            rt_size=$(rel_tool_wc -c < \"$rt_p\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "            rt_size=$(rel_tool_wc -c < \"$rt_p\") || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "zf02"
+  ]
+ },
+ {
+  "id": "FM353",
+  "what": "line 304: the failure handler is removed (a failure is ignored)",
+  "old": "        [ \"$rt_got\" = \"$rt_want\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_got\" = \"$rt_want\" ]",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM354",
+  "what": "line 304: the refusing condition is always true",
+  "old": "        [ \"$rt_got\" = \"$rt_want\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        true || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM355",
+  "what": "line 304: = becomes != in a test",
+  "old": "        [ \"$rt_got\" = \"$rt_want\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_got\" != \"$rt_want\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM356",
+  "what": "line 304: the default of EX_TRUST becomes 5",
+  "old": "        [ \"$rt_got\" = \"$rt_want\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_got\" = \"$rt_want\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr24"
+  ]
+ },
+ {
+  "id": "FM357",
+  "what": "line 304: the message trust_checksum becomes trust_stage",
+  "old": "        [ \"$rt_got\" = \"$rt_want\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        [ \"$rt_got\" = \"$rt_want\" ] || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "ir32"
+  ]
+ },
+ {
+  "id": "FM358",
+  "what": "line 307: the failure handler is removed (a failure is ignored)",
+  "old": "        rt_files=\"$rt_files${rel_nl}file $rt_f $rt_size $rt_got\"\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        rt_files=\"$rt_files${rel_nl}file $rt_f $rt_size $rt_got\"\n    done\n    [ -z \"$rt_rest\" ]",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM359",
+  "what": "line 307: the refusing condition is always true",
+  "old": "        rt_files=\"$rt_files${rel_nl}file $rt_f $rt_size $rt_got\"\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        rt_files=\"$rt_files${rel_nl}file $rt_f $rt_size $rt_got\"\n    done\n    true || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM360",
+  "what": "line 307: -z becomes -n",
+  "old": "        rt_files=\"$rt_files${rel_nl}file $rt_f $rt_size $rt_got\"\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        rt_files=\"$rt_files${rel_nl}file $rt_f $rt_size $rt_got\"\n    done\n    [ -n \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM361",
+  "what": "line 307: the default of EX_TRUST becomes 5",
+  "old": "        rt_files=\"$rt_files${rel_nl}file $rt_f $rt_size $rt_got\"\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        rt_files=\"$rt_files${rel_nl}file $rt_f $rt_size $rt_got\"\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM362",
+  "what": "line 307: the message trust_checksum becomes trust_stage",
+  "old": "        rt_files=\"$rt_files${rel_nl}file $rt_f $rt_size $rt_got\"\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        rt_files=\"$rt_files${rel_nl}file $rt_f $rt_size $rt_got\"\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr07"
+  ]
+ },
+ {
+  "id": "FM364",
+  "what": "line 308: the default of EX_TRUST becomes 5",
+  "old": "    case $rt_meta in *\"$rel_nl\") ;; *) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_meta in *\"$rel_nl\") ;; *) fetch_msg trust_checksum; return \"${EX_TRUST:-5}\" ;; esac",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM365",
+  "what": "line 308: the message trust_checksum becomes trust_stage",
+  "old": "    case $rt_meta in *\"$rel_nl\") ;; *) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "    case $rt_meta in *\"$rel_nl\") ;; *) fetch_msg trust_stage; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM368",
+  "what": "line 312: -n becomes -z",
+  "old": "    for rt_k in META_SCHEMA RELEASE_VERSION STACK_VERSION MEMBER_LIST CORTEX_SERVER_IMAGE CORTEX_DB_IMAGE ROLES_SCRIPT_DIGEST; do\n        [ -n \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    for rt_k in META_SCHEMA RELEASE_VERSION STACK_VERSION MEMBER_LIST CORTEX_SERVER_IMAGE CORTEX_DB_IMAGE ROLES_SCRIPT_DIGEST; do\n        [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM369",
+  "what": "line 312: the default of EX_TRUST becomes 5",
+  "old": "    for rt_k in META_SCHEMA RELEASE_VERSION STACK_VERSION MEMBER_LIST CORTEX_SERVER_IMAGE CORTEX_DB_IMAGE ROLES_SCRIPT_DIGEST; do\n        [ -n \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    for rt_k in META_SCHEMA RELEASE_VERSION STACK_VERSION MEMBER_LIST CORTEX_SERVER_IMAGE CORTEX_DB_IMAGE ROLES_SCRIPT_DIGEST; do\n        [ -n \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM370",
+  "what": "line 312: the message trust_checksum becomes trust_stage",
+  "old": "    for rt_k in META_SCHEMA RELEASE_VERSION STACK_VERSION MEMBER_LIST CORTEX_SERVER_IMAGE CORTEX_DB_IMAGE ROLES_SCRIPT_DIGEST; do\n        [ -n \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    for rt_k in META_SCHEMA RELEASE_VERSION STACK_VERSION MEMBER_LIST CORTEX_SERVER_IMAGE CORTEX_DB_IMAGE ROLES_SCRIPT_DIGEST; do\n        [ -n \"$rt_rest\" ] || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM371",
+  "what": "line 315: a refusing case line is deleted",
+  "old": "        case $rt_line in \"$rt_k\"=*) ;; *) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "        :",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM372",
+  "what": "line 315: the default of EX_TRUST becomes 5",
+  "old": "        case $rt_line in \"$rt_k\"=*) ;; *) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "        case $rt_line in \"$rt_k\"=*) ;; *) fetch_msg trust_checksum; return \"${EX_TRUST:-5}\" ;; esac",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM373",
+  "what": "line 315: the message trust_checksum becomes trust_stage",
+  "old": "        case $rt_line in \"$rt_k\"=*) ;; *) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "        case $rt_line in \"$rt_k\"=*) ;; *) fetch_msg trust_stage; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM376",
+  "what": "line 317: the number 300 in a test becomes 299",
+  "old": "        { [ -n \"$rt_val\" ] && [ \"${#rt_val}\" -le 300 ]; } || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        { [ -n \"$rt_val\" ] && [ \"${#rt_val}\" -le 299 ]; } || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "pr09"
+  ]
+ },
+ {
+  "id": "FM378",
+  "what": "line 317: -le becomes -gt",
+  "old": "        { [ -n \"$rt_val\" ] && [ \"${#rt_val}\" -le 300 ]; } || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        { [ -n \"$rt_val\" ] && [ \"${#rt_val}\" -gt 300 ]; } || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM379",
+  "what": "line 317: -n becomes -z",
+  "old": "        { [ -n \"$rt_val\" ] && [ \"${#rt_val}\" -le 300 ]; } || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        { [ -z \"$rt_val\" ] && [ \"${#rt_val}\" -le 300 ]; } || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM380",
+  "what": "line 317: the default of EX_TRUST becomes 5",
+  "old": "        { [ -n \"$rt_val\" ] && [ \"${#rt_val}\" -le 300 ]; } || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        { [ -n \"$rt_val\" ] && [ \"${#rt_val}\" -le 300 ]; } || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM381",
+  "what": "line 317: the message trust_checksum becomes trust_stage",
+  "old": "        { [ -n \"$rt_val\" ] && [ \"${#rt_val}\" -le 300 ]; } || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        { [ -n \"$rt_val\" ] && [ \"${#rt_val}\" -le 300 ]; } || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM383",
+  "what": "line 318: the default of EX_TRUST becomes 5",
+  "old": "        case $rt_val in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._:/@-]*) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "        case $rt_val in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._:/@-]*) fetch_msg trust_checksum; return \"${EX_TRUST:-5}\" ;; esac",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM384",
+  "what": "line 318: the message trust_checksum becomes trust_stage",
+  "old": "        case $rt_val in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._:/@-]*) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "        case $rt_val in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._:/@-]*) fetch_msg trust_stage; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM385",
+  "what": "line 318: an alphabet class loses its last character (-)",
+  "old": "        case $rt_val in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._:/@-]*) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "new": "        case $rt_val in *[!ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._:/@]*) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM386",
+  "what": "line 320: the failure handler is removed (a failure is ignored)",
+  "old": "            META_SCHEMA) [ \"$rt_val\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            META_SCHEMA) [ \"$rt_val\" = 1 ] ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM387",
+  "what": "line 320: = becomes != in a test",
+  "old": "            META_SCHEMA) [ \"$rt_val\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            META_SCHEMA) [ \"$rt_val\" != 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM388",
+  "what": "line 320: the default of EX_TRUST becomes 5",
+  "old": "            META_SCHEMA) [ \"$rt_val\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            META_SCHEMA) [ \"$rt_val\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; } ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM389",
+  "what": "line 320: the message trust_checksum becomes trust_stage",
+  "old": "            META_SCHEMA) [ \"$rt_val\" = 1 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            META_SCHEMA) [ \"$rt_val\" = 1 ] || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; } ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM390",
+  "what": "line 321: the failure handler is removed (a failure is ignored)",
+  "old": "            RELEASE_VERSION|STACK_VERSION) [ \"$rt_val\" = \"$rt_ver\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            RELEASE_VERSION|STACK_VERSION) [ \"$rt_val\" = \"$rt_ver\" ] ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM391",
+  "what": "line 321: = becomes != in a test",
+  "old": "            RELEASE_VERSION|STACK_VERSION) [ \"$rt_val\" = \"$rt_ver\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            RELEASE_VERSION|STACK_VERSION) [ \"$rt_val\" != \"$rt_ver\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM392",
+  "what": "line 321: the default of EX_TRUST becomes 5",
+  "old": "            RELEASE_VERSION|STACK_VERSION) [ \"$rt_val\" = \"$rt_ver\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            RELEASE_VERSION|STACK_VERSION) [ \"$rt_val\" = \"$rt_ver\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; } ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM393",
+  "what": "line 321: the message trust_checksum becomes trust_stage",
+  "old": "            RELEASE_VERSION|STACK_VERSION) [ \"$rt_val\" = \"$rt_ver\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            RELEASE_VERSION|STACK_VERSION) [ \"$rt_val\" = \"$rt_ver\" ] || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; } ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM394",
+  "what": "line 322: the failure handler is removed (a failure is ignored)",
+  "old": "            MEMBER_LIST) [ \"$rt_val\" = 2 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            MEMBER_LIST) [ \"$rt_val\" = 2 ] ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM395",
+  "what": "line 322: = becomes != in a test",
+  "old": "            MEMBER_LIST) [ \"$rt_val\" = 2 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            MEMBER_LIST) [ \"$rt_val\" != 2 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM396",
+  "what": "line 322: the default of EX_TRUST becomes 5",
+  "old": "            MEMBER_LIST) [ \"$rt_val\" = 2 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            MEMBER_LIST) [ \"$rt_val\" = 2 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; } ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM397",
+  "what": "line 322: the message trust_checksum becomes trust_stage",
+  "old": "            MEMBER_LIST) [ \"$rt_val\" = 2 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            MEMBER_LIST) [ \"$rt_val\" = 2 ] || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; } ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM398",
+  "what": "line 323: the failure handler is removed (a failure is ignored)",
+  "old": "            CORTEX_SERVER_IMAGE|CORTEX_DB_IMAGE) rel_image_ok \"$rt_val\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            CORTEX_SERVER_IMAGE|CORTEX_DB_IMAGE) rel_image_ok \"$rt_val\" ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM399",
+  "what": "line 323: the default of EX_TRUST becomes 5",
+  "old": "            CORTEX_SERVER_IMAGE|CORTEX_DB_IMAGE) rel_image_ok \"$rt_val\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            CORTEX_SERVER_IMAGE|CORTEX_DB_IMAGE) rel_image_ok \"$rt_val\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; } ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM400",
+  "what": "line 323: the message trust_checksum becomes trust_stage",
+  "old": "            CORTEX_SERVER_IMAGE|CORTEX_DB_IMAGE) rel_image_ok \"$rt_val\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; } ;;",
+  "new": "            CORTEX_SERVER_IMAGE|CORTEX_DB_IMAGE) rel_image_ok \"$rt_val\" || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; } ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM401",
+  "what": "line 325: the failure handler is removed (a failure is ignored)",
+  "old": "                [ \"${#rt_val}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "                [ \"${#rt_val}\" -eq 64 ]",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM402",
+  "what": "line 325: the refusing condition is always true",
+  "old": "                [ \"${#rt_val}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "                true || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM403",
+  "what": "line 325: the number 64 in a test becomes 63",
+  "old": "                [ \"${#rt_val}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "                [ \"${#rt_val}\" -eq 63 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM404",
+  "what": "line 325: the number 64 in a test becomes 65",
+  "old": "                [ \"${#rt_val}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "                [ \"${#rt_val}\" -eq 65 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM405",
+  "what": "line 325: -eq becomes -ne",
+  "old": "                [ \"${#rt_val}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "                [ \"${#rt_val}\" -ne 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM406",
+  "what": "line 325: the default of EX_TRUST becomes 5",
+  "old": "                [ \"${#rt_val}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "                [ \"${#rt_val}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM407",
+  "what": "line 325: the message trust_checksum becomes trust_stage",
+  "old": "                [ \"${#rt_val}\" -eq 64 ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "                [ \"${#rt_val}\" -eq 64 ] || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM408",
+  "what": "line 326: the default of EX_TRUST becomes 5",
+  "old": "                case $rt_val in *[!0123456789abcdef]*) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac ;;",
+  "new": "                case $rt_val in *[!0123456789abcdef]*) fetch_msg trust_checksum; return \"${EX_TRUST:-5}\" ;; esac ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM409",
+  "what": "line 326: the message trust_checksum becomes trust_stage",
+  "old": "                case $rt_val in *[!0123456789abcdef]*) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac ;;",
+  "new": "                case $rt_val in *[!0123456789abcdef]*) fetch_msg trust_stage; return \"${EX_TRUST:-4}\" ;; esac ;;",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM410",
+  "what": "line 326: an alphabet class loses its last character (f)",
+  "old": "                case $rt_val in *[!0123456789abcdef]*) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac ;;",
+  "new": "                case $rt_val in *[!0123456789abcde]*) fetch_msg trust_checksum; return \"${EX_TRUST:-4}\" ;; esac ;;",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM411",
+  "what": "line 328: != becomes = in a test",
+  "old": "        if [ \"$rt_k\" != META_SCHEMA ]; then rt_values=\"$rt_values${rel_nl}meta $rt_k $rt_val\"; fi",
+  "new": "        if [ \"$rt_k\" = META_SCHEMA ]; then rt_values=\"$rt_values${rel_nl}meta $rt_k $rt_val\"; fi",
+  "fails": [
+   "tr01"
+  ]
+ },
+ {
+  "id": "FM412",
+  "what": "line 330: the failure handler is removed (a failure is ignored)",
+  "old": "        if [ \"$rt_k\" != META_SCHEMA ]; then rt_values=\"$rt_values${rel_nl}meta $rt_k $rt_val\"; fi\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        if [ \"$rt_k\" != META_SCHEMA ]; then rt_values=\"$rt_values${rel_nl}meta $rt_k $rt_val\"; fi\n    done\n    [ -z \"$rt_rest\" ]",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM413",
+  "what": "line 330: the refusing condition is always true",
+  "old": "        if [ \"$rt_k\" != META_SCHEMA ]; then rt_values=\"$rt_values${rel_nl}meta $rt_k $rt_val\"; fi\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        if [ \"$rt_k\" != META_SCHEMA ]; then rt_values=\"$rt_values${rel_nl}meta $rt_k $rt_val\"; fi\n    done\n    true || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM414",
+  "what": "line 330: -z becomes -n",
+  "old": "        if [ \"$rt_k\" != META_SCHEMA ]; then rt_values=\"$rt_values${rel_nl}meta $rt_k $rt_val\"; fi\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        if [ \"$rt_k\" != META_SCHEMA ]; then rt_values=\"$rt_values${rel_nl}meta $rt_k $rt_val\"; fi\n    done\n    [ -n \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM415",
+  "what": "line 330: the default of EX_TRUST becomes 5",
+  "old": "        if [ \"$rt_k\" != META_SCHEMA ]; then rt_values=\"$rt_values${rel_nl}meta $rt_k $rt_val\"; fi\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        if [ \"$rt_k\" != META_SCHEMA ]; then rt_values=\"$rt_values${rel_nl}meta $rt_k $rt_val\"; fi\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM416",
+  "what": "line 330: the message trust_checksum becomes trust_stage",
+  "old": "        if [ \"$rt_k\" != META_SCHEMA ]; then rt_values=\"$rt_values${rel_nl}meta $rt_k $rt_val\"; fi\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "        if [ \"$rt_k\" != META_SCHEMA ]; then rt_values=\"$rt_values${rel_nl}meta $rt_k $rt_val\"; fi\n    done\n    [ -z \"$rt_rest\" ] || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "fails": [
+   "tr08"
+  ]
+ },
+ {
+  "id": "FM417",
+  "what": "line 332: a return value is flipped",
+  "old": "    printf '%s\\n' \"v1${rel_nl}version $rt_ver${rel_nl}stage $rt_stage$rt_files$rt_values\"\n    return 0",
+  "new": "    printf '%s\\n' \"v1${rel_nl}version $rt_ver${rel_nl}stage $rt_stage$rt_files$rt_values\"\n    return 9",
+  "fails": [
+   "hf02"
+  ]
+ },
+ {
+  "id": "FM418",
+  "what": "line 345: a hygiene statement is deleted",
+  "old": "rel_trust() {\n    REL_TRUSTED=",
+  "new": "rel_trust() {\n    :",
+  "fails": [
+   "tr19"
+  ]
+ },
+ {
+  "id": "FM419",
+  "what": "line 347: the default of EX_TRUST becomes 5",
+  "old": "    case $rt_out in v1*) ;; *) fetch_msg trust_checksum; rel_finish \"${EX_TRUST:-4}\"; return ;; esac",
+  "new": "    case $rt_out in v1*) ;; *) fetch_msg trust_checksum; rel_finish \"${EX_TRUST:-5}\"; return ;; esac",
+  "fails": [
+   "tr26"
+  ]
+ },
+ {
+  "id": "FM420",
+  "what": "line 347: the message trust_checksum becomes trust_stage",
+  "old": "    case $rt_out in v1*) ;; *) fetch_msg trust_checksum; rel_finish \"${EX_TRUST:-4}\"; return ;; esac",
+  "new": "    case $rt_out in v1*) ;; *) fetch_msg trust_stage; rel_finish \"${EX_TRUST:-4}\"; return ;; esac",
+  "fails": [
+   "pr11"
+  ]
+ },
+ {
+  "id": "FM421",
+  "what": "line 348: a hygiene statement is deleted",
+  "old": "    REL_TRUSTED=$rt_out",
+  "new": "    :",
+  "fails": [
+   "tr01"
+  ]
+ },
+ {
+  "id": "FM636",
+  "what": "line 694: an alphabet class loses its last character (9)",
+  "old": "        case $ru_size in \"\"|*[!0123456789]*) fetch_msg fetch_archive; return \"${EX_FETCH:-5}\" ;; esac",
+  "new": "        case $ru_size in \"\"|*[!012345678]*) fetch_msg fetch_archive; return \"${EX_FETCH:-5}\" ;; esac",
+  "fails": [
+   "bg08"
+  ]
+ },
+ {
+  "id": "FM639",
+  "what": "line 695: the number 10 in a test becomes 9",
+  "old": "        [ \"${#ru_size}\" -le 10 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"${#ru_size}\" -le 9 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "bg03"
+  ]
+ },
+ {
+  "id": "FM642",
+  "what": "line 695: the default of EX_FETCH becomes 4",
+  "old": "        [ \"${#ru_size}\" -le 10 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"${#ru_size}\" -le 10 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "bg09"
+  ],
+  "classes": [
+   "ZBigUnpackNoEx"
+  ]
+ },
+ {
+  "id": "FM645",
+  "what": "line 696: the number 1073741824 in a test becomes 1073741823",
+  "old": "        [ \"$ru_size\" -le 1073741824 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"$ru_size\" -le 1073741823 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "bg03"
+  ]
+ },
+ {
+  "id": "FM648",
+  "what": "line 696: the default of EX_FETCH becomes 4",
+  "old": "        [ \"$ru_size\" -le 1073741824 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"$ru_size\" -le 1073741824 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "bg01"
+  ],
+  "classes": [
+   "ZBigUnpackNoEx"
+  ]
+ },
+ {
+  "id": "FM651",
+  "what": "line 698: the number 1073741824 in a test becomes 1073741823",
+  "old": "        [ \"$ru_total\" -le 1073741824 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"$ru_total\" -le 1073741823 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "bg03"
+  ]
+ },
+ {
+  "id": "FM652",
+  "what": "line 698: the number 1073741824 in a test becomes 1073741825",
+  "old": "        [ \"$ru_total\" -le 1073741824 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"$ru_total\" -le 1073741825 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "bg05"
+  ]
+ },
+ {
+  "id": "FM654",
+  "what": "line 698: the default of EX_FETCH becomes 4",
+  "old": "        [ \"$ru_total\" -le 1073741824 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"$ru_total\" -le 1073741824 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "bg05"
+  ],
+  "classes": [
+   "ZBigUnpackNoEx"
+  ]
+ },
+ {
+  "id": "FM657",
+  "what": "line 700: the number 256 in a test becomes 255",
+  "old": "        [ \"$ru_count\" -le 256 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"$ru_count\" -le 255 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "bg06"
+  ]
+ },
+ {
+  "id": "FM658",
+  "what": "line 700: the number 256 in a test becomes 257",
+  "old": "        [ \"$ru_count\" -le 256 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "        [ \"$ru_count\" -le 257 ] || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "bg07"
+  ]
+ },
+ {
+  "id": "FM665",
+  "what": "line 707: a refusing case line is deleted",
+  "old": "    case \" $ru_seen \" in *\" initdb \"*|*\" initdb/\"*) ;; *) fetch_msg fetch_archive; return \"${EX_FETCH:-5}\" ;; esac",
+  "new": "    :",
+  "fails": [
+   "un19"
+  ]
+ },
+ {
+  "id": "FM669",
+  "what": "line 709: the failure handler is removed (a failure is ignored)",
+  "old": "    ru_owner=$(rel_tool_stat -c '%u' -- \"$ru_home/releases\") || { fetch_msg fetch_home; return \"${EX_FETCH:-5}\"; }",
+  "new": "    ru_owner=$(rel_tool_stat -c '%u' -- \"$ru_home/releases\")",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM672",
+  "what": "line 710: the failure handler is removed (a failure is ignored)",
+  "old": "    ru_owner=$(rel_tool_stat -c '%u' -- \"$ru_home/releases\") || { fetch_msg fetch_home; return \"${EX_FETCH:-5}\"; }\n    [ \"$ru_owner\" = \"$ru_me\" ] || { fetch_msg fetch_home; return \"${EX_FETCH:-5}\"; }",
+  "new": "    ru_owner=$(rel_tool_stat -c '%u' -- \"$ru_home/releases\") || { fetch_msg fetch_home; return \"${EX_FETCH:-5}\"; }\n    [ \"$ru_owner\" = \"$ru_me\" ]",
+  "fails": [
+   "un20"
+  ]
+ },
+ {
+  "id": "FM673",
+  "what": "line 710: the refusing condition is always true",
+  "old": "    ru_owner=$(rel_tool_stat -c '%u' -- \"$ru_home/releases\") || { fetch_msg fetch_home; return \"${EX_FETCH:-5}\"; }\n    [ \"$ru_owner\" = \"$ru_me\" ] || { fetch_msg fetch_home; return \"${EX_FETCH:-5}\"; }",
+  "new": "    ru_owner=$(rel_tool_stat -c '%u' -- \"$ru_home/releases\") || { fetch_msg fetch_home; return \"${EX_FETCH:-5}\"; }\n    true || { fetch_msg fetch_home; return \"${EX_FETCH:-5}\"; }",
+  "fails": [
+   "un20"
+  ]
+ },
+ {
+  "id": "FM675",
+  "what": "line 710: the default of EX_FETCH becomes 4",
+  "old": "    ru_owner=$(rel_tool_stat -c '%u' -- \"$ru_home/releases\") || { fetch_msg fetch_home; return \"${EX_FETCH:-5}\"; }\n    [ \"$ru_owner\" = \"$ru_me\" ] || { fetch_msg fetch_home; return \"${EX_FETCH:-5}\"; }",
+  "new": "    ru_owner=$(rel_tool_stat -c '%u' -- \"$ru_home/releases\") || { fetch_msg fetch_home; return \"${EX_FETCH:-5}\"; }\n    [ \"$ru_owner\" = \"$ru_me\" ] || { fetch_msg fetch_home; return \"${EX_FETCH:-4}\"; }",
+  "fails": [
+   "un20"
+  ],
+  "classes": [
+   "UnpackNoEx"
+  ]
+ },
+ {
+  "id": "FM676",
+  "what": "line 711: the failure handler is removed (a failure is ignored)",
+  "old": "    ru_cand=$(rel_tool_mktemp -d -- \"$ru_home/releases/.cortex-unpack.XXXXXXXX\") || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "    ru_cand=$(rel_tool_mktemp -d -- \"$ru_home/releases/.cortex-unpack.XXXXXXXX\")",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM680",
+  "what": "line 714: the failure handler is removed (a failure is ignored)",
+  "old": "    rel_tool_tar --no-same-owner -p -xzf \"$ru_stage/$ru_tar\" -C \"$ru_cand\" 2>/dev/null || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "    rel_tool_tar --no-same-owner -p -xzf \"$ru_stage/$ru_tar\" -C \"$ru_cand\" 2>/dev/null",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM697",
+  "what": "line 722: the failure handler is removed (a failure is ignored)",
+  "old": "    ru_found=$(rel_tool_find \"$ru_cand\" -mindepth 1 -printf '%y %m %P\\n') || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "    ru_found=$(rel_tool_find \"$ru_cand\" -mindepth 1 -printf '%y %m %P\\n')",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM732",
+  "what": "line 746: the failure handler is removed (a failure is ignored)",
+  "old": "    ru_got=$(rel_tool_sha256sum -- \"$ru_cand/db-roles.sh\") || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    ru_got=$(rel_tool_sha256sum -- \"$ru_cand/db-roles.sh\")",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM742",
+  "what": "line 749: the failure handler is removed (a failure is ignored)",
+  "old": "    rel_tool_chmod 0644 -- \"$ru_cand/manifest.json\" || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "    rel_tool_chmod 0644 -- \"$ru_cand/manifest.json\"",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM747",
+  "what": "line 751: the failure handler is removed (a failure is ignored)",
+  "old": "    ru_names=$(rel_tool_find \"$ru_cand\" -mindepth 1 -type f -printf '%P\\n') || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "    ru_names=$(rel_tool_find \"$ru_cand\" -mindepth 1 -type f -printf '%P\\n')",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM749",
+  "what": "line 752: the failure handler is removed (a failure is ignored)",
+  "old": "    ru_names=$(printf '%s\\n' \"$ru_names\" | rel_tool_sort) || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "    ru_names=$(printf '%s\\n' \"$ru_names\" | rel_tool_sort)",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM751",
+  "what": "line 756: the failure handler is removed (a failure is ignored)",
+  "old": "        ru_got=$(rel_tool_sha256sum -- \"$ru_cand/$ru_name\") || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "        ru_got=$(rel_tool_sha256sum -- \"$ru_cand/$ru_name\")",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM756",
+  "what": "line 760: the failure handler is removed (a failure is ignored)",
+  "old": "    rel_tool_chmod 0644 -- \"$ru_cand/SHA256SUMS\" || { fetch_msg fetch_archive; return \"${EX_FETCH:-5}\"; }",
+  "new": "    rel_tool_chmod 0644 -- \"$ru_cand/SHA256SUMS\"",
+  "fails": [
+   "zf01"
+  ],
+  "classes": [
+   "ZFaultsAfter"
+  ]
+ },
+ {
+  "id": "FM761",
+  "what": "line 772: the default of EX_FETCH becomes 4",
+  "old": "    case $ru_out in /*) ;; *) fetch_msg fetch_archive; rel_finish \"${EX_FETCH:-5}\"; return ;; esac",
+  "new": "    case $ru_out in /*) ;; *) fetch_msg fetch_archive; rel_finish \"${EX_FETCH:-4}\"; return ;; esac",
+  "fails": [
+   "un22"
+  ],
+  "classes": [
+   "UnpackNoEx"
+  ]
+ },
+ {
+  "id": "FM764",
+  "what": "line 786: the default of EX_TRUST becomes 5",
+  "old": "    rel_version_ok \"$rl_ver\" || { fetch_msg trust_stage; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_version_ok \"$rl_ver\" || { fetch_msg trust_stage; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "ld12"
+  ]
+ },
+ {
+  "id": "FM770",
+  "what": "line 788: the default of EX_TRUST becomes 5",
+  "old": "    rel_tuple_ok \"$rl_ver\" \"$rl_stage\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-4}\"; }",
+  "new": "    rel_tuple_ok \"$rl_ver\" \"$rl_stage\" || { fetch_msg trust_checksum; return \"${EX_TRUST:-5}\"; }",
+  "fails": [
+   "ld12"
+  ]
+ }
+]

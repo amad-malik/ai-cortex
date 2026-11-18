@@ -1,0 +1,11 @@
+error: cannot construct `Authorized<_>` with struct literal syntax due to private fields
+  --> tests/ui/d4_authorized_literal_fail.rs:8:19
+   |
+ 8 |     let _forged = Authorized {
+   |                   ^^^^^^^^^^
+ 9 |         value: (),
+   |         --------- private field
+10 |         authority: panic!(),
+   |         ------------------- private field
+   |
+   = note: ...and other private field `rule` that was not provided

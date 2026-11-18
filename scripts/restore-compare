@@ -1,0 +1,265 @@
+#!/bin/sh
+# restore-compare: is a restored database the same as its source? (piece 12; BK-15, BK-16, BK-34; bob@helix)
+#
+#   restore-compare --source <container> --target <container> [--source-db cortex] [--target-db cortex] [--after-restore]
+#   restore-compare --source <container> --target <container> [--source-db cortex] [--target-db cortex] --isolation
+#
+# Reads both databases as the postgres superuser over the socket (row-level security does not apply to it); changes nothing.
+# DATA MODE: for each base table of the six schemas (audit, handoffs, identity, platform, records, tokens): the row count and
+# the hash of the sorted primary keys (the definition of BK-15), then every row (key + hash of the row as jsonb, the two generated
+# search columns of records.records left out) so that missing, extra and different rows are NAMED. A table passes only when
+# every row is equal: equal counts with different rows are a failure. Also the hash of records.records.tsv, compared apart.
+#   --after-restore   the target is a cortex-restore result: the ONE row of tokens.generations with scope `install` must be the
+#                     source's row with gen + 1 (exactly, in numeric arithmetic), or the row cortex-restore creates with gen 1 where the
+#                     source has none, or absent on both sides; it is printed as "expected: +1". Only that VALUE is waived: the row's
+#                     key (scope_id) and every other column are compared like any row. Any other difference anywhere, tokens.tokens
+#                     included, fails. Without this flag any difference fails.
+# For tokens.tokens a row is matched by the FULL md5(id) and shown as its first 8 hex characters: a token id is half of a bearer value.
+# ISOLATION MODE: row-level security flags (enabled, forced) per table, the policies, the grants (tables, columns, schemas,
+# functions, expanded with aclexplode so the order they were granted in does not matter) and the views, source against target.
+# Exit codes: 0 equal; 1 a difference; 2 bad usage; 3 a database cannot be read.
+set -eu
+umask 077
+LC_ALL=C
+export LC_ALL
+
+me=restore-compare
+tab=$(printf '\t')
+
+die() {
+  printf '%s: %s\n' "$me" "$2" >&2
+  exit "$1"
+}
+
+src="" tgt="" sdb=cortex tdb=cortex after=0 iso=0
+while [ $# -gt 0 ]; do
+  case $1 in
+    --source) [ $# -ge 2 ] || die 2 "--source needs a value"; src=$2; shift 2 ;;
+    --target) [ $# -ge 2 ] || die 2 "--target needs a value"; tgt=$2; shift 2 ;;
+    --source-db) [ $# -ge 2 ] || die 2 "--source-db needs a value"; sdb=$2; shift 2 ;;
+    --target-db) [ $# -ge 2 ] || die 2 "--target-db needs a value"; tdb=$2; shift 2 ;;
+    --after-restore) after=1; shift ;;
+    --isolation) iso=1; shift ;;
+    -h | --help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
+    *) die 2 "unknown argument (see --help)" ;;
+  esac
+done
+[ -n "$src" ] && [ -n "$tgt" ] || die 2 "--source and --target are required"
+[ "$iso" -eq 0 ] || [ "$after" -eq 0 ] || die 2 "--after-restore belongs to the data mode"
+for v in "$src" "$tgt"; do
+  case $v in '' | [!A-Za-z0-9]* | *[!A-Za-z0-9_.-]*) die 2 "not a container name" ;; esac
+done
+for v in "$sdb" "$tdb"; do
+  case $v in '' | [!a-z_]* | *[!a-z0-9_]*) die 2 "not a database name" ;; esac
+done
+command -v podman > /dev/null 2>&1 || die 3 "podman is not installed"
+
+work=$(mktemp -d "${TMPDIR:-/tmp}/restore-compare.XXXXXX") || die 3 "no working directory"
+cleanup() {
+  case $work in
+    */restore-compare.??????) rm -rf -- "$work" ;;
+  esac
+}
+trap cleanup EXIT
+
+six="'audit', 'handoffs', 'identity', 'platform', 'records', 'tokens'"
+
+# run <container> <database> <sqlfile> <outfile>
+run_sql() {
+  podman exec -i --user postgres "$1" psql -U postgres -d "$2" -X -A -t -q -F "$tab" -v ON_ERROR_STOP=1 < "$3" > "$4" 2> "$work/psql.err" ||
+    die 3 "a database cannot be read ($1/$2)"
+}
+one() { # one <container> <database> <sql>: the single value, or empty
+  podman exec --user postgres "$1" psql -U postgres -d "$2" -X -A -t -q -v ON_ERROR_STOP=1 -c "$3" 2> /dev/null || die 3 "a database cannot be read ($1/$2)"
+}
+
+if [ "$iso" -eq 1 ]; then
+  cat > "$work/iso.sql" <<SQL
+select 'rls', n.nspname || '.' || c.relname, c.relrowsecurity::text || ',' || c.relforcerowsecurity::text || ',' || coalesce(c.reloptions::text, '')
+  from pg_class c join pg_namespace n on n.oid = c.relnamespace
+ where c.relkind in ('r', 'p') and n.nspname in ($six)
+union all
+select 'policy', p.schemaname || '.' || p.tablename || '.' || p.policyname,
+       p.permissive || '|' || p.roles::text || '|' || p.cmd || '|' || coalesce(p.qual, '') || '|' || coalesce(p.with_check, '')
+  from pg_policies p where p.schemaname in ($six)
+union all
+select 'grant-table', n.nspname || '.' || c.relname,
+       case when a.grantee = 0 then 'PUBLIC' else a.grantee::regrole::text end || ':' || a.privilege_type || ':' || a.is_grantable::text
+  from pg_class c join pg_namespace n on n.oid = c.relnamespace cross join lateral aclexplode(c.relacl) a
+ where n.nspname in ($six) and c.relacl is not null
+union all
+select 'grant-column', n.nspname || '.' || c.relname || '.' || t.attname,
+       case when a.grantee = 0 then 'PUBLIC' else a.grantee::regrole::text end || ':' || a.privilege_type || ':' || a.is_grantable::text
+  from pg_attribute t join pg_class c on c.oid = t.attrelid join pg_namespace n on n.oid = c.relnamespace cross join lateral aclexplode(t.attacl) a
+ where n.nspname in ($six) and t.attacl is not null and not t.attisdropped
+union all
+select 'grant-schema', n.nspname,
+       case when a.grantee = 0 then 'PUBLIC' else a.grantee::regrole::text end || ':' || a.privilege_type || ':' || a.is_grantable::text
+  from pg_namespace n cross join lateral aclexplode(n.nspacl) a where n.nspname in ($six)
+union all
+select 'grant-function', n.nspname || '.' || p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')',
+       case when a.grantee = 0 then 'PUBLIC' else a.grantee::regrole::text end || ':' || a.privilege_type || ':' || a.is_grantable::text
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace cross join lateral aclexplode(p.proacl) a
+ where n.nspname in ($six)
+union all
+select 'view', n.nspname || '.' || c.relname, md5(pg_get_viewdef(c.oid)) || ':' || coalesce(c.reloptions::text, '')
+  from pg_class c join pg_namespace n on n.oid = c.relnamespace where c.relkind = 'v' and n.nspname in ($six)
+order by 1, 2, 3;
+SQL
+  run_sql "$src" "$sdb" "$work/iso.sql" "$work/iso.src.raw"
+  run_sql "$tgt" "$tdb" "$work/iso.sql" "$work/iso.tgt.raw"
+  sort "$work/iso.src.raw" > "$work/iso.src"
+  sort "$work/iso.tgt.raw" > "$work/iso.tgt"
+  bad=0
+  for kind in rls policy grant-table grant-column grant-schema grant-function view; do
+    ns=$(awk -F "$tab" -v k="$kind" '$1 == k' "$work/iso.src" | wc -l | tr -d ' ')
+    nt=$(awk -F "$tab" -v k="$kind" '$1 == k' "$work/iso.tgt" | wc -l | tr -d ' ')
+    awk -F "$tab" -v k="$kind" '$1 == k' "$work/iso.src" > "$work/k.src"
+    awk -F "$tab" -v k="$kind" '$1 == k' "$work/iso.tgt" > "$work/k.tgt"
+    only_s=$(comm -23 "$work/k.src" "$work/k.tgt" | wc -l | tr -d ' ')
+    only_t=$(comm -13 "$work/k.src" "$work/k.tgt" | wc -l | tr -d ' ')
+    if [ "$ns" -eq "$nt" ] && [ "$only_s" -eq 0 ] && [ "$only_t" -eq 0 ]; then
+      printf '%-15s PASS  %s entries, identical\n' "$kind" "$ns"
+    else
+      bad=$((bad + 1))
+      printf '%-15s FAIL  source %s, target %s entries; only in source %s, only in target %s\n' "$kind" "$ns" "$nt" "$only_s" "$only_t"
+      comm -23 "$work/k.src" "$work/k.tgt" | head -n 5 | sed 's/^/    only in source: /'
+      comm -13 "$work/k.src" "$work/k.tgt" | head -n 5 | sed 's/^/    only in target: /'
+    fi
+  done
+  hs=$(grep '^grant-' "$work/iso.src" | md5sum | cut -c1-16)
+  ht=$(grep '^grant-' "$work/iso.tgt" | md5sum | cut -c1-16)
+  printf 'grants hash     source %s, target %s\n' "$hs" "$ht"
+  if [ "$hs" != "$ht" ]; then bad=$((bad + 1)); fi
+  if [ "$bad" -eq 0 ]; then
+    printf 'RESULT: isolation equal (flags, policies, grants, views)\n'
+    exit 0
+  fi
+  printf 'RESULT: isolation differs (%s groups)\n' "$bad"
+  exit 1
+fi
+
+# ---- data mode ----------------------------------------------------------------------------------------------------
+cat > "$work/agg.sql" <<SQL
+set timezone = 'UTC';
+select format(\$q\$select %L, count(*), md5(coalesce(string_agg(concat_ws('|', %s), E'\n' order by %s), '')) from %I.%I t\$q\$,
+              n.nspname || '.' || c.relname, pk.cols, pk.ord, n.nspname, c.relname)
+  from pg_class c join pg_namespace n on n.oid = c.relnamespace
+  cross join lateral (
+    select string_agg(case when n.nspname = 'tokens' and c.relname = 'tokens' then 'md5(t.' || quote_ident(a.attname) || '::text)'
+                           else 't.' || quote_ident(a.attname) || '::text' end, ', ' order by k.ord) as cols,
+           string_agg('t.' || quote_ident(a.attname) || '::text collate "C"', ', ' order by k.ord) as ord
+      from pg_index i
+      cross join lateral unnest(i.indkey) with ordinality as k(attnum, ord)
+      join pg_attribute a on a.attrelid = c.oid and a.attnum = k.attnum
+     where i.indrelid = c.oid and i.indisprimary) pk
+ where c.relkind in ('r', 'p') and n.nspname in ($six)
+ order by n.nspname, c.relname
+\gexec
+select 'records.records.tsv', count(*), md5(coalesce(string_agg(r.project_id::text || '|' || r.id::text || '|' || coalesce(r.tsv::text, ''), E'\n' order by r.project_id::text collate "C", r.id::text collate "C"), ''))
+  from records.records r;
+SQL
+cat > "$work/rows.sql" <<SQL
+set timezone = 'UTC';
+select format(\$q\$select %L, concat_ws('|', %s), md5((to_jsonb(t) - 'tsv' - 'tsv_truncated'%s)::text) from %I.%I t\$q\$,
+              n.nspname || '.' || c.relname, pk.cols,
+              case when ($after = 1) and n.nspname = 'tokens' and c.relname = 'generations'
+                   then ' - case when t.scope = ''install'' then ''gen''::text else ''''::text end' else '' end,
+              n.nspname, c.relname)
+  from pg_class c join pg_namespace n on n.oid = c.relnamespace
+  cross join lateral (
+    select string_agg(case when n.nspname = 'tokens' and c.relname = 'tokens' then 'md5(t.' || quote_ident(a.attname) || '::text)'
+                           else 't.' || quote_ident(a.attname) || '::text' end, ', ' order by k.ord) as cols
+      from pg_index i
+      cross join lateral unnest(i.indkey) with ordinality as k(attnum, ord)
+      join pg_attribute a on a.attrelid = c.oid and a.attnum = k.attnum
+     where i.indrelid = c.oid and i.indisprimary) pk
+ where c.relkind in ('r', 'p') and n.nspname in ($six)
+ order by n.nspname, c.relname
+\gexec
+SQL
+run_sql "$src" "$sdb" "$work/agg.sql" "$work/s.agg"
+run_sql "$tgt" "$tdb" "$work/agg.sql" "$work/t.agg"
+run_sql "$src" "$sdb" "$work/rows.sql" "$work/s.rows"
+run_sql "$tgt" "$tdb" "$work/rows.sql" "$work/t.rows"
+sgen=$(one "$src" "$sdb" "select gen from tokens.generations where scope = 'install'")
+tgen=$(one "$tgt" "$tdb" "select gen from tokens.generations where scope = 'install'")
+case $sgen$tgen in *[!0-9]*) die 3 "the install generation is not a number" ;; esac
+gen_ok=""
+if [ "$after" -eq 1 ]; then
+  if [ -z "$sgen" ] && [ -z "$tgen" ]; then
+    # both missing means "nothing to protect" ONLY for the unbootstrapped state: no installation and no token on the source (BK-35 b).
+    # With an installation or tokens, a missing generation is generation 0 and the restore had to create the row (BK-35 a): it did not.
+    sinst=$(one "$src" "$sdb" "select count(*) from identity.installations")
+    sntok=$(one "$src" "$sdb" "select count(*) from tokens.tokens")
+    if [ "$sinst" = 0 ] && [ "$sntok" = 0 ]; then gen_ok=none; else gen_ok=false; fi
+  elif [ -z "$sgen" ] || [ -z "$tgen" ]; then
+    if [ -z "$sgen" ] && [ "$tgen" = 1 ]; then gen_ok=true; else gen_ok=false; fi
+  else
+    # exact: numeric, not awk's doubles (above 2^53 an unchanged value would look like value + 1)
+    gen_ok=$(one "$tgt" "$tdb" "select ($tgen::numeric = $sgen::numeric + 1)::text")
+  fi
+fi
+inst_t=$(one "$tgt" "$tdb" "select id from identity.installations")
+printf '%s\n' "$inst_t" | grep -Eq '^[0-9a-f-]{36}$' || inst_t=""
+
+rc=0
+awk -F "$tab" -v after="$after" -v sgen="$sgen" -v tgen="$tgen" -v gen_ok="$gen_ok" -v inst_t="$inst_t" -v fs_="$work/s.agg" -v ft_="$work/t.agg" -v fsr="$work/s.rows" -v ftr="$work/t.rows" '
+  function key_of(   i, k) { k = $2; for (i = 3; i < NF; i++) k = k FS $i; return k }
+  function shown(t, k) { if (t == "tokens.tokens") k = substr(k, 1, 8); return (length(k) > 64) ? substr(k, 1, 64) "..." : k }
+  function note(list, t, k) { if (cnt[list, t]++ < 3) smp[list, t] = smp[list, t] " " shown(t, k) }
+  FILENAME == fs_ { sc[$1] = $2; sh[$1] = $3; names[$1] = 1; next }
+  FILENAME == ft_ { tc[$1] = $2; th[$1] = $3; names[$1] = 1; next }
+  FILENAME == fsr { srow[$1 SUBSEP key_of()] = $NF; next }
+  FILENAME == ftr { trow[$1 SUBSEP key_of()] = $NF; next }
+  END {
+    for (x in srow) {
+      split(x, p, SUBSEP); t = p[1]; k = p[2]
+      if (!(x in trow)) { miss[t]++; note("miss", t, k) }
+      else if (trow[x] != srow[x]) { diff[t]++; note("diff", t, k) }
+    }
+    for (x in trow) {
+      split(x, p, SUBSEP); t = p[1]; k = p[2]
+      if (!(x in srow)) {
+        # the one row cortex-restore creates when the source has none: the key of the installation itself, gen 1
+        if (after && t == "tokens.generations" && sgen == "" && tgen == "1" && inst_t != "" && k == "install|" inst_t) { has_install[t] = 1; continue }
+        extra[t]++; note("extra", t, k)
+      }
+    }
+    n = 0
+    for (t in names) order[++n] = t
+    for (i = 2; i <= n; i++) { v = order[i]; j = i - 1; while (j > 0 && order[j] > v) { order[j + 1] = order[j]; j-- }; order[j + 1] = v }
+    failed = 0
+    for (i = 1; i <= n; i++) {
+      t = order[i]
+      ok = 1
+      line = sprintf("%-26s", t)
+      if (t == "records.records.tsv") {
+        if (sc[t] == tc[t] && sh[t] == th[t]) line = line sprintf(" PASS  count %s = %s  tsv hash equal", sc[t], tc[t])
+        else { ok = 0; line = line sprintf(" FAIL  count %s vs %s  tsv hash differs (source %s, target %s)", sc[t], tc[t], substr(sh[t], 1, 12), substr(th[t], 1, 12)) }
+        print line
+        if (!ok) failed++
+        continue
+      }
+      tail_ = ""
+      if (after && t == "tokens.generations") {
+        if (gen_ok == "none") tail_ = "  no install row on either side (nothing to protect)"
+        else if (gen_ok == "true") tail_ = sprintf("  install row expected: +1 (source %s, target %s)", (sgen == "" ? "none" : sgen), tgen)
+        else { ok = 0; tail_ = sprintf("  install row NOT as expected: source %s, target %s", (sgen == "" ? "none" : sgen), (tgen == "" ? "none" : tgen)) }
+      }
+      agg_equal = (sc[t] == tc[t] && sh[t] == th[t])
+      if (!agg_equal && !(t in has_install)) ok = 0
+      if (miss[t] + extra[t] + diff[t] > 0) ok = 0
+      line = line sprintf(" %s  count %s %s %s  keys %s  rows: missing %d, extra %d, different %d", (ok ? "PASS" : "FAIL"), sc[t], (sc[t] == tc[t] ? "=" : "!="), tc[t], (agg_equal ? "equal" : "differ"), miss[t], extra[t], diff[t])
+      print line tail_
+      if (miss[t] > 0) print "    missing (first 3):" smp["miss", t]
+      if (extra[t] > 0) print "    extra (first 3):" smp["extra", t]
+      if (diff[t] > 0) print "    different (first 3):" smp["diff", t]
+      if (!ok) failed++
+    }
+    printf "RESULT: %d comparisons, %d failed\n", n, failed
+    exit (failed > 0)
+  }
+' "$work/s.agg" "$work/t.agg" "$work/s.rows" "$work/t.rows" > "$work/report.txt" || rc=$?
+cat "$work/report.txt"
+exit "$rc"

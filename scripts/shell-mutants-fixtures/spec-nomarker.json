@@ -1,0 +1,4 @@
+{"target": "scripts/shell-mutants-fixtures/target.sh", "command": ["sh", "{copy}", "--selftest"],
+ "mutants": [
+  {"id": "FX-2", "what": "a syntax error, and no marker is asked for", "old": "size() { if", "new": "size() {{ if"}
+ ]}

@@ -1,0 +1,9 @@
+# Fixture: a GOOD S5 server config example. Mounted read-only at /etc/cortex/cortex.toml; passwords only through files.
+[database]
+host = "db"
+port = 5432
+name = "cortex"
+app_user = "cortex_app"
+app_password_file = "/run/secrets/cv2-s5-app-password"
+owner_user = "cortex_owner"
+owner_password_file = "/run/secrets/cv2-s5-owner-password"

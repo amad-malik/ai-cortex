@@ -1,0 +1,15 @@
+error[E0061]: this method takes 5 arguments but 4 arguments were supplied
+ --> tests/ui/po05_route_without_a_scope_fail.rs:6:27
+  |
+6 |     let _ = Routes::new().read(Method::GET, "/v2/x", TargetRule::None, || async { "x" });
+  |                           ^^^^                       ---------------- argument #3 of type `&'static str` is missing
+  |
+note: method defined here
+ --> $WORKSPACE/crates/cortex-module/src/route.rs
+  |
+  |     pub fn read<H, T>(
+  |            ^^^^
+help: provide the argument
+  |
+6 |     let _ = Routes::new().read(Method::GET, "/v2/x", /* &str */, TargetRule::None, || async { "x" });
+  |                                                      +++++++++++

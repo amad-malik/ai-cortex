@@ -1,0 +1,48 @@
+# cortex-server image (S5) for linux/arm64 (D173: the Mac's native server image). THE ARM64 VARIANT of deploy/Containerfile.
+# Built from the repository root ON AN ARM64 MACHINE: podman build -f deploy/Containerfile.arm64 .
+# No config and no secret is copied in: the server config is mounted at run time (S0 F-11) and the passwords are Podman secrets.
+# Every base is pinned by digest. The build runs on a VM of its own, not through cv2-admit: CARGO_BUILD_JOBS is lifted from 2 to 4 here (it changes the build time, not the program).
+#
+# THE ARM64 VARIANT differs from deploy/Containerfile ONLY in the lines named below; scripts/containerfile-arm64-check.py builds this file from the x86_64 one by exactly
+# these replacements and fails on any other difference:
+#   - the two FROM digests: the linux/arm64/v8 manifest of the SAME Rocky build as the x86_64 pin (registry index sha256:827d37bc128288ccf160ee318bb3cb92d591164cb217e92f8bc61e3982ae1834, tag 10.2.20260525.0);
+#   - the rustup-init file: aarch64-unknown-linux-gnu, with its own sha256 (the publisher's rustup-init.sha256 listing for 1.29.3);
+#   - CARGO_BUILD_JOBS: 4 (the ENV line).
+#
+# Build stage: Rocky 10, so the binary links the EL10 glibc (P1 section 3.1). The same base as the P-1 cortex-postgres image.
+FROM quay.io/rockylinux/rockylinux@sha256:ef3f509cbc7109e0fa77463bab23ba74a5d65c3335bb11759f13a13a0c43764d AS build
+ARG RUSTUP_VERSION=1.29.3
+ARG RUSTUP_INIT_SHA256=9f608c142e0e38a78957d0661ba1dfaf0b6fb37184cfaa4b9a0aa57af6184282
+ENV CARGO_HOME=/opt/cargo RUSTUP_HOME=/opt/rustup CARGO_BUILD_JOBS=4 CARGO_TARGET_DIR=/build/target PATH=/opt/cargo/bin:/usr/local/bin:/usr/bin:/bin
+RUN dnf -y install gcc make curl ca-certificates && dnf clean all
+# rustup-init is pinned by version and sha256 (published beside the binary); it then installs the toolchain rust-toolchain.toml names.
+RUN curl --proto '=https' --tlsv1.2 -fsSLo /tmp/rustup-init "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/aarch64-unknown-linux-gnu/rustup-init" \
+ && echo "${RUSTUP_INIT_SHA256}  /tmp/rustup-init" | sha256sum -c - \
+ && chmod +x /tmp/rustup-init \
+ && /tmp/rustup-init -y --default-toolchain none --profile minimal \
+ && rm /tmp/rustup-init
+WORKDIR /src
+COPY rust-toolchain.toml ./
+RUN rustup show active-toolchain || rustup toolchain install
+COPY Cargo.toml Cargo.lock ./
+COPY crates ./crates
+COPY xtask ./xtask
+# The optional pieces this image compiles in: ONE source, deploy/server-features (one line, the comma list; cox's ruling, rule S5-23). cortex-server has no default
+# features, so a build without it would hold only the core pieces and could not serve. Never --all-features (it builds test-faults in).
+COPY deploy/server-features ./server-features
+# The git sha for `cortex-server --version` (cox): passed by compose from install.sh (or release.sh), `unknown` when there is none.
+ARG CORTEX_GIT_SHA=unknown
+ENV CORTEX_GIT_SHA=${CORTEX_GIT_SHA}
+# The set is checked before the build (hale N-5): an empty or malformed file would build the core pieces only and without an error. One line, the comma list, ending with its one LF: `grep -c ''` counts an unterminated last record that `wc -l` does not (vera V6D-01).
+RUN test "$(wc -l < server-features)" -eq 1 && test "$(grep -c '' server-features)" -eq 1 && grep -Eq '^[a-z][a-z0-9-]*(,[a-z][a-z0-9-]*)*$' server-features && cargo build --release --locked -p cortex-server --features "$(cat server-features)"
+
+# Run stage: the same pinned base. bash and grep (in the base) serve the compose health check; no curl is needed.
+FROM quay.io/rockylinux/rockylinux@sha256:ef3f509cbc7109e0fa77463bab23ba74a5d65c3335bb11759f13a13a0c43764d
+LABEL cortexv2=dev org.opencontainers.image.title=cortex-server org.opencontainers.image.description="Cortex v2 skeleton server (S5)"
+COPY --from=build /build/target/release/cortex-server /usr/local/bin/cortex-server
+# The state directory and the socket directory belong to the server user, so a fresh named volume copies that ownership.
+RUN install -d -o 10001 -g 10001 -m 0700 /var/lib/cortex /run/cortex
+USER 10001:10001
+EXPOSE 8601
+ENTRYPOINT ["/usr/local/bin/cortex-server"]
+CMD ["serve"]

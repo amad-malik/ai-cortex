@@ -1,0 +1,4 @@
+[workspace]
+members = ["crates/a", "crates/b"]
+[workspace.dependencies]
+serde_ignored = "=0.1.14"

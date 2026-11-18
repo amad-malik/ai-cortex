@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# r3 (mike's F1B-R0-05, vera's SUP-CUSTODY-02): a fake `ps`, first on the supervisor's PATH only
+# (the controls' own observer calls /usr/bin/ps). CV2_FAKE_PS=fail makes every call fail at once
+# with no output, as a failed process-table read would; otherwise the real ps runs.
+#   CV2_FAKE_PS=malformed  r4 (mike's item A): succeed (exit 0) with a listing that does not parse
+#   CV2_FAKE_PS=slow:<s>   r4 (item B): wait <s> seconds, then run the real ps (a slow, successful scan)
+#   CV2_FAKE_PS=slowfirst:<s>  r4 (item D): only the FIRST call (the helper's publication scan) waits <s>
+#                          seconds; later calls run the real ps at once. The marker is the directory
+#                          $CV2_FAKE_PS_MARK (mkdir is atomic), which the control names per run.
+#   CV2_FAKE_PS=omitafter:<n>  r5 (vera's SUP-CUSTODY-02, mike's A): the first <n> calls run the real ps;
+#                          every later call succeeds with a VALID but partial listing: only the rows
+#                          of the caller's own process group (the helper's), so the driver's whole
+#                          group, its unreaped leader included, is missing. The call count is the
+#                          number of lines in the file $CV2_FAKE_PS_MARK.
+#   CV2_FAKE_PS=omitpid:<pid>  r5 (K28): the real listing without the row of <pid> (a valid listing that
+#                          lacks the observer's own anchor row)
+#   CV2_FAKE_PS=dupleader:<n>  r6 (vera's SUP-CUSTODY-02, duplicate rows): after <n> real calls, a VALID listing:
+#                          the caller's own group, then the driver leader's TRUE row, then a second,
+#                          contradictory row for the same pid in the caller's group, marked live
+#                          (vera's `100 200 S / 201 201 Z / 100 201 S`); the leader's descendants omitted
+#   CV2_FAKE_PS=dupalias:<n>   the same, with the second row's pid written with a leading zero (`0201`)
+#   CV2_FAKE_PS=selfzombie:<n> r7 (vera's SUP-CUSTODY-02-SELFSTATE): after <n> real calls, a VALID, unique-pid
+#                          listing of exactly two rows: the CALLER's own row with state Z (impossible
+#                          while it runs) and the driver leader's true row; the descendants omitted
+#                          (vera's `100 200 Z / 201 201 Z`)
+#   CV2_FAKE_PS=selfstate:<S>:<n>  r8: the same two rows with the caller's own state <S> (vera's
+#                          `100 200 W / 201 201 Z` for W); selfzombie:<n> is selfstate:Z:<n>
+#   CV2_FAKE_PS=selfas:<S>:<n>     r8: after <n> real calls, the FULL real listing with only the caller's
+#                          own state rewritten to <S> (the healthy partner for a possible state, T)
+case "${CV2_FAKE_PS:-}" in
+  fail)      echo "fake ps: injected failure" >&2; exit 1 ;;
+  malformed) echo "malformed"; exit 0 ;;
+  slow:*)    sleep "${CV2_FAKE_PS#slow:}"; exec /usr/bin/ps "$@" ;;
+  omitafter:*)
+             echo call >> "${CV2_FAKE_PS_MARK:?omitafter needs CV2_FAKE_PS_MARK}"
+             if [ "$(wc -l < "$CV2_FAKE_PS_MARK")" -le "${CV2_FAKE_PS#omitafter:}" ]; then exec /usr/bin/ps "$@"; fi
+             st=$(< "/proc/$PPID/stat"); st=${st##*) }; set -- $st   # state ppid pgrp ...: the caller's group
+             /usr/bin/ps -e -o pgid=,pid=,stat= | awk -v g="$3" '$1 == g'; exit 0 ;;
+  dupleader:*|dupalias:*)
+             echo call >> "${CV2_FAKE_PS_MARK:?dupleader needs CV2_FAKE_PS_MARK}"
+             if [ "$(wc -l < "$CV2_FAKE_PS_MARK")" -le "${CV2_FAKE_PS#*:}" ]; then exec /usr/bin/ps "$@"; fi
+             me=$PPID; st=$(< "/proc/$me/stat"); st=${st##*) }; set -- $st; hg=$3   # the caller's (helper's) group
+             g=""   # the driver: the caller's child that leads its own process group
+             for d in /proc/[0-9]*; do
+               read -r st 2>/dev/null < "$d/stat" || continue; st=${st##*) }; set -- $st
+               [ "$2" = "$me" ] && [ "$3" = "${d#/proc/}" ] && g=${d#/proc/}
+             done
+             /usr/bin/ps -e -o pgid=,pid=,stat= | awk -v hg="$hg" -v g="$g" '$1 == hg || $2 == g'
+             dup=$g; [ "${CV2_FAKE_PS%%:*}" = dupalias ] && dup="0$g"
+             [ -n "$g" ] && echo "$hg $dup S"
+             exit 0 ;;
+  selfzombie:*|selfstate:*)
+             case $CV2_FAKE_PS in
+               selfzombie:*) want=Z; n=${CV2_FAKE_PS#selfzombie:} ;;
+               *) rest=${CV2_FAKE_PS#selfstate:}; want=${rest%%:*}; n=${rest#*:} ;;
+             esac
+             echo call >> "${CV2_FAKE_PS_MARK:?selfstate needs CV2_FAKE_PS_MARK}"
+             if [ "$(wc -l < "$CV2_FAKE_PS_MARK")" -le "$n" ]; then exec /usr/bin/ps "$@"; fi
+             me=$PPID; st=$(< "/proc/$me/stat"); st=${st##*) }; set -- $st; hg=$3
+             g=""
+             for d in /proc/[0-9]*; do
+               read -r st 2>/dev/null < "$d/stat" || continue; st=${st##*) }; set -- $st
+               [ "$2" = "$me" ] && [ "$3" = "${d#/proc/}" ] && g=${d#/proc/}
+             done
+             echo "$hg $me $want"
+             /usr/bin/ps -e -o pgid=,pid=,stat= | awk -v g="$g" '$2 == g'
+             exit 0 ;;
+  selfas:*)
+             rest=${CV2_FAKE_PS#selfas:}; want=${rest%%:*}; n=${rest#*:}
+             echo call >> "${CV2_FAKE_PS_MARK:?selfas needs CV2_FAKE_PS_MARK}"
+             if [ "$(wc -l < "$CV2_FAKE_PS_MARK")" -le "$n" ]; then exec /usr/bin/ps "$@"; fi
+             /usr/bin/ps -e -o pgid=,pid=,stat= | awk -v me="$PPID" -v w="$want" '$2 == me { $3 = w } { print $1, $2, $3 }'
+             exit 0 ;;
+  omitpid:*) /usr/bin/ps "$@" | awk -v p="${CV2_FAKE_PS#omitpid:}" '$2 != p'; exit 0 ;;
+  slowfirst:*) mkdir "${CV2_FAKE_PS_MARK:?slowfirst needs CV2_FAKE_PS_MARK}" 2>/dev/null && sleep "${CV2_FAKE_PS#slowfirst:}"
+             exec /usr/bin/ps "$@" ;;
+esac
+exec /usr/bin/ps "$@"

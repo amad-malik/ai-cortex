@@ -1,0 +1,120 @@
+# Fixture: a GOOD S5 compose file. The real one is deploy/compose.yml.
+name: cv2-s5
+
+services:
+  db:
+    image: docker.io/pgvector/pgvector:0.8.2-pg18@sha256:42e7f6b4e1eceb02ff14e3e6bc6108bbe259abbe83879dc1845d0da1ddeb555d
+    container_name: cv2-s5-db
+    restart: unless-stopped
+    init: true
+    shm_size: 256m
+    labels:
+      cortexv2: dev
+    environment:
+      POSTGRES_DB: cortex
+      POSTGRES_INITDB_ARGS: --auth-local=peer --auth-host=scram-sha-256 --locale-provider=builtin --builtin-locale=C.UTF-8 --locale=C.UTF-8 --data-checksums
+      POSTGRES_PASSWORD_FILE: /run/secrets/cv2-s5-db-superuser
+    secrets:
+      - cv2-s5-db-superuser
+      - cv2-s5-owner-password
+      - cv2-s5-app-password
+    volumes:
+      - cv2-s5-pg-data:/var/lib/postgresql
+      - ./initdb:/docker-entrypoint-initdb.d:ro,z
+    networks:
+      - cv2-s5-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -U postgres -h 127.0.0.1 -d cortex >/dev/null 2>&1"]
+      interval: 15s
+      timeout: 20s
+      retries: 20
+      start_period: 10s
+
+  migrate:
+    # One-shot: the only container of ours that mounts the owner password. It runs the migrations and exits; the server waits for it.
+    image: localhost/cv2-s5-server:dev
+    command: ["migrate"]
+    pull_policy: never
+    container_name: cv2-s5-migrate
+    restart: "no"
+    user: "10001:10001"
+    init: true
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m,mode=1777
+    labels:
+      cortexv2: dev
+      cortexv2.role: oneshot
+    environment:
+      HOME: /tmp
+    depends_on:
+      db:
+        condition: service_healthy
+    secrets:
+      - cv2-s5-owner-password
+    volumes:
+      - ${CORTEX_CONFIG:?set by install.sh}:/etc/cortex/cortex.toml:ro,z
+    networks:
+      - cv2-s5-net
+
+  server:
+    build:
+      context: ..
+      dockerfile: deploy/Containerfile
+      args:
+        CORTEX_GIT_SHA: ${CORTEX_GIT_SHA:-unknown}
+    image: localhost/cv2-s5-server:dev
+    pull_policy: never
+    container_name: cv2-s5-server
+    restart: unless-stopped
+    user: "10001:10001"
+    init: true
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=128m,mode=1777
+    labels:
+      cortexv2: dev
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:${CORTEX_PORT:-8601}:8601"
+    secrets:
+      - cv2-s5-app-password
+    volumes:
+      - ${CORTEX_CONFIG:?set by install.sh}:/etc/cortex/cortex.toml:ro,z
+      - ${CORTEX_DUMP_STATUS:?set by install.sh}:/var/lib/cortex-dumps:ro,z
+    networks:
+      - cv2-s5-net
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/cortex-server", "health", "--ready"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+networks:
+  cv2-s5-net:
+    name: cv2-s5-net
+
+volumes:
+  cv2-s5-pg-data:
+    name: cv2-s5-pg-data
+
+secrets:
+  cv2-s5-db-superuser:
+    external: true
+  cv2-s5-owner-password:
+    external: true
+  cv2-s5-app-password:
+    external: true

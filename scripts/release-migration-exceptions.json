@@ -1,0 +1,380 @@
+{
+  "schema": 2,
+  "exceptions": [
+    {
+      "path": "crates/cortex-db/migrations/platform/0001_platform.up.sql",
+      "sha256": "d5c79f3b15643af101343eed72888a2e2ab490577fa57047037e0553c4ceb3f4",
+      "approved_by": "729cbe80-cfed-4814-9ca7-9e7e7f99e191",
+      "dynamic_sql_lines": [83, 91, 103, 104],
+      "squawk": [
+        {"rule": "require-lock-timeout", "line": 2},
+        {"rule": "require-statement-timeout", "line": 2},
+        {"rule": "prefer-bigint-over-int", "line": 7},
+        {"rule": "prefer-bigint-over-int", "line": 34}
+      ]
+    },
+    {
+      "path": "crates/mod-audit/migrations/0001_audit.up.sql",
+      "sha256": "8f3b85baf619f9eec5847d1904470fa99a91177e1a045b3570893cf671825775",
+      "approved_by": "29aba9ba-33f1-44b2-8aa5-d9f9a5bb61e3",
+      "matcher": 2,
+      "raw_execute_words": [
+        {
+          "line": 36,
+          "column": 18
+        },
+        {
+          "line": 57,
+          "column": 9
+        },
+        {
+          "line": 64,
+          "column": 9
+        },
+        {
+          "line": 71,
+          "column": 9
+        },
+        {
+          "line": 74,
+          "column": 38
+        },
+        {
+          "line": 75,
+          "column": 8
+        }
+      ],
+      "dynamic_findings": [
+        {
+          "line": 57,
+          "column": 9,
+          "statement_sha256": "b2b7d2de29b99294c8273dcd511336fc86a52c3cd26432710306ce4ae4e84fac",
+          "kind": "execute_revoke",
+          "reason": "Fixed REVOKE ALL TABLE audit.records target. Non-owner ACL grantee OID0 maps to PUBLIC; all other pg_roles names pass pg_catalog.quote_ident before %s. Privilege removal only; exact grants/readback retained."
+        },
+        {
+          "line": 64,
+          "column": 9,
+          "statement_sha256": "73ec3966ad46fc0c0348e691cfeaf10ab417749b2158ebd4a23dce454cd83259",
+          "kind": "execute_revoke",
+          "reason": "Fixed REVOKE ALL FUNCTION audit.refuse_change() target. Same PUBLIC/prequoted catalogue-role boundary from that function ACL. Explicit NULL-ACL PUBLIC revoke and exact non-owner ACL readback retained."
+        },
+        {
+          "line": 71,
+          "column": 9,
+          "statement_sha256": "c5bae6f106b495cdb3c2b0a4f3b817714c8577fbd7968c17add94c0ad83d2c72",
+          "kind": "execute_revoke",
+          "reason": "Fixed REVOKE ALL SCHEMA audit target. Same PUBLIC/prequoted catalogue-role boundary from that schema ACL. Restore/check exact declared schema/table rights, no function grant."
+        }
+      ],
+      "squawk": [
+        {
+          "rule": "require-lock-timeout",
+          "line": 8,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "require-statement-timeout",
+          "line": 8,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        }
+      ]
+    },
+    {
+      "path": "crates/mod-records/migrations/0001_records.up.sql",
+      "sha256": "69e0393a3ab48c4825dee5b133c03c6838468c417f57a40a6e99c6ba6c99f7b5",
+      "approved_by": "893b4137-d853-4c85-bc89-5c19cad4e81e",
+      "matcher": 2,
+      "raw_execute_words": [
+        {
+          "line": 97,
+          "column": 18
+        },
+        {
+          "line": 158,
+          "column": 18
+        },
+        {
+          "line": 208,
+          "column": 21
+        },
+        {
+          "line": 209,
+          "column": 53
+        },
+        {
+          "line": 210,
+          "column": 8
+        },
+        {
+          "line": 211,
+          "column": 7
+        },
+        {
+          "line": 229,
+          "column": 9
+        },
+        {
+          "line": 238,
+          "column": 9
+        },
+        {
+          "line": 245,
+          "column": 9
+        },
+        {
+          "line": 249,
+          "column": 8
+        },
+        {
+          "line": 254,
+          "column": 7
+        },
+        {
+          "line": 290,
+          "column": 54
+        },
+        {
+          "line": 290,
+          "column": 114
+        }
+      ],
+      "dynamic_findings": [
+        {
+          "line": 229,
+          "column": 9,
+          "statement_sha256": "45fdeb5ccdaf354f6cae47a4686fa7847145f842e4793f775c6a4bf1052ed106",
+          "kind": "execute_revoke",
+          "reason": "Fixed REVOKE ALL TABLE template. r.rel separately quote_ident-renders catalogue schema/relation; filter limits tables/views to records. r.who is PUBLIC for0 or quote_ident-rendered pg_roles name."
+        },
+        {
+          "line": 238,
+          "column": 9,
+          "statement_sha256": "77fb7698b656839ce5d826270992d2e9a6b5842b61293dce8fcfe669b04eaa40",
+          "kind": "execute_revoke",
+          "reason": "Fixed REVOKE ALL FUNCTION template. r.fn uses %I schema/function identifiers plus PostgreSQL pg_get_function_identity_arguments backend rendering, not raw argument/default/body text. r.who is PUBLIC or prequoted catalogue role; filter restricts records."
+        },
+        {
+          "line": 245,
+          "column": 9,
+          "statement_sha256": "49f40ddbe3918e228fbe0e9e4444e1f992ca27b70cd5b5f48740e663f10f749e",
+          "kind": "execute_revoke",
+          "reason": "Fixed REVOKE ALL SCHEMA records target, with PUBLIC/prequoted catalogue grantee. Restrictive operation and exact restore/readback preserved."
+        },
+        {
+          "line": 290,
+          "column": 54,
+          "statement_sha256": "b1e6fa99a8a20914324816c50087541780eeb83902a76dcc2128c22187d285e8",
+          "kind": "privilege_literal_readback",
+          "reason": "Two single-quoted EXECUTE privilege labels in static allowed VALUES data, compared with ACL privilege_type; neither token invokes PL/pgSQL EXECUTE or supplies formatter SQL."
+        },
+        {
+          "line": 290,
+          "column": 114,
+          "statement_sha256": "b1e6fa99a8a20914324816c50087541780eeb83902a76dcc2128c22187d285e8",
+          "kind": "privilege_literal_readback",
+          "reason": "Two single-quoted EXECUTE privilege labels in static allowed VALUES data, compared with ACL privilege_type; neither token invokes PL/pgSQL EXECUTE or supplies formatter SQL."
+        }
+      ],
+      "squawk": [
+        {
+          "rule": "require-lock-timeout",
+          "line": 4,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "require-statement-timeout",
+          "line": 4,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "prefer-bigint-over-int",
+          "line": 55,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "prefer-bigint-over-int",
+          "line": 148,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        }
+      ]
+    },
+    {
+      "path": "crates/mod-handoffs/migrations/0001_handoffs.up.sql",
+      "sha256": "8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d",
+      "approved_by": "d4b7aeb6-93a3-4346-8f03-0b608b5914d6",
+      "matcher": 2,
+      "raw_execute_words": [
+        {
+          "line": 82,
+          "column": 18
+        },
+        {
+          "line": 155,
+          "column": 101
+        },
+        {
+          "line": 156,
+          "column": 101
+        },
+        {
+          "line": 157,
+          "column": 101
+        },
+        {
+          "line": 158,
+          "column": 101
+        }
+      ],
+      "dynamic_findings": [],
+      "squawk": [
+        {
+          "rule": "require-lock-timeout",
+          "line": 12,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "require-statement-timeout",
+          "line": 12,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "prefer-bigint-over-int",
+          "line": 30,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "prefer-bigint-over-int",
+          "line": 32,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "prefer-bigint-over-int",
+          "line": 45,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "prefer-bigint-over-int",
+          "line": 46,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "prefer-bigint-over-int",
+          "line": 91,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "prefer-bigint-over-int",
+          "line": 109,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "prefer-bigint-over-int",
+          "line": 122,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "prefer-bigint-over-int",
+          "line": 138,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        }
+      ]
+    },
+    {
+      "path": "crates/mod-identity/migrations/0001_identity.up.sql",
+      "sha256": "c08fab0dc0d048c62daa3e2c5b598802f31e54f46e6eb3f04c51e37056c29036",
+      "approved_by": "d4b7aeb6-93a3-4346-8f03-0b608b5914d6",
+      "matcher": 2,
+      "raw_execute_words": [
+        {
+          "line": 120,
+          "column": 18
+        },
+        {
+          "line": 131,
+          "column": 18
+        },
+        {
+          "line": 146,
+          "column": 18
+        },
+        {
+          "line": 157,
+          "column": 18
+        },
+        {
+          "line": 177,
+          "column": 18
+        }
+      ],
+      "dynamic_findings": [],
+      "squawk": [
+        {
+          "rule": "require-lock-timeout",
+          "line": 7,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "require-statement-timeout",
+          "line": 7,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "prefer-bigint-over-int",
+          "line": 25,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        }
+      ]
+    },
+    {
+      "path": "crates/mod-tokens/migrations/0001_tokens.up.sql",
+      "sha256": "8357e64ae28a0e8f51568e0a0f686719838127687b479f71ce090a0ea1e82d68",
+      "approved_by": "d4b7aeb6-93a3-4346-8f03-0b608b5914d6",
+      "matcher": 2,
+      "raw_execute_words": [
+        {
+          "line": 64,
+          "column": 54
+        },
+        {
+          "line": 85,
+          "column": 7
+        }
+      ],
+      "dynamic_findings": [],
+      "squawk": [
+        {
+          "rule": "require-lock-timeout",
+          "line": 6,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        },
+        {
+          "rule": "require-statement-timeout",
+          "line": 6,
+          "tool_sha256": "cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e",
+          "config_sha256": "7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427"
+        }
+      ]
+    }
+  ]
+}

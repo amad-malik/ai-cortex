@@ -1,0 +1,470 @@
+#!/bin/sh
+# launchd-backup: install, remove and check the backup's two macOS launch agents (M-1c; bob; cox f60b3c86, kai c9dc7843)
+#
+#   launchd-backup install   --home <abs dir> --db-container <name> [--agents-dir <abs dir>] [--log-dir <abs dir>] [--path-value <abs:abs:...>]
+#                            [--template-dir <abs dir>]
+#   launchd-backup uninstall [--agents-dir <abs dir>]
+#   launchd-backup status    [--agents-dir <abs dir>]
+#
+# The macOS counterpart of the five systemd user units (deploy/systemd/cortex-dump*): TWO LaunchAgents, ai.kaidera.cortex-dump (daily at 02:30 LOCAL
+# time) and ai.kaidera.cortex-dump-status (at load and at minute 17 of every hour, local), rendered from deploy/launchd/*.plist.in, written to
+# ~/Library/LaunchAgents (or --agents-dir) and loaded into the user's gui/<uid> domain with the modern `launchctl bootstrap` (never the deprecated
+# load and unload). scripts/launchd-run, installed in <home>/bin, stands in for OnFailure= and ExecStartPost=.
+#
+# WHAT A LAUNCHAGENT DOES AND DOES NOT PROMISE (macOS, written down on purpose): it runs ONLY while this user is logged in. It does not run while
+# logged out, asleep or switched off, and a daily dump that was missed is NOT made up (the hourly freshness check runs at login and says the dump is
+# stale). "Survives a logout" means: the agents are loaded again at the next login, without any command.
+#
+# THE FLOOR: the Linux-bound backup tools (podman, flock, GNU timeout, sha256sum) are not on a stock Mac. Until they are made portable this tool
+# REFUSES to install agents that could only fail and raise the alarm every night; it says so, and how to take a dump by hand.
+#
+# Every launchctl call goes through the one function lc(). Status reads launchctl's EXIT CODES only, never its text. Install is idempotent: a second
+# run with the same inputs changes nothing and makes no launchctl call but `print`. Nothing here ever calls a systemd tool.
+#
+# A saved copy of an OLD file that a failed rollback could not put back is KEPT, never deleted, and its exact path is in the message.
+# KNOWN LIMIT: an INTERRUPTION (Ctrl-C, a signal) between the unload and the load of an agent is not rolled back: run install again. A failure of launchctl or of a file
+# operation IS rolled back, and the message says truthfully what could not be put back (still loaded, files not restored, agents not reloaded).
+# Exit codes: 0 done; 1 launchctl or a file operation failed (what was changed is put back, or the message says what was not); 2 a refusal: bad usage or a missing prerequisite.
+# ENVIRONMENT HYGIENE (hale M1C-H3): an exported shell function would replace a command of this script (an exported [ turns every [ ] || die into a pass).
+# Run it with sh, as the first line says: run as bash (not in POSIX mode) an exported unset or set would defeat the block below.
+# Every function the environment brings is unset FIRST: bash exports one as BASH_FUNC_<name>%% (the form of every bash since the Shellshock fix, Apple's 3.2.57 included;
+# a bash older than that exports <name>=() {, which this block does not undo: ASK-A-MAC, and no such bash is on a supported Mac)
+unset -f unset command env sed 2> /dev/null || :
+# the listing must WORK: if env or sed failed, every exported function would stay in place and the script would go on as if none existed, so it refuses (sam M1C-SAM08, the same family)
+_fe=$(command env) || { command printf '%s: problem: cannot list the environment to remove the exported shell functions (env failed); fix: run it with a PATH that has a working env and sed\n' launchd-backup >&2; exit 2; }
+_fnames=$(command printf '%s\n' "$_fe" | command sed -n -e 's/^BASH_FUNC_\(.*\)%%=.*/\1/p') || { command printf '%s: problem: cannot list the environment to remove the exported shell functions (sed failed); fix: run it with a PATH that has a working env and sed\n' launchd-backup >&2; exit 2; }
+set -f
+for _fn in $_fnames; do
+  unset -f "$_fn" 2> /dev/null || :
+done
+set +f
+unset _fn _fe _fnames
+set -eu
+umask 022
+LC_ALL=C
+export LC_ALL
+
+me=launchd-backup
+required_tools="podman flock timeout sha256sum"
+l_dump=ai.kaidera.cortex-dump
+l_stat=ai.kaidera.cortex-dump-status
+nl='
+'
+
+die() { # die <exit code> <problem> <fix>
+  printf '%s: problem: %s; fix: %s\n' "$me" "$2" "$3" >&2
+  exit "$1"
+}
+
+lc() { launchctl "$@"; } # the ONE place launchctl is called
+
+cmd=${1:-}
+[ -n "$cmd" ] || die 2 "no command given" "run: launchd-backup install|uninstall|status (see --help)"
+shift
+case $cmd in
+  install | uninstall | status) ;;
+  -h | --help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
+  *) die 2 "unknown command" "run: launchd-backup install|uninstall|status (see --help)" ;;
+esac
+
+home="" dbc="" agents="" logs="" pathv="" tpl_dir=""
+while [ $# -gt 0 ]; do
+  case $1 in
+    --home) [ $# -ge 2 ] || die 2 "--home needs a value" "give the absolute Cortex home directory"; home=$2; shift 2 ;;
+    --db-container) [ $# -ge 2 ] || die 2 "--db-container needs a value" "give the name of the database container"; dbc=$2; shift 2 ;;
+    --agents-dir) [ $# -ge 2 ] || die 2 "--agents-dir needs a value" "give an absolute directory"; agents=$2; shift 2 ;;
+    --log-dir) [ $# -ge 2 ] || die 2 "--log-dir needs a value" "give an absolute directory"; logs=$2; shift 2 ;;
+    --path-value) [ $# -ge 2 ] || die 2 "--path-value needs a value" "give a colon separated list of absolute paths"; pathv=$2; shift 2 ;;
+    --template-dir) [ $# -ge 2 ] || die 2 "--template-dir needs a value" "give an absolute directory"; tpl_dir=$2; shift 2 ;;
+    -h | --help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
+    *) die 2 "an argument this tool does not know" "run: launchd-backup --help" ;;
+  esac
+done
+
+# ---- validation: nothing is changed before every input is accepted --------------------------------------------
+
+clean_abs() { # clean_abs <option> <value>: absolute, one line, no control character, no . or .. component, no ~ at the start
+  case $2 in
+    "") die 2 "$1 is empty" "give an absolute path" ;;
+    *"$nl"*) die 2 "the value of $1 contains a newline" "give a path on one line" ;;
+    "~"*) die 2 "the value of $1 starts with ~, which nothing expanded" "give an absolute path such as /Users/<name>/..." ;;
+    /*) ;;
+    *) die 2 "$1 is not an absolute path" "give an absolute path, starting with /" ;;
+  esac
+  if printf '%s' "$2" | grep -q '[[:cntrl:]]'; then
+    die 2 "the value of $1 contains a control character" "give a plain path"
+  fi
+  case "/$2/" in
+    */../* | */./*) die 2 "the value of $1 contains a . or .. component" "give the canonical absolute path (no . or ..)" ;;
+  esac
+}
+
+if [ "$cmd" = install ]; then
+  [ -n "$home" ] || die 2 "--home is required" "give the absolute Cortex home directory, for example --home /Users/<name>/cortex"
+  clean_abs --home "$home"
+  home=${home%/}
+  [ -n "$home" ] || die 2 "--home is the root directory" "give the Cortex home directory"
+  case $dbc in
+    "") die 2 "--db-container is required (the container name is empty)" "give the name of the database container, for example --db-container cv2-db-one" ;;
+  esac
+  printf '%s\n' "$dbc" | grep -Eq '^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$' ||
+    die 2 "the database container name is not a plain name" "use letters, digits, _ . - only (at most 128 characters)"
+  if [ -n "$pathv" ]; then
+    case ":$pathv:" in
+      *::*) die 2 "--path-value has an empty element" "give a colon separated list of absolute paths" ;;
+    esac
+    if printf '%s' "$pathv" | grep -q '[[:cntrl:]]'; then die 2 "--path-value contains a control character" "give a colon separated list of absolute paths"; fi
+    _old_ifs=$IFS
+    IFS=:
+    set -f
+    set -- $pathv
+    set +f
+    IFS=$_old_ifs
+    for _e in "$@"; do
+      case $_e in
+        /*) ;;
+        *) die 2 "--path-value must be a colon separated list of absolute paths" "for example /usr/local/bin:/usr/bin:/bin" ;;
+      esac
+    done
+  else
+    pathv=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin
+  fi
+fi
+if [ -n "$agents" ]; then
+  clean_abs --agents-dir "$agents"
+else
+  case ${HOME:-} in
+    /*) agents=${HOME%/}/Library/LaunchAgents ;;
+    *) die 2 "HOME is not an absolute path, so there is no default agents directory" "give --agents-dir <abs dir>" ;;
+  esac
+fi
+agents=${agents%/}
+if [ -n "$logs" ]; then clean_abs --log-dir "$logs"; logs=${logs%/}; elif [ "$cmd" = install ]; then logs=$home/logs; fi
+if [ -n "$tpl_dir" ]; then
+  clean_abs --template-dir "$tpl_dir"
+elif [ "$cmd" = install ]; then
+  tpl_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/../deploy/launchd
+fi
+
+# the user the agents belong to: never root (the gui domain of root is not the logged-in user's)
+uid=$(id -u)
+[ "$uid" -ne 0 ] || die 2 "this is running as root (uid 0), and launch agents belong to the logged-in user, not to root" "run it as the user who is logged in, without sudo"
+command -v launchctl > /dev/null 2>&1 ||
+  die 2 "launchctl was not found: this tool installs macOS launch agents" "run it on a Mac, as the logged-in user"
+domain=gui/$uid
+
+# who may write what this tool or the agents depend on (hale M1C-H1, H2, H4): "open" = the group or world write bit is set (find -H -perm is POSIX and the
+# same on BSD and GNU; stat is not), -H so that a link is judged by what it points to.
+# A query has THREE outcomes, not two (sam M1C-SAM08): it matched, it did not match, or it FAILED (find missing or unable to read, any non-zero status, whatever it
+# printed first). A failed query is never "no match": the tool refuses, with a problem and a fix, before it writes or loads anything.
+probe() { # probe <path> <find test ...>: status 0 = the test matches the path, 1 = it does not; a query that fails refuses
+  _pp=$1
+  shift
+  if _po=$(find -H "$_pp" -prune "$@" 2> /dev/null); then
+    [ -n "$_po" ]
+  else
+    die 2 "cannot read the permissions of $_pp (the find query failed, or find is not on the PATH), so it cannot be checked" "check that find works and that you can read $_pp, then run this again"
+  fi
+}
+is_open() { probe "$1" \( -perm -020 -o -perm -002 \); }
+is_world_open() { probe "$1" -perm -002; }
+is_group_open() { probe "$1" -perm -020; }
+is_root_owned() { probe "$1" -user root; }
+dir_check() { # dir_check <what> <dir>: the user's own, and not writable by group or world
+  [ -O "$2" ] || die 2 "$1 $2 is not owned by you" "use a directory you own (the default agents directory is ~/Library/LaunchAgents)"
+  if is_open "$2"; then die 2 "$1 $2 is writable by its group or by everyone" "run: chmod go-w $2 (or use another directory)"; fi
+}
+
+if [ "$cmd" = install ]; then
+  # the floor: refuse to install agents that could only fail (see the header). The agents run with the PATH rendered into their plists (--path-value,
+  # not the caller's PATH), so the tools are looked for THERE: a tool on the caller's PATH only would let agents install that cannot find it (sam M1C-SAM-03)
+  missing=""
+  for _t in $required_tools; do
+    (PATH=$pathv && command -v "$_t" > /dev/null 2>&1) || missing="$missing $_t"
+  done
+  if [ -n "$missing" ]; then
+    die 2 "the backup needs${missing} on the PATH the agents will get ($pathv), and this Mac does not have it there, so the agents could only fail and raise the alarm every night" \
+      "automatic backup is not available on macOS in this release (a known limit); take a dump by hand with: docker exec --user postgres <container> pg_dump -U postgres -Fc <database> > cortex.dump, or run the backup on Linux"
+  fi
+  for _b in launchd-run cortex-dump cortex-dump-status cortex-dump-alert; do
+    [ -f "$home/bin/$_b" ] && [ -x "$home/bin/$_b" ] ||
+      die 2 "$home/bin/$_b is missing or not executable (the agents run it)" "install the Cortex scripts into $home/bin first, then run this again"
+  done
+  # what the agents run every night is the user's and cannot be changed by anyone else (hale M1C-H4)
+  dir_check "the scripts directory" "$home/bin"
+  for _b in launchd-run cortex-dump cortex-dump-status cortex-dump-alert; do
+    [ -O "$home/bin/$_b" ] || die 2 "$home/bin/$_b is not owned by you (or is a link to something that is not)" "install the Cortex scripts into $home/bin as yourself, then run this again"
+    if is_open "$home/bin/$_b"; then die 2 "$home/bin/$_b is writable by its group or by everyone, and the agents run it" "run: chmod go-w $home/bin/$_b"; fi
+  done
+  # the PATH the agents will get (hale M1C-H2): refuse an element anyone can write or that is neither yours nor root's; a group-writable one is a WARNING
+  # (Homebrew on an Intel Mac makes /usr/local/bin group-writable by admin: refusing it would refuse the usual install; ASK-A-MAC); say where each tool resolves
+  _old_ifs=$IFS
+  IFS=:
+  set -f
+  set -- $pathv
+  set +f
+  IFS=$_old_ifs
+  for _e in "$@"; do
+    [ -d "$_e" ] || continue
+    if is_world_open "$_e"; then
+      die 2 "the agent PATH has $_e, which is writable by everyone: a program put there would run with the backup's access every night" "remove it from --path-value, or run: chmod o-w $_e"
+    fi
+    if [ ! -O "$_e" ] && ! is_root_owned "$_e"; then
+      die 2 "the agent PATH has $_e, which is not owned by you or by root" "remove it from --path-value, or use a directory you or root own"
+    fi
+    if is_group_open "$_e"; then
+      printf '%s: warning: the agent PATH has %s, which its group can write; a program put there by a member of that group would run with the backup'"'"'s access\n' "$me" "$_e" >&2
+    fi
+  done
+  for _t in $required_tools; do
+    printf '%s: resolved %s -> %s\n' "$me" "$_t" "$(PATH=$pathv && command -v "$_t")"
+  done
+  for _l in "$l_dump" "$l_stat"; do
+    [ -f "$tpl_dir/$_l.plist.in" ] || die 2 "the template $tpl_dir/$_l.plist.in is missing" "give --template-dir <the directory with the .plist.in files>"
+  done
+fi
+if [ -d "$agents" ]; then dir_check "the agents directory" "$agents"; fi
+for _l in "$l_dump" "$l_stat"; do
+  _d=$agents/$_l.plist
+  if [ -L "$_d" ]; then
+    die 2 "$_d is a symbolic link, and this tool never follows or replaces a link" "remove the link yourself, then run this again"
+  fi
+  if [ -e "$_d" ] && [ ! -f "$_d" ]; then
+    die 2 "$_d exists and is not a regular file" "move it away, then run this again"
+  fi
+done
+
+# ---- install --------------------------------------------------------------------------------------------------
+
+xml_esc() { printf '%s\n' "$1" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g'; }
+sed_esc() { printf '%s\n' "$1" | sed -e 's/[\\/&]/\\&/g'; }
+# esc_value <value>: the value escaped for XML and then for the replacement text of a sed s command. Each step's status is checked and returned: render runs under || die,
+# where errexit is OFF, so a failed step could never be left to set -e (sam M1C-SAM09)
+esc_value() {
+  _e1=$(xml_esc "$1") || return 1
+  _e2=$(sed_esc "$_e1") || return 1
+  printf '%s\n' "$_e2"
+}
+
+tmp_dump="" tmp_stat=""
+# What one label looked like before this run, and what this run did to it (r_*: the label being installed; a_*: the FIRST label, kept so that a
+# failure at the second label can put the pair back):
+#   existed  a plist file was there before        same     it had the bytes this run wants      loaded  its label was loaded before
+#   prev     a copy of the old file (made before this run replaced it)      changed  this run replaced or created the file      boot  this run loaded it
+r_label="" r_dest="" r_existed=0 r_same=0 r_loaded=0 r_prev="" r_changed=0 r_boot=0 r_unloaded=0
+a_label="" a_dest="" a_existed=0 a_same=0 a_loaded=0 a_prev="" a_changed=0 a_boot=0 a_unloaded=0
+#   unloaded  this run unloaded the old agent to replace it (so a failure must load the old one again)
+# What a rollback could NOT put back, so that the message tells the truth: left_loaded (an agent this run loaded that could not be unloaded; its file is left as
+# this run wrote it, consistent with what is loaded), left_files (a file that could not be restored or removed), not_reloaded (an old agent that could not be loaded again).
+left_loaded="" left_files="" not_reloaded=""
+# kept_files: the saved copies of OLD files that a failed rollback still needs (one path per line): they are NEVER deleted, and the message names them.
+kept_files=""
+cleanup() { # only the disposable files this run made, by their exact names; a recovery copy that a failed rollback still needs is never one of them
+  for _f in "$tmp_dump" "$tmp_stat" "$a_prev" "$r_prev"; do
+    [ -n "$_f" ] || continue
+    case "$nl$kept_files" in *"$nl$_f$nl"*) continue ;; esac
+    if [ -e "$_f" ]; then rm -f -- "$_f"; fi
+  done
+}
+trap cleanup EXIT
+
+lint_plist() { # lint_plist <file>: plutil where it exists (every Mac), python's plistlib elsewhere; no linter at all is a warning, not a refusal
+  if command -v plutil > /dev/null 2>&1; then
+    plutil -lint "$1" > /dev/null 2>&1
+  elif command -v python3 > /dev/null 2>&1; then
+    python3 -I -c 'import plistlib,sys; plistlib.load(open(sys.argv[1],"rb"))' "$1" > /dev/null 2>&1
+  else
+    printf '%s: note: no plutil and no python3, so the rendered file was not linted\n' "$me" >&2
+  fi
+}
+
+render() { # render <template> <out>: errexit is OFF in here (it is called under || die), so every step that can fail is checked by hand (sam M1C-SAM09)
+  _h=$(esc_value "$home") || return 1
+  _c=$(esc_value "$dbc") || return 1
+  _o=$(esc_value "$logs") || return 1
+  _p=$(esc_value "$pathv") || return 1
+  sed -e "s/@CORTEX_HOME@/$_h/g" -e "s/@DB_CONTAINER@/$_c/g" -e "s/@LOG_DIR@/$_o/g" -e "s/@PATH_VALUE@/$_p/g" "$1" > "$2"
+}
+
+is_loaded() { lc print "$domain/$1" > /dev/null 2>&1; } # exit code only
+
+problem() { printf '%s: problem: %s; fix: %s\n' "$me" "$1" "$2" >&2; } # like die, but it does not exit: the caller puts things back first
+
+save_as_a() { a_label=$r_label; a_dest=$r_dest; a_existed=$r_existed; a_same=$r_same; a_loaded=$r_loaded; a_prev=$r_prev; a_changed=$r_changed; a_boot=$r_boot; a_unloaded=$r_unloaded; }
+load_from_a() { r_label=$a_label; r_dest=$a_dest; r_existed=$a_existed; r_same=$a_same; r_loaded=$a_loaded; r_prev=$a_prev; r_changed=$a_changed; r_boot=$a_boot; r_unloaded=$a_unloaded; }
+
+restore_label() { # put the label in r_* back to what it was before this run; every step is checked, and what fails is recorded, never ignored
+  _skip_file=0
+  # unload what this run loaded; if that fails the agent stays loaded, so its file is left as it is (a loaded agent with its file removed would be worse)
+  if [ "$r_boot" -eq 1 ]; then
+    if ! lc bootout "$domain/$r_label" > /dev/null 2>&1; then
+      left_loaded="$left_loaded $r_label"
+      _skip_file=1
+    fi
+  fi
+  # the file: the old bytes back, or the new file removed; a file that was already there with the bytes this run wanted was never touched
+  if [ "$r_changed" -eq 1 ] && [ "$_skip_file" -eq 0 ]; then
+    if [ "$r_existed" -eq 1 ]; then
+      if [ -f "$r_prev" ] && mv -f -- "$r_prev" "$r_dest"; then
+        :
+      else
+        left_files="$left_files $r_label"
+        _skip_file=1
+      fi
+    else
+      if ! rm -f -- "$r_dest"; then
+        left_files="$left_files $r_label"
+        _skip_file=1
+      fi
+    fi
+  fi
+  # an agent that was loaded before this run and that this run unloaded to replace it: load the old one again from its (restored) file
+  if [ "$r_unloaded" -eq 1 ] && [ "$_skip_file" -eq 0 ]; then
+    lc enable "$domain/$r_label" > /dev/null 2>&1 || true
+    lc bootstrap "$domain" "$r_dest" > /dev/null 2>&1 || not_reloaded="$not_reloaded $r_label"
+  fi
+  # the saved copy of the OLD file is the only copy of those bytes when the restore did not happen: keep it (sam M1C-SAM-07)
+  if [ "$_skip_file" -eq 1 ] && [ -n "$r_prev" ] && [ -f "$r_prev" ]; then kept_files="$kept_files$r_prev$nl"; fi
+}
+
+finish_failure() { # the state sentence and the exit, after every label this run touched was put back as far as it could be
+  if [ -z "$left_loaded$left_files$not_reloaded" ]; then
+    printf '%s: all agent files and loaded states are as they were before this run\n' "$me" >&2
+    exit 1
+  fi
+  _m="this run could NOT put everything back:"
+  if [ -n "$left_loaded" ]; then _m="$_m still loaded (their files stay as this run wrote them):$left_loaded;"; fi
+  if [ -n "$left_files" ]; then _m="$_m files not restored:$left_files;"; fi
+  if [ -n "$not_reloaded" ]; then _m="$_m the agent files are as they were before this run, but these could not be reloaded:$not_reloaded;"; fi
+  if [ -n "$kept_files" ]; then
+    _k=""
+    _oifs=$IFS
+    IFS=$nl
+    set -f
+    for _p in $kept_files; do _k="$_k $_p"; done
+    set +f
+    IFS=$_oifs
+    _m="$_m the OLD files of these agents were KEPT at:$_k (copy each back over its agent file once launchctl works, then run this again);"
+  fi
+  problem "${_m%;}" "for each agent listed as still loaded run: launchctl bootout $domain/<label>; check the agents directory; then run this again"
+  exit 1
+}
+
+install_one() { # install_one <label> <rendered temp file>: 0 done or unchanged; 1 failed, with this label already put back as far as it could be (r_* describe it)
+  # errexit is OFF inside this function (it is called from an if): every step that can fail is checked by hand, never left to set -e
+  r_label=$1
+  _t=$2
+  r_dest=$agents/$1.plist
+  r_existed=0 r_same=0 r_loaded=0 r_prev="" r_changed=0 r_boot=0 r_unloaded=0
+  if [ -f "$r_dest" ]; then r_existed=1; fi
+  if [ "$r_existed" -eq 1 ] && cmp -s "$_t" "$r_dest"; then r_same=1; fi
+  if is_loaded "$r_label"; then r_loaded=1; fi
+  if [ "$r_same" -eq 1 ] && [ "$r_loaded" -eq 1 ]; then
+    printf '%s: %s unchanged and loaded\n' "$me" "$r_label"
+    return 0
+  fi
+  if [ "$r_same" -eq 0 ]; then
+    # 1. the backup of the old file, BEFORE anything is unloaded or replaced
+    if [ "$r_existed" -eq 1 ]; then
+      r_prev=$agents/.$r_label.plist.prev.$$
+      if ! cp -p "$r_dest" "$r_prev"; then
+        r_prev=""
+        problem "cannot make a backup copy of $r_dest" "check that the agents directory is writable and has free space; nothing was changed"
+        return 1
+      fi
+    fi
+    # 2. the mode of the new file, still before anything changes
+    if ! chmod 0644 "$_t"; then
+      problem "cannot set the mode of the new $r_label file" "check the agents directory; nothing was changed"
+      return 1
+    fi
+    # 3. unload the old agent; if that fails nothing has changed (the old file, loaded)
+    if [ "$r_loaded" -eq 1 ]; then
+      if ! lc bootout "$domain/$r_label"; then
+        problem "launchctl could not unload the old $r_label" "run: launchctl bootout $domain/$r_label, then run this again"
+        return 1
+      fi
+      r_unloaded=1
+    fi
+    # 4. the new file in place; if that fails the old file was never replaced: load the old agent again
+    if ! mv -f -- "$_t" "$r_dest"; then
+      restore_label
+      problem "cannot put the new $r_label file in place" "check that the agents directory is writable and has free space"
+      return 1
+    fi
+    r_changed=1
+  fi
+  lc enable "$domain/$r_label" || printf '%s: note: launchctl enable %s said no; going on\n' "$me" "$r_label" >&2
+  if ! lc bootstrap "$domain" "$r_dest"; then
+    restore_label
+    problem "launchctl could not load $r_label into $domain" "run: launchctl bootstrap $domain $r_dest to see the reason, fix it, and run this again"
+    return 1
+  fi
+  r_boot=1
+  printf '%s: installed %s (loaded in %s)\n' "$me" "$r_label" "$domain"
+  return 0
+}
+
+do_install() {
+  if [ ! -d "$logs" ]; then
+    mkdir -p -- "$logs" || die 1 "cannot create the log directory $logs" "check the path and its permissions"
+    chmod 0700 -- "$logs" || die 1 "cannot set the mode of the log directory $logs" "check the path and its permissions"
+  fi
+  [ -d "$agents" ] || mkdir -p -- "$agents" || die 1 "cannot create the agents directory $agents" "check the path and its permissions"
+  tmp_dump=$agents/.$l_dump.plist.new.$$
+  tmp_stat=$agents/.$l_stat.plist.new.$$
+  render "$tpl_dir/$l_dump.plist.in" "$tmp_dump" || die 1 "cannot render $l_dump" "check the template and the agents directory"
+  render "$tpl_dir/$l_stat.plist.in" "$tmp_stat" || die 1 "cannot render $l_stat" "check the template and the agents directory"
+  lint_plist "$tmp_dump" || die 1 "the rendered $l_dump is not a valid property list" "check the template, the home path and the PATH value"
+  lint_plist "$tmp_stat" || die 1 "the rendered $l_stat is not a valid property list" "check the template, the home path and the PATH value"
+  # all or nothing: a failure at either agent puts back everything this run changed (the first agent too, when the second is the one that fails)
+  if ! install_one "$l_dump" "$tmp_dump"; then finish_failure; fi
+  save_as_a
+  if ! install_one "$l_stat" "$tmp_stat"; then
+    load_from_a
+    restore_label # the first agent goes back; the second was already put back by install_one
+    finish_failure
+  fi
+  printf '%s: note: these are LaunchAgents: they run only while you are logged in, not while logged out, asleep or off; a missed daily dump is not made up (the hourly check says it is stale)\n' "$me"
+}
+
+# ---- uninstall and status -------------------------------------------------------------------------------------
+
+do_uninstall() {
+  for _l in "$l_dump" "$l_stat"; do
+    _d=$agents/$_l.plist
+    if is_loaded "$_l"; then
+      lc bootout "$domain/$_l" || die 1 "launchctl could not unload $_l" "run: launchctl bootout $domain/$_l, then run this again"
+      printf '%s: unloaded %s\n' "$me" "$_l"
+    fi
+    if [ -L "$_d" ]; then
+      printf '%s: note: %s is a symbolic link; left alone\n' "$me" "$_d" >&2
+    elif [ -f "$_d" ]; then
+      if grep -q "<string>$_l</string>" "$_d"; then
+        rm -f -- "$_d" || die 1 "cannot remove $_d" "check that the agents directory is writable, remove the file by hand, and run this again"
+        printf '%s: removed %s\n' "$me" "$_d"
+      else
+        printf '%s: note: %s does not carry the label %s; left alone\n' "$me" "$_d" "$_l" >&2
+      fi
+    fi
+  done
+}
+
+do_status() {
+  _rc=0
+  for _l in "$l_dump" "$l_stat"; do
+    _f=no
+    _s=no
+    [ -f "$agents/$_l.plist" ] && _f=yes
+    if is_loaded "$_l"; then _s=yes; fi
+    printf '%s: file %s, loaded %s\n' "$_l" "$_f" "$_s"
+    if [ "$_f" = no ] || [ "$_s" = no ]; then _rc=1; fi
+  done
+  return "$_rc"
+}
+
+case $cmd in
+  install) do_install ;;
+  uninstall) do_uninstall ;;
+  status) do_status ;;
+esac

@@ -1,0 +1,27 @@
+[package]
+name = "cortex-module"
+description = "The socket every piece plugs into: manifest, Piece, the six ports, the route table and the startup checks (Wave 0 S0)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+async-trait.workspace = true
+axum = { workspace = true, features = ["query"] }
+cortex-db.workspace = true
+cortex-types.workspace = true
+serde.workspace = true
+serde_ignored.workspace = true
+serde_urlencoded.workspace = true
+form_urlencoded.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+
+[dev-dependencies]
+tower = { version = "0.5", default-features = false, features = ["util"] }
+trybuild.workspace = true
+
+[lints]
+workspace = true

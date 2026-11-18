@@ -1,0 +1,352 @@
+[
+ {
+  "id": "PP-01",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_01_the_services_are_a_closed_list_with_their_compose_names"
+  ],
+  "what": "the db service has another name",
+  "old": "            Service::Db => \"db\",",
+  "new": "            Service::Db => \"database\","
+ },
+ {
+  "id": "PP-02",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_01_the_services_are_a_closed_list_with_their_compose_names"
+  ],
+  "what": "the migrate service has another name",
+  "old": "            Service::Migrate => \"migrate\",",
+  "new": "            Service::Migrate => \"migration\","
+ },
+ {
+  "id": "PP-03",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_01_the_services_are_a_closed_list_with_their_compose_names"
+  ],
+  "what": "the server service has another name",
+  "old": "            Service::Server => \"server\",",
+  "new": "            Service::Server => \"cortex-server\","
+ },
+ {
+  "id": "PP-04",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_01_the_services_are_a_closed_list_with_their_compose_names"
+  ],
+  "what": "the list of services is in another order",
+  "old": "[Service::Db, Service::Migrate, Service::Server];",
+  "new": "[Service::Db, Service::Server, Service::Migrate];"
+ },
+ {
+  "id": "PP-05",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_02_one_line_is_escaped_and_bounded"
+  ],
+  "what": "a line may be one character longer",
+  "old": "const ONE_LINE_MAX: usize = 200;",
+  "new": "const ONE_LINE_MAX: usize = 201;"
+ },
+ {
+  "id": "PP-06",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_02_one_line_is_escaped_and_bounded"
+  ],
+  "what": "a line may be one character shorter",
+  "old": "const ONE_LINE_MAX: usize = 200;",
+  "new": "const ONE_LINE_MAX: usize = 199;"
+ },
+ {
+  "id": "PP-07",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_02_one_line_is_escaped_and_bounded"
+  ],
+  "what": "an apostrophe is escaped",
+  "old": " '\"' | '\\'' => out.push(c),",
+  "new": " '\"' => out.push(c),"
+ },
+ {
+  "id": "PP-08",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_02_one_line_is_escaped_and_bounded"
+  ],
+  "what": "nothing is escaped",
+  "old": "                _ => out.extend(c.escape_debug()),",
+  "new": "                _ => out.push(c),"
+ },
+ {
+  "id": "PP-09",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_02_one_line_is_escaped_and_bounded"
+  ],
+  "what": "a cut line does not say so",
+  "old": "            out.push_str(\"...\");",
+  "new": "            out.push_str(\"\");"
+ },
+ {
+  "id": "PP-10",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_02_one_line_is_escaped_and_bounded"
+  ],
+  "what": "a line of exactly the bound is marked as cut",
+  "old": "raw.chars().nth(ONE_LINE_MAX).is_some()",
+  "new": "raw.chars().nth(ONE_LINE_MAX - 1).is_some()"
+ },
+ {
+  "id": "PP-11",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_02_one_line_is_escaped_and_bounded"
+  ],
+  "what": "a line one over the bound is not marked as cut",
+  "old": "raw.chars().nth(ONE_LINE_MAX).is_some()",
+  "new": "raw.chars().nth(ONE_LINE_MAX + 1).is_some()"
+ },
+ {
+  "id": "PP-12",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_03_the_last_non_empty_line_of_an_output"
+  ],
+  "what": "the first line is taken, not the last",
+  "old": "            .rev()\n            .map(str::trim)",
+  "new": "            .map(str::trim)"
+ },
+ {
+  "id": "PP-13",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_03_the_last_non_empty_line_of_an_output"
+  ],
+  "what": "the line is not trimmed",
+  "old": "            .map(str::trim)",
+  "new": "            .map(|l| l.trim_end_matches('\\r'))"
+ },
+ {
+  "id": "PP-14",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_03_the_last_non_empty_line_of_an_output"
+  ],
+  "what": "empty lines are not skipped",
+  "old": "            .find(|l| !l.is_empty())",
+  "new": "            .next()"
+ },
+ {
+  "id": "PP-15",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_04_a_dump_label_is_made_only_from_two_versions"
+  ],
+  "what": "the label names the versions the wrong way round",
+  "old": "format!(\"pre-upgrade-{from}-to-{to}\")",
+  "new": "format!(\"pre-upgrade-{to}-to-{from}\")"
+ },
+ {
+  "id": "PP-16",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_05_the_system_pace_moves_forward_and_sleeps"
+  ],
+  "what": "the pace never moves",
+  "old": "        self.start.elapsed()",
+  "new": "        Duration::ZERO"
+ },
+ {
+  "id": "PP-17",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_05_the_system_pace_moves_forward_and_sleeps"
+  ],
+  "what": "the pace does not sleep",
+  "old": "        std::thread::sleep(d);",
+  "new": "        let _ = d;"
+ },
+ {
+  "id": "PP-18",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_06_a_port_error_prints_its_one_line_and_nothing_else"
+  ],
+  "what": "a failure is printed without its prefix",
+  "old": "    #[error(\"failed: {0}\")]",
+  "new": "    #[error(\"{0}\")]"
+ },
+ {
+  "id": "PP-19",
+  "design": null,
+  "file": "src/ports.rs",
+  "tests": [
+   "ports"
+  ],
+  "fails": [
+   "po_06_a_port_error_prints_its_one_line_and_nothing_else"
+  ],
+  "what": "a timeout says something else",
+  "old": "    #[error(\"timed out\")]",
+  "new": "    #[error(\"took too long\")]"
+ },
+ {
+  "id": "PP-20",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "local::st_04_ready_is_a_200_on_the_health_path_without_any_token_and_everything_else_is_a_word"
+  ],
+  "what": "ready sends the operator's token",
+  "old": "            bearer: None,\n        }) {\n            Ok(r) if r.status == 200",
+  "new": "            bearer: Some(\"t\"),\n        }) {\n            Ok(r) if r.status == 200"
+ },
+ {
+  "id": "PP-21",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "local::st_04_ready_is_a_200_on_the_health_path_without_any_token_and_everything_else_is_a_word"
+  ],
+  "what": "ready accepts any 2xx",
+  "old": "Ok(r) if r.status == 200 => Ready::Yes,",
+  "new": "Ok(r) if r.status / 100 == 2 => Ready::Yes,"
+ },
+ {
+  "id": "PP-22",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "local::st_04_ready_is_a_200_on_the_health_path_without_any_token_and_everything_else_is_a_word"
+  ],
+  "what": "ready names no status",
+  "old": "Ok(r) => Ready::No(r.status.to_string()),",
+  "new": "Ok(_) => Ready::No(\"not ready\".into()),"
+ },
+ {
+  "id": "PP-23",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "local::st_04_ready_is_a_200_on_the_health_path_without_any_token_and_everything_else_is_a_word"
+  ],
+  "what": "ready reports a timeout as no answer",
+  "old": "Err(FetchError::Timeout) => Ready::No(\"timeout\".into()),",
+  "new": "Err(FetchError::Timeout) => Ready::No(\"no answer\".into()),"
+ },
+ {
+  "id": "PP-24",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "local::st_04_ready_is_a_200_on_the_health_path_without_any_token_and_everything_else_is_a_word"
+  ],
+  "what": "ready asks the live path",
+  "old": "\"{}/v2/health/ready\"",
+  "new": "\"{}/v2/health/live\""
+ },
+ {
+  "id": "PP-25",
+  "design": null,
+  "file": "src/engine.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "local::st_04_ready_is_a_200_on_the_health_path_without_any_token_and_everything_else_is_a_word"
+  ],
+  "what": "ready is yes when nothing answers",
+  "old": "Err(_) => Ready::No(\"no answer\".into()),",
+  "new": "Err(_) => Ready::Yes,"
+ }
+]

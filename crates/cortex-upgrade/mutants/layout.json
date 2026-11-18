@@ -1,0 +1,1698 @@
+[
+ {
+  "id": "LM-01",
+  "design": "M-20",
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_18_a_reader_never_finds_current_missing_while_the_links_are_swapped"
+  ],
+  "what": "the link is replaced in two steps (remove, then rename), not one rename",
+  "old": "fs::rename(&tmp, self.root.join(name)).map_err(|e| io_err(\"replace link\", e))",
+  "new": "{ let _ = fs::remove_file(self.root.join(name)); std::thread::sleep(std::time::Duration::from_millis(2)); fs::rename(&tmp, self.root.join(name)).map_err(|e| io_err(\"replace link\", e)) }"
+ },
+ {
+  "id": "LM-02",
+  "design": "M-13",
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_10_prune_keeps_current_and_previous_and_touches_nothing_else"
+  ],
+  "what": "prune deletes the dump sets",
+  "old": "            fs::remove_dir_all(entry.path()).map_err(|e| io_err(\"remove release\", e))?;",
+  "new": "            let _ = fs::remove_dir_all(self.root.join(\"dumps\"));\n            fs::remove_dir_all(entry.path()).map_err(|e| io_err(\"remove release\", e))?;"
+ },
+ {
+  "id": "LM-03",
+  "design": "M-14",
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_01_commit_switches_current_and_previous_and_touches_nothing_else"
+  ],
+  "what": "commit rewrites cortex.toml",
+  "old": "        self.set_link(\"current\", new)?;\n        sync_dir(&self.root)?;",
+  "new": "        self.set_link(\"current\", new)?;\n        let _ = fs::write(self.root.join(\"cortex.toml\"), b\"\");\n        sync_dir(&self.root)?;"
+ },
+ {
+  "id": "LM-04",
+  "design": "M-19",
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_12_the_lock_is_refused_at_once_when_held_and_free_after_drop",
+   "lay_13_a_lock_held_by_someone_else_is_respected"
+  ],
+  "what": "the lock waits instead of refusing",
+  "old": "match file.try_lock() {",
+  "new": "match file.lock().map_err(fs::TryLockError::Error) {"
+ },
+ {
+  "id": "LM-05",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_12_the_lock_is_refused_at_once_when_held_and_free_after_drop"
+  ],
+  "what": "a busy lock is taken anyway",
+  "old": "Err(fs::TryLockError::WouldBlock) => Err(LockError::Busy),",
+  "new": "Err(fs::TryLockError::WouldBlock) => Ok(UpgradeLock { _file: file }),"
+ },
+ {
+  "id": "LM-06",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_12_the_lock_is_refused_at_once_when_held_and_free_after_drop"
+  ],
+  "what": "the lock file is created 0644",
+  "old": ".truncate(false)\n            .write(true)\n            .mode(0o600)",
+  "new": ".truncate(false)\n            .write(true)\n            .mode(0o644)"
+ },
+ {
+  "id": "LM-07",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_14_a_lock_file_that_is_a_link_is_refused_and_its_target_is_not_touched"
+  ],
+  "what": "a lock file that is a link is followed",
+  "old": ".map(|m| m.file_type().is_symlink())",
+  "new": ".map(|_| false)"
+ },
+ {
+  "id": "LM-08",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_05_interrupted_at_every_step_never_leaves_a_missing_or_dangling_link"
+  ],
+  "what": "current is set before previous (the order the design forbids)",
+  "edits": [
+   [
+    "            self.set_link(\"previous\", old)?;",
+    "            let _ = old;"
+   ],
+   [
+    "        self.set_link(\"current\", new)?;\n        sync_dir(&self.root)?;",
+    "        self.set_link(\"current\", new)?;\n        if let Some(old) = &old {\n            self.set_link(\"previous\", old)?;\n        }\n        sync_dir(&self.root)?;"
+   ]
+  ]
+ },
+ {
+  "id": "LM-09",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_01_commit_switches_current_and_previous_and_touches_nothing_else"
+  ],
+  "what": "previous is never set by a commit",
+  "old": "            self.set_link(\"previous\", old)?;",
+  "new": "            let _ = old;"
+ },
+ {
+  "id": "LM-10",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_08_flip_back_is_refused_for_a_contract_release"
+  ],
+  "what": "a contract release is rolled back",
+  "old": "            Some(MigrationClass::Contract) => {\n                return Err(LayoutError::RollbackRefused(\n                    RollbackRefusal::ContractRelease,\n                ));\n            }",
+  "new": "            Some(MigrationClass::Contract) => {}"
+ },
+ {
+  "id": "LM-11",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_09_flip_back_is_refused_when_it_cannot_be_sure"
+  ],
+  "what": "an unreadable manifest copy does not stop a rollback",
+  "old": "            None => {\n                return Err(LayoutError::RollbackRefused(\n                    RollbackRefusal::ManifestUnreadable,\n                ));\n            }",
+  "new": "            None => {}"
+ },
+ {
+  "id": "LM-12",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_09_flip_back_is_refused_when_it_cannot_be_sure"
+  ],
+  "what": "previous equal to current does not stop a rollback",
+  "old": "        if prev == cur {",
+  "new": "        if false {"
+ },
+ {
+  "id": "LM-13",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_10_prune_keeps_current_and_previous_and_touches_nothing_else",
+   "lay_11_after_a_rollback_prune_keeps_the_older_current_and_the_newer_previous"
+  ],
+  "what": "prune removes current and previous too",
+  "old": "            if keep.contains(&version) || !is_real_dir(&entry.path()) {",
+  "new": "            if !is_real_dir(&entry.path()) {"
+ },
+ {
+  "id": "LM-14",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_10_prune_keeps_current_and_previous_and_touches_nothing_else"
+  ],
+  "what": "prune also acts on links named like a version",
+  "old": "            if keep.contains(&version) || !is_real_dir(&entry.path()) {",
+  "new": "            if keep.contains(&version) {"
+ },
+ {
+  "id": "LM-15",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_15_a_record_is_written_once_per_attempt_and_never_overwritten"
+  ],
+  "what": "a record overwrites an existing one",
+  "old": "                .write(true)\n                .create_new(true)",
+  "new": "                .write(true)\n                .create(true)\n                .truncate(true)"
+ },
+ {
+  "id": "LM-16",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_15_a_record_is_written_once_per_attempt_and_never_overwritten"
+  ],
+  "what": "a record is created 0644",
+  "old": "                .create_new(true)\n                .mode(0o600)",
+  "new": "                .create_new(true)\n                .mode(0o644)"
+ },
+ {
+  "id": "LM-17",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_16_the_stamp_is_utc_and_right_on_leap_days_and_the_epoch"
+  ],
+  "what": "the year is wrong in January and February",
+  "old": "let y = yoe + era * 400 + i64::from(m <= 2);",
+  "new": "let y = yoe + era * 400;"
+ },
+ {
+  "id": "LM-18",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_02_commit_needs_exactly_one_of_staging_or_release"
+  ],
+  "what": "a commit goes on when the release directory already exists",
+  "old": "(true, true) => return Err(LayoutError::ReleaseExists),",
+  "new": "(true, true) => {}"
+ },
+ {
+  "id": "LM-19",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_03_commit_of_the_current_release_changes_nothing"
+  ],
+  "what": "a commit of the current release is not a no-op",
+  "old": "        if old.as_ref() == Some(new) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "LM-20",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_17_stack_env_is_read_from_the_release_and_must_name_that_release"
+  ],
+  "what": "a stack.env that names another version is accepted",
+  "old": "        if env.version != *v {",
+  "new": "        if false {"
+ },
+ {
+  "id": "LM-21",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_04_a_link_that_is_not_a_release_is_refused_not_followed"
+  ],
+  "what": "a regular file named current is not refused as a bad link",
+  "old": "            Err(e) if e.kind() == std::io::ErrorKind::InvalidInput => {\n                Err(LayoutError::BadLink { link: name })\n            }\n",
+  "new": ""
+ },
+ {
+  "id": "LM-22",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_04_a_link_that_is_not_a_release_is_refused_not_followed"
+  ],
+  "what": "a link is read with plain SemVer, not the release rules",
+  "old": ".and_then(|rest| parse_version(rest).ok())",
+  "new": ".and_then(|rest| rest.parse::<Version>().ok())"
+ },
+ {
+  "id": "SM-01",
+  "design": null,
+  "file": "src/stack_env.rs",
+  "tests": [
+   "group_stack_env"
+  ],
+  "fails": [
+   "se_06_a_line_without_equals_is_refused_and_the_size_cap_is_exact"
+  ],
+  "what": "size cap off by one",
+  "old": "if text.len() > STACK_ENV_MAX_BYTES {",
+  "new": "if text.len() >= STACK_ENV_MAX_BYTES {"
+ },
+ {
+  "id": "SM-02",
+  "design": null,
+  "file": "src/stack_env.rs",
+  "tests": [
+   "group_stack_env"
+  ],
+  "fails": [
+   "se_03_no_other_key_may_be_there_least_of_all_a_secret"
+  ],
+  "what": "an unknown key is ignored",
+  "old": "_ => return Err(StackEnvError::UnknownKey { line }),",
+  "new": "_ => continue,"
+ },
+ {
+  "id": "SM-03",
+  "design": null,
+  "file": "src/stack_env.rs",
+  "tests": [
+   "group_stack_env"
+  ],
+  "fails": [
+   "se_02_each_key_is_required_exactly_once"
+  ],
+  "what": "a repeated key is accepted",
+  "old": "if slot.is_some() {",
+  "new": "if false {"
+ },
+ {
+  "id": "SM-04",
+  "design": null,
+  "file": "src/stack_env.rs",
+  "tests": [
+   "group_stack_env"
+  ],
+  "fails": [
+   "se_04_values_outside_the_allowed_characters_are_refused_and_never_echoed"
+  ],
+  "what": "value characters are not checked",
+  "old": " || !value.chars().all(value_char_ok)",
+  "new": ""
+ },
+ {
+  "id": "SM-05",
+  "design": null,
+  "file": "src/stack_env.rs",
+  "tests": [
+   "group_stack_env"
+  ],
+  "fails": [
+   "se_04_values_outside_the_allowed_characters_are_refused_and_never_echoed"
+  ],
+  "what": "the value length cap is lifted",
+  "old": "value.len() > VALUE_MAX_BYTES",
+  "new": "value.len() > VALUE_MAX_BYTES * 100"
+ },
+ {
+  "id": "SM-06",
+  "design": null,
+  "file": "src/stack_env.rs",
+  "tests": [
+   "group_stack_env"
+  ],
+  "fails": [
+   "se_05_the_version_is_a_version_and_each_image_is_pinned_by_digest"
+  ],
+  "what": "the digest length is not checked",
+  "old": "hex.len() == 64",
+  "new": "hex.len() >= 1"
+ },
+ {
+  "id": "SM-07",
+  "design": null,
+  "file": "src/stack_env.rs",
+  "tests": [
+   "group_stack_env"
+  ],
+  "fails": [
+   "se_05_the_version_is_a_version_and_each_image_is_pinned_by_digest"
+  ],
+  "what": "uppercase hex digits are accepted",
+  "old": "(b'a'..=b'f').contains(&b)",
+  "new": "(b'a'..=b'f').contains(&b.to_ascii_lowercase())"
+ },
+ {
+  "id": "SM-08",
+  "design": null,
+  "file": "src/stack_env.rs",
+  "tests": [
+   "group_stack_env"
+  ],
+  "fails": [
+   "se_05_the_version_is_a_version_and_each_image_is_pinned_by_digest"
+  ],
+  "what": "a second @ in the image name is accepted",
+  "old": " && !name.contains('@')",
+  "new": ""
+ },
+ {
+  "id": "SM-09",
+  "design": null,
+  "file": "src/stack_env.rs",
+  "tests": [
+   "group_stack_env"
+  ],
+  "fails": [
+   "se_05_the_version_is_a_version_and_each_image_is_pinned_by_digest"
+  ],
+  "what": "an image with an empty name is accepted",
+  "old": " && !name.is_empty()",
+  "new": ""
+ },
+ {
+  "id": "LM-23",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_19_a_rollback_interrupted_at_every_step_loses_nothing_and_recover_finishes_it"
+  ],
+  "what": "the rollback target is not written down before the links change",
+  "old": "        self.write_pair(&self.intent_path(), \".rollback.intent\", &cur, &prev, mark)?;\n",
+  "new": ""
+ },
+ {
+  "id": "LM-24",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_19_a_rollback_interrupted_at_every_step_loses_nothing_and_recover_finishes_it"
+  ],
+  "what": "recover does not remove the intent file",
+  "old": "        self.remove_intent().map_err(started)?;\n        Ok(Some(Flip { left, now: back }))",
+  "new": "        Ok(Some(Flip { left, now: back }))"
+ },
+ {
+  "id": "LM-25",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_19_a_rollback_interrupted_at_every_step_loses_nothing_and_recover_finishes_it"
+  ],
+  "what": "prune goes on while a rollback is pending",
+  "old": "    pub fn prune(&self) -> Result<Vec<Version>, LayoutError> {\n        self.refuse_if_pending()?;\n",
+  "new": "    pub fn prune(&self) -> Result<Vec<Version>, LayoutError> {\n"
+ },
+ {
+  "id": "LM-26",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_19_a_rollback_interrupted_at_every_step_loses_nothing_and_recover_finishes_it"
+  ],
+  "what": "commit goes on while a rollback is pending",
+  "old": "    ) -> Result<(), LayoutError> {\n        self.refuse_if_pending()?;\n        let old = self.current()?;",
+  "new": "    ) -> Result<(), LayoutError> {\n        let old = self.current()?;"
+ },
+ {
+  "id": "LM-27",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_19_a_rollback_interrupted_at_every_step_loses_nothing_and_recover_finishes_it"
+  ],
+  "what": "a second rollback starts while one is pending",
+  "old": "    ) -> Result<Flip, LayoutError> {\n        self.refuse_if_pending()?;\n        let cur = self.current()?",
+  "new": "    ) -> Result<Flip, LayoutError> {\n        let cur = self.current()?"
+ },
+ {
+  "id": "LM-28",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_21_an_intent_file_that_is_not_valid_is_refused_and_left_alone"
+  ],
+  "what": "an intent with the same version twice is accepted",
+  "old": "            || left == back\n",
+  "new": ""
+ },
+ {
+  "id": "LM-29",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_21_an_intent_file_that_is_not_valid_is_refused_and_left_alone"
+  ],
+  "what": "an intent for a release that is not there is accepted",
+  "old": "            || !is_real_dir(&self.release_dir(&left))\n",
+  "new": ""
+ },
+ {
+  "id": "LM-30",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_19_a_rollback_interrupted_at_every_step_loses_nothing_and_recover_finishes_it"
+  ],
+  "what": "the intent file is created 0644",
+  "old": "            .create_new(true)\n            .mode(0o600)\n            .open(&tmp)\n            .map_err(|e| io_err(\"create intent\", e))?;",
+  "new": "            .create_new(true)\n            .mode(0o644)\n            .open(&tmp)\n            .map_err(|e| io_err(\"create intent\", e))?;"
+ },
+ {
+  "id": "LM-31",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_22_drop_previous_removes_the_link_and_nothing_else_and_is_safe_to_repeat"
+  ],
+  "what": "drop_previous removes nothing",
+  "old": "        fs::remove_file(self.root.join(\"previous\")).map_err(|e| io_err(\"remove link\", e))?;\n        sync_dir(&self.root)",
+  "new": "        sync_dir(&self.root)"
+ },
+ {
+  "id": "LM-32",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_22_drop_previous_removes_the_link_and_nothing_else_and_is_safe_to_repeat"
+  ],
+  "what": "drop_previous removes current",
+  "old": "fs::remove_file(self.root.join(\"previous\")).map_err(|e| io_err(\"remove link\", e))?;",
+  "new": "fs::remove_file(self.root.join(\"current\")).map_err(|e| io_err(\"remove link\", e))?;"
+ },
+ {
+  "id": "LM-33",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_23_drop_previous_refuses_while_a_rollback_is_pending_and_leaves_odd_things_alone"
+  ],
+  "what": "drop_previous ignores a pending rollback",
+  "old": "    pub fn drop_previous(&self) -> Result<(), LayoutError> {\n        self.refuse_if_pending()?;",
+  "new": "    pub fn drop_previous(&self) -> Result<(), LayoutError> {"
+ },
+ {
+  "id": "LM-34",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_23_drop_previous_refuses_while_a_rollback_is_pending_and_leaves_odd_things_alone"
+  ],
+  "what": "drop_previous removes anything called previous",
+  "old": "        if self.previous()?.is_none() {\n            return Ok(());\n        }",
+  "new": "        if self.previous().unwrap_or(None).is_none() && !self.root.join(\"previous\").exists() {\n            return Ok(());\n        }"
+ },
+ {
+  "id": "LM-44",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_24_a_marked_rollback_keeps_a_private_marker_until_it_is_finished_and_everything_refuses_meanwhile",
+   "lay_25_a_marked_rollback_interrupted_at_every_step_is_finished_by_recover_and_keeps_its_marker"
+  ],
+  "what": "begin_rollback writes no marker",
+  "old": "        self.flip_with(true, after)",
+  "new": "        self.flip_with(false, after)"
+ },
+ {
+  "id": "LM-45",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_24_a_marked_rollback_keeps_a_private_marker_until_it_is_finished_and_everything_refuses_meanwhile"
+  ],
+  "what": "the flip never writes the marker",
+  "old": "        if mark {\n            self.write_pair(",
+  "new": "        if false {\n            self.write_pair("
+ },
+ {
+  "id": "LM-46",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_25_a_marked_rollback_interrupted_at_every_step_is_finished_by_recover_and_keeps_its_marker"
+  ],
+  "what": "the intent never says tail=1",
+  "old": "            if tail { \"tail=1\\n\" } else { \"\" }",
+  "new": "            if tail { \"\" } else { \"\" }"
+ },
+ {
+  "id": "LM-47",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_25_a_marked_rollback_interrupted_at_every_step_is_finished_by_recover_and_keeps_its_marker",
+   "lay_27_a_marker_that_disagrees_with_current_is_not_trusted_and_the_tail_line_is_exactly_tail_1"
+  ],
+  "what": "recover never writes the marker",
+  "old": "        if tail {\n            self.write_pair(",
+  "new": "        if false {\n            self.write_pair("
+ },
+ {
+  "id": "LM-48",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_24_a_marked_rollback_keeps_a_private_marker_until_it_is_finished_and_everything_refuses_meanwhile",
+   "lay_25_a_marked_rollback_interrupted_at_every_step_is_finished_by_recover_and_keeps_its_marker"
+  ],
+  "what": "the marker does not make everything refuse",
+  "old": "        fs::symlink_metadata(self.intent_path()).is_ok()\n            || fs::symlink_metadata(self.marker_path()).is_ok()\n    }",
+  "new": "        fs::symlink_metadata(self.intent_path()).is_ok()\n    }"
+ },
+ {
+  "id": "LM-49",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_24_a_marked_rollback_keeps_a_private_marker_until_it_is_finished_and_everything_refuses_meanwhile"
+  ],
+  "what": "finish leaves previous in place",
+  "old": "            Some(p) if p == left => {\n                fs::remove_file(self.root.join(\"previous\"))\n                    .map_err(|e| io_err(\"remove link\", e))?;\n                sync_dir(&self.root)?;\n            }",
+  "new": "            Some(p) if p == left => {}"
+ },
+ {
+  "id": "LM-50",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_24_a_marked_rollback_keeps_a_private_marker_until_it_is_finished_and_everything_refuses_meanwhile"
+  ],
+  "what": "finish leaves the marker in place",
+  "old": "        fs::remove_file(self.marker_path()).map_err(|e| io_err(\"remove marker\", e))?;\n        sync_dir(&self.root)?;\n",
+  "new": ""
+ },
+ {
+  "id": "LM-51",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_26_an_unreadable_marker_or_an_odd_previous_stops_finish_and_changes_nothing"
+  ],
+  "what": "finish accepts a previous that names another release",
+  "old": "            Some(_) => return Err(LayoutError::BadLink { link: \"previous\" }),",
+  "new": "            Some(_) => {}"
+ },
+ {
+  "id": "LM-52",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_26_an_unreadable_marker_or_an_odd_previous_stops_finish_and_changes_nothing"
+  ],
+  "what": "finish removes whatever previous names",
+  "old": "            Some(p) if p == left => {",
+  "new": "            Some(_) => {"
+ },
+ {
+  "id": "LM-53",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_27_a_marker_that_disagrees_with_current_is_not_trusted_and_the_tail_line_is_exactly_tail_1"
+  ],
+  "what": "the marker is trusted without looking at current",
+  "old": "        if self.current()?.as_ref() != Some(&back) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "LM-54",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_27_a_marker_that_disagrees_with_current_is_not_trusted_and_the_tail_line_is_exactly_tail_1"
+  ],
+  "what": "a marker may carry a tail line",
+  "old": "            (Some(\"tail=1\"), Some(\"\")) if allow_tail => true,",
+  "new": "            (Some(\"tail=1\"), Some(\"\")) => true,"
+ },
+ {
+  "id": "LM-55",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_27_a_marker_that_disagrees_with_current_is_not_trusted_and_the_tail_line_is_exactly_tail_1"
+  ],
+  "what": "any tail= line is accepted",
+  "old": "            (Some(\"tail=1\"), Some(\"\")) if allow_tail => true,",
+  "new": "            (Some(t), Some(\"\")) if allow_tail && t.starts_with(\"tail=\") => true,"
+ },
+ {
+  "id": "LM-56",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_25_a_marked_rollback_interrupted_at_every_step_is_finished_by_recover_and_keeps_its_marker"
+  ],
+  "what": "finish ignores a flip that is not recovered",
+  "old": "        if fs::symlink_metadata(self.intent_path()).is_ok() {\n            return Err(LayoutError::RecoveryPending);\n        }\n        let Some((left, _))",
+  "new": "        let Some((left, _))"
+ },
+ {
+  "id": "LM-57",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_24_a_marked_rollback_keeps_a_private_marker_until_it_is_finished_and_everything_refuses_meanwhile"
+  ],
+  "what": "the intent and the marker are group readable",
+  "old": "            .create_new(true)\n            .mode(0o600)\n            .open(&tmp)\n            .map_err(|e| io_err(\"create intent\", e))?;",
+  "new": "            .create_new(true)\n            .mode(0o644)\n            .open(&tmp)\n            .map_err(|e| io_err(\"create intent\", e))?;"
+ },
+ {
+  "id": "LM-58",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_25_a_marked_rollback_interrupted_at_every_step_is_finished_by_recover_and_keeps_its_marker",
+   "lay_27_a_marker_that_disagrees_with_current_is_not_trusted_and_the_tail_line_is_exactly_tail_1"
+  ],
+  "what": "recover writes the marker with the versions swapped",
+  "old": "                \".rollback.unfinished\",\n                &left,\n                &back,\n                false,",
+  "new": "                \".rollback.unfinished\",\n                &back,\n                &left,\n                false,"
+ },
+ {
+  "id": "LM-59",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout",
+   "group_engine"
+  ],
+  "fails": [
+   "lay_28_an_io_error_after_the_intent_was_published_is_flip_failed_and_one_before_it_is_not",
+   "prepare::rw_13_a_rollback_that_fails_after_it_started_is_exit_4_with_its_state_kept_and_the_retry_finishes_it"
+  ],
+  "what": "an I/O error after the rollback started stays a plain I/O error",
+  "old": "        LayoutError::Io { what, kind } => LayoutError::FlipFailed { what, kind },",
+  "new": "        LayoutError::Io { what, kind } => LayoutError::Io { what, kind },"
+ },
+ {
+  "id": "LM-60",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout",
+   "group_engine"
+  ],
+  "fails": [
+   "lay_28_an_io_error_after_the_intent_was_published_is_flip_failed_and_one_before_it_is_not",
+   "prepare::rw_13_a_rollback_that_fails_after_it_started_is_exit_4_with_its_state_kept_and_the_retry_finishes_it"
+  ],
+  "what": "a failure to set previous is not reported as started",
+  "old": "        self.set_link(\"previous\", &cur).map_err(started)?;",
+  "new": "        self.set_link(\"previous\", &cur)?;"
+ },
+ {
+  "id": "LM-61",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout",
+   "group_engine"
+  ],
+  "fails": [
+   "lay_28_an_io_error_after_the_intent_was_published_is_flip_failed_and_one_before_it_is_not",
+   "prepare::rw_13_a_rollback_that_fails_after_it_started_is_exit_4_with_its_state_kept_and_the_retry_finishes_it"
+  ],
+  "what": "a failure to set current is not reported as started",
+  "old": "        self.set_link(\"current\", &prev).map_err(started)?;",
+  "new": "        self.set_link(\"current\", &prev)?;"
+ },
+ {
+  "id": "LM-62",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout",
+   "group_engine"
+  ],
+  "fails": [
+   "lay_28_an_io_error_after_the_intent_was_published_is_flip_failed_and_one_before_it_is_not",
+   "prepare::rw_13_a_rollback_that_fails_after_it_started_is_exit_4_with_its_state_kept_and_the_retry_finishes_it",
+   "prepare::rw_14_a_rollback_that_fails_after_it_started_inside_a_failed_upgrade_is_exit_4_and_recoverable"
+  ],
+  "what": "a failure to write the marker is not reported as started",
+  "old": "            )\n            .map_err(started)?;\n            if !after(FlipStep::MarkerWritten) {",
+  "new": "            )?;\n            if !after(FlipStep::MarkerWritten) {"
+ },
+ {
+  "id": "LM-63",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout",
+   "group_engine"
+  ],
+  "fails": [
+   "lay_28_an_io_error_after_the_intent_was_published_is_flip_failed_and_one_before_it_is_not",
+   "prepare::rw_15_an_earlier_rollback_that_cannot_be_completed_by_recover_is_exit_4_and_keeps_its_intent"
+  ],
+  "what": "recover does not report a failure to set previous as started",
+  "old": "        self.set_link(\"previous\", &left).map_err(started)?;",
+  "new": "        self.set_link(\"previous\", &left)?;"
+ },
+ {
+  "id": "LM-64",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_28_an_io_error_after_the_intent_was_published_is_flip_failed_and_one_before_it_is_not"
+  ],
+  "what": "recover does not report a failure to write the marker as started",
+  "old": "            )\n            .map_err(started)?;\n        }\n        self.remove_intent().map_err(started)?;",
+  "new": "            )?;\n        }\n        self.remove_intent().map_err(started)?;"
+ },
+ {
+  "id": "LM-65",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_30_restore_previous_puts_the_link_back_as_it_was_and_touches_nothing_else"
+  ],
+  "what": "restore_previous ignores a pending rollback",
+  "old": "        self.refuse_if_pending()?;\n        match was {",
+  "new": "        match was {"
+ },
+ {
+  "id": "LM-66",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_30_restore_previous_puts_the_link_back_as_it_was_and_touches_nothing_else"
+  ],
+  "what": "restore_previous points at a release directory that is not there",
+  "old": "                if !is_real_dir(&self.release_dir(v)) {\n                    return Err(LayoutError::BadLink { link: \"previous\" });\n                }\n                if self.previous()?.as_ref() == Some(v) {",
+  "new": "                if self.previous()?.as_ref() == Some(v) {"
+ },
+ {
+  "id": "LM-67",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_30_restore_previous_puts_the_link_back_as_it_was_and_touches_nothing_else"
+  ],
+  "what": "restore_previous to none leaves the link",
+  "old": "            None => self.drop_previous(),",
+  "new": "            None => Ok(()),"
+ },
+ {
+  "id": "LM-68",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout",
+   "group_engine"
+  ],
+  "fails": [
+   "lay_30_restore_previous_puts_the_link_back_as_it_was_and_touches_nothing_else",
+   "prepare::rw_17_a_check_over_an_unfinished_rollback_is_refused_and_asks_for_nothing"
+  ],
+  "what": "has_unfinished_rollback is always false",
+  "old": "    pub fn has_unfinished_rollback(&self) -> bool {\n        self.rollback_pending()",
+  "new": "    pub fn has_unfinished_rollback(&self) -> bool {\n        false"
+ },
+ {
+  "id": "LM-69",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_layout"
+  ],
+  "fails": [
+   "lay_29_when_the_intent_cannot_be_unlinked_the_flip_has_failed_after_it_started_and_the_intent_stays"
+  ],
+  "what": "a failed unlink of the intent is ignored",
+  "old": "        fs::remove_file(self.intent_path()).map_err(|e| io_err(\"remove intent\", e))?;\n        let _ = sync_dir(&self.root);",
+  "new": "        let _ = fs::remove_file(self.intent_path());\n        let _ = sync_dir(&self.root);"
+ },
+ {
+  "id": "LM-70",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed"
+  ],
+  "what": "a marker without its final newline is accepted",
+  "old": "if text.len() > 4096 || !text.ends_with('\\n') {",
+  "new": "if text.len() > 4096 {"
+ },
+ {
+  "id": "LM-71",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_17_the_marker_size_limit_and_a_from_that_equals_to_are_exact"
+  ],
+  "what": "a marker may be one byte too long",
+  "old": "if text.len() > 4096 ||",
+  "new": "if text.len() > 4097 ||"
+ },
+ {
+  "id": "LM-72",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_17_the_marker_size_limit_and_a_from_that_equals_to_are_exact"
+  ],
+  "what": "a marker whose from equals its to is accepted",
+  "old": "if from == to || !one_line(&set)",
+  "new": "if !one_line(&set)"
+ },
+ {
+  "id": "LM-73",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed"
+  ],
+  "what": "the current link is not compared with the marker's to",
+  "old": "if current.as_ref() != Some(&to) || self.previous()?.as_ref() != Some(&from) {",
+  "new": "if self.previous()?.as_ref() != Some(&from) {"
+ },
+ {
+  "id": "LM-74",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed"
+  ],
+  "what": "the previous link is not compared with the marker's from",
+  "old": "if current.as_ref() != Some(&to) || self.previous()?.as_ref() != Some(&from) {",
+  "new": "if current.as_ref() != Some(&to) {"
+ },
+ {
+  "id": "LM-75",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed"
+  ],
+  "what": "an empty or multi-line set is accepted when read",
+  "old": "if from == to || !one_line(&set) || !one_line(&why) {",
+  "new": "if from == to || !one_line(&why) {"
+ },
+ {
+  "id": "LM-76",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed"
+  ],
+  "what": "a why with a control character is accepted when read",
+  "old": "if from == to || !one_line(&set) || !one_line(&why) {",
+  "new": "if from == to || !one_line(&set) {"
+ },
+ {
+  "id": "LM-77",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_03_a_refusal_on_the_rerun_is_a_refusal_and_is_rolled_back",
+   "prepare::cf_04_a_refusal_on_the_first_run_is_not_retried"
+  ],
+  "what": "a fifth line in the marker is ignored",
+  "old": "            lines.len(),\n        ) else {",
+  "new": "            lines.len().min(5),\n        ) else {"
+ },
+ {
+  "id": "LM-78",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_18_the_marker_writer_refuses_a_set_or_why_that_is_not_one_plain_line_and_replaces_an_older_marker"
+  ],
+  "what": "an empty set or why is written",
+  "old": "if v.is_empty() || v.chars().any(char::is_control) {",
+  "new": "if v.chars().any(char::is_control) {"
+ },
+ {
+  "id": "LM-79",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_18_the_marker_writer_refuses_a_set_or_why_that_is_not_one_plain_line_and_replaces_an_older_marker"
+  ],
+  "what": "a set or why with a control character is written",
+  "old": "if v.is_empty() || v.chars().any(char::is_control) {",
+  "new": "if v.is_empty() {"
+ },
+ {
+  "id": "LM-80",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_06_the_unknown_outcome_leaves_a_durable_marker_that_a_fresh_engine_sees"
+  ],
+  "what": "the marker is created with mode 0666",
+  "old": "            .mode(0o600)\n            .open(&tmp)\n            .map_err(|e| io_err(\"create marker\", e))?;",
+  "new": "            .mode(0o666)\n            .open(&tmp)\n            .map_err(|e| io_err(\"create marker\", e))?;"
+ },
+ {
+  "id": "LM-81",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_06_the_unknown_outcome_leaves_a_durable_marker_that_a_fresh_engine_sees"
+  ],
+  "what": "the marker's version lines are written in the other order",
+  "old": "            i.from, i.to, i.set, i.prev, i.why",
+  "new": "            i.to, i.from, i.set, i.prev, i.why"
+ },
+ {
+  "id": "LM-82",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::rw_07_an_interrupted_rollback_is_finished_before_an_upgrade_goes_on",
+   "prepare::rw_09_a_marker_that_cannot_be_cleared_is_reported_and_nothing_else_can_switch_until_it_is"
+  ],
+  "what": "clearing an absent marker is an error",
+  "old": "            Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),\n            Err(e) => Err(io_err(\"remove marker\", e)),",
+  "new": "            Err(e) => Err(io_err(\"remove marker\", e)),"
+ },
+ {
+  "id": "LM-83",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_11_rollback_with_an_unfinished_upgrade_goes_back_checks_the_old_release_and_clears_the_marker"
+  ],
+  "what": "a finished rollback leaves the marker of the unfinished upgrade",
+  "old": "        // a finished rollback is also the way out of an unfinished upgrade: its marker goes\n        self.clear_incomplete()",
+  "new": "        // a finished rollback is also the way out of an unfinished upgrade: its marker goes\n        Ok(())"
+ },
+ {
+  "id": "LM-84",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_19_a_stale_temporary_file_of_a_lost_run_does_not_stop_the_marker"
+  ],
+  "what": "a stale temporary file is not removed before the marker is written",
+  "old": "        match fs::remove_file(&tmp) {\n            Ok(()) => {}\n            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}\n            Err(e) => return Err(io_err(\"remove stale marker\", e)),\n        }\n",
+  "new": ""
+ },
+ {
+  "id": "LM-85",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_20_the_retry_reads_the_entry_of_the_release_it_finishes_whatever_else_the_manifest_copy_lists"
+  ],
+  "what": "the manifest copy that is read is any usable release, not the marker's",
+  "old": "Entry::Usable(r) if r.version == *v => Some(*r),",
+  "new": "Entry::Usable(r) => Some(*r),"
+ },
+ {
+  "id": "LM-86",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_22_a_marker_left_by_a_run_lost_before_the_switch_is_stale_and_ignored"
+  ],
+  "what": "a marker over links that never moved (current is from) is refused instead of ignored",
+  "old": "        if current.as_ref() == Some(&from) {\n            return Ok(Some((\n                Incomplete {\n                    from,\n                    to,\n                    set,\n                    prev,\n                    why,\n                    id,\n                },\n                true,\n            )));\n        }\n",
+  "new": ""
+ },
+ {
+  "id": "LM-88",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_22_a_marker_left_by_a_run_lost_before_the_switch_is_stale_and_ignored"
+  ],
+  "what": "incomplete() returns a stale marker as unfinished",
+  "old": ".and_then(|(marker, stale)| (!stale).then_some(marker)))",
+  "new": ".and_then(|(marker, _stale)| Some(marker)))"
+ },
+ {
+  "id": "LM-89",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed"
+  ],
+  "what": "a prev that is not none or a release is read as none",
+  "old": "                Err(_) => return Err(LayoutError::BadIncomplete),\n            },\n        };",
+  "new": "                Err(_) => PrevLink::Absent,\n            },\n        };"
+ },
+ {
+  "id": "LM-90",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine"
+  ],
+  "fails": [
+   "prepare::cf_31_a_run_lost_after_previous_was_set_removes_a_previous_that_did_not_exist"
+  ],
+  "what": "prev=none is read as the release the upgrade left",
+  "old": "            \"none\" => PrevLink::Absent,",
+  "new": "            \"none\" => PrevLink::Release(from.clone()),"
+ },
+ {
+  "id": "LM-1001",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_18_the_marker_writer_refuses_a_set_or_why_that_is_not_one_plain_line_and_replaces_an_older_marker"
+  ],
+  "what": "line 535: an || becomes && (at column 28)",
+  "old": "            if v.is_empty() || v.chars().any(char::is_control) {",
+  "new": "            if v.is_empty() && v.chars().any(char::is_control) {"
+ },
+ {
+  "id": "LM-1002",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_18_the_marker_writer_refuses_a_set_or_why_that_is_not_one_plain_line_and_replaces_an_older_marker"
+  ],
+  "what": "line 535: a condition is always false",
+  "old": "            if v.is_empty() || v.chars().any(char::is_control) {",
+  "new": "            if false {"
+ },
+ {
+  "id": "LM-1003",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_01_a_role_step_that_times_out_once_is_confirmed_by_one_rerun_and_the_upgrade_goes_on",
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "line 535: a condition is always true",
+  "old": "            if v.is_empty() || v.chars().any(char::is_control) {",
+  "new": "            if true {"
+ },
+ {
+  "id": "LM-1004",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_18_the_marker_writer_refuses_a_set_or_why_that_is_not_one_plain_line_and_replaces_an_older_marker"
+  ],
+  "what": "line 535: an emptiness check never holds",
+  "old": "            if v.is_empty() || v.chars().any(char::is_control) {",
+  "new": "            if v.is_empty() && false || v.chars().any(char::is_control) {"
+ },
+ {
+  "id": "LM-1006",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_01_a_role_step_that_times_out_once_is_confirmed_by_one_rerun_and_the_upgrade_goes_on",
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "line 539: a condition is always true",
+  "old": "        if !valid_attempt_id(&i.id) {",
+  "new": "        if true {"
+ },
+ {
+  "id": "LM-1007",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_01_a_role_step_that_times_out_once_is_confirmed_by_one_rerun_and_the_upgrade_goes_on",
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "line 539: a negation is dropped",
+  "old": "        if !valid_attempt_id(&i.id) {",
+  "new": "        if valid_attempt_id(&i.id) {"
+ },
+ {
+  "id": "LM-1008",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_06_the_unknown_outcome_leaves_a_durable_marker_that_a_fresh_engine_sees"
+  ],
+  "what": "line 554: the mode 0o600 is changed",
+  "old": "            Err(e) => return Err(io_err(\"remove stale marker\", e)),\n        }\n        let mut f = fs::OpenOptions::new()\n            .write(true)\n            .create_new(true)\n            .mode(0o600)",
+  "new": "            Err(e) => return Err(io_err(\"remove stale marker\", e)),\n        }\n        let mut f = fs::OpenOptions::new()\n            .write(true)\n            .create_new(true)\n            .mode(0o644)"
+ },
+ {
+  "id": "LM-1009",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_17_the_marker_size_limit_and_a_from_that_equals_to_are_exact"
+  ],
+  "what": "line 591: an || becomes && (at column 29)",
+  "old": "        if text.len() > 4096 || !text.ends_with('\\n') {",
+  "new": "        if text.len() > 4096 && !text.ends_with('\\n') {"
+ },
+ {
+  "id": "LM-1010",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_17_the_marker_size_limit_and_a_from_that_equals_to_are_exact"
+  ],
+  "what": "line 591: a condition is always false",
+  "old": "        if text.len() > 4096 || !text.ends_with('\\n') {",
+  "new": "        if false {"
+ },
+ {
+  "id": "LM-1011",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_03_a_refusal_on_the_rerun_is_a_refusal_and_is_rolled_back",
+   "prepare::cf_04_a_refusal_on_the_first_run_is_not_retried"
+  ],
+  "what": "line 591: a condition is always true",
+  "old": "        if text.len() > 4096 || !text.ends_with('\\n') {",
+  "new": "        if true {"
+ },
+ {
+  "id": "LM-1012",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_17_the_marker_size_limit_and_a_from_that_equals_to_are_exact"
+  ],
+  "what": "line 591: a comparison > becomes >=",
+  "old": "        if text.len() > 4096 || !text.ends_with('\\n') {",
+  "new": "        if text.len() >= 4096 || !text.ends_with('\\n') {"
+ },
+ {
+  "id": "LM-1014",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed"
+  ],
+  "what": "line 609: a condition is always false",
+  "old": "        if !valid_attempt_id(&id) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "LM-1015",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_03_a_refusal_on_the_rerun_is_a_refusal_and_is_rolled_back",
+   "prepare::cf_04_a_refusal_on_the_first_run_is_not_retried"
+  ],
+  "what": "line 609: a condition is always true",
+  "old": "        if !valid_attempt_id(&id) {",
+  "new": "        if true {"
+ },
+ {
+  "id": "LM-1016",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_03_a_refusal_on_the_rerun_is_a_refusal_and_is_rolled_back",
+   "prepare::cf_04_a_refusal_on_the_first_run_is_not_retried"
+  ],
+  "what": "line 609: a negation is dropped",
+  "old": "        if !valid_attempt_id(&id) {",
+  "new": "        if valid_attempt_id(&id) {"
+ },
+ {
+  "id": "LM-1017",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed"
+  ],
+  "what": "line 622: an && becomes || (at column 47)",
+  "old": "        let one_line = |v: &str| !v.is_empty() && !v.chars().any(char::is_control);",
+  "new": "        let one_line = |v: &str| !v.is_empty() || !v.chars().any(char::is_control);"
+ },
+ {
+  "id": "LM-1018",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_03_a_refusal_on_the_rerun_is_a_refusal_and_is_rolled_back",
+   "prepare::cf_04_a_refusal_on_the_first_run_is_not_retried"
+  ],
+  "what": "line 622: an emptiness check never holds",
+  "old": "        let one_line = |v: &str| !v.is_empty() && !v.chars().any(char::is_control);",
+  "new": "        let one_line = |v: &str| !v.is_empty() && false && !v.chars().any(char::is_control);"
+ },
+ {
+  "id": "LM-1019",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_03_a_refusal_on_the_rerun_is_a_refusal_and_is_rolled_back",
+   "prepare::cf_04_a_refusal_on_the_first_run_is_not_retried"
+  ],
+  "what": "line 623: an equality is inverted (at column 16)",
+  "old": "        if from == to || !one_line(&set) || !one_line(&why) {",
+  "new": "        if from != to || !one_line(&set) || !one_line(&why) {"
+ },
+ {
+  "id": "LM-1020",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed",
+   "prepare::cf_17_the_marker_size_limit_and_a_from_that_equals_to_are_exact"
+  ],
+  "what": "line 623: an || becomes && (at column 22)",
+  "old": "        if from == to || !one_line(&set) || !one_line(&why) {",
+  "new": "        if from == to && !one_line(&set) || !one_line(&why) {"
+ },
+ {
+  "id": "LM-1021",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed",
+   "prepare::cf_17_the_marker_size_limit_and_a_from_that_equals_to_are_exact"
+  ],
+  "what": "line 623: a condition is always false",
+  "old": "        if from == to || !one_line(&set) || !one_line(&why) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "LM-1022",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_03_a_refusal_on_the_rerun_is_a_refusal_and_is_rolled_back",
+   "prepare::cf_04_a_refusal_on_the_first_run_is_not_retried"
+  ],
+  "what": "line 623: a condition is always true",
+  "old": "        if from == to || !one_line(&set) || !one_line(&why) {",
+  "new": "        if true {"
+ },
+ {
+  "id": "LM-1023",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_03_a_refusal_on_the_rerun_is_a_refusal_and_is_rolled_back",
+   "prepare::cf_04_a_refusal_on_the_first_run_is_not_retried"
+  ],
+  "what": "line 629: an equality is inverted (at column 28)",
+  "old": "        if current.as_ref() == Some(&from) {",
+  "new": "        if current.as_ref() != Some(&from) {"
+ },
+ {
+  "id": "LM-1024",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_03_a_refusal_on_the_rerun_is_a_refusal_and_is_rolled_back",
+   "prepare::cf_04_a_refusal_on_the_first_run_is_not_retried"
+  ],
+  "what": "line 629: a condition is always false",
+  "old": "        if current.as_ref() == Some(&from) {",
+  "new": "        if false {"
+ },
+ {
+  "id": "LM-1025",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_06_the_unknown_outcome_leaves_a_durable_marker_that_a_fresh_engine_sees",
+   "prepare::cf_07_a_retry_after_the_unknown_outcome_finishes_the_upgrade_it_is_not_up_to_date"
+  ],
+  "what": "line 629: a condition is always true",
+  "old": "        if current.as_ref() == Some(&from) {",
+  "new": "        if true {"
+ },
+ {
+  "id": "LM-1026",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_01_a_role_step_that_times_out_once_is_confirmed_by_one_rerun_and_the_upgrade_goes_on",
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "line 949: an equality is inverted (at column 13)",
+  "old": "    id.len() == 16",
+  "new": "    id.len() != 16"
+ },
+ {
+  "id": "LM-1027",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_13_an_unreadable_marker_is_refused_in_plain_words_and_nothing_is_changed"
+  ],
+  "what": "line 950: an && becomes || (at column 8)",
+  "old": "        && id",
+  "new": "        || id"
+ },
+ {
+  "id": "LM-1028",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_01_a_role_step_that_times_out_once_is_confirmed_by_one_rerun_and_the_upgrade_goes_on",
+   "prepare::cf_02_two_timeouts_stop_at_unknown_with_a_plain_message_and_no_rollback"
+  ],
+  "what": "line 952: an || becomes && (at column 40)",
+  "old": "            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))",
+  "new": "            .all(|b| b.is_ascii_digit() && (b'a'..=b'f').contains(&b))"
+ },
+ {
+  "id": "LM-1005",
+  "design": null,
+  "file": "src/layout.rs",
+  "tests": [
+   "group_engine",
+   "group_layout"
+  ],
+  "fails": [
+   "prepare::cf_18_the_marker_writer_refuses_a_set_or_why_that_is_not_one_plain_line_and_replaces_an_older_marker"
+  ],
+  "what": "line 539: a condition is always false",
+  "old": "        if !valid_attempt_id(&i.id) {",
+  "new": "        if false {"
+ }
+]

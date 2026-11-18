@@ -1,0 +1,12 @@
+# Daily dump at 02:30 UTC (piece 12; bob). A TEMPLATE like cortex-dump.service.
+[Unit]
+Description=Cortex backup by dump, daily
+
+[Timer]
+OnCalendar=*-*-* 02:30:00 UTC
+# a missed slot (the machine was off) runs when the timer is next started (BK-19)
+Persistent=true
+Unit=cortex-dump.service
+
+[Install]
+WantedBy=timers.target

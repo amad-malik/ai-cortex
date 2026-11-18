@@ -1,0 +1,12 @@
+# What the server image build must not see: history, the VM-only cargo config (it points at cv2-admit), build output,
+# and anything that could carry config or a secret.
+.git
+.cargo
+target
+**/target
+deploy
+!deploy/server-features
+scripts
+*.token
+*.env
+.env*

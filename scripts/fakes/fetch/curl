@@ -1,0 +1,28 @@
+#!/bin/sh
+# Synthetic HTTP: only copies a named file from FAKE_RELEASE_DIR. It logs the URL (a synthetic host in every cell) so a cell can check the exact address asked for.
+set -eu
+fetch_field() { shift 3; printf '%s\n' "$1"; }
+fetch_lim=$(grep 'Max file size' /proc/self/limits)
+printf 'curl [fsize %s]' "$(fetch_field $fetch_lim)" >> "$FAKE_LOG"
+fetch_out=
+fetch_url=
+while [ "$#" -gt 0 ]; do
+    case $1 in
+        -o|--output) printf ' %s' "$1" >> "$FAKE_LOG"; shift; fetch_out=${1-}; printf ' [output]' >> "$FAKE_LOG" ;;
+        http://*|https://*) fetch_url=$1; printf ' [url %.120s]' "$1" >> "$FAKE_LOG" ;;   # cut: this log is a file the capped subshell appends to
+        *) printf ' %s' "$1" >> "$FAKE_LOG" ;;
+    esac
+    shift
+done
+printf '\n' >> "$FAKE_LOG"
+case ${FAKE_CURL_MODE:-ok} in fail|absent) exit 1 ;; ok|symlink|big|partial|huge) ;; *) exit 2 ;; esac
+fetch_name=${fetch_url##*/}
+case $fetch_name in ''|*[!A-Za-z0-9._-]*) exit 1 ;; esac
+[ -f "${FAKE_RELEASE_DIR:?}/$fetch_name" ] || exit 1
+case ${FAKE_CURL_MODE:-ok} in
+    symlink) ln -s "$FAKE_RELEASE_DIR/$fetch_name" "$fetch_out"; exit 0 ;;
+    big) head -c 5000 /dev/zero > "$fetch_out"; exit 0 ;;
+    huge) head -c 1048576 /dev/zero > "$fetch_out"; printf 'curl-huge-completed %s\n' "$fetch_name" >> "$FAKE_LOG"; exit 0 ;;
+    partial) head -c 10 "$FAKE_RELEASE_DIR/$fetch_name" > "$fetch_out"; exit 1 ;;
+esac
+if [ -n "$fetch_out" ]; then cp "$FAKE_RELEASE_DIR/$fetch_name" "$fetch_out"; else cat "$FAKE_RELEASE_DIR/$fetch_name"; fi

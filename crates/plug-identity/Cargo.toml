@@ -1,0 +1,23 @@
+[package]
+name = "plug-identity"
+description = "Wave 0 plug fixture: the minimal IdentityApi provider piece (not mod-identity)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+async-trait.workspace = true
+axum = { workspace = true, features = ["json"] }
+cortex-db.workspace = true
+cortex-module.workspace = true
+cortex-types.workspace = true
+serde.workspace = true
+sqlx.workspace = true
+
+[dev-dependencies]
+cortex-testkit.workspace = true
+tokio.workspace = true
+
+[lints]
+workspace = true

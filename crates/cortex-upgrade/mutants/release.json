@@ -1,0 +1,2731 @@
+[
+  {
+    "id": "RM-01",
+    "file": "scripts/release.sh",
+    "what": "CI gate omitted",
+    "old": "\"$ci\" > \"$work/ci.log\" 2>&1 || { echo 'release: CI failed' >&2; exit 1; }",
+    "new": "true",
+    "fails": "test_gates_run_in_order_and_fail_before_build"
+  },
+  {
+    "id": "RM-02",
+    "file": "scripts/release.sh",
+    "what": "S5 gate omitted",
+    "old": "\"$s5\" \"$work/layout\" || { echo 'release: S5 check failed' >&2; exit 1; }",
+    "new": "true",
+    "fails": "test_gates_run_in_order_and_fail_before_build"
+  },
+  {
+    "id": "RM-03",
+    "file": "scripts/release.sh",
+    "what": "proof verdict ignored",
+    "old": "case $proof in",
+    "new": "case 'last live run matches the current scripts' in",
+    "fails": "test_stale_failed_and_missing_proof_stop_before_build"
+  },
+  {
+    "id": "RM-04",
+    "file": "scripts/release.sh",
+    "what": "squawk gate omitted",
+    "old": "        if env -i PATH=/usr/bin:/bin HOME=\"$work/squawk-home\" TMPDIR=\"$work\" RELEASE_TEST_LOG=\"${RELEASE_TEST_LOG:-}\" RELEASE_TEST_FAIL=\"${RELEASE_TEST_FAIL:-}\" \"$squawk\" --config \"$root/scripts/release-squawk.toml\" --reporter json \"$migration\" > \"$work/squawk.json\"; then squawk_status=0; else squawk_status=$?; fi",
+    "new": "        squawk_status=0",
+    "fails": "test_gates_run_in_order_and_fail_before_build"
+  },
+  {
+    "id": "RM-05",
+    "file": "scripts/release.sh",
+    "what": "version not validated",
+    "old": "valid_version \"$version\" || { echo 'release: invalid version' >&2; exit 2; }",
+    "new": "true",
+    "fails": "test_invalid_versions_cannot_run_gates_or_create_files"
+  },
+  {
+    "id": "RM-06",
+    "file": "scripts/release_manifest.py",
+    "what": "cortex archive mode wrong",
+    "old": "\"cortex\": (cli, 0o755)",
+    "new": "\"cortex\": (cli, 0o644)",
+    "fails": "test_complete_release_has_reproducible_verified_assets"
+  },
+  {
+    "id": "RM-07",
+    "file": "scripts/release_manifest.py",
+    "what": "asset digest is typed",
+    "old": "\"digest\": sha(out / name)",
+    "new": "\"digest\": \"sha256:\" + \"a\" * 64",
+    "fails": "test_complete_release_has_reproducible_verified_assets"
+  },
+  {
+    "id": "RM-08",
+    "file": "scripts/release.sh",
+    "what": "staging cleanup omitted",
+    "old": "if [ \"$part_created\" -eq 1 ]; then rm -rf -- \"$part\"; fi",
+    "new": "if [ \"$part_created\" -eq 1 ]; then :; fi",
+    "fails": "test_build_failures_remove_staging"
+  },
+  {
+    "id": "RM-09",
+    "file": "scripts/release.sh",
+    "what": "migration contract scan omitted",
+    "old": "python3 -I \"$helper\" scan-migration --migration \"$migration\" --allow-dynamic \"$allow_dynamic\" || exit 1",
+    "new": "true",
+    "fails": "test_first_release_rejects_contract_migrations_even_with_marker"
+  },
+  {
+    "id": "RM-10",
+    "file": "scripts/release.sh",
+    "what": "notes and label validation omitted",
+    "old": "python3 -I - \"$notes_url\" \"$label\" <<'PYINPUT'",
+    "new": "true <<'PYINPUT'",
+    "fails": "test_notes_and_label_validation_happens_before_gates"
+  },
+  {
+    "id": "RM-11",
+    "file": "scripts/release_manifest.py",
+    "what": "db roles archive mode wrong",
+    "old": "\"db-roles.sh\": (roles, 0o755)",
+    "new": "\"db-roles.sh\": (roles, 0o644)",
+    "fails": "test_complete_release_has_reproducible_verified_assets"
+  },
+  {
+    "id": "RM-12",
+    "file": "scripts/release_manifest.py",
+    "what": "OCI image reference uses a typed digest",
+    "old": "        return digest\n\n\ndef archive(args):",
+    "new": "        return \"sha256:\" + \"a\" * 64\n\n\ndef archive(args):",
+    "fails": "test_complete_release_has_reproducible_verified_assets"
+  },
+  {
+    "id": "RM-13",
+    "file": "scripts/release.sh",
+    "what": "empty explicit minimum silently ignored",
+    "old": "if [ \"$minimum_given\" -eq 1 ]; then",
+    "new": "if [ -n \"$min_upgrade_from\" ]; then",
+    "fails": "test_minimum_version_is_validated_before_gates"
+  },
+  {
+    "id": "RM-14",
+    "file": "scripts/release_manifest.py",
+    "what": "reject allowed initdb prefixes",
+    "old": "[A-Za-z0-9_-][A-Za-z0-9._-]{0,63}",
+    "new": "[A-Za-z0-9][A-Za-z0-9._-]{0,63}",
+    "fails": "test_initdb_names_allow_underscore_and_hyphen_prefixes"
+  },
+  {
+    "id": "RM-15",
+    "file": "scripts/release.sh",
+    "what": "child process scratch follows caller TMPDIR",
+    "old": "TMPDIR=$work\nexport TMPDIR\n",
+    "new": "",
+    "fails": "test_child_commands_use_private_work_directory_for_temporary_files"
+  },
+  {
+    "id": "RM-16",
+    "file": "scripts/release_manifest.py",
+    "what": "multiple OCI manifests accepted",
+    "old": "len(manifests) != 1",
+    "new": "len(manifests) > 2",
+    "fails": "test_malformed_oci_index_refuses_and_cleans_staging"
+  },
+  {
+    "id": "RM-17",
+    "file": "scripts/release.sh",
+    "what": "database service environment lost",
+    "old": "    out.append(line)\nif not changed or services !=",
+    "new": "    if service == 'db' and line.startswith('    environment:'):\n        continue\n    out.append(line)\nif not changed or services !=",
+    "fails": "test_parameterised_database_service_survives_release_build"
+  },
+  {
+    "id": "RM-18",
+    "file": "scripts/release_manifest.py",
+    "what": "initdb directory mode changed",
+    "old": "                info.mode = 0o755\n                out.addfile(info)",
+    "new": "                info.mode = 0o700\n                out.addfile(info)",
+    "fails": "test_complete_release_has_reproducible_verified_assets"
+  },
+  {
+    "id": "RM-19",
+    "file": "scripts/release_manifest.py",
+    "what": "empty platform migrations accepted",
+    "old": "if not platform:",
+    "new": "if False and not platform:",
+    "fails": "test_missing_platform_migration_stops_before_build"
+  },
+  {
+    "id": "RM-20",
+    "file": "scripts/release_manifest.py",
+    "what": "plug migrations included in release set",
+    "old": "root.glob(\"mod-*/migrations/*.up.sql\")",
+    "new": "root.glob(\"*/migrations/*.up.sql\")",
+    "fails": "test_plug_migrations_are_not_in_release_migration_set"
+  },
+  {
+    "id": "RM-21",
+    "file": "scripts/release.sh",
+    "what": "migration discovery skipped before build",
+    "old": "python3 -I \"$helper\" migration-files \"${CORTEX_RELEASE_CRATES_DIR:-$root/crates}\" > \"$work/migrations\"",
+    "new": ": > \"$work/migrations\"",
+    "fails": "test_missing_migration_root_stops_before_build"
+  },
+  {
+    "id": "RM-22",
+    "file": "scripts/release_manifest.py",
+    "what": "quoted procedural SQL is ignored",
+    "old": "out.append(' ' + s[start:i] + ' ' if procedural else ' ')",
+    "new": "out.append(' ')",
+    "fails": "test_contract_sql_inside_quoted_do_stops_before_build"
+  },
+  {
+    "id": "RM-23",
+    "file": "scripts/release.sh",
+    "what": "CLI build omits the source SHA",
+    "old": "CORTEX_GIT_SHA=$git_sha \"$cargo_bin\" build --release --locked -p cortex-cli",
+    "new": "\"$cargo_bin\" build --release --locked -p cortex-cli",
+    "fails": "test_real_cli_build_receives_the_release_git_sha"
+  },
+  {
+    "id": "RM-24",
+    "file": "scripts/release.sh",
+    "what": "workspace version mismatch accepted",
+    "old": "requested != version or version == '0.1.0'",
+    "new": "False or version == '0.1.0'",
+    "fails": "test_release_version_must_match_workspace_before_gates"
+  },
+  {
+    "id": "RM-25",
+    "file": "scripts/release.sh",
+    "what": "development version accepted",
+    "old": "requested != version or version == '0.1.0'",
+    "new": "requested != version or False",
+    "fails": "test_development_version_is_not_a_release"
+  },
+  {
+    "id": "RM-26",
+    "file": "scripts/release.sh",
+    "what": "crate version need not inherit workspace",
+    "old": "manifest['package']['version'] != {'workspace': True} or package['version'] != version",
+    "new": "False or package['version'] != version",
+    "fails": "test_workspace_crate_must_inherit_version"
+  },
+  {
+    "id": "RM-27",
+    "file": "scripts/release_manifest.py",
+    "what": "wrong manifest member list version",
+    "old": "\"members\": 2",
+    "new": "\"members\": 3",
+    "fails": "test_complete_release_has_reproducible_verified_assets"
+  },
+  {
+    "id": "RM-28",
+    "file": "scripts/release_manifest.py",
+    "what": "inline ignore directives permitted",
+    "old": "if 'squawk-ignore' in text.lower():",
+    "new": "if False and 'squawk-ignore' in text.lower():",
+    "fails": "test_squawk_inline_ignore_directives_are_refused"
+  },
+  {
+    "id": "RM-29",
+    "file": "scripts/release_manifest.py",
+    "what": "empty migration allowed",
+    "old": "if not any(token != ';' for token in tokens):",
+    "new": "if False and not any(token != ';' for token in tokens):",
+    "fails": "test_empty_migration_is_refused"
+  },
+  {
+    "id": "RM-30",
+    "file": "scripts/release_manifest.py",
+    "what": "last backup binary omitted",
+    "old": "for name in BIN_MEMBERS:",
+    "new": "for name in BIN_MEMBERS[:-1]:",
+    "fails": "test_expanded_archive_has_each_required_member_with_exact_mode_and_bytes"
+  },
+  {
+    "id": "RM-31",
+    "file": "scripts/release.sh",
+    "what": "separate installer omitted",
+    "old": "install -m 0755 \"$work/install.sh\" \"$part/install.sh\"",
+    "new": "true",
+    "fails": "test_installer_is_separate_checksummed_asset"
+  },
+  {
+    "id": "RM-32",
+    "file": "scripts/release.sh",
+    "what": "installer omitted from checksum file",
+    "old": "sha256sum \"$archive_name\" \"$image_name\" install.sh manifest.json install.meta > SHA256SUMS",
+    "new": "sha256sum \"$archive_name\" \"$image_name\" manifest.json install.meta > SHA256SUMS",
+    "fails": "test_installer_is_separate_checksummed_asset"
+  },
+  {
+    "id": "RM-33",
+    "file": "scripts/release_manifest.py",
+    "what": "installer source may be a symlink",
+    "old": "template = regular(root / \"install.sh\").read_bytes()",
+    "new": "template = (root / \"install.sh\").read_bytes()",
+    "fails": "test_installer_source_symlink_is_refused"
+  },
+  {
+    "id": "RM-34",
+    "file": "scripts/release.sh",
+    "what": "distribution verification omitted",
+    "old": "python3 -I \"$helper\" verify-dist --output-dir \"$part\" --version \"$version\" || { echo 'release: distribution verification failed' >&2; exit 1; }",
+    "new": "true",
+    "fails": "test_builder_refuses_if_dist_verification_fails"
+  },
+  {
+    "id": "RM-35",
+    "file": "scripts/release_manifest.py",
+    "what": "distribution asset digest ignored",
+    "old": "if sha(root / name) != \"sha256:\" + listed[name]:",
+    "new": "if False and sha(root / name) != \"sha256:\" + listed[name]:",
+    "fails": "test_dist_verification_requires_every_sibling_and_exact_hash"
+  },
+  {
+    "id": "RM-36",
+    "file": "scripts/release_manifest.py",
+    "what": "extra distribution siblings accepted",
+    "old": "if {p.name for p in root.iterdir()} != expected | {\"SHA256SUMS\"}:",
+    "new": "if False and {p.name for p in root.iterdir()} != expected | {\"SHA256SUMS\"}:",
+    "fails": "test_dist_verification_requires_every_sibling_and_exact_hash"
+  },
+  {
+    "id": "RM-37",
+    "file": "scripts/release_manifest.py",
+    "what": "duplicate distribution checksums accepted",
+    "old": "if name in listed:",
+    "new": "if False and name in listed:",
+    "fails": "test_dist_verification_requires_every_sibling_and_exact_hash"
+  },
+  {
+    "id": "RM-38",
+    "file": "scripts/release_manifest.py",
+    "what": "distribution symlink accepted",
+    "old": "if path.is_symlink() or not path.is_file():",
+    "new": "if not path.is_file():",
+    "fails": "test_dist_verification_requires_every_sibling_and_exact_hash"
+  },
+  {
+    "id": "RM-39",
+    "file": "scripts/release_manifest.py",
+    "what": "computed procedural SQL accepted",
+    "old": "if dynamic and not allow_dynamic:\n        die('dynamic SQL requires review: ' + name)",
+    "new": "if False and dynamic and not allow_dynamic:\n        die('dynamic SQL requires review: ' + name)",
+    "fails": "test_computed_contract_sql_inside_do_or_function_is_refused"
+  },
+  {
+    "id": "RM-40",
+    "file": "scripts/release_manifest.py",
+    "what": "language-prefixed DO body ignored",
+    "old": "            procedural = quote == \"'\" and (\n                re.match(r'\\s*DO\\b', prefix, re.IGNORECASE)\n                or re.search(r'\\bAS\\s*(?:E)?$', prefix, re.IGNORECASE)\n            )",
+    "new": "            procedural = quote == \"'\" and re.search(r'\\b(?:DO|AS)\\s*(?:E)?$', prefix, re.IGNORECASE)",
+    "fails": "test_do_language_before_quoted_body_cannot_hide_contract_sql"
+  },
+  {
+    "id": "RM-41",
+    "file": "scripts/release_manifest.py",
+    "what": "metadata version differs from manifest",
+    "old": "f\"RELEASE_VERSION={entry['version']}\\n\"",
+    "new": "f\"RELEASE_VERSION=0.0.0\\n\"",
+    "fails": "test_install_metadata_matches_manifest_and_release_archive"
+  },
+  {
+    "id": "RM-42",
+    "file": "scripts/release.sh",
+    "what": "joined installer shell syntax not checked",
+    "old": "sh -n \"$work/install.sh\" || { echo 'release: joined installer is invalid shell' >&2; exit 1; }",
+    "new": "true",
+    "fails": "test_installer_join_refuses_missing_or_invalid_sources_and_markers"
+  },
+  {
+    "id": "RM-43",
+    "file": "scripts/release_manifest.py",
+    "what": "remaining include marker accepted",
+    "old": "if b'# @include' in template:",
+    "new": "if False and b'# @include' in template:",
+    "fails": "test_installer_join_refuses_missing_or_invalid_sources_and_markers"
+  },
+  {
+    "id": "RM-44",
+    "file": "scripts/release_manifest.py",
+    "what": "one changed migration byte passes the exact hash check",
+    "old": "if hashlib.sha256(raw).hexdigest() != BASELINE_SHA256:",
+    "new": "if False and hashlib.sha256(raw).hexdigest() != BASELINE_SHA256:",
+    "fails": "test_exc_b11_the_frozen_matcher_guards_its_own_inputs",
+    "only": "test_exc_b11_the_frozen_matcher_guards_its_own_inputs"
+  },
+  {
+    "id": "RM-45",
+    "file": "scripts/release_manifest.py",
+    "what": "a different migration path receives the baseline exception",
+    "old": "migration != root / BASELINE_PATH):",
+    "new": "False):",
+    "fails": "test_exc_b11_the_frozen_matcher_guards_its_own_inputs",
+    "only": "test_exc_b11_the_frozen_matcher_guards_its_own_inputs"
+  },
+  {
+    "id": "RM-46",
+    "file": "scripts/release_manifest.py",
+    "what": "additional Squawk findings are ignored",
+    "old": "return sorted(observed) == sorted(BASELINE_SQUAWK)",
+    "new": "return all(item in observed for item in BASELINE_SQUAWK)",
+    "fails": "test_approved_baseline_rejects_fifth_squawk_finding"
+  },
+  {
+    "id": "RM-47",
+    "file": "scripts/release_manifest.py",
+    "what": "guarded installer include lines are not joined",
+    "old": "if line in (plain, guarded)]",
+    "new": "if line == plain]",
+    "fails": "test_installer_joins_guarded_development_includes"
+  },
+  {
+    "id": "RM-48",
+    "file": "scripts/release-fixtures/server-features.fixture",
+    "what": "release feature list omits search",
+    "old": ",mod-search",
+    "new": "",
+    "fails": "test_release_image_uses_exactly_declared_features"
+  },
+  {
+    "id": "RM-49",
+    "file": "scripts/release-fixtures/server-features.fixture",
+    "what": "release feature list adds test-faults",
+    "old": "mod-boot",
+    "new": "mod-boot,test-faults",
+    "fails": "test_release_image_uses_exactly_declared_features"
+  },
+  {
+    "id": "RM-50",
+    "file": "scripts/release_manifest.py",
+    "what": "test-faults is accepted as a release feature",
+    "old": "set(features) != REQUIRED_SERVER_FEATURES",
+    "new": "set(features) - {\"test-faults\"} != REQUIRED_SERVER_FEATURES",
+    "fails": "test_release_rejects_test_faults_feature"
+  },
+  {
+    "id": "RM-51",
+    "file": "scripts/release.sh",
+    "what": "image build accepts a feature build argument",
+    "old": "--build-arg \"CORTEX_GIT_SHA=$git_sha\" --tag \"$image_tag\"",
+    "new": "--build-arg \"CORTEX_GIT_SHA=$git_sha\" --build-arg \"SERVER_FEATURES=mod-policy\" --tag \"$image_tag\"",
+    "fails": "test_release_image_uses_exactly_declared_features"
+  },
+  {
+    "id": "RM-52",
+    "file": "scripts/release.sh",
+    "what": "image build accepts a features command override",
+    "old": "--build-arg \"CORTEX_GIT_SHA=$git_sha\" --tag \"$image_tag\"",
+    "new": "--build-arg \"CORTEX_GIT_SHA=$git_sha\" --features=mod-policy --tag \"$image_tag\"",
+    "fails": "test_release_image_uses_exactly_declared_features"
+  },
+  {
+    "id": "RM-53",
+    "file": "scripts/release.sh",
+    "what": "feature file may change after validation",
+    "old": "[ \"$feature_digest\" = \"$(python3 -I \"$helper\" file-digest --path \"$root/deploy/server-features\")\" ] || { echo 'release: server feature file changed before image build' >&2; exit 1; }",
+    "new": "true",
+    "fails": "test_release_refuses_feature_file_changed_after_validation"
+  },
+  {
+    "id": "RM-54",
+    "file": "scripts/release.sh",
+    "what": "no PATH check at all (empty and relative elements allowed)",
+    "old": "case \":${PATH-}:\" in\n    *:[!/]*) echo 'release: PATH has an empty or relative element' >&2; exit 2 ;;\nesac\n",
+    "new": ":\n",
+    "fails": "test_rb4_an_empty_path_element_is_refused_before_any_tree_file_runs"
+  },
+  {
+    "id": "RM-55",
+    "file": "scripts/release.sh",
+    "what": "an empty PATH element is allowed (only relative elements refused)",
+    "old": "*:[!/]*) echo 'release: PATH has",
+    "new": "*:[!/:]*) echo 'release: PATH has",
+    "fails": "test_rb4_an_empty_path_element_is_refused_before_any_tree_file_runs"
+  },
+  {
+    "id": "RM-56",
+    "file": "scripts/release.sh",
+    "what": "a relative PATH element is allowed (only empty elements refused)",
+    "old": "*:[!/]*) echo 'release: PATH has",
+    "new": "*::*) echo 'release: PATH has",
+    "fails": "test_rb4_a_relative_path_element_is_refused_before_any_tree_file_runs"
+  },
+  {
+    "id": "RM-57",
+    "file": "scripts/release.sh",
+    "what": "helper tools keep the caller's PATH (no reset to /usr/bin:/bin)",
+    "old": "PATH=/usr/bin:/bin\nexport PATH\n",
+    "new": "",
+    "fails": "test_rb4_helper_tools_are_not_looked_up_on_the_callers_path"
+  },
+  {
+    "id": "RM-58",
+    "file": "scripts/release.sh",
+    "what": "the CI gate loses the caller's PATH",
+    "old": "PATH=$caller_path \"$ci\" > \"$work/ci.log\"",
+    "new": "\"$ci\" > \"$work/ci.log\"",
+    "fails": "test_rb4_the_three_gates_keep_the_callers_path"
+  },
+  {
+    "id": "RM-59",
+    "file": "scripts/release.sh",
+    "what": "the S5 gate loses the caller's PATH",
+    "old": "PATH=$caller_path \"$s5\" \"$work/layout\"",
+    "new": "\"$s5\" \"$work/layout\"",
+    "fails": "test_rb4_the_three_gates_keep_the_callers_path"
+  },
+  {
+    "id": "RM-60",
+    "file": "scripts/release.sh",
+    "what": "the proof gate loses the caller's PATH",
+    "old": "proof=$(PATH=$caller_path \"$CORTEX_RELEASE_PROOF\")",
+    "new": "proof=$(\"$CORTEX_RELEASE_PROOF\")",
+    "fails": "test_rb4_the_three_gates_keep_the_callers_path"
+  },
+  {
+    "id": "RM-61",
+    "file": "scripts/release.sh",
+    "what": "seams honoured without the fixture marker",
+    "old": "    [ \"${CORTEX_RELEASE_FIXTURE_ROOT:-}\" = \"$root\" ] || { echo \"release: test seams are set outside a fixture ($seams); a real release sets none of them\" >&2; exit 2; }\n",
+    "new": "    :\n",
+    "fails": "test_rb3_each_seam_without_the_fixture_marker_refuses_before_any_gate"
+  },
+  {
+    "id": "RM-62",
+    "file": "scripts/release.sh",
+    "what": "any marker value unlocks the seams (not the root being built)",
+    "old": "[ \"${CORTEX_RELEASE_FIXTURE_ROOT:-}\" = \"$root\" ] ||",
+    "new": "[ -n \"${CORTEX_RELEASE_FIXTURE_ROOT:-}\" ] ||",
+    "fails": "test_rb3_a_marker_naming_another_root_does_not_unlock_the_seams"
+  },
+  {
+    "id": "RM-63",
+    "file": "scripts/release.sh",
+    "what": "the first seam (CI) is not in the checked list",
+    "old": "for seam in CORTEX_RELEASE_CI CORTEX_RELEASE_S5",
+    "new": "for seam in CORTEX_RELEASE_S5",
+    "fails": "test_rb3_each_seam_without_the_fixture_marker_refuses_before_any_gate"
+  },
+  {
+    "id": "RM-64",
+    "file": "scripts/release.sh",
+    "what": "the last seam (TOML) is not in the checked list",
+    "old": "CORTEX_RELEASE_CRATES_DIR CORTEX_RELEASE_TOML; do",
+    "new": "CORTEX_RELEASE_CRATES_DIR; do",
+    "fails": "test_rb3_each_seam_without_the_fixture_marker_refuses_before_any_gate"
+  },
+  {
+    "id": "RM-65",
+    "file": "scripts/release.sh",
+    "what": "active seams are not named on stderr",
+    "old": "    echo \"release: TEST SEAMS ACTIVE (this is not a real release): $seams\" >&2\n",
+    "new": "    :\n",
+    "fails": "test_rb3_a_seam_release_names_its_seams_on_stderr_and_in_install_meta"
+  },
+  {
+    "id": "RM-66",
+    "file": "scripts/release.sh",
+    "what": "active seams are not passed to the manifest step",
+    "old": " --seams \"$seams\" \\\n",
+    "new": " \\\n",
+    "fails": "test_rb3_a_seam_release_names_its_seams_on_stderr_and_in_install_meta"
+  },
+  {
+    "id": "RM-67",
+    "file": "scripts/release_manifest.py",
+    "what": "install.meta always has a RELEASE_SEAMS line (even empty)",
+    "old": "(f\"RELEASE_SEAMS={args.seams}\\n\" if args.seams else \"\")",
+    "new": "(f\"RELEASE_SEAMS={args.seams}\\n\")",
+    "fails": "test_rb3_the_manifest_helper_writes_the_seams_line_only_when_given"
+  },
+  {
+    "id": "RM-68",
+    "file": "scripts/release_manifest.py",
+    "what": "the seam list is not validated",
+    "old": "    if args.seams and not re.fullmatch(",
+    "new": "    if False and not re.fullmatch(",
+    "fails": "test_rb3_the_manifest_helper_writes_the_seams_line_only_when_given"
+  },
+  {
+    "id": "RM-69",
+    "file": "scripts/release.sh",
+    "what": "a dirty tree is accepted",
+    "old": "        [ -z \"$changes\" ] || { echo \"release: the work tree is not clean ($1); commit or remove every change before a release\" >&2; exit 1; }\n",
+    "new": "        :\n",
+    "fails": "test_rb1_an_untracked_file_in_deploy_refuses_a_release_under_a_clean_sha"
+  },
+  {
+    "id": "RM-70",
+    "file": "scripts/release.sh",
+    "what": "untracked files are not counted",
+    "old": "--untracked-files=all",
+    "new": "--untracked-files=no",
+    "fails": "test_rb1_an_untracked_file_in_deploy_refuses_a_release_under_a_clean_sha"
+  },
+  {
+    "id": "RM-71",
+    "file": "scripts/release.sh",
+    "what": "the top-of-its-own-work-tree check is omitted",
+    "old": "    [ \"$(CDPATH= cd -- \"$toplevel\" && pwd -P)\" = \"$(CDPATH= cd -- \"$root\" && pwd -P)\" ] || { echo 'release: this directory is not the top of its own git work tree' >&2; exit 1; }\n",
+    "new": "    :\n",
+    "fails": "test_rb1_a_root_inside_another_work_tree_is_refused"
+  },
+  {
+    "id": "RM-72",
+    "file": "scripts/release.sh",
+    "what": "target/ is not excluded from the clean check",
+    "old": " ':(exclude)target'",
+    "new": "",
+    "fails": "test_rb1_target_dist_and_the_one_squawk_binary_do_not_dirty_the_tree"
+  },
+  {
+    "id": "RM-73",
+    "file": "scripts/release.sh",
+    "what": "dist/ is not excluded from the clean check",
+    "old": " ':(exclude)dist'",
+    "new": "",
+    "fails": "test_rb1_target_dist_and_the_one_squawk_binary_do_not_dirty_the_tree"
+  },
+  {
+    "id": "RM-74",
+    "file": "scripts/release.sh",
+    "what": "the squawk binary is not excluded from the clean check",
+    "old": " ':(exclude)tools/squawk/2.71.0/squawk-linux-musl-x64'",
+    "new": "",
+    "fails": "test_rb1_target_dist_and_the_one_squawk_binary_do_not_dirty_the_tree"
+  },
+  {
+    "id": "RM-75",
+    "file": "scripts/release.sh",
+    "what": "the whole git check is skipped",
+    "old": "if [ -z \"${CORTEX_RELEASE_GIT_SHA:-}\" ]; then\n    git_checked=1\n",
+    "new": "if false; then\n    git_checked=1\n",
+    "fails": "test_rb1_an_untracked_file_in_deploy_refuses_a_release_under_a_clean_sha"
+  },
+  {
+    "id": "RM-76",
+    "file": "scripts/release.sh",
+    "what": "the installer join reads the live deploy/",
+    "old": "        python3 -I \"$helper\" join-installer --deploy \"$work/layout\" --output \"$work/install.sh\"\n    fi\n",
+    "new": "        python3 -I \"$helper\" join-installer --deploy \"$root/deploy\" --output \"$work/install.sh\"\n    fi\n",
+    "fails": "test_rb2_the_shipped_installer_is_the_copy_s5_read_not_the_live_file"
+  },
+  {
+    "id": "RM-77",
+    "file": "scripts/release.sh",
+    "what": "the db image is read from the live compose.yml",
+    "old": "db-image \"$work/layout/compose.yml\"",
+    "new": "db-image \"$root/deploy/compose.yml\"",
+    "fails": "test_rb2_every_input_of_the_join_db_image_archive_and_manifest_steps_is_a_snapshot_in_the_work_directory"
+  },
+  {
+    "id": "RM-78",
+    "file": "scripts/release.sh",
+    "what": "the archive reads the live bin scripts",
+    "old": "--scripts \"$work/scripts\"",
+    "new": "--scripts \"$root/scripts\"",
+    "fails": "test_rb2_every_input_of_the_join_db_image_archive_and_manifest_steps_is_a_snapshot_in_the_work_directory"
+  },
+  {
+    "id": "RM-79",
+    "file": "scripts/release.sh",
+    "what": "the manifest reads the live toml",
+    "old": "${CORTEX_RELEASE_TOML:-$work/layout/cortex.toml.example}",
+    "new": "${CORTEX_RELEASE_TOML:-$root/deploy/cortex.toml.example}",
+    "fails": "test_rb2_every_input_of_the_join_db_image_archive_and_manifest_steps_is_a_snapshot_in_the_work_directory"
+  },
+  {
+    "id": "RM-80",
+    "file": "scripts/release.sh",
+    "what": "no end recheck of the live deploy/",
+    "old": "[ \"$(tree_digest \"$root/deploy\")\" = \"$deploy_digest\" ] || { echo 'release: a deploy file changed during the release' >&2; exit 1; }\n",
+    "new": ":\n",
+    "fails": "test_rb2_a_deploy_file_changed_during_the_release_refuses_it"
+  },
+  {
+    "id": "RM-81",
+    "file": "scripts/release.sh",
+    "what": "no end recheck of the live bin scripts",
+    "old": "[ \"$(members_digest \"$root/scripts\")\" = \"$scripts_digest\" ] || { echo 'release: a bin script changed during the release' >&2; exit 1; }\n",
+    "new": ":\n",
+    "fails": "test_rb2_a_bin_script_changed_during_the_release_refuses_it"
+  },
+  {
+    "id": "RM-82",
+    "file": "scripts/release.sh",
+    "what": "one bin script (restore-compare) is not in the snapshot list",
+    "old": "cortex-restore restore-compare'",
+    "new": "cortex-restore'",
+    "fails": "test_complete_release_has_reproducible_verified_assets"
+  },
+  {
+    "id": "RM-83",
+    "file": "scripts/release.sh",
+    "what": "the server manifest is not copied beside the layout",
+    "old": "cp -p -- \"$root/crates/cortex-server/Cargo.toml\" \"$work/crates/cortex-server/Cargo.toml\"\n",
+    "new": ":\n",
+    "fails": "test_x1_the_real_s5_checker_passes_the_release_layout"
+  },
+  {
+    "id": "RM-84",
+    "file": "scripts/release.sh",
+    "what": "a missing server manifest is not named",
+    "old": "[ -f \"$root/crates/cortex-server/Cargo.toml\" ] && [ ! -L \"$root/crates/cortex-server/Cargo.toml\" ] || { echo 'release: crates/cortex-server/Cargo.toml is missing (the S5 gate reads it beside the layout)' >&2; exit 1; }\n",
+    "new": ":\n",
+    "fails": "test_x1_a_missing_server_cargo_toml_refuses_before_the_s5_gate"
+  },
+  {
+    "id": "RM-85",
+    "file": "scripts/release.sh",
+    "what": "a symlinked server manifest is accepted",
+    "old": " && [ ! -L \"$root/crates/cortex-server/Cargo.toml\" ]",
+    "new": "",
+    "fails": "test_x1_a_symlinked_server_cargo_toml_is_refused_before_the_s5_gate"
+  },
+  {
+    "id": "RM-86",
+    "file": "scripts/release.sh",
+    "what": "no clean-tree check after the layout copy (an edit during the CI gate ships)",
+    "old": "[ \"$git_checked\" -eq 0 ] || tree_clean \"after the CI gate\"\n",
+    "new": ":\n",
+    "fails": "test_rb12_an_edit_during_the_ci_gate_refuses_the_release"
+  },
+  {
+    "id": "RM-87",
+    "file": "scripts/release.sh",
+    "what": "no clean-tree check before the move (an edit during the image build ships)",
+    "old": "    tree_clean \"at the end\"\n",
+    "new": "    :\n",
+    "fails": "test_rb12_an_edit_during_the_image_build_refuses_the_release"
+  },
+  {
+    "id": "RM-88",
+    "file": "scripts/release.sh",
+    "what": "the git HEAD is not compared at the end",
+    "old": "    [ \"$(git_env rev-parse HEAD)\" = \"$start_head\" ] || { echo 'release: the git HEAD moved during the release' >&2; exit 1; }\n",
+    "new": "    :\n",
+    "fails": "test_rb12_a_head_that_moves_during_the_release_refuses_it"
+  },
+  {
+    "id": "RM-89",
+    "file": "scripts/release.sh",
+    "what": "an ignored file under deploy/ is accepted",
+    "old": "        [ -z \"$ignored\" ] || { echo \"release: an ignored file under deploy/ would be shipped ($1): $(printf '%s\\n' \"$ignored\" | head -n 1)\" >&2; exit 1; }\n",
+    "new": "        :\n",
+    "fails": "test_rb12_an_ignored_file_under_deploy_refuses_the_release"
+  },
+  {
+    "id": "RM-90",
+    "file": "scripts/release.sh",
+    "what": "no clean-tree check at the start (a dirty tree is caught only after the CI gate ran)",
+    "old": "    tree_clean \"at the start\"\n",
+    "new": "    :\n",
+    "fails": "test_rb1_an_untracked_file_in_deploy_refuses_a_release_under_a_clean_sha"
+  },
+  {
+    "id": "RM-91",
+    "file": "scripts/release.sh",
+    "what": "RB-11: the functions the next line needs (compgen) are not dropped first",
+    "old": "case ${BASH_VERSION-} in ?*) unset -f '[' test compgen builtin command type ;; esac\n",
+    "new": "",
+    "fails": "test_rb11_exported_shell_functions_cannot_replace_the_guards"
+  },
+  {
+    "id": "RM-92",
+    "file": "scripts/release.sh",
+    "what": "RB-11: the imported functions are not dropped (only the named few)",
+    "old": "case ${BASH_VERSION-} in ?*) for release_fn in $(compgen -A function); do unset -f \"$release_fn\"; done ;; esac\n",
+    "new": "",
+    "fails": "test_rb11_exported_shell_functions_cannot_replace_the_guards"
+  },
+  {
+    "id": "RM-93",
+    "file": "scripts/release_manifest.py",
+    "what": "the record says schema 2",
+    "old": "{\"schema\": 2 if anchor else 1, \"object_format\"",
+    "new": "{\"schema\": 2, \"object_format\"",
+    "fails": "test_g12_the_join_helper_writes_a_record_a_strict_validator_accepts"
+  },
+  {
+    "id": "RM-94",
+    "file": "scripts/release_manifest.py",
+    "what": "the record's schema is a boolean",
+    "old": "{\"schema\": 2 if anchor else 1, \"object_format\"",
+    "new": "{\"schema\": True, \"object_format\"",
+    "fails": "test_g12_the_join_helper_writes_a_record_a_strict_validator_accepts"
+  },
+  {
+    "id": "RM-95",
+    "file": "scripts/release_manifest.py",
+    "what": "commit and tree are swapped in the record",
+    "old": "\"commit\": args.commit, \"tree\": args.tree,",
+    "new": "\"commit\": args.tree, \"tree\": args.commit,",
+    "fails": "test_g12_the_join_helper_writes_a_record_a_strict_validator_accepts"
+  },
+  {
+    "id": "RM-96",
+    "file": "scripts/release_manifest.py",
+    "what": "the includes are listed by name, not in the order of the marker lines",
+    "old": "for _, name, digest in sorted(includes)]",
+    "new": "for _, name, digest in sorted(includes, key=lambda i: i[1])]",
+    "fails": "test_g12_the_join_helper_writes_a_record_a_strict_validator_accepts"
+  },
+  {
+    "id": "RM-97",
+    "file": "scripts/release_manifest.py",
+    "what": "an include's hash is taken from the joined text, not from the include's bytes",
+    "old": "includes.append((original.index(markers[0]), name, hashlib.sha256(source).hexdigest()))",
+    "new": "includes.append((original.index(markers[0]), name, hashlib.sha256(template).hexdigest()))",
+    "fails": "test_g12_the_join_helper_writes_a_record_a_strict_validator_accepts"
+  },
+  {
+    "id": "RM-98",
+    "file": "scripts/release_manifest.py",
+    "what": "the splice sentence differs",
+    "old": "SPLICE = \"each '# @include' marker line",
+    "new": "SPLICE = \"each '#include' marker line",
+    "fails": "test_g12_the_join_helper_writes_a_record_a_strict_validator_accepts"
+  },
+  {
+    "id": "RM-99",
+    "file": "scripts/release_manifest.py",
+    "what": "joined_sha256 is the hash of the template before the join",
+    "old": "\"joined_sha256\": hashlib.sha256(template).hexdigest()}",
+    "new": "\"joined_sha256\": hashlib.sha256(original).hexdigest()}",
+    "fails": "test_g12_the_join_helper_writes_a_record_a_strict_validator_accepts"
+  },
+  {
+    "id": "RM-100",
+    "file": "scripts/release_manifest.py",
+    "what": "an unknown key in the record",
+    "old": "\"splice\": ANCHOR_SPLICE if anchor else SPLICE, \"joined_sha256\"",
+    "new": "\"splice\": ANCHOR_SPLICE if anchor else SPLICE, \"note\": \"x\", \"joined_sha256\"",
+    "fails": "test_g12_the_join_helper_writes_a_record_a_strict_validator_accepts"
+  },
+  {
+    "id": "RM-101",
+    "file": "scripts/release_manifest.py",
+    "what": "a key missing from the record (tree)",
+    "old": "\"commit\": args.commit, \"tree\": args.tree,\n",
+    "new": "\"commit\": args.commit,\n",
+    "fails": "test_g12_the_join_helper_writes_a_record_a_strict_validator_accepts"
+  },
+  {
+    "id": "RM-102",
+    "file": "scripts/release_manifest.py",
+    "what": "the record has no final newline",
+    "old": "(json.dumps(record, indent=2) + \"\\n\").encode(\"ascii\")",
+    "new": "json.dumps(record, indent=2).encode(\"ascii\")",
+    "fails": "test_g12_the_join_helper_writes_a_record_a_strict_validator_accepts"
+  },
+  {
+    "id": "RM-103",
+    "file": "scripts/release_manifest.py",
+    "what": "the width of the ids is not checked",
+    "old": "if not re.fullmatch(\"[0-9a-f]{%d}\" % width, value, re.ASCII):",
+    "new": "if False:",
+    "fails": "test_g12_the_object_format_decides_the_width_of_the_ids"
+  },
+  {
+    "id": "RM-104",
+    "file": "scripts/release_manifest.py",
+    "what": "a record without all four options is accepted",
+    "old": "if any(given) and not all(given):",
+    "new": "if False:",
+    "fails": "test_g12_a_record_needs_all_three_arguments_and_writes_nothing_without_them"
+  },
+  {
+    "id": "RM-105",
+    "file": "scripts/release_manifest.py",
+    "what": "upper-case hex is accepted",
+    "old": "\"[0-9a-f]{%d}\" % width",
+    "new": "\"[0-9a-fA-F]{%d}\" % width",
+    "fails": "test_g12_the_object_format_decides_the_width_of_the_ids"
+  },
+  {
+    "id": "RM-106",
+    "file": "scripts/release.sh",
+    "what": "the record is published inside the release directory",
+    "old": "\"$root/dist/$version.install.sh.binding.json\" || { echo \"release: cannot publish the binding record;",
+    "new": "\"$root/dist/$version/install.sh.binding.json\" || { echo \"release: cannot publish the binding record;",
+    "fails": "test_g12_a_real_release_publishes_the_record_beside_the_release_directory"
+  },
+  {
+    "id": "RM-107",
+    "file": "scripts/release.sh",
+    "what": "a seam release does not say that it writes no record",
+    "old": "    echo 'release: no binding record (a test-seam release has no commit to bind to)' >&2\n",
+    "new": "    :\n",
+    "fails": "test_g12_a_seam_release_writes_no_record_and_says_so"
+  },
+  {
+    "id": "RM-108",
+    "file": "scripts/release.sh",
+    "what": "a stale record destination is not refused",
+    "old": "[ ! -e \"dist/$version.install.sh.binding.json\" ] && [ ! -L \"dist/$version.install.sh.binding.json\" ] || { echo 'release: binding record destination exists' >&2; exit 1; }\n",
+    "new": ":\n",
+    "fails": "test_g12_a_stale_record_destination_refuses_before_any_gate"
+  },
+  {
+    "id": "RM-109",
+    "file": "scripts/release.sh",
+    "what": "the tree id passed to the join is the commit",
+    "old": "--tree \"$start_tree\"",
+    "new": "--tree \"$start_head\"",
+    "fails": "test_g12_a_real_release_publishes_the_record_beside_the_release_directory"
+  },
+  {
+    "id": "RM-110",
+    "file": "scripts/release.sh",
+    "what": "the commit id passed to the join is the tree",
+    "old": "--commit \"$start_head\"",
+    "new": "--commit \"$start_tree\"",
+    "fails": "test_g12_a_real_release_publishes_the_record_beside_the_release_directory"
+  },
+  {
+    "id": "RM-111",
+    "file": "scripts/release.sh",
+    "what": "the record is written into dist at join time (published even when the release later fails)",
+    "old": "--record \"$work/install.sh.binding.json\" --commit",
+    "new": "--record \"$root/dist/$version.install.sh.binding.json\" --commit",
+    "fails": "test_g12_a_release_that_fails_after_the_join_publishes_no_record"
+  },
+  {
+    "id": "RM-112",
+    "file": "scripts/release_manifest.py",
+    "what": "the includes are listed in the order of the builder's names, not of the marker lines",
+    "old": "for _, name, digest in sorted(includes)]",
+    "new": "for _, name, digest in sorted(includes, key=lambda i: (\"install-prereq.sh\", \"install-fetch.sh\").index(i[1]))]",
+    "fails": "test_g12_the_include_order_is_the_order_of_the_marker_lines"
+  },
+  {
+    "id": "RM-113",
+    "file": "scripts/release_manifest.py",
+    "what": "a file exactly at the cap is refused (>= instead of >)",
+    "old": "        if size > cap:",
+    "new": "        if size >= cap:",
+    "fails": "test_cap_each_staged_file_passes_at_its_own_cap_and_refuses_one_byte_over"
+  },
+  {
+    "id": "RM-114",
+    "file": "scripts/release_manifest.py",
+    "what": "a file one byte over the cap is accepted",
+    "old": "        if size > cap:",
+    "new": "        if size > cap + 1:",
+    "fails": "test_cap_each_staged_file_passes_at_its_own_cap_and_refuses_one_byte_over"
+  },
+  {
+    "id": "RM-115",
+    "file": "scripts/release_manifest.py",
+    "what": "the cap is 2 MiB",
+    "old": "STAGED_FILE_MAX_BYTES = 1024 * 1024\n",
+    "new": "STAGED_FILE_MAX_BYTES = 2 * 1024 * 1024\n",
+    "fails": "test_cap_each_staged_file_passes_at_its_own_cap_and_refuses_one_byte_over"
+  },
+  {
+    "id": "RM-116",
+    "file": "scripts/release_manifest.py",
+    "what": "compose.yml is not checked",
+    "old": "    for name, cap, reason in bounds:\n        size = regular",
+    "new": "    for name, cap, reason in bounds[:1]:\n        size = regular",
+    "fails": "test_cap_each_staged_file_passes_at_its_own_cap_and_refuses_one_byte_over"
+  },
+  {
+    "id": "RM-117",
+    "file": "scripts/release_manifest.py",
+    "what": "db-roles.sh is not checked",
+    "old": "    for name, cap, reason in bounds:\n        size = regular",
+    "new": "    for name, cap, reason in bounds[1:]:\n        size = regular",
+    "fails": "test_cap_each_staged_file_passes_at_its_own_cap_and_refuses_one_byte_over"
+  },
+  {
+    "id": "RM-118",
+    "file": "scripts/release.sh",
+    "what": "the size check is not run by the release",
+    "old": "python3 -I \"$helper\" check-staged-sizes --layout \"$work/layout\"\n",
+    "new": ":\n",
+    "fails": "test_cap_a_release_with_a_roles_script_at_the_cap_builds_and_one_byte_over_refuses_before_s5"
+  },
+  {
+    "id": "RM-119",
+    "file": "scripts/release.sh",
+    "what": "the size check runs after S5, not before",
+    "old": "python3 -I \"$helper\" check-staged-sizes --layout \"$work/layout\"\nPATH=$caller_path \"$s5\" \"$work/layout\" || { echo 'release: S5 check failed' >&2; exit 1; }\n",
+    "new": "PATH=$caller_path \"$s5\" \"$work/layout\" || { echo 'release: S5 check failed' >&2; exit 1; }\npython3 -I \"$helper\" check-staged-sizes --layout \"$work/layout\"\n",
+    "fails": "test_cap_a_release_with_a_compose_file_over_the_cap_refuses_before_s5"
+  },
+  {
+    "id": "RM-120",
+    "file": "scripts/release_manifest.py",
+    "what": "the refusal does not name the file",
+    "old": "die(f\"{name} is {size} bytes, over",
+    "new": "die(f\"the file is {size} bytes, over",
+    "fails": "test_cap_each_staged_file_passes_at_its_own_cap_and_refuses_one_byte_over"
+  },
+  {
+    "id": "RM-121",
+    "file": "scripts/release_manifest.py",
+    "what": "the refusal does not name the Rust constant",
+    "old": "the verifier accepts (STAGED_FILE_MAX_BYTES in crates/cortex-upgrade/src/verify.rs)",
+    "new": "the verifier accepts",
+    "fails": "test_cap_each_staged_file_passes_at_its_own_cap_and_refuses_one_byte_over"
+  },
+  {
+    "id": "RM-122",
+    "file": "scripts/release_manifest.py",
+    "what": "compose.yml is bounded by the verifier's 1 MiB, not the engine's 256 KiB",
+    "old": "COMPOSE_FILE_MAX_BYTES = 256 * 1024\n",
+    "new": "COMPOSE_FILE_MAX_BYTES = 1024 * 1024\n",
+    "fails": "test_cap_compose_yml_and_db_roles_sh_have_different_bounds"
+  },
+  {
+    "id": "RM-123",
+    "file": "scripts/release_manifest.py",
+    "what": "db-roles.sh is bounded by the compose bound",
+    "old": "(\"db-roles.sh\", STAGED_FILE_MAX_BYTES,",
+    "new": "(\"db-roles.sh\", COMPOSE_FILE_MAX_BYTES,",
+    "fails": "test_cap_compose_yml_and_db_roles_sh_have_different_bounds"
+  },
+  {
+    "id": "RM-124",
+    "file": "scripts/release_manifest.py",
+    "what": "the compose refusal names the verifier's constant, not the engine's",
+    "old": "the upgrade engine reads (FILE_MAX_BYTES in crates/cortex-upgrade/src/compose.rs)",
+    "new": "the verifier accepts (STAGED_FILE_MAX_BYTES in crates/cortex-upgrade/src/verify.rs)",
+    "fails": "test_cap_each_staged_file_passes_at_its_own_cap_and_refuses_one_byte_over"
+  },
+  {
+    "id": "RM-125",
+    "file": "scripts/release.sh",
+    "what": "the record is moved without -T, so a directory at its name absorbs it",
+    "old": "mv -T -n -- \"$work/install.sh.binding.json\"",
+    "new": "mv -n -- \"$work/install.sh.binding.json\"",
+    "fails": "test_g12e1_a_directory_created_at_the_record_name_during_the_build_does_not_absorb_the_record"
+  },
+  {
+    "id": "RM-126",
+    "file": "scripts/release.sh",
+    "what": "the refusal after a record move that left the record behind does not say the release directory is already published",
+    "old": "release: binding record destination appeared during build; dist/$version is already published: remove it before running again",
+    "new": "release: binding record destination appeared during build",
+    "fails": "test_g12e2_a_failed_record_move_says_the_release_directory_is_already_published"
+  },
+  {
+    "id": "RM-127",
+    "file": "scripts/release_manifest.py",
+    "what": "the matcher version is accepted as any number equal to 2 (a float passes)",
+    "old": "if type(entry[\"matcher\"]) is not int or entry[\"matcher\"] != 2:",
+    "new": "if entry[\"matcher\"] != 2:",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-128",
+    "file": "scripts/release_manifest.py",
+    "what": "an unknown matcher version 3 is accepted",
+    "old": "if type(entry[\"matcher\"]) is not int or entry[\"matcher\"] != 2:",
+    "new": "if type(entry[\"matcher\"]) is not int or entry[\"matcher\"] not in (2, 3):",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-129",
+    "file": "scripts/release_manifest.py",
+    "what": "unknown fields of a matcher-2 entry are accepted",
+    "old": "if set(entry) != V2_FIELDS:",
+    "new": "if not V2_FIELDS <= set(entry):",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-130",
+    "file": "scripts/release_manifest.py",
+    "what": "unknown fields of the platform entry are accepted",
+    "old": "if set(entry) != LEGACY_FIELDS:",
+    "new": "if not LEGACY_FIELDS <= set(entry):",
+    "fails": "test_exc_b7_the_platform_entry_must_match_the_frozen_baseline",
+    "only": "test_exc_b7_the_platform_entry_must_match_the_frozen_baseline"
+  },
+  {
+    "id": "RM-131",
+    "file": "scripts/release_manifest.py",
+    "what": "the legacy entry is not matched against the frozen platform baseline",
+    "old": "if not exact_baseline_exception(root, root / path, entry):",
+    "new": "if False:",
+    "fails": "test_exc_b7_the_platform_entry_must_match_the_frozen_baseline",
+    "only": "test_exc_b7_the_platform_entry_must_match_the_frozen_baseline"
+  },
+  {
+    "id": "RM-132",
+    "file": "scripts/release_manifest.py",
+    "what": "dot components in an entry path are accepted",
+    "old": "if any(part in (\"\", \".\", \"..\") for part in parts):",
+    "new": "if False:",
+    "fails": "test_exc_b4_the_list_and_record_structure_refusals",
+    "only": "test_exc_b4_the_list_and_record_structure_refusals"
+  },
+  {
+    "id": "RM-133",
+    "file": "scripts/release_manifest.py",
+    "what": "a symlink component in an entry path is accepted",
+    "old": "        if walk.is_symlink():\n            die(\"entry path has a symlink component\")",
+    "new": "        if False:\n            die(\"entry path has a symlink component\")",
+    "fails": "test_exc_b4_the_list_and_record_structure_refusals",
+    "only": "test_exc_b4_the_list_and_record_structure_refusals"
+  },
+  {
+    "id": "RM-134",
+    "file": "scripts/release_manifest.py",
+    "what": "the zero decision row is accepted",
+    "old": "ROW_FORMAT.fullmatch(value) is not None and value != ZERO_ROW",
+    "new": "ROW_FORMAT.fullmatch(value) is not None",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-135",
+    "file": "scripts/release_manifest.py",
+    "what": "the decision row format is not checked",
+    "old": "return isinstance(value, str) and ROW_FORMAT.fullmatch(value) is not None and value != ZERO_ROW",
+    "new": "return isinstance(value, str) and value != ZERO_ROW",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-136",
+    "file": "scripts/release_manifest.py",
+    "what": "the file hash of an entry is not checked",
+    "old": "hashlib.sha256(raw).hexdigest() != entry[\"sha256\"]",
+    "new": "False",
+    "fails": "test_exc_b1_a_stale_entry_refuses_the_whole_release_before_any_gate_even_when_it_is_not_the_one_scanned",
+    "only": "test_exc_b1_a_stale_entry_refuses_the_whole_release_before_any_gate_even_when_it_is_not_the_one_scanned"
+  },
+  {
+    "id": "RM-137",
+    "file": "scripts/release_manifest.py",
+    "what": "the raw EXECUTE inventory is not compared",
+    "old": "if words != [{\"line\": line, \"column\": column} for line, column in scan_execute_words(text)]:",
+    "new": "if False:",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-138",
+    "file": "scripts/release_manifest.py",
+    "what": "the raw EXECUTE inventory is compared as a set (multiplicity lost)",
+    "old": "if words != [{\"line\": line, \"column\": column} for line, column in scan_execute_words(text)]:",
+    "new": "if {(w[\"line\"], w[\"column\"]) for w in words} != set(scan_execute_words(text)):",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-139",
+    "file": "scripts/release_manifest.py",
+    "what": "the dynamic findings are not compared at all",
+    "old": "if [{k: f[k] for k in (\"line\", \"column\", \"statement_sha256\")} for f in findings] != [{k: c[k] for k in (\"line\", \"column\", \"statement_sha256\")} for c in computed]:",
+    "new": "if False:",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-140",
+    "file": "scripts/release_manifest.py",
+    "what": "the dynamic findings are compared by line only",
+    "old": "if [{k: f[k] for k in (\"line\", \"column\", \"statement_sha256\")} for f in findings] != [{k: c[k] for k in (\"line\", \"column\", \"statement_sha256\")} for c in computed]:",
+    "new": "if [f[\"line\"] for f in findings] != [c[\"line\"] for c in computed]:",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-141",
+    "file": "scripts/release_manifest.py",
+    "what": "the column of a finding is not compared",
+    "old": "if [{k: f[k] for k in (\"line\", \"column\", \"statement_sha256\")} for f in findings] != [{k: c[k] for k in (\"line\", \"column\", \"statement_sha256\")} for c in computed]:",
+    "new": "if [{k: f[k] for k in (\"line\", \"statement_sha256\")} for f in findings] != [{k: c[k] for k in (\"line\", \"statement_sha256\")} for c in computed]:",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-142",
+    "file": "scripts/release_manifest.py",
+    "what": "the statement hash of a finding is not compared",
+    "old": "if [{k: f[k] for k in (\"line\", \"column\", \"statement_sha256\")} for f in findings] != [{k: c[k] for k in (\"line\", \"column\", \"statement_sha256\")} for c in computed]:",
+    "new": "if [{k: f[k] for k in (\"line\", \"column\")} for f in findings] != [{k: c[k] for k in (\"line\", \"column\")} for c in computed]:",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-143",
+    "file": "scripts/release_manifest.py",
+    "what": "the kind of a finding is not compared with the computed kind",
+    "old": "if finding[\"kind\"] != expected[\"kind\"]:",
+    "new": "if False:",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-144",
+    "file": "scripts/release_manifest.py",
+    "what": "the closed set of kinds is not enforced",
+    "old": "if finding[\"kind\"] not in EXCEPTION_KINDS:",
+    "new": "if False:",
+    "fails": "test_exc_b10_a_finding_with_no_approvable_kind_is_refused_whatever_kind_the_entry_names",
+    "only": "test_exc_b10_a_finding_with_no_approvable_kind_is_refused_whatever_kind_the_entry_names"
+  },
+  {
+    "id": "RM-145",
+    "file": "scripts/release_manifest.py",
+    "what": "an empty reason is accepted",
+    "old": "if not isinstance(finding[\"reason\"], str) or not finding[\"reason\"]:",
+    "new": "if not isinstance(finding[\"reason\"], str):",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-146",
+    "file": "scripts/release_manifest.py",
+    "what": "an approval of the old shape (no digests) is not refused as a wrong shape",
+    "old": "        if not isinstance(item, dict) or set(item) != SQUAWK_APPROVAL_FIELDS:",
+    "new": "        if not isinstance(item, dict):",
+    "fails": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause",
+    "only": "test_exc_b2_each_defect_of_an_entry_refuses_with_its_own_cause"
+  },
+  {
+    "id": "RM-147",
+    "file": "scripts/release_manifest.py",
+    "what": "findings inside quoted procedural bodies are not counted",
+    "old": "            if procedural:\n                dynamic.extend(",
+    "new": "            if False:\n                dynamic.extend(",
+    "fails": "test_exc_b8_quoted_procedural_bodies_are_findings_as_well_as_dollar_bodies",
+    "only": "test_exc_b8_quoted_procedural_bodies_are_findings_as_well_as_dollar_bodies"
+  },
+  {
+    "id": "RM-148",
+    "file": "scripts/release_manifest.py",
+    "what": "findings inside dollar-quoted bodies are not counted",
+    "old": "            dynamic.extend(i + len(delimiter) + match.start() for match in re.finditer(r'\\bEXECUTE\\b', body, re.IGNORECASE))",
+    "new": "            pass",
+    "fails": "test_exc_a4_one_scanner_gives_the_raw_words_and_the_dynamic_findings_with_multiplicity",
+    "only": "test_exc_a4_one_scanner_gives_the_raw_words_and_the_dynamic_findings_with_multiplicity"
+  },
+  {
+    "id": "RM-149",
+    "file": "scripts/release_manifest.py",
+    "what": "columns are bytes, not characters",
+    "old": "return text.count(\"\\n\", 0, offset) + 1, offset - (text.rfind(\"\\n\", 0, offset) + 1) + 1",
+    "new": "return text.count(\"\\n\", 0, offset) + 1, len(text[text.rfind(\"\\n\", 0, offset) + 1:offset].encode(\"utf-8\")) + 1",
+    "fails": "test_exc_b9_columns_are_characters_not_bytes",
+    "only": "test_exc_b9_columns_are_characters_not_bytes"
+  },
+  {
+    "id": "RM-150",
+    "file": "scripts/release_manifest.py",
+    "what": "the statement hash keeps the surrounding whitespace",
+    "old": "hashlib.sha256(lines[line - 1].strip().encode(\"utf-8\")).hexdigest(),\n                 \"kind\"",
+    "new": "hashlib.sha256(lines[line - 1].encode(\"utf-8\")).hexdigest(),\n                 \"kind\"",
+    "fails": "test_exc_a1_the_platform_entry_and_two_new_entries_verify_and_each_is_found_by_its_path",
+    "only": "test_exc_a1_the_platform_entry_and_two_new_entries_verify_and_each_is_found_by_its_path"
+  },
+  {
+    "id": "RM-151",
+    "file": "scripts/release_manifest.py",
+    "what": "a privilege label needs a quote on one side only",
+    "old": "if before == \"'\" and after == \"'\":",
+    "new": "if before == \"'\" or after == \"'\":",
+    "fails": "test_exc_b10_a_finding_with_no_approvable_kind_is_refused_whatever_kind_the_entry_names",
+    "only": "test_exc_b10_a_finding_with_no_approvable_kind_is_refused_whatever_kind_the_entry_names"
+  },
+  {
+    "id": "RM-152",
+    "file": "scripts/release_manifest.py",
+    "what": "any REVOKE string counts as the approved revoke form",
+    "old": "if line_text.strip().startswith(\"EXECUTE format('REVOKE ALL ON \"):",
+    "new": "if \"REVOKE\" in line_text:",
+    "fails": "test_exc_b10_a_finding_with_no_approvable_kind_is_refused_whatever_kind_the_entry_names",
+    "only": "test_exc_b10_a_finding_with_no_approvable_kind_is_refused_whatever_kind_the_entry_names"
+  },
+  {
+    "id": "RM-153",
+    "file": "scripts/release_manifest.py",
+    "what": "the revoke form is matched without stripping the indentation",
+    "old": "if line_text.strip().startswith(\"EXECUTE format('REVOKE ALL ON \"):",
+    "new": "if line_text.startswith(\"EXECUTE format('REVOKE ALL ON \"):",
+    "fails": "test_exc_a1_the_platform_entry_and_two_new_entries_verify_and_each_is_found_by_its_path",
+    "only": "test_exc_a1_the_platform_entry_and_two_new_entries_verify_and_each_is_found_by_its_path"
+  },
+  {
+    "id": "RM-154",
+    "file": "scripts/release_manifest.py",
+    "what": "two entries for one path are accepted",
+    "old": "        if entry[\"path\"] in entries:\n            die(\"duplicate entry for path \" + entry[\"path\"])",
+    "new": "        if False:\n            die(\"duplicate entry for path \" + entry[\"path\"])",
+    "fails": "test_exc_b4_the_list_and_record_structure_refusals",
+    "only": "test_exc_b4_the_list_and_record_structure_refusals"
+  },
+  {
+    "id": "RM-155",
+    "file": "scripts/release_manifest.py",
+    "what": "the pin's migration hash is not compared with the entry's",
+    "old": "if pin[\"migration_sha256\"] != entry[\"sha256\"]:",
+    "new": "if False:",
+    "fails": "test_exc_d1_each_defect_of_the_record_refuses",
+    "only": "test_exc_d1_each_defect_of_the_record_refuses"
+  },
+  {
+    "id": "RM-156",
+    "file": "scripts/release_manifest.py",
+    "what": "the pin's decision row is not compared with the entry's",
+    "old": "if pin[\"approved_by\"] != entry[\"approved_by\"]:",
+    "new": "if False:",
+    "fails": "test_exc_d1_each_defect_of_the_record_refuses",
+    "only": "test_exc_d1_each_defect_of_the_record_refuses"
+  },
+  {
+    "id": "RM-157",
+    "file": "scripts/release_manifest.py",
+    "what": "a review file with any name is accepted",
+    "old": " or Path(name).name not in REVIEW_NAMES):",
+    "new": "):",
+    "fails": "test_exc_d1_each_defect_of_the_record_refuses",
+    "only": "test_exc_d1_each_defect_of_the_record_refuses"
+  },
+  {
+    "id": "RM-158",
+    "file": "scripts/release_manifest.py",
+    "what": "the review file hash is not compared with the pin",
+    "old": "if actual != \"sha256:\" + digest:",
+    "new": "if False:",
+    "fails": "test_exc_d1_each_defect_of_the_record_refuses",
+    "only": "test_exc_d1_each_defect_of_the_record_refuses"
+  },
+  {
+    "id": "RM-159",
+    "file": "scripts/release_manifest.py",
+    "what": "the config hash is not compared with the record's",
+    "old": "if pins[\"config_sha256\"] != hashlib.sha256(config_bytes).hexdigest():",
+    "new": "if False:",
+    "fails": "test_exc_d1_each_defect_of_the_record_refuses",
+    "only": "test_exc_d1_each_defect_of_the_record_refuses"
+  },
+  {
+    "id": "RM-160",
+    "file": "scripts/release_manifest.py",
+    "what": "the list schema is not checked",
+    "old": "if not isinstance(data, dict) or data.get(\"schema\") != 2 or type(data.get(\"schema\")) is not int:",
+    "new": "if not isinstance(data, dict):",
+    "fails": "test_exc_b4_the_list_and_record_structure_refusals",
+    "only": "test_exc_b4_the_list_and_record_structure_refusals"
+  },
+  {
+    "id": "RM-161",
+    "file": "scripts/release_manifest.py",
+    "what": "the record schema is not checked",
+    "old": "if not isinstance(pins, dict) or pins.get(\"schema\") != 2 or type(pins.get(\"schema\")) is not int:",
+    "new": "if not isinstance(pins, dict):",
+    "fails": "test_exc_d2_the_old_aggregate_record_cannot_cover_a_changed_list",
+    "only": "test_exc_d2_the_old_aggregate_record_cannot_cover_a_changed_list"
+  },
+  {
+    "id": "RM-162",
+    "file": "scripts/release_manifest.py",
+    "what": "a duplicate JSON key is accepted",
+    "old": "            if key in result:\n                raise ValueError(what + \" has a duplicate JSON key\")",
+    "new": "            if False:\n                raise ValueError(what + \" has a duplicate JSON key\")",
+    "fails": "test_exc_b4_the_list_and_record_structure_refusals",
+    "only": "test_exc_b4_the_list_and_record_structure_refusals"
+  },
+  {
+    "id": "RM-163",
+    "file": "scripts/release_manifest.py",
+    "what": "the entries of the list are not required to be a list",
+    "old": "if set(data) != {\"schema\", \"exceptions\"} or not isinstance(data[\"exceptions\"], list):",
+    "new": "if set(data) != {\"schema\", \"exceptions\"}:",
+    "fails": "test_exc_b4_the_list_and_record_structure_refusals",
+    "only": "test_exc_b4_the_list_and_record_structure_refusals"
+  },
+  {
+    "id": "RM-164",
+    "file": "scripts/release_manifest.py",
+    "what": "the lookup answers with the first entry's mode (index zero restored)",
+    "old": "            print(modes[relative])",
+    "new": "            print(list(modes.values())[0])",
+    "fails": "test_exc_a1_the_platform_entry_and_two_new_entries_verify_and_each_is_found_by_its_path",
+    "only": "test_exc_a1_the_platform_entry_and_two_new_entries_verify_and_each_is_found_by_its_path"
+  },
+  {
+    "id": "RM-165",
+    "file": "scripts/release_manifest.py",
+    "what": "a Squawk report that is not an empty list is accepted for a matcher-2 entry",
+    "old": "if len(raw) > 1024 * 1024 or json.loads(raw) != []:",
+    "new": "if len(raw) > 1024 * 1024:",
+    "fails": "test_exc_c2_a_new_entry_gets_no_squawk_waiver_whatever_the_tool_says",
+    "only": "test_exc_c2_a_new_entry_gets_no_squawk_waiver_whatever_the_tool_says"
+  },
+  {
+    "id": "RM-166",
+    "file": "scripts/release.sh",
+    "what": "the dynamic-SQL waiver is applied to every migration once the list exists",
+    "old": "    allow_dynamic=0\n    exception_mode=\n",
+    "new": "    allow_dynamic=$exception_enabled\n    exception_mode=\n",
+    "fails": "test_exc_b3_a_dynamic_migration_with_no_entry_is_refused_even_when_other_entries_are_valid",
+    "only": "test_exc_b3_a_dynamic_migration_with_no_entry_is_refused_even_when_other_entries_are_valid"
+  },
+  {
+    "id": "RM-167",
+    "file": "scripts/release.sh",
+    "what": "the platform's Squawk waiver is applied to every candidate",
+    "old": "if [ \"$exception_mode\" = baseline ]; then",
+    "new": "if [ -n \"$exception_mode\" ]; then",
+    "fails": "test_exc_c1_the_approved_new_entries_pass_both_migration_gates_with_a_clean_squawk",
+    "only": "test_exc_c1_the_approved_new_entries_pass_both_migration_gates_with_a_clean_squawk"
+  },
+  {
+    "id": "RM-168",
+    "file": "scripts/release.sh",
+    "what": "a matcher-2 entry's Squawk report is not checked as an empty list",
+    "old": "            python3 -I \"$helper\" squawk-clean --input \"$work/squawk.json\" || { echo \"release: migration gate failed: $migration\" >&2; exit 1; }",
+    "new": "            true",
+    "fails": "test_exc_c2_a_new_entry_gets_no_squawk_waiver_whatever_the_tool_says",
+    "only": "test_exc_c2_a_new_entry_gets_no_squawk_waiver_whatever_the_tool_says"
+  },
+  {
+    "id": "RM-169",
+    "file": "scripts/release.sh",
+    "what": "an ordinary migration passes with Squawk status 1",
+    "old": "[ \"$squawk_status\" -eq 0 ] || { echo \"release: migration gate failed: $migration\" >&2; exit 1; }",
+    "new": "[ \"$squawk_status\" -le 1 ] || { echo \"release: migration gate failed: $migration\" >&2; exit 1; }",
+    "fails": "test_exc_c2_a_new_entry_gets_no_squawk_waiver_whatever_the_tool_says",
+    "only": "test_exc_c2_a_new_entry_gets_no_squawk_waiver_whatever_the_tool_says"
+  },
+  {
+    "id": "RM-170",
+    "file": "scripts/release.sh",
+    "what": "the list is not verified before the first gate",
+    "old": "    python3 -I \"$helper\" verify-approval --root \"$root\" || { echo 'release: migration exception approval is not verified' >&2; exit 1; }",
+    "new": "    true",
+    "fails": "test_exc_b1_a_stale_entry_refuses_the_whole_release_before_any_gate_even_when_it_is_not_the_one_scanned",
+    "only": "test_exc_b1_a_stale_entry_refuses_the_whole_release_before_any_gate_even_when_it_is_not_the_one_scanned"
+  },
+  {
+    "id": "RM-171",
+    "file": "scripts/release.sh",
+    "what": "the baseline entry does not need its four findings (an empty report passes)",
+    "old": "[ \"$squawk_status\" -le 1 ] && python3 -I \"$helper\" exception-squawk --migration \"$migration\" --input \"$work/squawk.json\" && ",
+    "new": "[ \"$squawk_status\" -le 1 ] && ",
+    "fails": "test_exc_c3_the_platform_baseline_still_needs_exactly_its_four_findings",
+    "only": "test_exc_c3_the_platform_baseline_still_needs_exactly_its_four_findings"
+  },
+  {
+    "id": "RM-172",
+    "file": "scripts/release-migration-exceptions.json",
+    "what": "the platform object of the production list re-spaced inside (same parsed values, same canonical hash)",
+    "old": "[83, 91, 103, 104]",
+    "new": "[83,  91, 103, 104]",
+    "fails": "test_exc_a2_the_platform_entry_of_the_production_list_is_byte_identical_to_the_frozen_one",
+    "only": "test_exc_a2_the_platform_entry_of_the_production_list_is_byte_identical_to_the_frozen_one"
+  },
+  {
+    "id": "RM-173",
+    "file": "scripts/release-migration-exceptions.json",
+    "what": "the platform object of the production list with a tab indent (anchored on the first Squawk diagnostic, unique in the emitted list)",
+    "old": "      \"squawk\": [\n        {\"rule\": \"require-lock-timeout\", \"line\": 2},",
+    "new": "\t\"squawk\": [\n        {\"rule\": \"require-lock-timeout\", \"line\": 2},",
+    "fails": "test_exc_a2_the_platform_entry_of_the_production_list_is_byte_identical_to_the_frozen_one",
+    "only": "test_exc_a2_the_platform_entry_of_the_production_list_is_byte_identical_to_the_frozen_one"
+  },
+  {
+    "id": "RM-174",
+    "file": "scripts/release-fixtures/test_release.py",
+    "what": "the raw-span check compares the canonical form only",
+    "old": "        return len(obj) == self.PLATFORM_OBJECT_RAW_LEN and hashlib.sha256(obj).hexdigest() == self.PLATFORM_OBJECT_RAW_SHA256",
+    "new": "        return hashlib.sha256(json.dumps(json.loads(obj), sort_keys=True, separators=(\",\", \":\")).encode()).hexdigest() == self.PLATFORM_ENTRY_SHA256",
+    "fails": "test_exc_a2b_whitespace_only_changes_inside_the_platform_object_are_refused_and_outside_it_are_not",
+    "only": "test_exc_a2b_whitespace_only_changes_inside_the_platform_object_are_refused_and_outside_it_are_not"
+  },
+  {
+    "id": "RM-175",
+    "file": "scripts/release-fixtures/test_release.py",
+    "what": "the span finder counts a brace inside a string",
+    "old": "            elif char == b'\"':\n                in_string = True\n",
+    "new": "            elif False:\n                in_string = True\n",
+    "fails": "test_exc_a2c_the_span_finder_respects_strings_nesting_and_line_ends",
+    "only": "test_exc_a2c_the_span_finder_respects_strings_nesting_and_line_ends"
+  },
+  {
+    "id": "RM-176",
+    "file": "scripts/release-fixtures/test_release.py",
+    "what": "the span finder ends a string at an escaped quote",
+    "old": "                if escaped:\n                    escaped = False\n",
+    "new": "                if False:\n                    escaped = False\n",
+    "fails": "test_exc_a2c_the_span_finder_respects_strings_nesting_and_line_ends",
+    "only": "test_exc_a2c_the_span_finder_respects_strings_nesting_and_line_ends"
+  },
+  {
+    "id": "RM-177",
+    "file": "scripts/release-fixtures/test_release.py",
+    "what": "the span includes the indentation of the enclosing array",
+    "old": "                    spans.append((start, i + 1))",
+    "new": "                    spans.append((raw.rfind(b\"\\n\", 0, start) + 1, i + 1))",
+    "fails": "test_exc_a2b_whitespace_only_changes_inside_the_platform_object_are_refused_and_outside_it_are_not",
+    "only": "test_exc_a2b_whitespace_only_changes_inside_the_platform_object_are_refused_and_outside_it_are_not"
+  },
+  {
+    "id": "RM-178",
+    "file": "scripts/release.sh",
+    "what": "the dynamic-SQL waiver is set for any zero-status answer of the candidate lookup (hale X-1)",
+    "old": "        case $exception_mode in\n            baseline|clean|findings) allow_dynamic=1 ;;\n            *) exception_mode= ;;\n        esac\n",
+    "new": "        allow_dynamic=1\n",
+    "fails": "test_exc_c6_a_zero_status_candidate_answer_other_than_baseline_or_clean_waives_nothing",
+    "only": "test_exc_c6_a_zero_status_candidate_answer_other_than_baseline_or_clean_waives_nothing"
+  },
+  {
+    "id": "RM-179",
+    "file": "scripts/release-fixtures/run_mutants.py",
+    "what": "a run that passed is judged a kill (a survivor is not reported)",
+    "old": "    if returncode == 0:\n        return \"SURVIVED\"\n",
+    "new": "    if returncode == 0:\n        return \"OK\"\n",
+    "fails": "test_driver_a1_the_screen_reports_a_survivor_when_the_named_cell_passes_and_a_kill_only_when_it_fails",
+    "only": "test_driver_a1_the_screen_reports_a_survivor_when_the_named_cell_passes_and_a_kill_only_when_it_fails"
+  },
+  {
+    "id": "RM-180",
+    "file": "scripts/release-fixtures/run_mutants.py",
+    "what": "an error anywhere in the run does not stop a kill",
+    "old": "    if \"ERROR:\" in out or \"FAIL: \" + mutant[\"fails\"] + \" \" not in out:",
+    "new": "    if \"FAIL: \" + mutant[\"fails\"] + \" \" not in out:",
+    "fails": "test_driver_a1_the_screen_reports_a_survivor_when_the_named_cell_passes_and_a_kill_only_when_it_fails",
+    "only": "test_driver_a1_the_screen_reports_a_survivor_when_the_named_cell_passes_and_a_kill_only_when_it_fails"
+  },
+  {
+    "id": "RM-181",
+    "file": "scripts/release-fixtures/run_mutants.py",
+    "what": "a failing run is a kill whatever cell failed",
+    "old": "    if \"ERROR:\" in out or \"FAIL: \" + mutant[\"fails\"] + \" \" not in out:",
+    "new": "    if \"ERROR:\" in out:",
+    "fails": "test_driver_a1_the_screen_reports_a_survivor_when_the_named_cell_passes_and_a_kill_only_when_it_fails",
+    "only": "test_driver_a1_the_screen_reports_a_survivor_when_the_named_cell_passes_and_a_kill_only_when_it_fails"
+  },
+  {
+    "id": "RM-182",
+    "file": "scripts/release-fixtures/run_mutants.py",
+    "what": "the screen runs the whole suite (cell-only ignored)",
+    "old": "    return mutant.get(\"only\") or (mutant[\"fails\"] if cell_only else None)",
+    "new": "    return mutant.get(\"only\") or None",
+    "fails": "test_driver_a1_the_screen_reports_a_survivor_when_the_named_cell_passes_and_a_kill_only_when_it_fails",
+    "only": "test_driver_a1_the_screen_reports_a_survivor_when_the_named_cell_passes_and_a_kill_only_when_it_fails"
+  },
+  {
+    "id": "RM-183",
+    "file": "scripts/release-fixtures/run_mutants.py",
+    "what": "a mutant's own only is ignored",
+    "old": "    return mutant.get(\"only\") or (mutant[\"fails\"] if cell_only else None)",
+    "new": "    return (mutant[\"fails\"] if cell_only else None)",
+    "fails": "test_driver_a2_the_cell_selection_and_the_command_line",
+    "only": "test_driver_a2_the_cell_selection_and_the_command_line"
+  },
+  {
+    "id": "RM-184",
+    "file": "scripts/release-fixtures/run_mutants.py",
+    "what": "the screen is on for every run (cell_only always true)",
+    "old": "    return mutant.get(\"only\") or (mutant[\"fails\"] if cell_only else None)",
+    "new": "    return mutant.get(\"only\") or mutant[\"fails\"]",
+    "fails": "test_driver_a2_the_cell_selection_and_the_command_line",
+    "only": "test_driver_a2_the_cell_selection_and_the_command_line"
+  },
+  {
+    "id": "RM-185",
+    "file": "scripts/release.sh",
+    "what": "a missing exception list is no longer refused (the optional-file behaviour is back)",
+    "old": "if [ ! -e \"$exception_file\" ] && [ ! -L \"$exception_file\" ]; then\n    echo 'release: the migration exception list is missing: a release needs the reviewed list (an explicit empty list means no waivers)' >&2\n    exit 1\nfi\n",
+    "new": "",
+    "fails": "test_exc_c7_a_missing_exception_list_refuses_before_any_gate_whatever_record_is_left",
+    "only": "test_exc_c7_a_missing_exception_list_refuses_before_any_gate_whatever_record_is_left"
+  },
+  {
+    "id": "RM-186",
+    "file": "scripts/release.sh",
+    "what": "a dangling symbolic link at the list path counts as a missing list",
+    "old": "if [ ! -e \"$exception_file\" ] && [ ! -L \"$exception_file\" ]; then",
+    "new": "if [ ! -e \"$exception_file\" ]; then",
+    "fails": "test_exc_c7_a_missing_exception_list_refuses_before_any_gate_whatever_record_is_left",
+    "only": "test_exc_c7_a_missing_exception_list_refuses_before_any_gate_whatever_record_is_left"
+  },
+  {
+    "id": "RM-187",
+    "file": "scripts/release.sh",
+    "what": "the missing-list refusal changes its fixed wording",
+    "old": "the migration exception list is missing: a release needs the reviewed list",
+    "new": "the migration exception list is absent: a release needs the reviewed list",
+    "fails": "test_exc_c7_a_missing_exception_list_refuses_before_any_gate_whatever_record_is_left",
+    "only": "test_exc_c7_a_missing_exception_list_refuses_before_any_gate_whatever_record_is_left"
+  },
+  {
+    "id": "RM-188",
+    "file": "scripts/release.sh",
+    "what": "the missing-list refusal comes after the CI gate",
+    "old": "if [ ! -e \"$exception_file\" ] && [ ! -L \"$exception_file\" ]; then\n    echo 'release: the migration exception list is missing: a release needs the reviewed list (an explicit empty list means no waivers)' >&2\n    exit 1\nfi\nexception_enabled=0\nif [ -e \"$exception_file\" ] || [ -L \"$exception_file\" ]; then\n    python3 -I \"$helper\" verify-approval --root \"$root\" || { echo 'release: migration exception approval is not verified' >&2; exit 1; }\n    exception_enabled=1\nfi\n# The anchor join (contract G12-BINDING-RECORD-SCHEMA-nix-r4.md): the key file, the fingerprint tool and the installer template are validated NOW, with nothing written,\n# so a bad key or template fails before the first gate and not hours later at the join. The hash of the one buffer it read is kept for the two re-reads below.\nkey_start_hash=\nif [ \"$trust_key_given\" -eq 1 ]; then\n    key_start_hash=$(python3 -I \"$helper\" check-anchor --deploy \"$root/deploy\" --trust-key-file \"$trust_key_file\") || exit 1\nfi\n# Gate 1: CI must run without the text-only option.\nPATH=$caller_path \"$ci\" > \"$work/ci.log\" 2>&1 || { echo 'release: CI failed' >&2; exit 1; }\n",
+    "new": "exception_enabled=0\nif [ -e \"$exception_file\" ] || [ -L \"$exception_file\" ]; then\n    python3 -I \"$helper\" verify-approval --root \"$root\" || { echo 'release: migration exception approval is not verified' >&2; exit 1; }\n    exception_enabled=1\nfi\n# The anchor join (contract G12-BINDING-RECORD-SCHEMA-nix-r4.md): the key file, the fingerprint tool and the installer template are validated NOW, with nothing written,\n# so a bad key or template fails before the first gate and not hours later at the join. The hash of the one buffer it read is kept for the two re-reads below.\nkey_start_hash=\nif [ \"$trust_key_given\" -eq 1 ]; then\n    key_start_hash=$(python3 -I \"$helper\" check-anchor --deploy \"$root/deploy\" --trust-key-file \"$trust_key_file\") || exit 1\nfi\n# Gate 1: CI must run without the text-only option.\nPATH=$caller_path \"$ci\" > \"$work/ci.log\" 2>&1 || { echo 'release: CI failed' >&2; exit 1; }\nif [ ! -e \"$exception_file\" ] && [ ! -L \"$exception_file\" ]; then\n    echo 'release: the migration exception list is missing: a release needs the reviewed list (an explicit empty list means no waivers)' >&2\n    exit 1\nfi\n",
+    "fails": "test_exc_c7_a_missing_exception_list_refuses_before_any_gate_whatever_record_is_left",
+    "only": "test_exc_c7_a_missing_exception_list_refuses_before_any_gate_whatever_record_is_left"
+  },
+  {
+    "id": "RM-189",
+    "file": "scripts/release.sh",
+    "what": "the list is verified but never enabled (approved entries waive nothing)",
+    "old": "    exception_enabled=1\nfi\n",
+    "new": "    exception_enabled=0\nfi\n",
+    "fails": "test_exc_c1_the_approved_new_entries_pass_both_migration_gates_with_a_clean_squawk",
+    "only": "test_exc_c1_the_approved_new_entries_pass_both_migration_gates_with_a_clean_squawk"
+  },
+  {
+    "id": "RM-190",
+    "file": "scripts/release_manifest.py",
+    "what": "the key file is opened following a symlink",
+    "old": "        descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC)\n    except OSError as error:\n        die(\"trust key file: the file is not a regular file (a symbolic link)\"",
+    "new": "        descriptor = os.open(path, os.O_RDONLY | os.O_NONBLOCK | os.O_CLOEXEC)\n    except OSError as error:\n        die(\"trust key file: the file is not a regular file (a symbolic link)\"",
+    "fails": "test_anchor_a4_a_key_file_that_is_not_a_plain_readable_file_is_refused",
+    "only": "test_anchor_a4_a_key_file_that_is_not_a_plain_readable_file_is_refused"
+  },
+  {
+    "id": "RM-191",
+    "file": "scripts/release_manifest.py",
+    "what": "the size bound is one byte too generous",
+    "old": "    if len(buffer) > TRUST_KEY_MAX_BYTES:\n",
+    "new": "    if len(buffer) > TRUST_KEY_MAX_BYTES + 1:\n",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-192",
+    "file": "scripts/release_manifest.py",
+    "what": "the read stops at the bound, so an oversized file is not seen as oversized",
+    "old": "while len(buffer) <= TRUST_KEY_MAX_BYTES:",
+    "new": "while len(buffer) < TRUST_KEY_MAX_BYTES:",
+    "fails": "test_anchor_a5_a_key_file_is_read_to_one_byte_past_the_bound_even_when_the_reads_are_short",
+    "only": "test_anchor_a5_a_key_file_is_read_to_one_byte_past_the_bound_even_when_the_reads_are_short"
+  },
+  {
+    "id": "RM-193",
+    "file": "scripts/release_manifest.py",
+    "what": "a CR is accepted",
+    "old": "    if b\"\\r\" in buffer:\n        die(\"trust key file: the file contains a CR\")",
+    "new": "    if False:\n        die(\"trust key file: the file contains a CR\")",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-194",
+    "file": "scripts/release_manifest.py",
+    "what": "a NUL is accepted",
+    "old": "    if b\"\\0\" in buffer:\n        die(\"trust key file: the file contains a NUL\")",
+    "new": "    if False:\n        die(\"trust key file: the file contains a NUL\")",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-195",
+    "file": "scripts/release_manifest.py",
+    "what": "non-ASCII is accepted",
+    "old": "    if not buffer.isascii():",
+    "new": "    if False:",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-196",
+    "file": "scripts/release_manifest.py",
+    "what": "the trailing line feed is part of the line",
+    "old": "    body = text[:-1] if text.endswith(\"\\n\") else text",
+    "new": "    body = text",
+    "fails": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen",
+    "only": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen"
+  },
+  {
+    "id": "RM-197",
+    "file": "scripts/release_manifest.py",
+    "what": "a second line is accepted",
+    "old": "    if \"\\n\" in body:",
+    "new": "    if False:",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-198",
+    "file": "scripts/release_manifest.py",
+    "what": "an empty file is not named as empty",
+    "old": "    if body == \"\":",
+    "new": "    if False:",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-199",
+    "file": "scripts/release_manifest.py",
+    "what": "a private key header is not named",
+    "old": "    if body.startswith(\"-----BEGIN\"):",
+    "new": "    if False:",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-200",
+    "file": "scripts/release_manifest.py",
+    "what": "the field count is loosened",
+    "old": "    if len(parts) != 3 or not all(parts):",
+    "new": "    if len(parts) < 3:",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-201",
+    "file": "scripts/release_manifest.py",
+    "what": "any key type is accepted",
+    "old": "    if kind != \"ssh-ed25519\":",
+    "new": "    if False:",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-202",
+    "file": "scripts/release_manifest.py",
+    "what": "a hyphen-led principal is accepted",
+    "old": "ANCHOR_PRINCIPAL = re.compile(r\"[A-Za-z0-9._@][A-Za-z0-9._@-]{0,63}",
+    "new": "ANCHOR_PRINCIPAL = re.compile(r\"[A-Za-z0-9._@-][A-Za-z0-9._@-]{0,63}",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-203",
+    "file": "scripts/release_manifest.py",
+    "what": "a principal of 65 characters is accepted",
+    "old": "[A-Za-z0-9._@-]{0,63}\\Z",
+    "new": "[A-Za-z0-9._@-]{0,64}\\Z",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-204",
+    "file": "scripts/release_manifest.py",
+    "what": "a single quote is allowed in the principal",
+    "old": "ANCHOR_PRINCIPAL = re.compile(r\"[A-Za-z0-9._@][A-Za-z0-9._@-]{0,63}",
+    "new": "ANCHOR_PRINCIPAL = re.compile(r\"[A-Za-z0-9._@][A-Za-z0-9._@'-]{0,63}",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-205",
+    "file": "scripts/release_manifest.py",
+    "what": "a longer key is accepted",
+    "old": "[A-Za-z0-9+/]{43}\\Z\", re.ASCII)\nKEYGEN_LINE",
+    "new": "[A-Za-z0-9+/]{43,}\\Z\", re.ASCII)\nKEYGEN_LINE",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-206",
+    "file": "scripts/release_manifest.py",
+    "what": "the key prefix is not checked",
+    "old": "ANCHOR_KEY = re.compile(r\"AAAAC3NzaC1lZDI1NTE5AAAAI[A-Za-z0-9+/]{43}",
+    "new": "ANCHOR_KEY = re.compile(r\"[A-Za-z0-9+/]{68}",
+    "fails": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_a3_each_key_file_rule_refuses_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-207",
+    "file": "scripts/release_manifest.py",
+    "what": "the hash is taken from a second read instead of the buffer",
+    "old": "\"key_input_sha256\": hashlib.sha256(buffer).hexdigest()}",
+    "new": "\"key_input_sha256\": hashlib.sha256(Path(path).read_bytes()).hexdigest()}",
+    "fails": "test_anchor_b7_the_key_file_is_opened_exactly_once_without_following_a_symlink",
+    "only": "test_anchor_b7_the_key_file_is_opened_exactly_once_without_following_a_symlink"
+  },
+  {
+    "id": "RM-208",
+    "file": "scripts/release_manifest.py",
+    "what": "a non-zero tool status is ignored",
+    "old": "    if done.returncode != 0:",
+    "new": "    if False:",
+    "fails": "test_anchor_b3_a_tool_failure_is_refused_and_leaves_no_scratch",
+    "only": "test_anchor_b3_a_tool_failure_is_refused_and_leaves_no_scratch"
+  },
+  {
+    "id": "RM-209",
+    "file": "scripts/release_manifest.py",
+    "what": "the tool has no time bound",
+    "old": "timeout=KEYGEN_TIMEOUT,",
+    "new": "timeout=None,",
+    "fails": "test_anchor_b4_a_tool_that_does_not_finish_in_the_bound_is_ended_and_refused",
+    "only": "test_anchor_b4_a_tool_that_does_not_finish_in_the_bound_is_ended_and_refused"
+  },
+  {
+    "id": "RM-210",
+    "file": "scripts/release_manifest.py",
+    "what": "a tool that reports another key kind is accepted",
+    "old": "    if kind != \"ED25519\":",
+    "new": "    if False:",
+    "fails": "test_anchor_b6_a_tool_that_reports_another_key_kind_is_refused",
+    "only": "test_anchor_b6_a_tool_that_reports_another_key_kind_is_refused"
+  },
+  {
+    "id": "RM-211",
+    "file": "scripts/release_manifest.py",
+    "what": "a wrong bit count is accepted",
+    "old": "    if bits != \"256\":",
+    "new": "    if False:",
+    "fails": "test_anchor_b5_malformed_tool_output_is_refused_whatever_its_shape",
+    "only": "test_anchor_b5_malformed_tool_output_is_refused_whatever_its_shape"
+  },
+  {
+    "id": "RM-212",
+    "file": "scripts/release_manifest.py",
+    "what": "the scratch directory is 0755",
+    "old": "        os.chmod(scratch, 0o700)",
+    "new": "        os.chmod(scratch, 0o755)",
+    "fails": "test_anchor_b2_a_good_tool_answer_is_taken_and_the_tool_gets_a_0600_file_in_a_0700_directory_that_is_removed_after",
+    "only": "test_anchor_b2_a_good_tool_answer_is_taken_and_the_tool_gets_a_0600_file_in_a_0700_directory_that_is_removed_after"
+  },
+  {
+    "id": "RM-213",
+    "file": "scripts/release_manifest.py",
+    "what": "the key file in the scratch is 0644",
+    "old": "os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)\n        try:\n            os.fchmod(descriptor, 0o600)",
+    "new": "os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o644)\n        try:\n            pass",
+    "fails": "test_anchor_b2_a_good_tool_answer_is_taken_and_the_tool_gets_a_0600_file_in_a_0700_directory_that_is_removed_after",
+    "only": "test_anchor_b2_a_good_tool_answer_is_taken_and_the_tool_gets_a_0600_file_in_a_0700_directory_that_is_removed_after"
+  },
+  {
+    "id": "RM-214",
+    "file": "scripts/release_manifest.py",
+    "what": "the scratch is not removed",
+    "old": "        shutil.rmtree(scratch, ignore_errors=True)\n",
+    "new": "        pass\n",
+    "fails": "test_anchor_b2_a_good_tool_answer_is_taken_and_the_tool_gets_a_0600_file_in_a_0700_directory_that_is_removed_after",
+    "only": "test_anchor_b2_a_good_tool_answer_is_taken_and_the_tool_gets_a_0600_file_in_a_0700_directory_that_is_removed_after"
+  },
+  {
+    "id": "RM-215",
+    "file": "scripts/release_manifest.py",
+    "what": "a trappable signal is not caught, so the scratch stays",
+    "old": "handlers[number] = signal.signal(number, terminate)",
+    "new": "handlers[number] = signal.getsignal(number)",
+    "fails": "test_anchor_b8_a_trappable_signal_during_the_tool_leaves_no_scratch_and_no_process",
+    "only": "test_anchor_b8_a_trappable_signal_during_the_tool_leaves_no_scratch_and_no_process"
+  },
+  {
+    "id": "RM-216",
+    "file": "scripts/release_manifest.py",
+    "what": "the fingerprint is made from the key text, not by the tool",
+    "old": "\"fpr\": fingerprint(key),",
+    "new": "\"fpr\": \"SHA256:\" + key[:43],",
+    "fails": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen",
+    "only": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen"
+  },
+  {
+    "id": "RM-217",
+    "file": "scripts/release_manifest.py",
+    "what": "the tool is given the directory, not the key file",
+    "old": "[SSH_KEYGEN, \"-l\", \"-f\", path]",
+    "new": "[SSH_KEYGEN, \"-l\", \"-f\", os.path.dirname(path)]",
+    "fails": "test_anchor_b2_a_good_tool_answer_is_taken_and_the_tool_gets_a_0600_file_in_a_0700_directory_that_is_removed_after",
+    "only": "test_anchor_b2_a_good_tool_answer_is_taken_and_the_tool_gets_a_0600_file_in_a_0700_directory_that_is_removed_after"
+  },
+  {
+    "id": "RM-218",
+    "file": "scripts/release_manifest.py",
+    "what": "a blank line is not part of the header",
+    "old": "(lines[top] == b\"\" or lines[top].startswith(b\"#\"))",
+    "new": "(lines[top].startswith(b\"#\"))",
+    "fails": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen",
+    "only": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen"
+  },
+  {
+    "id": "RM-219",
+    "file": "scripts/release_manifest.py",
+    "what": "a duplicated placeholder is accepted",
+    "old": "        if count > 1:",
+    "new": "        if count > 2:",
+    "fails": "test_anchor_c3_each_placeholder_defect_is_refused_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_c3_each_placeholder_defect_is_refused_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-220",
+    "file": "scripts/release_manifest.py",
+    "what": "a missing placeholder is named as an order problem",
+    "old": "        if count == 0:",
+    "new": "        if count == -1:",
+    "fails": "test_anchor_c3_each_placeholder_defect_is_refused_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_c3_each_placeholder_defect_is_refused_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-221",
+    "file": "scripts/release_manifest.py",
+    "what": "an already filled placeholder is not named",
+    "old": "        if any(line.startswith(name.encode(\"ascii\") + b\"=\") and line != empty for line in lines):",
+    "new": "        if False:",
+    "fails": "test_anchor_c3_each_placeholder_defect_is_refused_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_c3_each_placeholder_defect_is_refused_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-222",
+    "file": "scripts/release_manifest.py",
+    "what": "the position and order rule is dropped",
+    "old": "    if lines[top:top + 3] != [name.encode(\"ascii\") + b\"=''\" for name in ANCHOR_NAMES]:",
+    "new": "    if False:",
+    "fails": "test_anchor_c3_each_placeholder_defect_is_refused_with_its_own_cause_and_writes_nothing",
+    "only": "test_anchor_c3_each_placeholder_defect_is_refused_with_its_own_cause_and_writes_nothing"
+  },
+  {
+    "id": "RM-223",
+    "file": "scripts/release_manifest.py",
+    "what": "the values are not quoted",
+    "old": "(name + \"='\" + value + \"'\")",
+    "new": "(name + \"=\" + value)",
+    "fails": "test_anchor_c1_the_final_bytes_differ_from_the_joined_template_in_exactly_the_three_statements",
+    "only": "test_anchor_c1_the_final_bytes_differ_from_the_joined_template_in_exactly_the_three_statements"
+  },
+  {
+    "id": "RM-224",
+    "file": "scripts/release_manifest.py",
+    "what": "two values are swapped",
+    "old": "(anchor[\"principal\"], anchor[\"key\"], anchor[\"fpr\"])",
+    "new": "(anchor[\"key\"], anchor[\"principal\"], anchor[\"fpr\"])",
+    "fails": "test_anchor_c1_the_final_bytes_differ_from_the_joined_template_in_exactly_the_three_statements",
+    "only": "test_anchor_c1_the_final_bytes_differ_from_the_joined_template_in_exactly_the_three_statements"
+  },
+  {
+    "id": "RM-225",
+    "file": "scripts/release_manifest.py",
+    "what": "joined_sha256 is the hash of the template, not the final bytes",
+    "old": "\"splice\": ANCHOR_SPLICE if anchor else SPLICE, \"joined_sha256\": hashlib.sha256(template).hexdigest()}",
+    "new": "\"splice\": ANCHOR_SPLICE if anchor else SPLICE, \"joined_sha256\": hashlib.sha256((Path(args.deploy) / \"install.sh\").read_bytes()).hexdigest()}",
+    "fails": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen",
+    "only": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen"
+  },
+  {
+    "id": "RM-226",
+    "file": "scripts/release_manifest.py",
+    "what": "a record with a key is schema 1",
+    "old": "\"schema\": 2 if anchor else 1,",
+    "new": "\"schema\": 1,",
+    "fails": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen",
+    "only": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen"
+  },
+  {
+    "id": "RM-227",
+    "file": "scripts/release_manifest.py",
+    "what": "the anchor object is missing from the record",
+    "old": "        if anchor:\n            record[\"anchor\"]",
+    "new": "        if False:\n            record[\"anchor\"]",
+    "fails": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen",
+    "only": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen"
+  },
+  {
+    "id": "RM-228",
+    "file": "scripts/release_manifest.py",
+    "what": "the anchor object has an extra key",
+    "old": "\"key_input_sha256\": anchor[\"key_input_sha256\"]}\n        Path(args.record)",
+    "new": "\"key_input_sha256\": anchor[\"key_input_sha256\"], \"extra\": \"x\"}\n        Path(args.record)",
+    "fails": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen",
+    "only": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen"
+  },
+  {
+    "id": "RM-229",
+    "file": "scripts/release_manifest.py",
+    "what": "a record with a key carries the schema-1 splice sentence",
+    "old": "\"splice\": ANCHOR_SPLICE if anchor else SPLICE,",
+    "new": "\"splice\": SPLICE,",
+    "fails": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen",
+    "only": "test_anchor_a1_a_consistent_key_file_joins_and_every_derived_value_equals_an_independent_ssh_keygen"
+  },
+  {
+    "id": "RM-230",
+    "file": "scripts/release_manifest.py",
+    "what": "the join prints a hash that is not the one it read",
+    "old": "        print(anchor[\"key_input_sha256\"])\n\n\ndef check_anchor",
+    "new": "        print(\"0\" * 64)\n\n\ndef check_anchor",
+    "fails": "test_anchor_e3_a_real_release_publishes_the_anchored_installer_and_the_schema_2_record_and_nothing_else",
+    "only": "test_anchor_e3_a_real_release_publishes_the_anchored_installer_and_the_schema_2_record_and_nothing_else"
+  },
+  {
+    "id": "RM-231",
+    "file": "scripts/release_manifest.py",
+    "what": "the start check does not validate the template",
+    "old": "    build_installer(args.deploy, anchor)\n    print(anchor",
+    "new": "    print(anchor",
+    "fails": "test_anchor_e2_a_bad_key_or_a_bad_template_refuses_at_the_start_before_any_gate",
+    "only": "test_anchor_e2_a_bad_key_or_a_bad_template_refuses_at_the_start_before_any_gate"
+  },
+  {
+    "id": "RM-232",
+    "file": "scripts/release_manifest.py",
+    "what": "the start check does not read the key file",
+    "old": "    anchor = derive_anchor(args.trust_key_file)\n    build_installer(args.deploy, anchor)",
+    "new": "    anchor = {\"principal\": \"x@y\", \"key\": \"AAAAC3NzaC1lZDI1NTE5AAAAI\" + \"A\" * 43, \"fpr\": \"SHA256:\" + \"A\" * 43, \"key_input_sha256\": \"0\" * 64}\n    build_installer(args.deploy, anchor)",
+    "fails": "test_anchor_e2_a_bad_key_or_a_bad_template_refuses_at_the_start_before_any_gate",
+    "only": "test_anchor_e2_a_bad_key_or_a_bad_template_refuses_at_the_start_before_any_gate"
+  },
+  {
+    "id": "RM-233",
+    "file": "scripts/release.sh",
+    "what": "a real release without a key is accepted",
+    "old": "    [ \"$trust_key_given\" -eq 1 ] || { echo 'release: --trust-key-file is required for a real release' >&2; exit 2; }\n",
+    "new": "    :\n",
+    "fails": "test_anchor_e1_a_real_release_without_a_key_refuses_at_the_start_before_any_gate",
+    "only": "test_anchor_e1_a_real_release_without_a_key_refuses_at_the_start_before_any_gate"
+  },
+  {
+    "id": "RM-234",
+    "file": "scripts/release.sh",
+    "what": "the key file is taken from an environment variable",
+    "old": "trust_key_file=\ntrust_key_given=0\nwhile",
+    "new": "trust_key_file=${CORTEX_TRUST_KEY_FILE:-}\ntrust_key_given=0\n[ -z \"$trust_key_file\" ] || trust_key_given=1\nwhile",
+    "fails": "test_anchor_e5_the_trust_key_file_option_is_checked_and_no_environment_variable_stands_in_for_it",
+    "only": "test_anchor_e5_the_trust_key_file_option_is_checked_and_no_environment_variable_stands_in_for_it"
+  },
+  {
+    "id": "RM-235",
+    "file": "scripts/release.sh",
+    "what": "the start check is dropped",
+    "old": "    key_start_hash=$(python3 -I \"$helper\" check-anchor --deploy \"$root/deploy\" --trust-key-file \"$trust_key_file\") || exit 1",
+    "new": "    key_start_hash=",
+    "fails": "test_anchor_e2_a_bad_key_or_a_bad_template_refuses_at_the_start_before_any_gate",
+    "only": "test_anchor_e2_a_bad_key_or_a_bad_template_refuses_at_the_start_before_any_gate"
+  },
+  {
+    "id": "RM-236",
+    "file": "scripts/release.sh",
+    "what": "the hash the join read is not compared with the start hash",
+    "old": "[ \"$join_hash\" = \"$key_start_hash\" ] || { echo 'release: the trust key file changed during the release' >&2; exit 1; }\n",
+    "new": ":\n",
+    "fails": "test_anchor_g1_a_key_file_replaced_during_the_gates_refuses_and_publishes_nothing",
+    "only": "test_anchor_g1_a_key_file_replaced_during_the_gates_refuses_and_publishes_nothing"
+  },
+  {
+    "id": "RM-237",
+    "file": "scripts/release.sh",
+    "what": "the end comparison of the key file hash is dropped",
+    "old": "    [ \"$key_end_hash\" = \"$key_start_hash\" ] || { echo 'release: the trust key file changed during the release' >&2; exit 1; }",
+    "new": "    :",
+    "fails": "test_anchor_g2_a_key_file_replaced_after_the_join_refuses_at_the_end_and_publishes_nothing",
+    "only": "test_anchor_g2_a_key_file_replaced_after_the_join_refuses_at_the_end_and_publishes_nothing"
+  },
+  {
+    "id": "RM-238",
+    "file": "scripts/release.sh",
+    "what": "a relative key path is accepted",
+    "old": "        /*) ;;\n        *) echo 'release: --trust-key-file must be an absolute path without a newline' >&2; exit 2 ;;",
+    "new": "        *) ;;",
+    "fails": "test_anchor_e5_the_trust_key_file_option_is_checked_and_no_environment_variable_stands_in_for_it",
+    "only": "test_anchor_e5_the_trust_key_file_option_is_checked_and_no_environment_variable_stands_in_for_it"
+  },
+  {
+    "id": "RM-239",
+    "file": "scripts/release.sh",
+    "what": "a newline in the key path is accepted",
+    "old": "        *\"$nl\"*) echo 'release: --trust-key-file must be an absolute path without a newline' >&2; exit 2 ;;",
+    "new": "        *\"$nl\"*) ;;",
+    "fails": "test_anchor_e5_the_trust_key_file_option_is_checked_and_no_environment_variable_stands_in_for_it",
+    "only": "test_anchor_e5_the_trust_key_file_option_is_checked_and_no_environment_variable_stands_in_for_it"
+  },
+  {
+    "id": "RM-240",
+    "file": "scripts/release.sh",
+    "what": "a second --trust-key-file is accepted",
+    "old": "            [ \"$trust_key_given\" -eq 0 ] || { echo 'release: --trust-key-file given twice' >&2; exit 2; }\n",
+    "new": "",
+    "fails": "test_anchor_e5_the_trust_key_file_option_is_checked_and_no_environment_variable_stands_in_for_it",
+    "only": "test_anchor_e5_the_trust_key_file_option_is_checked_and_no_environment_variable_stands_in_for_it"
+  },
+  {
+    "id": "RM-241",
+    "file": "scripts/release.sh",
+    "what": "SIGTERM is ignored",
+    "old": "trap 'exit 1' HUP INT TERM",
+    "new": "trap '' HUP INT TERM",
+    "fails": "test_anchor_h1_sigterm_during_a_gate_leaves_no_staging_no_record_and_no_work_directory",
+    "only": "test_anchor_h1_sigterm_during_a_gate_leaves_no_staging_no_record_and_no_work_directory"
+  },
+  {
+    "id": "RM-242",
+    "what": "the end re-read of the key file is the plain sha256sum of the path again (sam TAJ-SAM01: it blocks on a FIFO and follows a link)",
+    "file": "scripts/release.sh",
+    "old": "    key_end_hash=$(python3 -I \"$helper\" trust-key-hash --trust-key-file \"$trust_key_file\") || { echo 'release: the trust key file changed during the release' >&2; exit 1; }",
+    "new": "    key_end_hash=$(sha256sum -- \"$trust_key_file\" 2>/dev/null | cut -d' ' -f1)",
+    "fails": "test_anchor_g4_a_key_path_replaced_after_the_join_by_a_fifo_refuses_and_never_blocks",
+    "only": "test_anchor_g4_a_key_path_replaced_after_the_join_by_a_fifo_refuses_and_never_blocks"
+  },
+  {
+    "id": "RM-243",
+    "what": "the end re-read follows a link to a file with the very bytes of the key (the checked read is replaced by a plain read of the path's bytes)",
+    "file": "scripts/release_manifest.py",
+    "old": "print(hashlib.sha256(read_trust_key(args.trust_key_file)[0]).hexdigest())",
+    "new": "print(hashlib.sha256(Path(args.trust_key_file).read_bytes()).hexdigest())",
+    "fails": "test_anchor_a6_the_final_hash_command_uses_the_one_checked_bounded_read",
+    "only": "test_anchor_a6_the_final_hash_command_uses_the_one_checked_bounded_read"
+  },
+  {
+    "id": "RM-244",
+    "what": "the end re-read command prints the hash without the 1024-byte bound (the cap of the checked read is lifted)",
+    "file": "scripts/release_manifest.py",
+    "old": "TRUST_KEY_MAX_BYTES = 1024",
+    "new": "TRUST_KEY_MAX_BYTES = 1024 * 1024",
+    "fails": "test_anchor_a6_the_final_hash_command_uses_the_one_checked_bounded_read",
+    "only": "test_anchor_a6_the_final_hash_command_uses_the_one_checked_bounded_read"
+  },
+  {
+    "id": "RM-245",
+    "what": "tree_digest is the plain find and sha256sum loop again (it follows a link: a link to a FIFO blocks the end digest; cox O-1)",
+    "file": "scripts/release.sh",
+    "old": "tree_digest() {\n    python3 -I \"$helper\" tree-digest --dir \"$1\"\n}",
+    "new": "tree_digest() {\n    ( cd \"$1\" && find . \\( -type f -o -type l \\) -print | LC_ALL=C sort | while IFS= read -r entry; do\n          printf '%s  %s\\n' \"$(sha256sum -- \"$entry\" | cut -d' ' -f1)\" \"$entry\"\n      done | sha256sum | cut -d' ' -f1 )\n}",
+    "fails": "test_anchor_i1_a_link_to_a_fifo_planted_in_deploy_after_the_last_clean_check_refuses_at_the_end_and_never_blocks",
+    "only": "test_anchor_i1_a_link_to_a_fifo_planted_in_deploy_after_the_last_clean_check_refuses_at_the_end_and_never_blocks"
+  },
+  {
+    "id": "RM-246",
+    "what": "members_digest is the plain sha256sum loop again (a bin member replaced by a FIFO blocks the end digest)",
+    "file": "scripts/release.sh",
+    "old": "members_digest() {\n    python3 -I \"$helper\" members-digest --dir \"$1\" $bin_members\n}",
+    "new": "members_digest() {\n    ( cd \"$1\" && for member in $bin_members; do printf '%s  %s\\n' \"$(sha256sum -- \"$member\" | cut -d' ' -f1)\" \"$member\"; done | sha256sum | cut -d' ' -f1 )\n}",
+    "fails": "test_anchor_i3_a_bin_member_replaced_by_a_fifo_after_the_start_refuses_at_the_end_and_never_blocks",
+    "only": "test_anchor_i3_a_bin_member_replaced_by_a_fifo_after_the_start_refuses_at_the_end_and_never_blocks"
+  },
+  {
+    "id": "RM-247",
+    "what": "the feature digest before the image build is the plain sha256sum again (the feature file replaced by a FIFO blocks it)",
+    "file": "scripts/release.sh",
+    "old": "[ \"$feature_digest\" = \"$(python3 -I \"$helper\" file-digest --path \"$root/deploy/server-features\")\" ] || { echo 'release: server feature file changed before image build' >&2; exit 1; }",
+    "new": "[ \"$feature_digest\" = \"$(cat \"$root/deploy/server-features\" | sha256sum | cut -d\" \" -f1)\" ] || { echo 'release: server feature file changed before image build' >&2; exit 1; }",
+    "fails": "test_anchor_i4_the_server_feature_file_replaced_by_a_fifo_before_the_image_build_refuses_and_never_blocks",
+    "only": "test_anchor_i4_the_server_feature_file_replaced_by_a_fifo_before_the_image_build_refuses_and_never_blocks"
+  },
+  {
+    "id": "RM-248",
+    "what": "a file the digest cannot hash is skipped silently instead of refused (the digest of a tree with an oversized file is made without it)",
+    "file": "scripts/release_manifest.py",
+    "old": "                entries.append((relative, bounded_file_hash(entry.path)))",
+    "new": "                try:\n                    entries.append((relative, bounded_file_hash(entry.path)))\n                except ValueError:\n                    pass",
+    "fails": "test_anchor_i5_a_deploy_file_over_the_bound_is_refused_not_silently_hashed_whole",
+    "only": "test_anchor_i5_a_deploy_file_over_the_bound_is_refused_not_silently_hashed_whole"
+  },
+  {
+    "id": "RM-249",
+    "what": "the bounded hash follows links (O_NOFOLLOW dropped from the digest read)",
+    "file": "scripts/release_manifest.py",
+    "old": "        descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC)\n    except OSError as error:\n        die(f\"digest: {name} is a symbolic link\"",
+    "new": "        descriptor = os.open(path, os.O_RDONLY | os.O_NONBLOCK | os.O_CLOEXEC)\n    except OSError as error:\n        die(f\"digest: {name} is a symbolic link\"",
+    "fails": "test_anchor_a7_the_digest_commands_are_bounded_no_follow_reads",
+    "only": "test_anchor_a7_the_digest_commands_are_bounded_no_follow_reads"
+  },
+  {
+    "id": "RM-250",
+    "what": "the digest bound is lifted (a file of any size is hashed whole)",
+    "file": "scripts/release_manifest.py",
+    "old": "DIGEST_FILE_MAX_BYTES = 64 * 1024 * 1024",
+    "new": "DIGEST_FILE_MAX_BYTES = 64 * 1024 * 1024 * 1024",
+    "fails": "test_anchor_i5_a_deploy_file_over_the_bound_is_refused_not_silently_hashed_whole",
+    "only": "test_anchor_i5_a_deploy_file_over_the_bound_is_refused_not_silently_hashed_whole"
+  },
+  {
+    "id": "RM-251",
+    "what": "tree-digest ignores a link instead of recording its target text",
+    "file": "scripts/release_manifest.py",
+    "old": "            if entry.is_symlink():\n                entries.append((relative, \"link:\" + os.readlink(entry.path)))",
+    "new": "            if False:\n                entries.append((relative, \"link:\" + os.readlink(entry.path)))",
+    "fails": "test_anchor_i2_a_link_to_a_regular_file_planted_in_deploy_after_the_last_clean_check_refuses_at_the_end",
+    "only": "test_anchor_i2_a_link_to_a_regular_file_planted_in_deploy_after_the_last_clean_check_refuses_at_the_end"
+  },
+  {
+    "id": "RM-252",
+    "what": "the squawk digest is a plain sha256sum again (follows a link, blocks on a FIFO)",
+    "file": "scripts/release.sh",
+    "old": "actual=$(python3 -I \"$helper\" file-digest --path \"$squawk\") ||",
+    "new": "actual=$(sha256sum \"$squawk\" | cut -d' ' -f1) ||",
+    "fails": "test_anchor_j1_a_fifo_at_the_pinned_squawk_path_is_refused_and_never_blocks",
+    "only": "test_anchor_j1_a_fifo_at_the_pinned_squawk_path_is_refused_and_never_blocks"
+  },
+  {
+    "id": "RM-253",
+    "what": "the pinned squawk digest is no longer compared",
+    "file": "scripts/release.sh",
+    "old": "    [ \"$actual\" = cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e ] || { echo 'release: squawk digest mismatch' >&2; exit 1; }",
+    "new": "    :",
+    "fails": "test_anchor_j2_a_regular_file_with_the_wrong_digest_at_the_pinned_squawk_path_is_refused",
+    "only": "test_anchor_j2_a_regular_file_with_the_wrong_digest_at_the_pinned_squawk_path_is_refused"
+  },
+  {
+    "id": "RM-254",
+    "what": "an unreadable squawk binary exits without the refusal line (the guard on the digest call is dropped)",
+    "file": "scripts/release.sh",
+    "old": "actual=$(python3 -I \"$helper\" file-digest --path \"$squawk\") || { echo 'release: squawk digest mismatch' >&2; exit 1; }",
+    "new": "actual=$(python3 -I \"$helper\" file-digest --path \"$squawk\")",
+    "fails": "test_anchor_j3_a_link_at_the_pinned_squawk_path_is_refused_not_followed",
+    "only": "test_anchor_j3_a_link_at_the_pinned_squawk_path_is_refused_not_followed"
+  },
+  {
+    "id": "RM-255",
+    "what": "approvals that are not a list are accepted as none",
+    "file": "scripts/release_manifest.py",
+    "old": "    if not isinstance(approvals, list):\n        die(f\"entry {path}: Squawk approvals are not a list\")\n",
+    "new": "    if not isinstance(approvals, list):\n        return\n",
+    "fails": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause",
+    "only": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause"
+  },
+  {
+    "id": "RM-256",
+    "what": "an approval with an unknown extra field is accepted",
+    "file": "scripts/release_manifest.py",
+    "old": "        if not isinstance(item, dict) or set(item) != SQUAWK_APPROVAL_FIELDS:",
+    "new": "        if not isinstance(item, dict) or not SQUAWK_APPROVAL_FIELDS <= set(item):",
+    "fails": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause",
+    "only": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause"
+  },
+  {
+    "id": "RM-257",
+    "what": "a boolean line is accepted as an integer",
+    "file": "scripts/release_manifest.py",
+    "old": "        if type(item[\"line\"]) is not int or item[\"line\"] < 0:",
+    "new": "        if not isinstance(item[\"line\"], int) or item[\"line\"] < 0:",
+    "fails": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause",
+    "only": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause"
+  },
+  {
+    "id": "RM-258",
+    "what": "a negative line is accepted",
+    "file": "scripts/release_manifest.py",
+    "old": "        if type(item[\"line\"]) is not int or item[\"line\"] < 0:",
+    "new": "        if type(item[\"line\"]) is not int:",
+    "fails": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause",
+    "only": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause"
+  },
+  {
+    "id": "RM-259",
+    "what": "any text is a rule name",
+    "file": "scripts/release_manifest.py",
+    "old": "SQUAWK_RULE_NAME = re.compile(r\"[a-z0-9][a-z0-9-]{0,63}\\Z\", re.ASCII)",
+    "new": "SQUAWK_RULE_NAME = re.compile(r\".+\\Z\")",
+    "fails": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause",
+    "only": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause"
+  },
+  {
+    "id": "RM-260",
+    "what": "an upper-case rule name is accepted",
+    "file": "scripts/release_manifest.py",
+    "old": "SQUAWK_RULE_NAME = re.compile(r\"[a-z0-9][a-z0-9-]{0,63}\\Z\", re.ASCII)",
+    "new": "SQUAWK_RULE_NAME = re.compile(r\"[A-Za-z0-9][A-Za-z0-9-]{0,63}\\Z\", re.ASCII)",
+    "fails": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause",
+    "only": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause"
+  },
+  {
+    "id": "RM-261",
+    "what": "a rule name of any length is accepted",
+    "file": "scripts/release_manifest.py",
+    "old": "SQUAWK_RULE_NAME = re.compile(r\"[a-z0-9][a-z0-9-]{0,63}\\Z\", re.ASCII)",
+    "new": "SQUAWK_RULE_NAME = re.compile(r\"[a-z0-9][a-z0-9-]*\\Z\", re.ASCII)",
+    "fails": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause",
+    "only": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause"
+  },
+  {
+    "id": "RM-262",
+    "what": "the approval's tool digest is not checked",
+    "file": "scripts/release_manifest.py",
+    "old": "        if item[\"tool_sha256\"] != SQUAWK_TOOL_SHA256:",
+    "new": "        if False:",
+    "fails": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause",
+    "only": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause"
+  },
+  {
+    "id": "RM-263",
+    "what": "the approval's config digest is not checked",
+    "file": "scripts/release_manifest.py",
+    "old": "        if item[\"config_sha256\"] != config_sha:",
+    "new": "        if False:",
+    "fails": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause",
+    "only": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause"
+  },
+  {
+    "id": "RM-264",
+    "what": "the config digest is taken from the entry itself instead of the file in the tree",
+    "file": "scripts/release_manifest.py",
+    "old": "            config_sha = bounded_file_hash(Path(root) / SQUAWK_CONFIG_PATH)",
+    "new": "            config_sha = item[\"config_sha256\"]",
+    "fails": "test_sq_a3_the_approvals_are_bound_to_the_pinned_tool_and_to_the_config_in_the_tree",
+    "only": "test_sq_a3_the_approvals_are_bound_to_the_pinned_tool_and_to_the_config_in_the_tree"
+  },
+  {
+    "id": "RM-265",
+    "what": "a duplicate approval (the same rule and line twice) is accepted",
+    "file": "scripts/release_manifest.py",
+    "old": "        if (item[\"rule\"], item[\"line\"]) in seen:",
+    "new": "        if False:",
+    "fails": "test_sq_a4_a_duplicate_approval_is_refused_with_its_own_message_and_near_misses_are_not_duplicates",
+    "only": "test_sq_a4_a_duplicate_approval_is_refused_with_its_own_message_and_near_misses_are_not_duplicates"
+  },
+  {
+    "id": "RM-266",
+    "what": "the same rule on two lines is refused as a duplicate",
+    "file": "scripts/release_manifest.py",
+    "old": "        if (item[\"rule\"], item[\"line\"]) in seen:",
+    "new": "        if item[\"rule\"] in {rule for rule, _ in seen}:",
+    "fails": "test_sq_a4_a_duplicate_approval_is_refused_with_its_own_message_and_near_misses_are_not_duplicates",
+    "only": "test_sq_a4_a_duplicate_approval_is_refused_with_its_own_message_and_near_misses_are_not_duplicates"
+  },
+  {
+    "id": "RM-267",
+    "what": "the duplicate-approval message loses its words",
+    "file": "scripts/release_manifest.py",
+    "old": "            die(f\"entry {path}: duplicate Squawk approval: {item['rule']} line {item['line']}\")",
+    "new": "            die(f\"entry {path}: a repeated approval\")",
+    "fails": "test_sq_a4_a_duplicate_approval_is_refused_with_its_own_message_and_near_misses_are_not_duplicates",
+    "only": "test_sq_a4_a_duplicate_approval_is_refused_with_its_own_message_and_near_misses_are_not_duplicates"
+  },
+  {
+    "id": "RM-268",
+    "what": "an entry with approvals is a clean candidate",
+    "file": "scripts/release_manifest.py",
+    "old": "    return \"findings\" if entry[\"squawk\"] else \"clean\"",
+    "new": "    return \"clean\"",
+    "fails": "test_sq_a1_a_findings_entry_verifies_and_is_a_findings_candidate_beside_the_others",
+    "only": "test_sq_a1_a_findings_entry_verifies_and_is_a_findings_candidate_beside_the_others"
+  },
+  {
+    "id": "RM-269",
+    "what": "an entry without approvals is a findings candidate",
+    "file": "scripts/release_manifest.py",
+    "old": "    return \"findings\" if entry[\"squawk\"] else \"clean\"",
+    "new": "    return \"findings\"",
+    "fails": "test_sq_a1_a_findings_entry_verifies_and_is_a_findings_candidate_beside_the_others",
+    "only": "test_sq_a1_a_findings_entry_verifies_and_is_a_findings_candidate_beside_the_others"
+  },
+  {
+    "id": "RM-270",
+    "what": "the helper's pinned tool digest differs from release.sh's literal",
+    "file": "scripts/release_manifest.py",
+    "old": "SQUAWK_TOOL_SHA256 = \"cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e\"",
+    "new": "SQUAWK_TOOL_SHA256 = \"cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3ef\"",
+    "fails": "test_sq_a3_the_approvals_are_bound_to_the_pinned_tool_and_to_the_config_in_the_tree",
+    "only": "test_sq_a3_the_approvals_are_bound_to_the_pinned_tool_and_to_the_config_in_the_tree"
+  },
+  {
+    "id": "RM-271",
+    "what": "the approvals are bound to a config path that does not exist",
+    "file": "scripts/release_manifest.py",
+    "old": "SQUAWK_CONFIG_PATH = \"scripts/release-squawk.toml\"",
+    "new": "SQUAWK_CONFIG_PATH = \"scripts/release-squawk.toml.none\"",
+    "fails": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause",
+    "only": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause"
+  },
+  {
+    "id": "RM-272",
+    "what": "a finding reported twice counts once",
+    "file": "scripts/release_manifest.py",
+    "old": "        observed[(finding[\"rule_name\"], finding[\"line\"])] += 1",
+    "new": "        observed[(finding[\"rule_name\"], finding[\"line\"])] = 1",
+    "fails": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals",
+    "only": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals"
+  },
+  {
+    "id": "RM-273",
+    "what": "an extra finding is ignored",
+    "file": "scripts/release_manifest.py",
+    "old": "    for (rule, line), count in sorted((observed - approved).items()):",
+    "new": "    for (rule, line), count in []:",
+    "fails": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals",
+    "only": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals"
+  },
+  {
+    "id": "RM-274",
+    "what": "a stale approval is ignored",
+    "file": "scripts/release_manifest.py",
+    "old": "    for (rule, line), count in sorted((approved - observed).items()):",
+    "new": "    for (rule, line), count in []:",
+    "fails": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals",
+    "only": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals"
+  },
+  {
+    "id": "RM-275",
+    "what": "the extra-finding message loses its words",
+    "file": "scripts/release_manifest.py",
+    "old": "        die(f\"Squawk finding is not approved: {rule} line {line}\")",
+    "new": "        die(\"Squawk finding differs\")",
+    "fails": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals",
+    "only": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals"
+  },
+  {
+    "id": "RM-276",
+    "what": "the stale-approval message loses its words",
+    "file": "scripts/release_manifest.py",
+    "old": "        die(f\"approved Squawk finding is not in the report (stale): {rule} line {line}\")",
+    "new": "        die(\"an approval differs\")",
+    "fails": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals",
+    "only": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals"
+  },
+  {
+    "id": "RM-277",
+    "what": "a finding reported for another file is accepted",
+    "file": "scripts/release_manifest.py",
+    "old": "                type(finding.get(\"line\")) is not int or Path(finding[\"file\"]).resolve() != Path(migration).resolve()):",
+    "new": "                type(finding.get(\"line\")) is not int):",
+    "fails": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals",
+    "only": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals"
+  },
+  {
+    "id": "RM-278",
+    "what": "a report that is not a list is accepted",
+    "file": "scripts/release_manifest.py",
+    "old": "    if not isinstance(findings, list):\n        die(\"the Squawk report is not a well-formed list of findings for this file\")\n",
+    "new": "    if not isinstance(findings, list):\n        return True\n",
+    "fails": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals",
+    "only": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals"
+  },
+  {
+    "id": "RM-279",
+    "what": "the approved line is compared one off from the reported line",
+    "file": "scripts/release_manifest.py",
+    "old": "    approved = collections.Counter((item[\"rule\"], item[\"line\"]) for item in entry[\"squawk\"])",
+    "new": "    approved = collections.Counter((item[\"rule\"], item[\"line\"] + 1) for item in entry[\"squawk\"])",
+    "fails": "test_sq_b1_gate_4_passes_when_the_report_equals_the_approvals_and_clean_mode_is_unchanged",
+    "only": "test_sq_b1_gate_4_passes_when_the_report_equals_the_approvals_and_clean_mode_is_unchanged"
+  },
+  {
+    "id": "RM-280",
+    "what": "the approvals of the first findings entry are used for every migration",
+    "file": "scripts/release_manifest.py",
+    "old": "            exact_entry_squawk(args.migration, entries[relative], json.loads(raw))",
+    "new": "            exact_entry_squawk(args.migration, entries[next(p for p, m in modes.items() if m == \"findings\")], json.loads(raw))",
+    "fails": "test_sq_b3_the_approvals_of_one_migration_cannot_satisfy_another",
+    "only": "test_sq_b3_the_approvals_of_one_migration_cannot_satisfy_another"
+  },
+  {
+    "id": "RM-281",
+    "what": "a report over 1 MiB is accepted",
+    "file": "scripts/release_manifest.py",
+    "old": "            if len(raw) > 1024 * 1024:\n                die(\"the Squawk report is over 1 MiB\")",
+    "new": "            if len(raw) > 1024 * 1024 * 1024:\n                die(\"the Squawk report is over 1 MiB\")",
+    "fails": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals",
+    "only": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals"
+  },
+  {
+    "id": "RM-282",
+    "what": "the approvals are not validated at all",
+    "file": "scripts/release_manifest.py",
+    "old": "    _check_squawk_approvals(root, path, entry[\"squawk\"])",
+    "new": "    pass",
+    "fails": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause",
+    "only": "test_sq_a2_every_malformed_approval_is_refused_with_its_own_cause"
+  },
+  {
+    "id": "RM-283",
+    "what": "gate 4 has no findings mode (an entry with approvals is treated as clean)",
+    "file": "scripts/release.sh",
+    "old": "    elif [ \"$exception_mode\" = findings ]; then",
+    "new": "    elif false; then",
+    "fails": "test_sq_b1_gate_4_passes_when_the_report_equals_the_approvals_and_clean_mode_is_unchanged",
+    "only": "test_sq_b1_gate_4_passes_when_the_report_equals_the_approvals_and_clean_mode_is_unchanged"
+  },
+  {
+    "id": "RM-284",
+    "what": "findings mode accepts status 0",
+    "file": "scripts/release.sh",
+    "old": "        [ \"$squawk_status\" -eq 1 ] && python3 -I \"$helper\" exception-squawk --root",
+    "new": "        [ \"$squawk_status\" -le 1 ] && python3 -I \"$helper\" exception-squawk --root",
+    "fails": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals",
+    "only": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals"
+  },
+  {
+    "id": "RM-285",
+    "what": "findings mode compares against the frozen platform four (no --root)",
+    "file": "scripts/release.sh",
+    "old": " exception-squawk --root \"$root\" --migration \"$migration\" --input \"$work/squawk.json\" ||",
+    "new": " exception-squawk --migration \"$migration\" --input \"$work/squawk.json\" ||",
+    "fails": "test_sq_b1_gate_4_passes_when_the_report_equals_the_approvals_and_clean_mode_is_unchanged",
+    "only": "test_sq_b1_gate_4_passes_when_the_report_equals_the_approvals_and_clean_mode_is_unchanged"
+  },
+  {
+    "id": "RM-286",
+    "what": "findings is no waiver word for the dynamic-SQL scan",
+    "file": "scripts/release.sh",
+    "old": "            baseline|clean|findings) allow_dynamic=1 ;;",
+    "new": "            baseline|clean) allow_dynamic=1 ;;",
+    "fails": "test_sq_b1_gate_4_passes_when_the_report_equals_the_approvals_and_clean_mode_is_unchanged",
+    "only": "test_sq_b1_gate_4_passes_when_the_report_equals_the_approvals_and_clean_mode_is_unchanged"
+  },
+  {
+    "id": "RM-287",
+    "what": "a word that only starts like findings waives the dynamic-SQL scan",
+    "file": "scripts/release.sh",
+    "old": "            baseline|clean|findings) allow_dynamic=1 ;;",
+    "new": "            baseline|clean|findings*) allow_dynamic=1 ;;",
+    "fails": "test_exc_c6_a_zero_status_candidate_answer_other_than_baseline_or_clean_waives_nothing",
+    "only": "test_exc_c6_a_zero_status_candidate_answer_other_than_baseline_or_clean_waives_nothing"
+  },
+  {
+    "id": "RM-288",
+    "what": "a failed findings comparison does not stop the release",
+    "file": "scripts/release.sh",
+    "old": "|| { echo \"release: approved Squawk findings differ: $migration\" >&2; exit 1; }",
+    "new": "|| true",
+    "fails": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals",
+    "only": "test_sq_b2_gate_4_refuses_every_difference_between_the_report_and_the_approvals"
+  },
+  {
+    "id": "RM-289",
+    "what": "the frozen platform baseline of four findings is widened to five",
+    "file": "scripts/release_manifest.py",
+    "old": "BASELINE_SQUAWK = [(\"require-lock-timeout\", 2), (\"require-statement-timeout\", 2),\n                   (\"prefer-bigint-over-int\", 7), (\"prefer-bigint-over-int\", 34)]",
+    "new": "BASELINE_SQUAWK = [(\"require-lock-timeout\", 2), (\"require-statement-timeout\", 2),\n                   (\"prefer-bigint-over-int\", 7), (\"prefer-bigint-over-int\", 34), (\"prefer-bigint-over-int\", 35)]",
+    "fails": "test_sq_c2_the_frozen_platform_constants_and_the_clean_mode_are_untouched",
+    "only": "test_sq_c2_the_frozen_platform_constants_and_the_clean_mode_are_untouched"
+  },
+  {
+    "id": "RM-290",
+    "what": "an approval of tokens is moved one line (the reported line is part of the identity)",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"rule\": \"require-lock-timeout\",\n          \"line\": 6,",
+    "new": "\"rule\": \"require-lock-timeout\",\n          \"line\": 7,",
+    "fails": "test_pd_d1_the_real_reports_replayed_against_the_production_list_pass_for_the_three_and_cannot_cross",
+    "only": "test_pd_d1_the_real_reports_replayed_against_the_production_list_pass_for_the_three_and_cannot_cross"
+  },
+  {
+    "id": "RM-291",
+    "what": "an approval of handoffs is moved one line",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"rule\": \"require-lock-timeout\",\n          \"line\": 12,",
+    "new": "\"rule\": \"require-lock-timeout\",\n          \"line\": 13,",
+    "fails": "test_pd_d1_the_real_reports_replayed_against_the_production_list_pass_for_the_three_and_cannot_cross",
+    "only": "test_pd_d1_the_real_reports_replayed_against_the_production_list_pass_for_the_three_and_cannot_cross"
+  },
+  {
+    "id": "RM-292",
+    "what": "an approval of identity is moved one line",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"rule\": \"prefer-bigint-over-int\",\n          \"line\": 25,",
+    "new": "\"rule\": \"prefer-bigint-over-int\",\n          \"line\": 26,",
+    "fails": "test_pd_b1_the_production_list_carries_the_exact_findings_entries_for_handoffs_identity_and_tokens",
+    "only": "test_pd_b1_the_production_list_carries_the_exact_findings_entries_for_handoffs_identity_and_tokens"
+  },
+  {
+    "id": "RM-293",
+    "what": "the last approval of tokens is dropped (a finding the binary reports is no longer approved)",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": ",\n        {\n          \"rule\": \"require-statement-timeout\",\n          \"line\": 6,\n          \"tool_sha256\": \"cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e\",\n          \"config_sha256\": \"7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427\"\n        }\n      ]\n    }\n  ]\n}",
+    "new": "\n      ]\n    }\n  ]\n}",
+    "fails": "test_pd_b1_the_production_list_carries_the_exact_findings_entries_for_handoffs_identity_and_tokens",
+    "only": "test_pd_b1_the_production_list_carries_the_exact_findings_entries_for_handoffs_identity_and_tokens"
+  },
+  {
+    "id": "RM-294",
+    "what": "the handoffs entry is approved by the older ruling's row instead of vera's new one",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"path\": \"crates/mod-handoffs/migrations/0001_handoffs.up.sql\",\n      \"sha256\": \"8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d\",\n      \"approved_by\": \"d4b7aeb6-93a3-4346-8f03-0b608b5914d6\",",
+    "new": "\"path\": \"crates/mod-handoffs/migrations/0001_handoffs.up.sql\",\n      \"sha256\": \"8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d\",\n      \"approved_by\": \"dff86aea-4b3b-46a8-a79e-5b6b0302a3b4\",",
+    "fails": "test_pd_b1_the_production_list_carries_the_exact_findings_entries_for_handoffs_identity_and_tokens",
+    "only": "test_pd_b1_the_production_list_carries_the_exact_findings_entries_for_handoffs_identity_and_tokens"
+  },
+  {
+    "id": "RM-295",
+    "what": "a raw EXECUTE word of tokens is moved one line (the scan no longer equals the entry)",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"line\": 64,\n          \"column\": 54",
+    "new": "\"line\": 65,\n          \"column\": 54",
+    "fails": "test_pd_b1_the_production_list_carries_the_exact_findings_entries_for_handoffs_identity_and_tokens",
+    "only": "test_pd_b1_the_production_list_carries_the_exact_findings_entries_for_handoffs_identity_and_tokens"
+  },
+  {
+    "id": "RM-296",
+    "what": "an approval of tokens names another tool digest",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"rule\": \"require-lock-timeout\",\n          \"line\": 6,\n          \"tool_sha256\": \"cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e\"",
+    "new": "\"rule\": \"require-lock-timeout\",\n          \"line\": 6,\n          \"tool_sha256\": \"cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3f\"",
+    "fails": "test_pd_c1_the_production_list_and_record_verify_on_this_tree_and_the_three_entries_are_findings_candidates",
+    "only": "test_pd_c1_the_production_list_and_record_verify_on_this_tree_and_the_three_entries_are_findings_candidates"
+  },
+  {
+    "id": "RM-297",
+    "what": "an approval of identity names another config digest",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"rule\": \"require-lock-timeout\",\n          \"line\": 7,\n          \"tool_sha256\": \"cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e\",\n          \"config_sha256\": \"7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427\"",
+    "new": "\"rule\": \"require-lock-timeout\",\n          \"line\": 7,\n          \"tool_sha256\": \"cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e\",\n          \"config_sha256\": \"7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9428\"",
+    "fails": "test_pd_c1_the_production_list_and_record_verify_on_this_tree_and_the_three_entries_are_findings_candidates",
+    "only": "test_pd_c1_the_production_list_and_record_verify_on_this_tree_and_the_three_entries_are_findings_candidates"
+  },
+  {
+    "id": "RM-298",
+    "what": "the handoffs pin cites the relay copy instead of vera's own report",
+    "file": "scripts/release-migration-approval.json",
+    "old": "\"migration_path\": \"crates/mod-handoffs/migrations/0001_handoffs.up.sql\",\n      \"migration_sha256\": \"8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d\",\n      \"approved_by\": \"d4b7aeb6-93a3-4346-8f03-0b608b5914d6\",\n      \"review_path\": \"/path/to/docs/Program/ReviewService/2026-11-09-squawk-gate4-d4b7aeb-vera/RULING.md\"",
+    "new": "\"migration_path\": \"crates/mod-handoffs/migrations/0001_handoffs.up.sql\",\n      \"migration_sha256\": \"8f7c2ab56c98b039621b8975266e2b552bfeb5601e0f39fded442c3a274d853d\",\n      \"approved_by\": \"d4b7aeb6-93a3-4346-8f03-0b608b5914d6\",\n      \"review_path\": \"/path/to/docs/mvp/pieces/relay-vera-gate4-ruling-20261109/RULING.md\"",
+    "fails": "test_pd_b2_the_production_record_pins_the_three_entries_to_veras_ruling_and_the_list_it_hashes",
+    "only": "test_pd_b2_the_production_record_pins_the_three_entries_to_veras_ruling_and_the_list_it_hashes"
+  },
+  {
+    "id": "RM-299",
+    "what": "the identity pin names the older ruling's row",
+    "file": "scripts/release-migration-approval.json",
+    "old": "\"migration_path\": \"crates/mod-identity/migrations/0001_identity.up.sql\",\n      \"migration_sha256\": \"c08fab0dc0d048c62daa3e2c5b598802f31e54f46e6eb3f04c51e37056c29036\",\n      \"approved_by\": \"d4b7aeb6-93a3-4346-8f03-0b608b5914d6\"",
+    "new": "\"migration_path\": \"crates/mod-identity/migrations/0001_identity.up.sql\",\n      \"migration_sha256\": \"c08fab0dc0d048c62daa3e2c5b598802f31e54f46e6eb3f04c51e37056c29036\",\n      \"approved_by\": \"dff86aea-4b3b-46a8-a79e-5b6b0302a3b4\"",
+    "fails": "test_pd_b2_the_production_record_pins_the_three_entries_to_veras_ruling_and_the_list_it_hashes",
+    "only": "test_pd_b2_the_production_record_pins_the_three_entries_to_veras_ruling_and_the_list_it_hashes"
+  },
+  {
+    "id": "RM-300",
+    "what": "the tokens pin names another review hash",
+    "file": "scripts/release-migration-approval.json",
+    "old": "\"migration_path\": \"crates/mod-tokens/migrations/0001_tokens.up.sql\",\n      \"migration_sha256\": \"8357e64ae28a0e8f51568e0a0f686719838127687b479f71ce090a0ea1e82d68\",\n      \"approved_by\": \"d4b7aeb6-93a3-4346-8f03-0b608b5914d6\",\n      \"review_path\": \"/path/to/docs/Program/ReviewService/2026-11-09-squawk-gate4-d4b7aeb-vera/RULING.md\",\n      \"review_sha256\": \"4b73344788b02711206f7226d26b6b62a96cd936fb20709250359cd3c25a789b\"",
+    "new": "\"migration_path\": \"crates/mod-tokens/migrations/0001_tokens.up.sql\",\n      \"migration_sha256\": \"8357e64ae28a0e8f51568e0a0f686719838127687b479f71ce090a0ea1e82d68\",\n      \"approved_by\": \"d4b7aeb6-93a3-4346-8f03-0b608b5914d6\",\n      \"review_path\": \"/path/to/docs/Program/ReviewService/2026-11-09-squawk-gate4-d4b7aeb-vera/RULING.md\",\n      \"review_sha256\": \"4b73344788b02711206f7226d26b6b62a96cd936fb20709250359cd3c25a789c\"",
+    "fails": "test_pd_b2_the_production_record_pins_the_three_entries_to_veras_ruling_and_the_list_it_hashes",
+    "only": "test_pd_b2_the_production_record_pins_the_three_entries_to_veras_ruling_and_the_list_it_hashes"
+  },
+  {
+    "id": "RM-301",
+    "what": "the one FIX verdict of the ruling becomes a BASELINE",
+    "file": "scripts/release-fixtures/vera-gate4-verdicts.json",
+    "old": "\"verdict\": \"FIX\"",
+    "new": "\"verdict\": \"BASELINE\"",
+    "fails": "test_pd_a1_the_verdict_fixture_is_veras_22_verdicts_and_equals_the_real_reports",
+    "only": "test_pd_a1_the_verdict_fixture_is_veras_22_verdicts_and_equals_the_real_reports"
+  },
+  {
+    "id": "RM-302",
+    "what": "the fixture names another config digest",
+    "file": "scripts/release-fixtures/vera-gate4-verdicts.json",
+    "old": "\"config_sha256\": \"7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427\"",
+    "new": "\"config_sha256\": \"7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9428\"",
+    "fails": "test_pd_a1_the_verdict_fixture_is_veras_22_verdicts_and_equals_the_real_reports",
+    "only": "test_pd_a1_the_verdict_fixture_is_veras_22_verdicts_and_equals_the_real_reports"
+  },
+  {
+    "id": "RM-303",
+    "what": "the audit entry is approved by the records ruling's row",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"path\": \"crates/mod-audit/migrations/0001_audit.up.sql\",\n      \"sha256\": \"8f3b85baf619f9eec5847d1904470fa99a91177e1a045b3570893cf671825775\",\n      \"approved_by\": \"29aba9ba-33f1-44b2-8aa5-d9f9a5bb61e3\",",
+    "new": "\"path\": \"crates/mod-audit/migrations/0001_audit.up.sql\",\n      \"sha256\": \"8f3b85baf619f9eec5847d1904470fa99a91177e1a045b3570893cf671825775\",\n      \"approved_by\": \"893b4137-d853-4c85-bc89-5c19cad4e81e\",",
+    "fails": "test_pe_b1_the_production_list_carries_audit_and_records_with_the_two_kinds_kept_apart",
+    "only": "test_pe_b1_the_production_list_carries_audit_and_records_with_the_two_kinds_kept_apart"
+  },
+  {
+    "id": "RM-304",
+    "what": "the audit entry still carries the OLD migration hash (a stale entry)",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"path\": \"crates/mod-audit/migrations/0001_audit.up.sql\",\n      \"sha256\": \"8f3b85baf619f9eec5847d1904470fa99a91177e1a045b3570893cf671825775\",",
+    "new": "\"path\": \"crates/mod-audit/migrations/0001_audit.up.sql\",\n      \"sha256\": \"10266dc510b78dd7bed352ac8f5ce4050c24c81a6c0150b5b404e509f0599aa8\",",
+    "fails": "test_pe_c1_the_final_pair_verifies_and_every_non_platform_migration_is_a_findings_candidate",
+    "only": "test_pe_c1_the_final_pair_verifies_and_every_non_platform_migration_is_a_findings_candidate"
+  },
+  {
+    "id": "RM-305",
+    "what": "an audit approval is moved one reported line",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"rule\": \"require-lock-timeout\",\n          \"line\": 8,",
+    "new": "\"rule\": \"require-lock-timeout\",\n          \"line\": 9,",
+    "fails": "test_pe_d1_the_six_real_reports_replayed_against_the_production_list_pass_and_audit_and_records_cannot_cross",
+    "only": "test_pe_d1_the_six_real_reports_replayed_against_the_production_list_pass_and_audit_and_records_cannot_cross"
+  },
+  {
+    "id": "RM-306",
+    "what": "the second audit approval is dropped",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": ",\n        {\n          \"rule\": \"require-statement-timeout\",\n          \"line\": 8,\n          \"tool_sha256\": \"cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e\",\n          \"config_sha256\": \"7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427\"\n        }\n      ]",
+    "new": "\n      ]",
+    "fails": "test_pe_b1_the_production_list_carries_audit_and_records_with_the_two_kinds_kept_apart",
+    "only": "test_pe_b1_the_production_list_carries_audit_and_records_with_the_two_kinds_kept_apart"
+  },
+  {
+    "id": "RM-307",
+    "what": "the records entry is approved by the audit ruling's row",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"path\": \"crates/mod-records/migrations/0001_records.up.sql\",\n      \"sha256\": \"69e0393a3ab48c4825dee5b133c03c6838468c417f57a40a6e99c6ba6c99f7b5\",\n      \"approved_by\": \"893b4137-d853-4c85-bc89-5c19cad4e81e\",",
+    "new": "\"path\": \"crates/mod-records/migrations/0001_records.up.sql\",\n      \"sha256\": \"69e0393a3ab48c4825dee5b133c03c6838468c417f57a40a6e99c6ba6c99f7b5\",\n      \"approved_by\": \"29aba9ba-33f1-44b2-8aa5-d9f9a5bb61e3\",",
+    "fails": "test_pe_b1_the_production_list_carries_audit_and_records_with_the_two_kinds_kept_apart",
+    "only": "test_pe_b1_the_production_list_carries_audit_and_records_with_the_two_kinds_kept_apart"
+  },
+  {
+    "id": "RM-308",
+    "what": "a records approval is moved one reported line",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"rule\": \"prefer-bigint-over-int\",\n          \"line\": 55,",
+    "new": "\"rule\": \"prefer-bigint-over-int\",\n          \"line\": 56,",
+    "fails": "test_pe_d1_the_six_real_reports_replayed_against_the_production_list_pass_and_audit_and_records_cannot_cross",
+    "only": "test_pe_d1_the_six_real_reports_replayed_against_the_production_list_pass_and_audit_and_records_cannot_cross"
+  },
+  {
+    "id": "RM-309",
+    "what": "a records approval of the lock timeout is moved one reported line",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"rule\": \"require-lock-timeout\",\n          \"line\": 4,",
+    "new": "\"rule\": \"require-lock-timeout\",\n          \"line\": 5,",
+    "fails": "test_pe_d1_the_six_real_reports_replayed_against_the_production_list_pass_and_audit_and_records_cannot_cross",
+    "only": "test_pe_d1_the_six_real_reports_replayed_against_the_production_list_pass_and_audit_and_records_cannot_cross"
+  },
+  {
+    "id": "RM-310",
+    "what": "the last records approval is dropped",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": ",\n        {\n          \"rule\": \"prefer-bigint-over-int\",\n          \"line\": 148,\n          \"tool_sha256\": \"cf542e159fb3a94e5fd31d8b5282a31334df8205c6d7993afe286e9133fdff3e\",\n          \"config_sha256\": \"7816611e12c601652dcb67848876893642dd2f42647483df3893ae02fe4f9427\"\n        }\n      ]",
+    "new": "\n      ]",
+    "fails": "test_pe_b1_the_production_list_carries_audit_and_records_with_the_two_kinds_kept_apart",
+    "only": "test_pe_b1_the_production_list_carries_audit_and_records_with_the_two_kinds_kept_apart"
+  },
+  {
+    "id": "RM-311",
+    "what": "an audit dynamic-SQL statement hash is changed",
+    "file": "scripts/release-migration-exceptions.json",
+    "old": "\"statement_sha256\": \"b2b7d2de29b99294c8273dcd511336fc86a52c3cd26432710306ce4ae4e84fac\"",
+    "new": "\"statement_sha256\": \"b2b7d2de29b99294c8273dcd511336fc86a52c3cd26432710306ce4ae4e84fad\"",
+    "fails": "test_pe_e1_the_two_kinds_of_approval_are_separate_fields_with_their_own_exact_contents",
+    "only": "test_pe_e1_the_two_kinds_of_approval_are_separate_fields_with_their_own_exact_contents"
+  },
+  {
+    "id": "RM-312",
+    "what": "the audit pin cites another review hash",
+    "file": "scripts/release-migration-approval.json",
+    "old": "\"approved_by\": \"29aba9ba-33f1-44b2-8aa5-d9f9a5bb61e3\",\n      \"review_path\": \"/path/to/docs/Program/ReviewService/2026-11-09-audit-consolidated-29aba9ba-vera/RULING.md\",\n      \"review_sha256\": \"35ed7b581e129864b6b05e16141bcf821897ddcfa3494dd288b0a9c15feb602f\"",
+    "new": "\"approved_by\": \"29aba9ba-33f1-44b2-8aa5-d9f9a5bb61e3\",\n      \"review_path\": \"/path/to/docs/Program/ReviewService/2026-11-09-audit-consolidated-29aba9ba-vera/RULING.md\",\n      \"review_sha256\": \"35ed7b581e129864b6b05e16141bcf821897ddcfa3494dd288b0a9c15feb602e\"",
+    "fails": "test_pe_b2_the_production_record_pins_audit_and_records_to_their_own_consolidated_rulings",
+    "only": "test_pe_b2_the_production_record_pins_audit_and_records_to_their_own_consolidated_rulings"
+  },
+  {
+    "id": "RM-313",
+    "what": "the audit pin still names the OLD migration hash",
+    "file": "scripts/release-migration-approval.json",
+    "old": "\"migration_path\": \"crates/mod-audit/migrations/0001_audit.up.sql\",\n      \"migration_sha256\": \"8f3b85baf619f9eec5847d1904470fa99a91177e1a045b3570893cf671825775\",",
+    "new": "\"migration_path\": \"crates/mod-audit/migrations/0001_audit.up.sql\",\n      \"migration_sha256\": \"10266dc510b78dd7bed352ac8f5ce4050c24c81a6c0150b5b404e509f0599aa8\",",
+    "fails": "test_pe_b2_the_production_record_pins_audit_and_records_to_their_own_consolidated_rulings",
+    "only": "test_pe_b2_the_production_record_pins_audit_and_records_to_their_own_consolidated_rulings"
+  },
+  {
+    "id": "RM-314",
+    "what": "the records pin cites the audit ruling instead of its own",
+    "file": "scripts/release-migration-approval.json",
+    "old": "\"approved_by\": \"893b4137-d853-4c85-bc89-5c19cad4e81e\",\n      \"review_path\": \"/path/to/docs/Program/ReviewService/2026-11-09-records-consolidated-893b4137-vera/RULING.md\",",
+    "new": "\"approved_by\": \"893b4137-d853-4c85-bc89-5c19cad4e81e\",\n      \"review_path\": \"/path/to/docs/Program/ReviewService/2026-11-09-audit-consolidated-29aba9ba-vera/RULING.md\",",
+    "fails": "test_pe_b2_the_production_record_pins_audit_and_records_to_their_own_consolidated_rulings",
+    "only": "test_pe_b2_the_production_record_pins_audit_and_records_to_their_own_consolidated_rulings"
+  },
+  {
+    "id": "RM-315",
+    "what": "the consolidated fixture names the OLD audit migration hash",
+    "file": "scripts/release-fixtures/vera-consolidated-rulings.json",
+    "old": "\"migration_sha256\": \"8f3b85baf619f9eec5847d1904470fa99a91177e1a045b3570893cf671825775\"",
+    "new": "\"migration_sha256\": \"10266dc510b78dd7bed352ac8f5ce4050c24c81a6c0150b5b404e509f0599aa8\"",
+    "fails": "test_pe_a1_the_consolidated_fixture_equals_the_files_the_scan_and_the_real_reports",
+    "only": "test_pe_a1_the_consolidated_fixture_equals_the_files_the_scan_and_the_real_reports"
+  },
+  {
+    "id": "RM-316",
+    "what": "the consolidated fixture moves a records dynamic finding one column",
+    "file": "scripts/release-fixtures/vera-consolidated-rulings.json",
+    "old": "\"column\": 114",
+    "new": "\"column\": 113",
+    "fails": "test_pe_a1_the_consolidated_fixture_equals_the_files_the_scan_and_the_real_reports",
+    "only": "test_pe_a1_the_consolidated_fixture_equals_the_files_the_scan_and_the_real_reports"
+  },
+  {
+    "id": "RM-317",
+    "what": "the audit real report names another rule (the stored report differs from the sealed one)",
+    "file": "scripts/release-fixtures/squawk-real-reports/0001_audit.json",
+    "old": "\"rule_name\":\"require-statement-timeout\"",
+    "new": "\"rule_name\":\"require-lock-timeout-x\"",
+    "fails": "test_sq_c3_the_flagged_statement_of_each_real_finding_is_the_file_line_after_the_reported_line",
+    "only": "test_sq_c3_the_flagged_statement_of_each_real_finding_is_the_file_line_after_the_reported_line"
+  }
+]

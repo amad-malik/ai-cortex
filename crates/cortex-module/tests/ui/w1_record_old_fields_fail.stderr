@@ -1,0 +1,27 @@
+error[E0609]: no field `revision` on type `&RecordView`
+ --> tests/ui/w1_record_old_fields_fail.rs:6:15
+  |
+6 |     let _ = v.revision;
+  |               ^^^^^^^^ unknown field
+  |
+  = note: available fields are: `id`, `kind`, `summary`, `body`, `fields` ... and 10 others
+
+error[E0609]: no field `title` on type `&RecordView`
+ --> tests/ui/w1_record_old_fields_fail.rs:7:16
+  |
+7 |     let _ = &v.title;
+  |                ^^^^^ unknown field
+  |
+  = note: available fields are: `id`, `kind`, `summary`, `body`, `fields` ... and 10 others
+
+error[E0609]: no field `updated_at` on type `&RecordView`
+ --> tests/ui/w1_record_old_fields_fail.rs:8:15
+  |
+8 |     let _ = v.updated_at;
+  |               ^^^^^^^^^^ unknown field
+  |
+help: a field with a similar name exists
+  |
+8 -     let _ = v.updated_at;
+8 +     let _ = v.created_at;
+  |

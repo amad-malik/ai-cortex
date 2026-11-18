@@ -1,0 +1,8 @@
+[package]
+name = "app"
+version = "0.0.1"
+edition = "2021"
+publish = false
+
+[dependencies]
+libsqlite3-sys = { path = "../libsqlite3-sys" }

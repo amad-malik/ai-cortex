@@ -1,0 +1,4 @@
+# Wave 1 ports (d) fixture workspace (role-ok). Standalone; never a member of the repository workspace.
+[workspace]
+resolver = "3"
+members = ["cortex-db", "cortex-testkit", "mod-tokens", "mod-identity", "mod-policy"]

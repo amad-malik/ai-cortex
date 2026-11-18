@@ -1,0 +1,4 @@
+# Delta 4b fixture workspace (ctx-ok). Standalone; never a member of the repository workspace.
+[workspace]
+resolver = "3"
+members = ["cortex-http", "cortex-module", "mod-tokens", "mod-identity", "mod-policy"]

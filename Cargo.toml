@@ -1,0 +1,49 @@
+[workspace]
+resolver = "3"
+members = ["crates/*", "xtask"]
+# The xtask fixtures are standalone workspaces that the tests point the checks at; never members.
+exclude = ["xtask/tests/fixtures"]
+
+[workspace.package]
+version = "0.2.2"
+edition = "2024"
+rust-version = "1.99.1"
+publish = false
+
+[workspace.dependencies]
+cortex-types = { path = "crates/cortex-types" }
+cortex-config = { path = "crates/cortex-config" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Wave 1 (kai d2a88cf7, D94): PINNED exact. serde_ignored 0.1.14 (MIT OR Apache-2.0) finds the fields a type ignores; the lock holds its
+# checksum and `xtask fitness` fails if either drifts. serde_urlencoded and form_urlencoded are what axum already decodes a query with (both in the lock).
+serde_ignored = "=0.1.14"
+serde_urlencoded = "=0.7.1"
+form_urlencoded = "=1.2.2"
+serde_json_canonicalizer = "0.4"
+subtle = "2"
+# F1-31's test inventory pins body hashes (cortex-testkit only); already in the lock through sqlx.
+sha2 = "0.10"
+thiserror = "2"
+toml = "1"
+uuid = { version = "1", features = ["v7"] }
+zeroize = { version = "1", features = ["zeroize_derive"] }
+trybuild = "1"
+cortex-db = { path = "crates/cortex-db" }
+cortex-module = { path = "crates/cortex-module" }
+cortex-testkit = { path = "crates/cortex-testkit" }
+sqlx = { version = "=0.9.0", default-features = false, features = ["runtime-tokio", "postgres", "uuid", "tls-none"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time", "sync"] }
+# Wave 0 S0 (cortex-module): ports as `Arc<dyn Trait>` with async methods (ponytail card, rung 4),
+# and the route table's axum types (mira's C1-C9; the server and cortex-http add axum's runtime
+# features).
+async-trait = "0.1"
+# Wave 1 mod-tokens (cox W1-32): the token secret comes from the OS randomness ONLY (getrandom, fail closed), is
+# written as base64url without padding. Both are already in Cargo.lock through other crates; normal requirements,
+# INTERIM-REGISTER rows 12 and 13.
+getrandom = "0.4"
+base64 = "0.22"
+axum = { version = "0.8", default-features = false }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

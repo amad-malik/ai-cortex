@@ -1,0 +1,37 @@
+#!/bin/sh
+# cv2-admit-shim: run "$@" through this VM's admission program (cox's cv2-admit).
+#   - On build-host-1 the admission program is REQUIRED: if it is missing or not executable the shim refuses (exit 75) and runs nothing,
+#     because a build there must never run unadmitted by accident (finn's finding, cox row 2350a624).
+#   - On any other machine (a laptop, CI, an image build) there is nothing to admit through, so the command runs unchanged, but the
+#     shim says so on stderr: a fallback is never silent.
+#   - The program is always the canonical path below. CV2_ADMIT and CV2_SHIM_HOSTNAME are honoured only together with the test hook
+#     CV2_SHIM_TEST=1 (used by scripts/shim-test.sh), so an environment variable cannot name another program in normal use.
+# Use it as cargo's rustc-wrapper and test runner (a lane A diff to .cargo/config.toml, see S5-diffs-for-finn/).
+set -eu
+admit=/path/to/workspace/spikes/cortex-v2-s0/admission/cv2-admit
+host=$(hostname -s 2>/dev/null || echo unknown)
+if [ "${CV2_SHIM_TEST:-0}" = 1 ]; then
+  admit=${CV2_ADMIT:-$admit}
+  host=${CV2_SHIM_HOSTNAME:-$host}
+fi
+if [ -f "$admit" ] && [ -x "$admit" ]; then
+  exec "$admit" "$@"
+fi
+if [ "$host" = "build-host-1" ]; then
+  echo "cv2-admit-shim: REFUSED: $admit is missing or not executable on build-host-1; nothing runs unadmitted here" >&2
+  exit 75
+fi
+# said once per build (all the rustc calls of one cargo share a parent pid), but never silently: if the marker cannot be made, say it again
+notice="${TMPDIR:-/tmp}/cv2-admit-shim.$(id -u).$PPID"
+if [ ! -e "$notice" ]; then
+  # prune the markers of builds that have ended (nix N21): only files named exactly like ours, only when their pid is gone
+  for f in "${TMPDIR:-/tmp}"/cv2-admit-shim."$(id -u)".*; do
+    [ -e "$f" ] || continue
+    owner_pid=${f##*.}
+    case $owner_pid in ""|*[!0-9]*) continue ;; esac
+    kill -0 "$owner_pid" 2>/dev/null || rm -f "$f"
+  done
+  ( set -C; : > "$notice" ) 2>/dev/null || true
+  echo "cv2-admit-shim: no admission program at $admit on host $host; running UNADMITTED (said once per build)" >&2
+fi
+exec "$@"

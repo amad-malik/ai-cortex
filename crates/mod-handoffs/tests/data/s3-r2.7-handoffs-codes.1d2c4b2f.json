@@ -1,0 +1,21 @@
+{
+  "source": "S3 r2.7 JSON twin, x-error-codes.pieces, the codes mod-handoffs mints",
+  "sha256": "1d2c4b2f3f4d61cddffa3574d13a5b2efdae00a8cd6b5ea3087a895ec9d165d5",
+  "codes": {
+    "already_claimed": 409,
+    "evidence_hash_mismatch": 422,
+    "evidence_required": 422,
+    "evidence_source_invalid": 422,
+    "invalid_transition": 409,
+    "not_holder": 409,
+    "notes_required": 422,
+    "packet_incomplete": 422,
+    "reason_required": 422,
+    "risks_required": 422,
+    "self_review_forbidden": 403,
+    "target_retired": 409,
+    "unknown_addressee": 422
+  },
+  "twin_has_text_for_codes": false,
+  "note": "x-error-codes gives a status per code; the shared title and fix of reason_required and target_retired are in x-shared-codes and in mvp/api/shared-problem-codes.json (W1-34). Every other code's text lives in its piece."
+}

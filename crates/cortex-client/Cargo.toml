@@ -1,0 +1,26 @@
+[package]
+name = "cortex-client"
+description = "The Cortex HTTP client: token file, requests, idempotency, Problem decoding, retry, exit codes (Wave 1 piece 10)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+zeroize.workspace = true
+# W1-43 Q-4 (cox, 15:12:19Z): ureq =3.5.1, default features OFF and NO tls feature: the client talks to a loopback http:// address only
+# (S1 4.5), so its own dependency tree adds no rustls, ring or webpki-roots. NO reqwest. Exact pin; the lock checksum is pinned in xtask.
+ureq = { version = "=3.5.1", default-features = false }
+
+[dev-dependencies]
+# The fake server (tests/support/fake.rs) is std only: it records the raw request head, which the rows RQ-02 and SC-01 need,
+# and it can close, delay, trickle or stream. No axum, no tokio, no tempfile. (cox's row named axum as a possible fake; this
+# is smaller and adds nothing to the dependency review.)
+trybuild.workspace = true
+
+[lints]
+workspace = true

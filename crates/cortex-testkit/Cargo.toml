@@ -1,0 +1,24 @@
+[package]
+name = "cortex-testkit"
+description = "Test-only: the supervisor-owned Postgres (L-9), per-binary databases, the injected clock (dev-dependency only)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[features]
+# The banked F1-31 maintenance fixtures (v0.2.001's walking skeleton builds without them).
+maintenance = ["cortex-db/maintenance", "dep:sha2"]
+
+[dependencies]
+cortex-db = { workspace = true, features = ["testkit"] }
+# Wave 1 (W1-22): SpyPolicy implements `ScopePolicy`. A workspace crate, already in the lock; no new package.
+cortex-module.workspace = true
+cortex-types = { workspace = true, features = ["testkit"] }
+sha2 = { workspace = true, optional = true }
+sqlx.workspace = true
+tokio.workspace = true
+uuid.workspace = true
+
+[lints]
+workspace = true

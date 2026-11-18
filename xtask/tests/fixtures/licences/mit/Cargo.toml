@@ -1,0 +1,8 @@
+# F1-02 fixture: a crate declaring MIT. Standalone; never a member of the repository workspace.
+[package]
+name = "fixture-mit"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[workspace]

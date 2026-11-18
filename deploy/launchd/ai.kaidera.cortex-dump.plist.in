@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Cortex backup by dump: the macOS launch agent that stands in for deploy/systemd/cortex-dump.service and cortex-dump.timer.
+     Rendered by scripts/launchd-backup (the four placeholder words are filled in there). A LaunchAgent runs only while the user is logged in. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.kaidera.cortex-dump</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>@CORTEX_HOME@/bin/launchd-run</string>
+    <string>--unit</string>
+    <string>cortex-dump.service</string>
+    <string>--home</string>
+    <string>@CORTEX_HOME@</string>
+    <string>--</string>
+    <string>@CORTEX_HOME@/bin/cortex-dump</string>
+    <string>--target</string>
+    <string>@DB_CONTAINER@</string>
+    <string>--out</string>
+    <string>@CORTEX_HOME@/dumps</string>
+    <string>--status-dir</string>
+    <string>@CORTEX_HOME@/dump-status</string>
+    <string>--timeout</string>
+    <string>1800</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>2</integer>
+    <key>Minute</key>
+    <integer>30</integer>
+  </dict>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>Nice</key>
+  <integer>10</integer>
+  <key>LowPriorityIO</key>
+  <true/>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>@PATH_VALUE@</string>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>@LOG_DIR@/cortex-dump.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>@LOG_DIR@/cortex-dump.err.log</string>
+</dict>
+</plist>

@@ -1,0 +1,236 @@
+#!/bin/sh
+# cortex-restore: put a verified dump set into a NEW database on an EMPTY throwaway cluster, and make it safe (piece 12; bob@helix)
+# INTERIM(ponytail): pg_dump shell script, replaced in 0.2.003 by cortex backup on pgBackRest.
+#
+#   cortex-restore --set <dir> --target <container> --confirm-new [--database cortex]
+#
+# <dir> is a set written by cortex-dump (platform.dump, globals.sql, SHA256SUMS). <container> is a podman container running an
+# EMPTY Postgres whose access rules have no `trust` line. The tool: verifies the set; reads the target's EFFECTIVE access rules;
+# refuses a target that already has a database of this name or any user table; creates the roles of globals.sql that the target
+# does not have (an existing role is never altered); creates the new database; loads the archive in ONE transaction with no
+# --clean, no --no-acl and no --no-owner; then RAISES THE INSTALL GENERATION by one, as cortex_install_admin, and reads it back.
+# The raise cannot be switched off: a restored database holds tokens that were revoked after the dump, and the raise is what
+# makes every token issued before the restore refused (401 token_revoked) until it is issued again.
+#
+# There is NO mode that restores over a live database. Doing that is a manual act that needs the CTO's explicit line.
+# Exit codes: 0 restored and made safe; 1 failed after a change (the database this run created is removed, by its exact name);
+# 2 refused before any change. Output never repeats a role hash, a token, a digest or a row of data.
+#
+# restore ONLY with cortex-restore; a plain pg_restore can make revoked tokens valid again
+set -eu
+umask 077
+LC_ALL=C
+export LC_ALL
+
+me=cortex-restore
+
+die() { # die <code> <message>: before any change
+  printf '%s: %s\n' "$me" "$2" >&2
+  exit "$1"
+}
+
+set_dir="" target="" db=cortex confirm=0
+while [ $# -gt 0 ]; do
+  case $1 in
+    --set) [ $# -ge 2 ] || die 2 "--set needs a value"; set_dir=$2; shift 2 ;;
+    --target) [ $# -ge 2 ] || die 2 "--target needs a value"; target=$2; shift 2 ;;
+    --database) [ $# -ge 2 ] || die 2 "--database needs a value"; db=$2; shift 2 ;;
+    --confirm-new) confirm=1; shift ;;
+    -h | --help) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 0 ;;
+    *) die 2 "unknown argument (see --help)" ;;
+  esac
+done
+
+# ---- 1. arguments: every refusal here happens before the first podman call ----------------------------------------
+[ -n "$set_dir" ] || die 2 "--set is required"
+[ -n "$target" ] || die 2 "--target is required"
+case $target in
+  '' | [!A-Za-z0-9]* | *[!A-Za-z0-9_.-]*) die 2 "the target is not a container name" ;;
+  cortex-* | spike-s0-* | harness-appdb | platform_agent_memory) die 2 "the target is a live or reserved database; cortex-restore works only on a throwaway container" ;; # s5-never: ok the refusal list itself
+esac
+[ "$confirm" -eq 1 ] || die 2 "--confirm-new is required: this tool only restores into a new database on an empty target"
+case $db in
+  '' | [!a-z_]* | *[!a-z0-9_]*) die 2 "the database name must be lower-case letters, digits and underscores" ;;
+  postgres | template0 | template1) die 2 "this database name is reserved" ;;
+esac
+[ "${#db}" -le 63 ] || die 2 "the database name is longer than 63 characters"
+case $set_dir in
+  /*) ;;
+  *) die 2 "--set must be an absolute path" ;;
+esac
+set_dir=${set_dir%/}
+[ -d "$set_dir" ] || die 2 "the set is not a directory"
+for f in platform.dump globals.sql SHA256SUMS; do
+  if [ -L "$set_dir/$f" ] || [ ! -f "$set_dir/$f" ] || [ ! -s "$set_dir/$f" ]; then die 2 "the set lacks a usable $f"; fi
+done
+for f in platform.dump globals.sql; do
+  grep -Eq "^[0-9a-f]{64}  \*?$f\$" "$set_dir/SHA256SUMS" || die 2 "SHA256SUMS does not list $f"
+done
+(cd "$set_dir" && sha256sum -c SHA256SUMS > /dev/null 2>&1) || die 2 "the set does not verify (sha256sum -c failed); nothing was changed"
+
+# ---- 2. the target: read only ------------------------------------------------------------------------------------
+podman container exists "$target" > /dev/null 2>&1 || die 2 "no such container; nothing was changed"
+
+pq() { # pq <database> <sql>: values one per line, unaligned, as the postgres OS user over the socket (peer authentication; no password)
+  podman exec --user postgres "$target" psql -U postgres -d "$1" -X -A -t -q -v ON_ERROR_STOP=1 -c "$2" 2> /dev/null
+}
+
+# the same query install.sh uses: the rules in force, not the file on disk
+hba=$(pq postgres "select count(*) from pg_hba_file_rules where auth_method = 'trust' or error is not null") ||
+  die 2 "the target's access rules cannot be read; refusing, nothing was changed"
+case $hba in
+  0) ;;
+  *) die 2 "the target's access rules have a trust line, an error, or an unreadable answer; refusing, nothing was changed" ;;
+esac
+
+# every database of the cluster, connectable or not (BK12-09): a database that refuses connections cannot be checked for user tables
+dbs_raw=$(pq postgres "select datname, datallowconn from pg_database order by 1") || die 2 "the target's databases cannot be listed; nothing was changed"
+[ -n "$dbs_raw" ] || die 2 "the target reports no databases; nothing was changed"
+if printf '%s\n' "$dbs_raw" | grep -Evq '^[A-Za-z0-9_.-]+\|[tf]$'; then die 2 "a database name of the target is not one this tool inspects; nothing was changed"; fi
+for row in $dbs_raw; do
+  if [ "${row%%|*}" = "$db" ]; then die 2 "a database of this name already exists in the target; it was not touched"; fi
+done
+for row in $dbs_raw; do
+  dn=${row%%|*}
+  if [ "${row#*|}" = f ]; then
+    # template0 is the one database that is meant to refuse connections
+    if [ "$dn" = template0 ]; then continue; fi
+    die 2 "the database $dn does not accept connections, so it cannot be checked for user tables; nothing was changed"
+  fi
+  n=$(pq "$dn" "select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace where c.relkind in ('r', 'p', 'm', 'f') and n.nspname not in ('pg_catalog', 'information_schema') and n.nspname !~ '^pg_toast'") ||
+    die 2 "the target cannot be inspected; nothing was changed"
+  case $n in
+    0) ;;
+    *) die 2 "the target already holds user tables; cortex-restore needs an empty cluster; nothing was changed" ;;
+  esac
+done
+
+# ---- 3. the roles: only the missing ones (the file is built and checked before anything is written) ---------------
+work=$(mktemp -d "${TMPDIR:-/tmp}/cortex-restore.XXXXXX") || die 2 "no working directory"
+keep=0 created=0 cpid=""
+cleanup() {
+  case $work in
+    */cortex-restore.??????)
+      # the filtered role file holds password hashes: it never survives this script, kept details or not
+      rm -f -- "$work/globals.filtered.sql"
+      if [ "$keep" -eq 0 ]; then rm -rf -- "$work"; fi ;;
+  esac
+}
+trap cleanup EXIT
+
+fail() { # fail <reason>: stop what is running (by its exact pid), remove the database THIS run created (by its exact name), exit 1
+  _why=$1
+  trap - INT TERM
+  if [ -n "$cpid" ]; then kill "$cpid" 2> /dev/null || true; cpid=""; fi
+  if [ "$created" -eq 1 ]; then
+    if podman exec --user postgres "$target" psql -U postgres -d postgres -X -q -v ON_ERROR_STOP=1 -c "DROP DATABASE \"$db\" WITH (FORCE)" > /dev/null 2>&1; then
+      created=0
+      printf '%s: %s; the database %s that this run created was removed\n' "$me" "$_why" "$db" >&2
+    else
+      printf '%s: %s; the database %s that this run created could NOT be removed: remove it by hand\n' "$me" "$_why" "$db" >&2
+    fi
+  else
+    printf '%s: %s\n' "$me" "$_why" >&2
+  fi
+  keep=1
+  printf '%s: details (they may hold data; readable only by you): %s\n' "$me" "$work" >&2
+  exit 1
+}
+trap 'fail "interrupted"' INT TERM
+
+run_bg() { # run_bg <stdin file> <stderr file> <command...>: a background job that is waited for, so a signal to this script is handled AT ONCE; sets bg_rc
+  _in=$1
+  _err=$2
+  shift 2
+  "$@" < "$_in" > /dev/null 2> "$_err" &
+  cpid=$!
+  bg_rc=0
+  wait "$cpid" || bg_rc=$?
+  cpid=""
+}
+
+pq postgres "select rolname from pg_roles order by 1" > "$work/roles.have" || die 2 "the target's roles cannot be listed; nothing was changed"
+# A whitelist of WHOLE statements (BK12-01): a line is accepted only if all of it is one supported statement, so a stacked statement or a
+# psql command (a backslash) on an accepted line is a refusal, exit 2, before anything is written. Supported: blank lines, comments without a
+# backslash, SET name = simple value;, the one set_config line pg_dumpall may write, \restrict and \unrestrict with a key, CREATE ROLE name;,
+# ALTER ROLE name WITH <attributes> [PASSWORD '<SCRAM or md5 verifier>'];, GRANT role TO role [WITH ...] [GRANTED BY role];.
+# Statements about a role the target already has are left out (it is left exactly as it is); a GRANT is left out when its MEMBER exists.
+# Pass 1 only checks; pass 2 writes the file. Role-level settings (ALTER ROLE ... SET) are not supported and stop the restore.
+cat > "$work/filter.awk" <<'AWK'
+BEGIN {
+  while ((getline r < have) > 0) { exists[r] = 1 }
+  close(have)
+  name = "[a-z_][a-z0-9_]*"
+  attr = "(NO)?(SUPERUSER|INHERIT|CREATEROLE|CREATEDB|LOGIN|REPLICATION|BYPASSRLS)"
+  h32 = ""
+  for (i = 0; i < 32; i++) h32 = h32 "[0-9a-f]"
+  verifier = "(SCRAM-SHA-256\\$[0-9]+:[A-Za-z0-9+/=]+\\$[A-Za-z0-9+/=]+:[A-Za-z0-9+/=]+|md5" h32 ")"
+  re_alter = "^ALTER ROLE " name " WITH( " attr ")*( CONNECTION LIMIT -?[0-9]+)?( PASSWORD " q verifier q "| PASSWORD NULL)?( VALID UNTIL " q "[0-9TZ:+. -]+" q ")?;$"
+  opt = "(ADMIN|INHERIT|SET) (OPTION|TRUE|FALSE)"
+  re_grant = "^GRANT " name " TO " name "( WITH " opt "(, " opt ")*)?( GRANTED BY " name ")?;$"
+  re_set = "^SET [a-z_.]+ = ([A-Za-z0-9_.-]+|" q "[A-Za-z0-9_ .-]*" q ");$"
+  setcfg = "SELECT pg_catalog.set_config(" q "search_path" q ", " q q ", false);"
+}
+/^$/ { if (emit) print; next }
+/^--[^\\]*$/ { if (emit) print; next }
+/^\\(un)?restrict [A-Za-z0-9]+$/ { if (emit) print; next }
+$0 == setcfg { if (emit) print; next }
+$0 ~ re_set { if (emit) print; next }
+/^CREATE ROLE [a-z_][a-z0-9_]*;$/ { n = $3; sub(/;$/, "", n); if (emit && !(n in exists)) print; next }
+$0 ~ re_alter { if (emit && !($3 in exists)) print; next }
+$0 ~ re_grant { m = $4; sub(/;$/, "", m); if (emit && !(m in exists)) print; next }
+{ bad = 1; exit 3 }
+END { if (bad) exit 3 }
+AWK
+awk -v have="$work/roles.have" -v q="'" -v emit=0 -f "$work/filter.awk" "$set_dir/globals.sql" > /dev/null ||
+  die 2 "globals.sql holds a statement this tool will not run; nothing was changed"
+awk -v have="$work/roles.have" -v q="'" -v emit=1 -f "$work/filter.awk" "$set_dir/globals.sql" > "$work/globals.filtered.sql" ||
+  die 2 "globals.sql holds a statement this tool will not run; nothing was changed"
+
+# ---- 4. from here on, changes ------------------------------------------------------------------------------------
+run_bg "$work/globals.filtered.sql" "$work/roles.err" podman exec -i --user postgres "$target" psql -U postgres -d postgres -X -q -v ON_ERROR_STOP=1
+# the filtered file holds the role password hashes: gone as soon as it has been used, on every path
+rm -f -- "$work/globals.filtered.sql"
+[ "$bg_rc" -eq 0 ] || fail "creating the missing roles failed"
+
+run_bg /dev/null "$work/create.err" podman exec --user postgres "$target" psql -U postgres -d postgres -X -q -v ON_ERROR_STOP=1 \
+  -c "create database \"$db\" template template0 encoding 'UTF8' owner cortex_owner"
+[ "$bg_rc" -eq 0 ] || fail "creating the database failed"
+created=1
+
+run_bg "$set_dir/platform.dump" "$work/restore.err" podman exec -i --user postgres "$target" pg_restore -U postgres -d "$db" --no-password --single-transaction --exit-on-error
+[ "$bg_rc" -eq 0 ] || fail "loading the archive failed (it ran in one transaction, so nothing of it is left)"
+
+# ---- 5. the install generation: raised by one, as cortex_install_admin, and read back -------------------------------
+inst=$(pq "$db" "select id from identity.installations") || fail "the installation could not be read"
+ntok=$(pq "$db" "select count(*) from tokens.tokens") || fail "the tokens could not be counted"
+case $ntok in
+  '' | *[!0-9]*) fail "the token count is not a number" ;;
+esac
+if [ -z "$inst" ]; then
+  if [ "$ntok" -ne 0 ]; then fail "the set has tokens but no installation, so the install generation could not be raised"; fi
+  printf '%s: restored %s into database %s on %s\n' "$me" "${set_dir##*/}" "$db" "$target"
+  printf 'install generation: none; there is no installation and no token in this set, so there is nothing to protect\n'
+  exit 0
+fi
+printf '%s\n' "$inst" | grep -Eq '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' || fail "the installation id is not a uuid"
+
+old=$(pq "$db" "select gen from tokens.generations where scope = 'install' and scope_id = '$inst'") || fail "the install generation could not be read"
+case $old in
+  '') old_text=none; want=1 ;;
+  *[!0-9]* | ??????????????????*) fail "the install generation is not a usable number" ;;
+  *) old_text=$old; want=$((old + 1)) ;;
+esac
+
+if [ -z "$old" ]; then
+  raise="begin; set local role cortex_install_admin; insert into tokens.generations (scope, scope_id, gen) values ('install', '$inst', 1); commit;"
+else
+  raise="begin; set local role cortex_install_admin; update tokens.generations set gen = gen + 1 where scope = 'install' and scope_id = '$inst'; commit;"
+fi
+pq "$db" "$raise" > /dev/null || fail "the install generation could not be raised"
+new=$(pq "$db" "select gen from tokens.generations where scope = 'install' and scope_id = '$inst'") || fail "the install generation could not be read back"
+[ "$new" = "$want" ] || fail "the install generation could not be raised (read back a different number than expected)"
+
+printf '%s: restored %s into database %s on %s\n' "$me" "${set_dir##*/}" "$db" "$target"
+printf 'install generation %s -> %s: every token issued before this restore is refused (401 token_revoked); re-issue the lead token with install.sh --reissue-token\n' "$old_text" "$new"
+exit 0

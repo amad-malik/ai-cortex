@@ -1,0 +1,202 @@
+{
+  "schema": 1,
+  "status": "SPECIFICATION_VECTORS_NOT_RUNTIME_PROOF",
+  "bodies": [
+    {
+      "id": "empty",
+      "base64": "",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "valid_utf8": true,
+      "nul_free": true
+    },
+    {
+      "id": "crlf-spaces",
+      "base64": "YWxwaGENCmJldGEgIA0K",
+      "length": 15,
+      "sha256": "1e75fcdc83f43e36b50819e563606fd55a9fffe975b7c174e6316a6931e66f32",
+      "valid_utf8": true,
+      "nul_free": true
+    },
+    {
+      "id": "nfc",
+      "base64": "Y2Fmw6k=",
+      "length": 5,
+      "sha256": "850f7dc43910ff890f8879c0ed26fe697c93a067ad93a7d50f466a7028a9bf4e",
+      "valid_utf8": true,
+      "nul_free": true
+    },
+    {
+      "id": "nfd",
+      "base64": "Y2FmZcyB",
+      "length": 6,
+      "sha256": "81ef060bcd98adc7824eb5c1ada83c32491b16018e11e79f00ab9d09e04b015a",
+      "valid_utf8": true,
+      "nul_free": true
+    },
+    {
+      "id": "emoji",
+      "base64": "QfCfmIBlzIFa",
+      "length": 9,
+      "sha256": "75d0a188697852c2e2ce7e7fe623111a09eab74ec3f073b5c223340a44e862e5",
+      "valid_utf8": true,
+      "nul_free": true
+    },
+    {
+      "id": "no-final-newline",
+      "base64": "ZXhhY3Q=",
+      "length": 5,
+      "sha256": "fa79d4746c21cd960a17b92db8976ddef95a7e20b590721f8e0fa7847a05e486",
+      "valid_utf8": true,
+      "nul_free": true
+    }
+  ],
+  "jcs": [
+    {
+      "id": "utf16-key-order",
+      "input_json": "{\"\\ue000\":\"pua\",\"😀\":\"face\"}",
+      "canonical_utf8_base64": "eyLwn5iAIjoiZmFjZSIsIu6AgCI6InB1YSJ9",
+      "canonical_utf8": "{\"😀\":\"face\",\"\":\"pua\"}",
+      "sha256": "50e36fcf658fd4340b1b59bd747bbb7277f2741091e062f4c9732d5142468143"
+    },
+    {
+      "id": "numbers",
+      "input_json": "{\"n\":[1.0,-0.0,0.002,1e30]}",
+      "canonical_utf8_base64": "eyJuIjpbMSwwLDAuMDAyLDFlKzMwXX0=",
+      "canonical_utf8": "{\"n\":[1,0,0.002,1e+30]}",
+      "sha256": "fb30e98823effbdda853a0cc54dba2ed12431dd3a00d4ccbb2678b586ce81c85"
+    },
+    {
+      "id": "pointer-keys",
+      "input_json": "{\"a/b\":{\"~key\":\"vérify\"},\"~1\":\"literal\"}",
+      "canonical_utf8_base64": "eyJhL2IiOnsifmtleSI6InbDqXJpZnkifSwifjEiOiJsaXRlcmFsIn0=",
+      "canonical_utf8": "{\"a/b\":{\"~key\":\"vérify\"},\"~1\":\"literal\"}",
+      "sha256": "3fb6ff53695bdf107936ab71fab0018f806bf384150d7f7a4a9abf2d2542a5d2"
+    },
+    {
+      "id": "combining-kept",
+      "input_json": "{\"s\":\"e\\u0301\"}",
+      "canonical_utf8_base64": "eyJzIjoiZcyBIn0=",
+      "canonical_utf8": "{\"s\":\"é\"}",
+      "sha256": "1fc0bd7cc93fca8092a2041d7d01842876422aa7e2838acf42c14578e9f2be05"
+    }
+  ],
+  "spans": [
+    {
+      "fixture": "emoji",
+      "part": "body",
+      "start": 1,
+      "end": 5,
+      "expected_base64": "8J+YgA==",
+      "valid": true
+    },
+    {
+      "fixture": "emoji",
+      "part": "body",
+      "start": 5,
+      "end": 8,
+      "expected_base64": "ZcyB",
+      "valid": true
+    },
+    {
+      "fixture": "emoji",
+      "part": "body",
+      "start": 2,
+      "end": 5,
+      "valid": false,
+      "reason": "inside UTF-8 codepoint"
+    }
+  ],
+  "pointers": [
+    {
+      "input": {
+        "a/b": {
+          "~key": "vérify"
+        },
+        "~1": "literal"
+      },
+      "pointer": "/a~1b/~0key",
+      "expected": "vérify"
+    },
+    {
+      "input": {
+        "~1": "literal"
+      },
+      "pointer": "/~01",
+      "expected": "literal"
+    }
+  ],
+  "invalid_utf8_base64": [
+    "wyg=",
+    "8CiMvA==",
+    "/w=="
+  ],
+  "boundary_recipes": [
+    {
+      "part": "normal_body",
+      "unit": "UTF-8 bytes",
+      "cap": 262144,
+      "offsets": [
+        -1,
+        0,
+        1
+      ]
+    },
+    {
+      "part": "conversation_body",
+      "unit": "UTF-8 bytes",
+      "cap": 4194304,
+      "offsets": [
+        -1,
+        0,
+        1
+      ]
+    },
+    {
+      "part": "summary",
+      "unit": "UTF-8 bytes",
+      "cap": 512,
+      "offsets": [
+        -1,
+        0,
+        1
+      ]
+    },
+    {
+      "part": "fields",
+      "unit": "serialized bytes, per accepted F1-10 interpretation",
+      "cap": 65536,
+      "offsets": [
+        -1,
+        0,
+        1
+      ]
+    },
+    {
+      "part": "normal_wire",
+      "unit": "whole HTTP JSON body bytes",
+      "cap": 1048576,
+      "offsets": [
+        -1,
+        0,
+        1
+      ]
+    },
+    {
+      "part": "conversation_wire",
+      "unit": "whole HTTP JSON body bytes",
+      "cap": 9437184,
+      "offsets": [
+        -1,
+        0,
+        1
+      ]
+    }
+  ],
+  "notes": [
+    "Custom fixtures, not copied RFC examples. Literal expected canonical bytes are not produced by json.dumps(sort_keys=True).",
+    "JCS orders keys by UTF-16 code units, preserves Unicode strings and uses ECMAScript number serialization: https://www.rfc-editor.org/info/rfc8785/",
+    "JSON Pointer decodes ~1 before ~0, once: https://www.rfc-editor.org/info/rfc6901/",
+    "Large boundaries are recipes; generate after F-1 parsing/size semantics freeze, without storing megabyte filler in this prep packet."
+  ]
+}

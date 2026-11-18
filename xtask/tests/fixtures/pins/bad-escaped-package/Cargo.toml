@@ -1,0 +1,2 @@
+[dependencies]
+si = { package = "serde\u005fignored", version = "0.1" }

@@ -1,0 +1,37 @@
+#!/bin/sh
+# FAKE cargo for scripts/test-gate/test_test_gate.py: prints canned output from $TG_DIR and records every call. Nothing is built.
+set -u
+# the real cargo prints its "Running ..." and "Doc-tests ..." lines to STDERR and the test harness's lines to stdout; the gate must read them merged, in order
+like_cargo() {
+  while IFS= read -r line; do
+    case $line in
+      *"     Running "*|*"   Doc-tests "*) printf '%s\n' "$line" >&2 ;;
+      *) printf '%s\n' "$line" ;;
+    esac
+  done < "$1"
+}
+{ printf 'cargo'; for a in "$@"; do printf ' [%s]' "$a"; done; printf ' CV2_DB=%s CV2_ADMITTED=%s TERM_COLOR=%s\n' "${CV2_DB-}" "${CV2_ADMITTED-}" "${CARGO_TERM_COLOR-}"; } >> "$TG_DIR/calls.log"
+case "$*" in
+  "test --workspace --no-run --message-format=json")
+    [ ! -e "$TG_DIR/build.rc" ] || exit "$(cat "$TG_DIR/build.rc")"
+    cat "$TG_DIR/build.json"; exit 0 ;;
+  "test --workspace -- --list")
+    like_cargo "$TG_DIR/list.txt"; exit 0 ;;
+  "test --workspace --no-fail-fast")
+    [ ! -e "$TG_DIR/hang-free" ] || sleep 30
+    like_cargo "$TG_DIR/run.txt"
+    if [ -e "$TG_DIR/run.rc" ]; then
+      rc=$(cat "$TG_DIR/run.rc"); [ "$rc" != kill ] || kill -KILL $$   # death by a signal: the parent sees a NEGATIVE status   # s5-never: ok the fake cargo kills ITS OWN process ($$) so the parent sees a death by signal; the signal is the point of the cell (TG-42)
+      exit "$rc"
+    fi
+    if grep -q ' \.\.\. FAILED' "$TG_DIR/run.txt"; then exit 101; fi   # what cargo does: 101 when any test failed
+    exit 0 ;;
+  "test -p "*" --no-fail-fast")
+    pkg=$3
+    echo "db-start $pkg" >> "$TG_DIR/order.log"
+    [ ! -e "$TG_DIR/hang-db-$pkg" ] || sleep 30
+    [ ! -e "$TG_DIR/db-$pkg.txt" ] || like_cargo "$TG_DIR/db-$pkg.txt"
+    echo "db-end $pkg" >> "$TG_DIR/order.log"
+    exit "$(cat "$TG_DIR/db-$pkg.rc" 2>/dev/null || echo 0)" ;;
+esac
+echo "fake cargo: unexpected arguments: $*" >&2; exit 99

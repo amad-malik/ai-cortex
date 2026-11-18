@@ -1,0 +1,4 @@
+# Wave 1 fixture workspace (flatten-ok). Standalone; never a member of the repository workspace.
+[workspace]
+resolver = "3"
+members = ["mod-tokens", "mod-identity", "mod-policy"]

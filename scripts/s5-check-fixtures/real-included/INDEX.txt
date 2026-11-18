@@ -1,0 +1,4 @@
+# PINNED COPIES (sha256 below; the self-test fails if a byte changes). They must be RE-RUN at the merge of marv's lane: the S5 gate then runs on the real tree.
+# marv's two real included files of the install lane, as pinned when 5w was cut: the oracle (S5-10) must ACCEPT them (the lexical scanner of 5t..5v refused both)
+4763c6411074e5a6588f89a7d4b7c2c1c98e67201d35644400b5bee8ff4fdecc  install-prereq.sh  (marv, branch wave1/s5-install-prereq, lane head 766b1258dfccc36b6180f524068f5f0a093fd6a7; copied by hue, unchanged)
+9190d8892eae08886143210c2aae2ae70ce6615a767d3ad03e547bab56eac360  install-fetch.sh  (hue, branch wave1/6c-trust: the 6c include with stage 2, r2 after vera's V6S2R1-01 (rel_discard is a clean-first subshell); it replaces the r1 copy with sha256 2c9887166a6b8c33773167c0fa8a98cabb20bf3f4f5956e0f7bc9564eb7d17e0)

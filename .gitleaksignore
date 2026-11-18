@@ -1,0 +1,19 @@
+# gitleaks 8.30.1, run as 'gitleaks dir .' from the repository root: the fingerprints of the 17 reviewed findings (path:rule:line), all synthetic test fixtures, public key fingerprints or empty trust-anchor statements.
+# hale 16 Nov, security read of tree 6ff5b7fe; a new finding or a moved line is NOT matched and needs a new review. No wildcard, no path-only, no rule-only entry.
+crates/cortex-module/tests/w1_s0_strict.rs:cortex-v2-worker-token:64
+crates/cortex-module/tests/w1_s0_strict2.rs:cortex-v2-worker-token:49
+deploy/install-prereq.sh:generic-api-key:603
+deploy/install.sh:generic-api-key:10
+mac/install-mac.sh:generic-api-key:10
+scripts/cortex-dump-test.sh:generic-api-key:705
+scripts/install-gate/test_gate_runner.py:generic-api-key:893
+scripts/install-prereq-test.sh:generic-api-key:1171
+scripts/install-prereq-test.sh:generic-api-key:426
+scripts/install-test.sh:cortex-v2-worker-token:4734
+scripts/install-test.sh:cortex-v2-worker-token:4757
+scripts/install-test.sh:cortex-v2-worker-token:5035
+scripts/install-test.sh:cortex-v2-worker-token:5036
+scripts/install-test.sh:generic-api-key:2481
+scripts/install-test.sh:generic-api-key:327
+scripts/launchd-test.sh:generic-api-key:552
+scripts/release-fixtures/test_release.py:generic-api-key:3390

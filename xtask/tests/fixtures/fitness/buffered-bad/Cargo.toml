@@ -1,0 +1,4 @@
+# Wave 1 rework (W1S-V1, cox W1-21) fixture workspace (buffered-bad). Standalone; never a member of the repository workspace.
+[workspace]
+resolver = "3"
+members = ["mod-tokens", "mod-identity"]

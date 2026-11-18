@@ -1,0 +1,17 @@
+error[E0382]: use of moved value: `m`
+ --> tests/ui/problem_minter_copy_fail.rs:7:10
+  |
+5 |     let m = cortex_types::ProblemCodeMinter::take().expect("this process's minter");
+  |         - move occurs because `m` has type `ProblemCodeMinter`, which does not implement the `Copy` trait
+6 |     keep(m);
+  |          - value moved here
+7 |     keep(m);
+  |          ^ value used here after move
+  |
+note: consider changing this parameter type in function `keep` to borrow instead if owning the value isn't necessary
+ --> tests/ui/problem_minter_copy_fail.rs:2:12
+  |
+2 | fn keep(_: cortex_types::ProblemCodeMinter) {}
+  |    ----    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ this parameter takes ownership of the value
+  |    |
+  |    in this function

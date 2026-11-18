@@ -1,0 +1,26 @@
+[
+  {
+    "gate": "prerequisite-IP64",
+    "reason": "joined prerequisite suite is not implemented (IP-64)",
+    "accepted_by": "vera 0.2.1 stated limit; cox W1-284",
+    "close_release": "installer-gate releases, phase P2"
+  },
+  {
+    "gate": "witness-live",
+    "reason": "needs a running stack (Wave 2, G-S5-2): install.sh on a throwaway stack, then witness_container on the server and the database. No live result recorded.",
+    "accepted_by": "vera 0.2.1 stated limit; cox W1-284",
+    "close_release": "installer-gate releases, phase P2"
+  },
+  {
+    "gate": "roles-proof",
+    "reason": "needs a database: run by hand, CV2_DB=1 cv2-admit sh scripts/roles-proof.sh. last live run matches the current scripts (roles-proof: 98 passed, 0 failed)",
+    "accepted_by": "vera 0.2.1 stated limit; cox W1-284; independent live proof required",
+    "close_release": "0.2.2 live roles proof"
+  },
+  {
+    "gate": "install-mac-test",
+    "reason": "1 mandatory cell(s) not run (IT-M29): the suite proved less than all of it; the release run must run them (IT-M29 with INSTALL_MAC_REQUIRE_SET=1 and the signed set)",
+    "accepted_by": "cox W1-284 pre-sign only; post-sign receipt required",
+    "close_release": "0.2.2 post-sign signed-set gate"
+  }
+]

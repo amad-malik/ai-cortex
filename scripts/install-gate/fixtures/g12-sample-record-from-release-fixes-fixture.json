@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "object_format": "sha1",
+  "commit": "cccccccccccccccccccccccccccccccccccccccc",
+  "tree": "dddddddddddddddddddddddddddddddddddddddd",
+  "includes": [
+    {
+      "name": "install-prereq.sh",
+      "sha256": "b03e13eb730fd6464b160ba051010d2ad0e0a031c00a209d50ea0ff3b57e82f8"
+    },
+    {
+      "name": "install-fetch.sh",
+      "sha256": "eeb30c9476a1dbac348fbbf2a77beebdd960bac01e2e49ce40fd6f5aecdbe87a"
+    }
+  ],
+  "splice": "each '# @include' marker line, newline included, is replaced by the exact bytes of its include; nothing is added",
+  "joined_sha256": "6278a0550c0af8bce743c787f3e209d1a5e1395c1d136ad69568aa5465b20ffd"
+}

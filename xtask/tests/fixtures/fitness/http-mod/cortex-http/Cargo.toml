@@ -1,0 +1,9 @@
+[package]
+name = "cortex-http"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+cortex-types = { path = "../cortex-types" }
+mod-identity = { path = "../mod-identity" }

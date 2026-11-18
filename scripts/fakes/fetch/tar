@@ -1,0 +1,23 @@
+#!/bin/sh
+set -eu
+printf 'tar' >> "$FAKE_LOG"
+for fetch_arg do printf ' %s' "$fetch_arg" >> "$FAKE_LOG"; done
+printf '\n' >> "$FAKE_LOG"
+printf 'tar-env TAR_OPTIONS=%s\n' "${TAR_OPTIONS-unset}" >> "$FAKE_LOG"
+case ${FAKE_TAR_MODE:-ok} in
+    fail|absent) exit 1 ;;
+    ok) exec /usr/bin/tar "$@" ;;
+    inject)   # extracts, then adds ONE physical entry whose name carries a line feed and a second record: it would alias a permitted member in a line-oriented listing
+        /usr/bin/tar "$@" || exit $?
+        fetch_dir=
+        fetch_prev=
+        for fetch_arg do
+            if [ "$fetch_prev" = -C ]; then fetch_dir=$fetch_arg; fi
+            fetch_prev=$fetch_arg
+        done
+        case " $* " in *" -xzf "*|*" -p -xzf "*) ;; *) exit 0 ;; esac
+        fetch_nl=$(printf '\nx'); fetch_nl=${fetch_nl%x}
+        [ -z "$fetch_dir" ] || printf x > "$fetch_dir/initdb/roles.sql${fetch_nl}d 755 bin"
+        exit 0 ;;
+    *) exit 2 ;;
+esac

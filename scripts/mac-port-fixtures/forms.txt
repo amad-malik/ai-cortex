@@ -1,0 +1,244 @@
+# More forms of the rules, one shell line per row:  <expected rules for that line: OK, or one or more rule ids separated by commas> ||| <the line>
+# The test puts the lines into one script (line n of the table is line n+2 of the script) and the scanner must report EXACTLY the expected rules on each line.
+# GNU or BSD command forms
+MP-001 ||| sed -Ei 's/a/b/' "$f"
+MP-001 ||| sed -n -i p "$f"
+OK ||| sed -i.bak 's/a/b/' "$f"
+MP-002 ||| sed -nr 's/(a)+/b/' "$f"
+MP-002 ||| sed --regexp-extended 's/(a)+/b/' "$f"
+MP-003 ||| sed -e 's/a\|b/x/' "$f"
+MP-003 ||| sed -e 's/a/b/' -e 's/c\?/d/' "$f"
+OK ||| sed -E 's/a\+b/x/' "$f"
+OK ||| sed 's/a\.b/x/' "$f"
+MP-004 ||| date -d@5 +%s
+MP-004 ||| date --date=yesterday +%s
+OK ||| date -u +%s
+MP-005 ||| date +%N
+MP-005 ||| date +%s%3N
+MP-006 ||| stat -c%a "$f"
+MP-006 ||| stat --format=%a "$f"
+MP-006 ||| stat --printf=x "$f"
+OK ||| stat -f %Lp "$f"
+OK ||| stat -L "$f"
+MP-007 ||| readlink --canonicalize "$p"
+MP-007 ||| readlink -m "$p"
+MP-007 ||| readlink -e "$p"
+OK ||| readlink "$p"
+OK ||| readlink -n "$p"
+MP-009 ||| grep -P x "$f"
+MP-009 ||| grep -iP x "$f"
+MP-009 ||| grep --perl-regexp x "$f"
+OK ||| grep -E x "$f"
+MP-010 ||| md5sum "$f"
+MP-010 ||| sha1sum "$f"
+MP-010 ||| sha512sum "$f"
+OK ||| shasum -a 256 "$f"
+OK ||| md5 "$f"
+MP-013 ||| mktemp -u
+MP-013 ||| mktemp -p "$d"
+OK ||| mktemp -p "$d" x.XXXXXX
+OK ||| mktemp -t x.XXXXXX
+OK ||| mktemp "$d/x.XXXXXX"
+MP-015 ||| install -Dm0644 a /d/b
+OK ||| install -m 0644 a /d/b
+MP-016 ||| sort -rV "$f"
+MP-016 ||| sort --version-sort "$f"
+OK ||| sort -r "$f"
+MP-017 ||| head -n-2 "$f"
+MP-017 ||| head -n -1 "$f"
+OK ||| head -n 2 "$f"
+OK ||| head -2 "$f"
+MP-021 ||| base64 --wrap=0 "$f"
+MP-021 ||| base64 -w 0 "$f"
+OK ||| base64 -d "$f"
+MP-022 ||| find . -regextype posix-extended -name x
+OK ||| find . -name x
+MP-023 ||| ps --no-headers -p 1
+MP-023 ||| ps -C sh -o pid=
+OK ||| ps -eo pid,comm
+OK ||| ps aux
+MP-024 ||| df --output=avail /
+MP-024 ||| df -BG /
+OK ||| df -h /
+MP-025 ||| du -sb "$f"
+MP-025 ||| du --bytes "$f"
+OK ||| du -sk "$f"
+MP-026 ||| tar --xform=s/a/b/ -cf x y
+OK ||| tar -czf x y
+MP-027 ||| cp -a --reflink=auto a b
+OK ||| cp -R a b
+MP-028 ||| ls --color=never
+OK ||| ls -la
+MP-030 ||| xargs --no-run-if-empty rm
+OK ||| xargs -0 rm
+MP-031 ||| touch --date=x "$f"
+MP-031 ||| touch -dx "$f"
+OK ||| touch -r a b
+MP-032 ||| echo -ne "a"
+OK ||| echo -n a
+OK ||| echo -E a
+# Linux-only things
+MP-035 ||| loginctl enable-linger
+MP-035 ||| journalctl -u x
+MP-035 ||| systemd-run x
+MP-035 ||| systemd-analyze verify x
+MP-036 ||| apt-get install x
+MP-036 ||| yum install x
+MP-036 ||| apk add x
+MP-037 ||| podman compose up
+MP-037 ||| podman container exists x
+MP-038 ||| podman ps
+MP-034 ||| ls /proc
+MP-034 ||| cat < /proc/stat
+OK ||| ls /process
+MP-040 ||| source /etc/os-release
+MP-040 ||| cat /etc/redhat-release
+OK ||| . /etc/profile
+MP-041 ||| ls /dev/shm/x
+OK ||| ls /dev/null
+OK ||| ls /dev/shmx
+MP-042 ||| ls /run
+OK ||| ls /runtime
+MP-044 ||| ls /sys/x
+OK ||| ls /sysroot
+# bash 4+ features
+MP-050 ||| local -A m
+MP-050 ||| typeset -A m
+MP-050,MP-063 ||| declare -gA m
+OK ||| declare -a x
+OK ||| declare -r x
+OK ||| declare -x y
+MP-051 ||| readarray -t a < "$f"
+MP-052 ||| x=${v^^}
+MP-052 ||| x=${v,}
+MP-052 ||| x=${v^}
+MP-052 ||| x="${v,,}"
+MP-052 ||| x=${a[0],,}
+OK ||| x=${v:-a,,}
+OK ||| x=${#v}
+MP-053 ||| x=${v@E}
+OK ||| x=("${a[@]}")
+MP-054 ||| [ -v v ]
+MP-054 ||| [[ ! -v v ]]
+OK ||| [ -n "$v" ]
+OK ||| [[ -e f ]]
+OK ||| cmd &> log
+MP-056 ||| cmd |& tee x
+OK ||| cmd || x
+OK ||| cmd | x
+MP-057 ||| case $x in a) :;;& b) :;; esac
+MP-059 ||| wait -fn
+OK ||| wait $pid
+MP-060 ||| read -t0.5 x
+MP-060 ||| read -r -t .5 x
+OK ||| read -t 5 x
+OK ||| read -r x
+MP-061 ||| x=${a[-2]}
+OK ||| x=${a[1]}
+OK ||| x=${a[${#a[@]}-1]}
+MP-062 ||| echo $EPOCHREALTIME
+MP-062 ||| echo ${SRANDOM}
+MP-062 ||| echo $BASHPID
+OK ||| echo $EPOCH
+OK ||| echo $BASHPIDX
+MP-063 ||| declare -n r=x
+MP-063 ||| declare -g x=1
+MP-063 ||| typeset -n r=x
+MP-064 ||| printf -v t '%(%s)T' -1
+OK ||| printf '%s\n' x
+MP-065 ||| shopt -s autocd
+MP-065 ||| shopt -s lastpipe
+MP-065 ||| shopt -s compat44
+OK ||| shopt -s extglob
+OK ||| shopt -u nullglob
+MP-066 ||| echo {1..10..2}
+MP-066 ||| echo {001..010}
+MP-066 ||| echo {10..01}
+OK ||| echo {1..10}
+OK ||| echo {a..e}
+MP-067 ||| ls **/x
+OK ||| echo a**b
+OK ||| x=$((2**3))
+MP-068 ||| x=$'é'
+MP-068 ||| x=$'\U0001F600'
+OK ||| x=$'a\tb'
+# the lexer and the end of options
+MP-001 ||| echo a#b; sed -i x "$f"
+OK ||| echo ok # ${v,,} and &>> and |& and ;;&
+OK ||| echo '${v,,} &>> |& ;;&'
+OK ||| echo "a &>> b |& c ;;& d"
+MP-001 ||| /bin/sed -i x "$f"
+OK ||| sed -n p -- -i
+OK ||| ls -l -- x
+OK ||| cp -- a b
+# the options of the wrappers
+MP-001 ||| sudo -g wheel sed -i x "$f"
+MP-001 ||| sudo -h host sed -i x "$f"
+MP-001 ||| sudo -p prompt sed -i x "$f"
+MP-001 ||| sudo -C 3 sed -i x "$f"
+MP-001 ||| sudo -r role sed -i x "$f"
+MP-001 ||| sudo -t type sed -i x "$f"
+MP-001 ||| sudo -U user sed -i x "$f"
+MP-001 ||| sudo -D dir sed -i x "$f"
+MP-001 ||| sudo -R dir sed -i x "$f"
+MP-001 ||| sudo -T 5 sed -i x "$f"
+MP-001 ||| xargs -a list sed -i x
+MP-001 ||| xargs -d , sed -i x
+MP-001 ||| xargs -E eof sed -i x
+MP-001 ||| xargs -I {} sed -i x {}
+MP-001 ||| xargs -L 1 sed -i x
+MP-001 ||| xargs -P 2 sed -i x
+MP-001 ||| xargs -s 100 sed -i x
+MP-001 ||| xargs -R 1 sed -i x
+MP-001 ||| xargs -S 100 sed -i x
+MP-001 ||| env -C /tmp sed -i x "$f"
+MP-001 ||| env -S x sed -i x "$f"
+MP-001 ||| setsid sed -i x "$f"
+MP-001,MP-011 ||| timeout -k 5 5 sed -i x "$f"
+MP-001 ||| find . -exec sed -i x {} +
+OK ||| find . -exec ls {} \; -newer --foo
+OK ||| find . -exec ls {} + -newer --foo
+# the names of the rules that list several
+MP-010 ||| sha384sum "$f"
+MP-010 ||| sha224sum "$f"
+MP-010 ||| b2sum "$f"
+MP-035 ||| timedatectl status
+MP-035 ||| hostnamectl
+MP-035 ||| busctl list
+MP-036 ||| apt install x
+MP-036 ||| rpm -qa
+MP-036 ||| dpkg -l
+MP-036 ||| zypper install x
+MP-036 ||| pacman -S x
+MP-050 ||| readonly -A m
+MP-009 ||| egrep -P x "$f"
+MP-009 ||| fgrep -P x "$f"
+MP-065 ||| shopt -s dirspell
+MP-065 ||| shopt -s checkjobs
+MP-065 ||| shopt -s direxpand
+MP-065 ||| shopt -s localvar_inherit
+MP-065 ||| shopt -s assoc_expand_once
+MP-065 ||| shopt -s compat40
+MP-065 ||| shopt -s compat41
+MP-065 ||| shopt -s compat42
+MP-065 ||| shopt -s compat43
+MP-037 ||| podman pod create
+MP-037 ||| podman play kube x
+MP-037 ||| podman generate systemd x
+MP-037 ||| podman kube play x
+MP-037 ||| podman machine start
+MP-037 ||| podman system prune
+MP-037 ||| podman unshare id
+MP-006 ||| stat --terse "$f"
+# a GNU option inside a cluster of short options (found on the real install.sh: stat -fc %T /sys/fs/cgroup)
+MP-006 ||| stat -fc %T /x
+MP-006 ||| stat -Lc %a "$f"
+MP-004 ||| date -ud @5 +%s
+MP-031 ||| touch -cd x "$f"
+MP-021 ||| base64 -dw0 "$f"
+MP-024 ||| df -hB1M /
+OK ||| date -v+1d +%s
+OK ||| date -j -f %s 5 +%s
+OK ||| df -k /
+OK ||| touch -c "$f"
+OK ||| base64 -D "$f"

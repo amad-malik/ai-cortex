@@ -1,0 +1,6 @@
+# Squawk 2.71.0 default rules, with no excluded paths or rules.
+excluded_paths = []
+excluded_rules = []
+included_rules = []
+pg_version = "18.0"
+assume_in_transaction = true

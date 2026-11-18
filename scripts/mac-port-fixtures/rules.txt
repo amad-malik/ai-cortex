@@ -1,0 +1,68 @@
+# One row per rule of scripts/mac-port-scan:  <rule id> ||| <a BAD line: the scanner must report this rule on it> ||| <the GOOD (portable) spelling: the scanner must report NOTHING on it>
+# A field may contain the five characters <NL> for a line break (a rule that needs two lines); a backslash-n in a field is shell text and stays as it is. The test builds one small script per row. No tabs, no '|||' inside a field.
+# GNU or BSD command forms
+MP-001 ||| sed -i 's/a/b/' "$f" ||| sed 's/a/b/' "$f" > "$f.new" && mv "$f.new" "$f"
+MP-002 ||| sed -r 's/(a)+/b/' "$f" ||| sed -E 's/(a)+/b/' "$f"
+MP-003 ||| sed 's/a\+/b/' "$f" ||| sed -E 's/a+/b/' "$f"
+MP-004 ||| date -d "$t" +%s ||| date -j -f %Y-%m-%dT%H:%M:%SZ "$t" +%s
+MP-005 ||| date +%s%N ||| date +%s
+MP-006 ||| stat -c %a "$f" ||| stat -f %Lp "$f"
+MP-007 ||| readlink -f "$p" ||| (cd "$(dirname "$p")" && pwd -P)
+MP-008 ||| realpath "$p" ||| (cd "$p" && pwd -P)
+MP-009 ||| grep -oP 'a\K.*' "$f" ||| grep -Eo 'a.*' "$f"
+MP-010 ||| sha256sum "$f" ||| shasum -a 256 "$f"
+MP-011 ||| timeout 5 sleep 1 ||| sleep 1 & wait
+MP-012 ||| flock -n 9 ||| mkdir "$lock" 2>/dev/null || exit 3
+MP-013 ||| mktemp -d ||| mktemp -d "${TMPDIR:-/tmp}/x.XXXXXX"
+MP-014 ||| mktemp --tmpdir x.XXXXXX ||| mktemp "${TMPDIR:-/tmp}/x.XXXXXX"
+MP-015 ||| install -D -m 0644 a /d/b/c ||| mkdir -p /d/b && install -m 0644 a /d/b/c
+MP-016 ||| sort -V "$f" ||| sort "$f"
+MP-017 ||| head -n -2 "$f" ||| sed '$d' "$f"
+MP-018 ||| tac "$f" ||| tail -r "$f"
+MP-019 ||| nproc ||| sysctl -n hw.ncpu
+MP-020 ||| free -m ||| vm_stat
+MP-021 ||| base64 -w0 "$f" ||| base64 < "$f" | tr -d '\n'
+MP-022 ||| find . -printf '%p\n' ||| find . -print
+MP-023 ||| ps -C sh ||| ps -ax -o pid=
+MP-024 ||| df -BM / ||| df -k /
+MP-025 ||| du -b "$f" ||| du -k "$f"
+MP-026 ||| tar --transform 's/a/b/' -cf x.tar y ||| tar -cf x.tar y
+MP-027 ||| cp --preserve=all a b ||| cp -p a b
+MP-028 ||| ls --time-style=iso -l ||| ls -l
+MP-029 ||| getopt -o a -l long -- "$@" ||| getopts a opt
+MP-030 ||| xargs -r rm ||| xargs rm
+MP-031 ||| touch -d '2020-01-01' "$f" ||| touch -t 202001010000 "$f"
+MP-032 ||| echo -e "a\tb" ||| printf 'a\tb\n'
+# Linux-only things
+MP-034 ||| cat /proc/self/status ||| ps -p $$ -o stat=
+MP-035 ||| systemctl --user daemon-reload ||| launchctl print "gui/$(id -u)"
+MP-036 ||| dnf install -y jq ||| brew install jq
+MP-037 ||| podman secret create x - ||| docker container inspect "$c"
+MP-038 ||| podman exec c true ||| "$RT" exec c true
+MP-040 ||| . /etc/os-release ||| sw_vers -productVersion
+MP-041 ||| ls /dev/shm ||| ls "${TMPDIR:-/tmp}"
+MP-042 ||| ls /run/user/1000 ||| ls "${TMPDIR:-/tmp}"
+MP-043 ||| ss -ltn ||| lsof -iTCP -sTCP:LISTEN -n -P
+MP-044 ||| cat /sys/class/net/eth0/address ||| ifconfig en0
+# bash 4+ features
+MP-050 ||| declare -A m ||| m_a=1
+MP-051 ||| mapfile -t a < "$f" ||| while IFS= read -r l; do :; done < "$f"
+MP-052 ||| x=${v,,} ||| x=$(printf '%s' "$v" | tr '[:upper:]' '[:lower:]')
+MP-053 ||| x=${v@Q} ||| x=$v
+MP-054 ||| [[ -v v ]] && : ||| [ -n "${v+x}" ] && :
+MP-055 ||| cmd &>> log ||| cmd >> log 2>&1
+MP-056 ||| cmd1 |& cmd2 ||| cmd1 2>&1 | cmd2
+MP-057 ||| case $x in a) :;& b) :;; esac ||| case $x in a|b) :;; esac
+MP-058 ||| coproc cat ||| cat &
+MP-059 ||| wait -n ||| wait
+MP-060 ||| read -t 0.5 x ||| read -t 1 x
+MP-061 ||| x=${a[-1]} ||| x=${a[${#a[@]}-1]}
+MP-062 ||| t=$EPOCHSECONDS ||| t=$(date +%s)
+MP-063 ||| local -n r=x ||| r=$x
+MP-064 ||| printf '%(%s)T\n' -1 ||| date +%s
+MP-065 ||| shopt -s globstar ||| shopt -s nullglob
+MP-066 ||| echo {01..10} ||| seq 1 10
+MP-067 ||| ls **/*.sh ||| find . -name '*.sh'
+MP-068 ||| x=$'é' ||| x=$(printf '\303\251')
+# the warning rule (two lines)
+MP-070 ||| set -u<NL>echo "${arr[@]}" ||| set -u<NL>echo ${arr[@]+"${arr[@]}"}

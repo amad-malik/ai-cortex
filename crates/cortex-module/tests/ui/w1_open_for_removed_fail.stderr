@@ -1,0 +1,11 @@
+error[E0407]: method `open_for` is not a member of trait `HandoffsApi`
+  --> tests/ui/w1_open_for_removed_fail.rs:28:5
+   |
+28 | /     async fn open_for(
+29 | |         &self,
+30 | |         _tx: &mut ModuleTx,
+31 | |         _w: &WorkerId,
+...  |
+34 | |         Ok(vec![])
+35 | |     }
+   | |_____^ not a member of trait `HandoffsApi`

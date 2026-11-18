@@ -1,0 +1,13 @@
+#!/bin/sh
+# Synthetic podman: logs its arguments and answers load and image exists; a mode makes one or all of them fail.
+set -eu
+printf 'podman' >> "$FAKE_LOG"
+for fetch_arg do printf ' %s' "$fetch_arg" >> "$FAKE_LOG"; done
+printf '\n' >> "$FAKE_LOG"
+fetch_mode=${FAKE_PODMAN_MODE:-ok}
+case $fetch_mode in fail|absent) exit 1 ;; ok|load-fail|exists-fail) ;; *) exit 2 ;; esac
+case ${1-} in
+    load) [ "$fetch_mode" != load-fail ] || exit 1; printf 'Loaded image: synthetic\n' ;;
+    image) [ "${2-}" = exists ] || exit 2; [ "$fetch_mode" != exists-fail ] || exit 1 ;;
+    *) exit 2 ;;
+esac

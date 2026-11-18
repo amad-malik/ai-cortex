@@ -1,0 +1,28 @@
+# Cortex v2 server config for the S5 compose install. install.sh copies it to $CORTEX_HOME/cortex.toml and the compose file
+# mounts that copy read-only at /etc/cortex/cortex.toml. It is never baked into an image. Passwords only through *_file paths.
+#
+# PROPOSED KEYS: cortex-config knows only [paths] and [modules] today, and an unknown key stops startup (F1-05).
+# [database] (cox, row 7757bad4 answer 1) and [server] (my proposal) are added by finn in S1 before this file is final.
+
+[paths]
+state_dir = "/var/lib/cortex"
+host_socket = "/run/cortex/admin.sock"
+worker_socket = "/run/cortex/api.sock"
+
+[modules]
+# The skeleton set (MVP plan section 4). cox's piece 11 owns the final list.
+enabled = ["audit", "identity", "tokens", "policy", "records", "search", "handoffs", "boot"]
+
+[server]
+listen = "0.0.0.0:8601"
+
+[database]
+# `cortex-server serve` (the long-running server) reads the app_* keys only; its container has no owner secret.
+# `cortex-server migrate` (the one-shot container) reads the owner_* keys. Both mount this one file read-only.
+host = "db"
+port = 5432
+name = "cortex"
+app_user = "cortex_app"
+app_password_file = "/run/secrets/cv2-s5-app-password"
+owner_user = "cortex_owner"
+owner_password_file = "/run/secrets/cv2-s5-owner-password"

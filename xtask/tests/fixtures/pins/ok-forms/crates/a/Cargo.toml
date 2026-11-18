@@ -1,0 +1,10 @@
+[package]
+name = "a"
+version = "0.1.0"
+[dependencies]
+serde_ignored.workspace = true
+[dev-dependencies.serde_ignored]
+workspace = true
+[build-dependencies]
+serde_ignored = { workspace = true, features = ["y"] }
+serde_ignored_ext = "9"

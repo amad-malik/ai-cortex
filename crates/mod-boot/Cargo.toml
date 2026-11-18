@@ -1,0 +1,27 @@
+[package]
+name = "mod-boot"
+description = "Piece 9: the budgeted, byte-deterministic boot briefing (GET /v2/boot)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+async-trait.workspace = true
+axum.workspace = true
+cortex-db.workspace = true
+cortex-module.workspace = true
+cortex-types.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+# DB cells only (tests/boot_db.rs): the supervisor's throwaway Postgres, the Wave 0 identity
+# fixture as a real IdentityApi provider, and raw SQL for the fixture's seed.
+cortex-testkit.workspace = true
+plug-identity = { path = "../plug-identity" }
+sqlx.workspace = true
+tokio.workspace = true
+
+[lints]
+workspace = true

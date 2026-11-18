@@ -1,0 +1,4 @@
+# cox W1-72: a fixture is a COPY pinned by sha256, never a live path.
+# sophi's trust-anchor join, the PRODUCER, at her corrected lane pin: lane wave1/release-fixes, commit 440189e3cb34aa922ecb474baedad8f3562d78cc (tree 599bd57a56124dede142aea1d308f7e2c2240e82),
+# file scripts/release_manifest.py; used only as a black box by the conformance cell GR-137 (join-installer) and by GR-138 (planted faults in COPIES of it).
+691789da02b027616f134309ba395be6b5c614a4424715b9ceb795b86a201341  release_manifest.py

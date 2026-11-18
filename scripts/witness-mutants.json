@@ -1,0 +1,229 @@
+[
+ {
+  "id": "G2-M1",
+  "what": "only presence is checked: extra valid names are ignored",
+  "old": "|| ws_unexpected=\"$ws_unexpected $ws_name\"",
+  "new": "|| :",
+  "fails": [
+   "IW-02",
+   "IW-03"
+  ]
+ },
+ {
+  "id": "G2-M2",
+  "what": "only the COUNT of names is compared",
+  "old": "if [ -z \"$ws_unexpected\" ] && [ -z \"$ws_missing\" ] && [ -z \"$ws_repeated\" ]; then",
+  "new": "if [ \"$(printf '%s' \"$ws_listed\" | wc -l)\" -eq \"$(printf '%s' \"$ws_expected\" | wc -l)\" ]; then",
+  "fails": [
+   "IW-05"
+  ]
+ },
+ {
+  "id": "G2-M3",
+  "what": "a failing exec is read as an empty listing",
+  "old": "2>/dev/null && echo x); then",
+  "new": "2>/dev/null; echo x); then",
+  "fails": [
+   "IW-06"
+  ]
+ },
+ {
+  "id": "G2-M4",
+  "what": "names are matched by substring, not as whole lines (grep without -x)",
+  "old": "printf '%s' \"$ws_expected\" | LC_ALL=C grep -qxF -- \"$ws_name\"",
+  "new": "printf '%s' \"$ws_expected\" | LC_ALL=C grep -qF -- \"$ws_name\"",
+  "fails": [
+   "IW-12"
+  ]
+ },
+ {
+  "id": "G2-M5",
+  "what": "one expected list for every container",
+  "old": "cv2-s5-db) printf '%s\\n' cv2-s5-app-password cv2-s5-db-superuser cv2-s5-owner-password ;;",
+  "new": "cv2-s5-db) printf '%s\\n' cv2-s5-app-password ;;",
+  "fails": [
+   "IW-07"
+  ]
+ },
+ {
+  "id": "G2-M6",
+  "what": "the listing is expanded unquoted (word splitting and globbing)",
+  "old": "  while IFS= read -r ws_line; do\n    if witness_name_ok \"$ws_line\"; then\n      if printf '%s' \"$ws_listed\" | LC_ALL=C grep -qxF -- \"$ws_line\"; then ws_repeated=\"$ws_repeated $ws_line\"; fi\n      ws_listed=\"$ws_listed$ws_line$witness_nl\"\n    else\n      ws_bad=\"$ws_bad $(witness_cut \"$ws_line\")\"\n    fi\n  done <<WITNESS_LISTING\n$ws_out\nWITNESS_LISTING\n",
+  "new": "  for ws_line in $ws_out; do\n    if witness_name_ok \"$ws_line\"; then\n      if printf '%s' \"$ws_listed\" | LC_ALL=C grep -qxF -- \"$ws_line\"; then ws_repeated=\"$ws_repeated $ws_line\"; fi\n      ws_listed=\"$ws_listed$ws_line$witness_nl\"\n    else\n      ws_bad=\"$ws_bad $(witness_cut \"$ws_line\")\"\n    fi\n  done\n",
+  "fails": [
+   "IW-08"
+  ]
+ },
+ {
+  "id": "G2-M7",
+  "what": "the function reads a secret file instead of listing names",
+  "old": "ls -1A /run/secrets 2>/dev/null && echo x",
+  "new": "cat /run/secrets/cv2-s5-app-password 2>/dev/null && echo x",
+  "fails": [
+   "IW-09"
+  ]
+ },
+ {
+  "id": "G2-M8",
+  "what": "an empty listing has no rule of its own",
+  "old": "if [ -z \"$ws_out\" ]; then",
+  "new": "if false; then",
+  "fails": [
+   "IW-04"
+  ]
+ },
+ {
+  "id": "WM-01",
+  "what": "the 40-character bound on names is lifted",
+  "old": "[ \"${#wn_rest}\" -le 40 ]",
+  "new": "[ \"${#wn_rest}\" -le 400 ]",
+  "fails": [
+   "IW-08"
+  ]
+ },
+ {
+  "id": "WM-02",
+  "what": "the container name is not checked",
+  "old": "if ! witness_name_ok \"$ws_ctr\"; then",
+  "new": "if false; then",
+  "fails": [
+   "IW-11"
+  ]
+ },
+ {
+  "id": "WM-03",
+  "what": "an expected name is not checked",
+  "old": "    if ! witness_name_ok \"$ws_e\"; then",
+  "new": "    if false; then",
+  "fails": [
+   "IW-11"
+  ]
+ },
+ {
+  "id": "WM-04",
+  "what": "a bad listing line is shown whole, not cut",
+  "old": "ws_bad=\"$ws_bad $(witness_cut \"$ws_line\")\"",
+  "new": "ws_bad=\"$ws_bad $ws_line\"",
+  "fails": [
+   "IW-08"
+  ]
+ },
+ {
+  "id": "WM-05",
+  "what": "a bad listing line keeps its control characters",
+  "old": "LC_ALL=C tr -c 'A-Za-z0-9._-' '?'",
+  "new": "cat",
+  "fails": [
+   "IW-08"
+  ]
+ },
+ {
+  "id": "WM-06",
+  "what": "the newline that ls ends with is kept, so a clean listing gains a blank line",
+  "old": "  ws_out=${ws_out%\"$witness_nl\"}\n",
+  "new": "",
+  "fails": [
+   "IW-01"
+  ]
+ },
+ {
+  "id": "WM-07",
+  "what": "trailing blank lines of the listing are lost",
+  "old": "2>/dev/null && echo x); then",
+  "new": "2>/dev/null); then",
+  "fails": [
+   "IW-08"
+  ]
+ },
+ {
+  "id": "WM-08",
+  "what": "missing names are ignored",
+  "old": "if [ -z \"$ws_unexpected\" ] && [ -z \"$ws_missing\" ] && [ -z \"$ws_repeated\" ]; then",
+  "new": "if [ -z \"$ws_unexpected\" ] && [ -z \"$ws_repeated\" ]; then",
+  "fails": [
+   "IW-07"
+  ]
+ },
+ {
+  "id": "WM-09",
+  "what": "a failure returns 0",
+  "old": "  echo \"$ws_msg\" >&2\n  return 1\n",
+  "new": "  echo \"$ws_msg\" >&2\n  return 0\n",
+  "fails": [
+   "IW-02"
+  ]
+ },
+ {
+  "id": "WM-10",
+  "what": "an unknown container gets the server's set",
+  "old": "    *) return 1 ;;\n  esac\n}\n\nwitness_secrets()",
+  "new": "    *) printf '%s\\n' cv2-s5-app-password ;;\n  esac\n}\n\nwitness_secrets()",
+  "fails": [
+   "IW-10"
+  ]
+ },
+ {
+  "id": "WM-11",
+  "what": "one argument is enough (no expected names)",
+  "old": "if [ $# -lt 2 ]; then",
+  "new": "if [ $# -lt 1 ]; then",
+  "fails": [
+   "IW-11"
+  ]
+ },
+ {
+  "id": "WM-12",
+  "what": "a listed name is found among the expected ones by substring in the missing check",
+  "old": "printf '%s' \"$ws_listed\" | LC_ALL=C grep -qxF -- \"$ws_name\"",
+  "new": "printf '%s' \"$ws_listed\" | LC_ALL=C grep -qF -- \"$ws_name\"",
+  "fails": [
+   "IW-12"
+  ]
+ },
+ {
+  "id": "WM-13",
+  "what": "the -A is dropped: hidden dot-entries are not listed (hale F-1)",
+  "old": "\"$ws_ctr\" ls -1A /run/secrets",
+  "new": "\"$ws_ctr\" ls -1 /run/secrets",
+  "fails": [
+   "IW-13",
+   "IW-09"
+  ]
+ },
+ {
+  "id": "WM-14",
+  "what": "a repeated listing line is not noticed (hale F-2)",
+  "old": "if printf '%s' \"$ws_listed\" | LC_ALL=C grep -qxF -- \"$ws_line\"; then ws_repeated=\"$ws_repeated $ws_line\"; fi",
+  "new": "",
+  "fails": [
+   "IW-14"
+  ]
+ },
+ {
+  "id": "WM-15",
+  "what": "a repeated line is noticed but does not fail",
+  "old": "if [ -z \"$ws_unexpected\" ] && [ -z \"$ws_missing\" ] && [ -z \"$ws_repeated\" ]; then",
+  "new": "if [ -z \"$ws_unexpected\" ] && [ -z \"$ws_missing\" ]; then",
+  "fails": [
+   "IW-14"
+  ]
+ },
+ {
+  "id": "WM-16",
+  "what": "the split is done in the caller's shell, so its IFS is changed (hale F-3)",
+  "old": "( IFS=$witness_nl; set -- $wc_exp; unset IFS; witness_secrets \"$wc_ctr\" \"$@\" )",
+  "new": "IFS=$witness_nl; set -- $wc_exp; unset IFS; witness_secrets \"$wc_ctr\" \"$@\"",
+  "fails": [
+   "IW-15"
+  ]
+ },
+ {
+  "id": "WM-17",
+  "what": "the exit status is left out of the 'could not list' message (hale N-2)",
+  "old": " (exit $ws_rc)",
+  "new": "",
+  "fails": [
+   "IW-06"
+  ]
+ }
+]

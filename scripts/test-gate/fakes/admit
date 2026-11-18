@@ -1,0 +1,11 @@
+#!/bin/sh
+# FAKE admission program: records the call, can refuse (exit 3, or TG_REFUSE_RC) the first N times (a counter per kind of call: admit-refuse-free for the free phase, admit-refuse-db for the database drivers), then runs the command.
+set -u
+{ printf 'admit'; for a in "$@"; do printf ' [%s]' "$a"; done; printf ' CV2_DB=%s\n' "${CV2_DB-}"; } >> "$TG_DIR/calls.log"
+kind=db; for a in "$@"; do [ "$a" != "--phase" ] || kind=free; done
+if [ -e "$TG_DIR/admit-refuse-$kind" ]; then
+  left=$(cat "$TG_DIR/admit-refuse-$kind")
+  if [ "$left" -gt 0 ]; then echo $((left - 1)) > "$TG_DIR/admit-refuse-$kind"; echo "admit: busy" >&2; exit "${TG_REFUSE_RC:-3}"; fi
+fi
+CV2_ADMITTED=1; export CV2_ADMITTED
+exec "$@"

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# A fake `podman` for the supervisor's harness controls (Z-2 r3; here for supervise.sh). controls.sh puts this directory first on
+# PATH for the supervisor only, so faults are injected from outside and run.sh has no fault hooks.
+# The same injection works on any revision of run.sh, which is what lets a control discriminate.
+#
+# It appends each call to $CV2_FAKE_LOG as "<monotonic seconds> <sub> begin pid=<pid>" (the clock
+# is /proc/uptime, as in run.sh and controls.sh), then applies the fault that $CV2_FAKE names for
+# that subcommand, if any:
+#   <sub>=<s>        wait <s> seconds, then run the real podman (a slow command)
+#   <sub>=<s>:noop   wait <s> seconds, then do nothing and succeed (a removal that does not remove)
+#   <sub>=fail       fail at once with 125, as podman does when it cannot read its store
+#   <sub>=hang       never return until killed
+#   run=collide:<n>  (r2, kai's port ruling (b)) the first <n> `run` calls fail at once as a port
+#                    collision does ("Address already in use", exit 126); later calls pass through
+# <sub> is exec, stop, rm, exists (podman container exists) or ps; anything else passes through.
+# Example: CV2_FAKE="stop=30:noop rm=30:noop exists=19 ps=19"
+REAL=/usr/bin/podman
+case "${1:-}" in
+  container) sub=${2:-container} ;;
+  *)         sub=${1:-} ;;
+esac
+read -r u _ < /proc/uptime
+[ -n "${CV2_FAKE_LOG:-}" ] && echo "$u $sub begin pid=$$" >> "$CV2_FAKE_LOG"
+spec=""
+for kv in ${CV2_FAKE:-}; do [ "${kv%%=*}" = "$sub" ] && spec=${kv#*=}; done
+case $spec in
+  "")     exec "$REAL" "$@" ;;
+  fail)   exit 125 ;;
+  hang)   exec sleep 3600 ;;
+  collide:*)
+    cf="${CV2_FAKE_LOG:-/dev/null}.runs"; n=$(cat "$cf" 2>/dev/null || echo 0); n=$(( n + 1 )); echo "$n" > "$cf"
+    if [ "$n" -le "${spec#collide:}" ]; then
+      echo "Error: pasta failed with exit code 1:" >&2
+      echo "Failed to bind port (Address already in use) (fake collision $n)" >&2
+      exit 126
+    fi
+    exec "$REAL" "$@" ;;
+  *:noop) sleep "${spec%%:*}"; exit 0 ;;
+  *)      sleep "$spec"; exec "$REAL" "$@" ;;
+esac
