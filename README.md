@@ -1,3 +1,7 @@
+**DO NOT INSTALL.** As of 20 November 2026 the installer of Cortex 0.2.1 and 0.2.2 does not work on Rocky Linux 10.2 or 10.3. Cortex 0.2.3, planned for 26 November 2026, replaces both.
+
+The text below is kept as it was; its install command does not work on Rocky Linux 10.2 or 10.3.
+
 # Cortex
 
 **Cortex is a system for handing work between AI workers with a record of what was asked, what came back and who accepted it.** Work arrives as
